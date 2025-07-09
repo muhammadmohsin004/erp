@@ -12,7 +12,7 @@ const SearchAndFilters = ({
     <Container className="px-6 py-3 flex gap-x-3 justify-between items-center">
       <Container
         className={`border border-gray-300 bg-white flex items-center text-center py-2 px-4 rounded-md transition-all duration-300 ${
-          isFocused ? "w-full" : "w-[30%]"
+          isFocused ? "w-full" : "w-[300px]"
         }`}
       >
         <input

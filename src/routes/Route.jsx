@@ -161,19 +161,19 @@ const getRouteConfig = () => {
     // SuperAdmin Plans & Subscriptions Routes
     {
       path: "/superadmin/manage-plan",
-      component: () => <div>Manage Subscription Page</div>,
+      component: ManagePlans,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/subscription",
-      component: () => <div>Subscriptions Page</div>,
+      component: Subscription,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/subscription-report",
-      component: () => <div>Subscription Reports Page</div>,
+      component: SubscriptionReports,
       roles: ["SuperAdmin"],
       layout: true,
     },
