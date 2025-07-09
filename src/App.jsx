@@ -1,15 +1,21 @@
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 
-import { BrowserRouter } from 'react-router-dom';
-import './App.css';
+import { AuthProvider } from './Contexts/AuthContexts/AuthContextsApi';
 import { Routes } from './routes/Route';
+import { SuperAdminProvider } from './Contexts/superAdminApiClient/superAdminApiClient';
+// import { SuperAdminProvider } from './Contexts/superAdminApiClient/superAdminApiClient';
 
 function App() {
   return (
-    <BrowserRouter>
-      <div>
-        <Routes />
-      </div>
-    </BrowserRouter>
+    <Router>
+      <AuthProvider>
+        <SuperAdminProvider> <Routes /></SuperAdminProvider>
+       
+      
+
+      </AuthProvider>
+    </Router>
   );
 }
 

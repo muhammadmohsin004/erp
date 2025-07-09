@@ -1,0 +1,21 @@
+.skeleton-component {
+
+    background-color: #dddddd;
+    /* Gray background color */
+    border-radius: 4px;
+    /* Optional: Add border radius for rounded corners */
+    animation: skeleton-component-animation 1s linear infinite alternate;
+    /* Animation */
+}
+
+@keyframes skeleton-component-animation {
+    0% {
+        background-color: #dddddd;
+        /* Initial gray color */
+    }
+
+    100% {
+        background-color: #f2f2f2;
+        /* Lighter gray color */
+    }
+}
