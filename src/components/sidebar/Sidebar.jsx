@@ -1,4 +1,4 @@
-// components/layout/Sidebar.jsx - Updated with SuperAdmin menu items
+// components/layout/Sidebar.jsx - Updated with Warehouse as submenu under Inventory
 import React, { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -20,6 +20,11 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
+  Warehouse,
+  ArrowDownLeftFromCircleIcon,
+  ShieldUser,
+  Archive,
+  Boxes,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen }) => {
@@ -207,7 +212,7 @@ const Sidebar = ({ isOpen }) => {
     },
   ];
 
-  // Regular menu items for other roles (keeping existing structure)
+  // Regular menu items for other roles (updated with Inventory submenu)
   const regularMenuItems = [
     {
       icon: BarChart3,
@@ -227,11 +232,40 @@ const Sidebar = ({ isOpen }) => {
       path: getRoleBasedPath("/clients"),
       roles: ["Admin", "Manager", "Employee"],
     },
+    // Updated Inventory with submenu including Warehouse
     {
       icon: Package,
       label: "Inventory",
-      path: getRoleBasedPath("/inventory"),
+      submenu: true,
+      key: "inventory-management",
       roles: ["Admin", "Manager", "Employee"],
+      submenuItems: [
+        {
+          label: "Inventory Overview",
+          path: getRoleBasedPath("/inventory"),
+          icon: Archive,
+        },
+        {
+          label: "Warehouses",
+          path: getRoleBasedPath("/WareHouse"),
+          icon: Warehouse,
+        },
+        {
+          label: "Default Warehouse",
+          path: getRoleBasedPath("/Defualt-WareHouse"),
+          icon: ArrowDownLeftFromCircleIcon,
+        },
+        {
+          label: "Suppliers",
+          path: getRoleBasedPath("/Manage-Suppliers"),
+          icon: ShieldUser,
+        },
+        {
+          label: "Stock Management",
+          path: getRoleBasedPath("/stock"),
+          icon: Boxes,
+        },
+      ],
     },
     {
       icon: DollarSign,
@@ -329,6 +363,18 @@ const Sidebar = ({ isOpen }) => {
     return submenuItems.some((item) => isPathActive(item.path, currentPath));
   };
 
+  // Auto-expand submenu if any of its items are active
+  React.useEffect(() => {
+    menuItems.forEach((item) => {
+      if (item.submenu && isSubmenuActive(item.submenuItems, location.pathname)) {
+        setExpandedMenus((prev) => ({
+          ...prev,
+          [item.key]: true,
+        }));
+      }
+    });
+  }, [location.pathname, menuItems]);
+
   return (
     <div
       className={`fixed left-0 top-0 h-full bg-white text-gray-700 transition-all duration-300 z-50 shadow-2xl border-r border-gray-200 ${
@@ -378,7 +424,7 @@ const Sidebar = ({ isOpen }) => {
               <div key={index}>
                 {/* Main menu item with submenu */}
                 <div
-                  className={`flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${
                     hasActiveSubmenu
                       ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                       : "text-gray-700 hover:text-purple-700"
@@ -396,9 +442,48 @@ const Sidebar = ({ isOpen }) => {
                       )}
                     </>
                   )}
+
+                  {/* Tooltip for collapsed sidebar */}
+                  {!isOpen && (
+                    <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">
+                      {item.label}
+                      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
+                    </div>
+                  )}
+
+                  {/* Submenu for collapsed sidebar */}
+                  {!isOpen && (
+                    <div className="absolute left-16 top-0 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto min-w-48">
+                      <div className="p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                        <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                      </div>
+                      {item.submenuItems.map((subItem, subIndex) => (
+                        <NavLink
+                          key={subIndex}
+                          to={subItem.path}
+                          className={({ isActive }) => {
+                            const isCurrentActive =
+                              isActive ||
+                              isPathActive(subItem.path, location.pathname);
+
+                            return `flex items-center px-3 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transition-all duration-200 ${
+                              isCurrentActive
+                                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
+                                : "text-gray-600 hover:text-purple-700"
+                            } ${subIndex === item.submenuItems.length - 1 ? 'rounded-b-lg' : ''}`;
+                          }}
+                        >
+                          {subItem.icon && (
+                            <subItem.icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                          )}
+                          <span className="truncate">{subItem.label}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Submenu items */}
+                {/* Submenu items for expanded sidebar */}
                 {isOpen && isExpanded && (
                   <div className="bg-gray-50">
                     {item.submenuItems.map((subItem, subIndex) => (
@@ -437,7 +522,7 @@ const Sidebar = ({ isOpen }) => {
                   const isCurrentActive =
                     isActive || isPathActive(item.path, location.pathname);
 
-                  return `flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 ${
+                  return `flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${
                     isCurrentActive
                       ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                       : "text-gray-700 hover:text-purple-700"
@@ -446,6 +531,14 @@ const Sidebar = ({ isOpen }) => {
               >
                 <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
                 {isOpen && <span className="truncate">{item.label}</span>}
+                
+                {/* Tooltip for collapsed sidebar */}
+                {!isOpen && (
+                  <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">
+                    {item.label}
+                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
+                  </div>
+                )}
               </NavLink>
             );
           }

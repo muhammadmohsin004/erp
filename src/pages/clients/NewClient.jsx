@@ -78,7 +78,7 @@ const NewClient = () => {
   };
 
   // Check if editing (from location state or URL)
-  const isEditing = location.pathname.includes('edit') || location.state?.editData;
+  const isEditing = location.state?.isEditing || false;
   const cloneData = location.state?.cloneData;
   const editData = location.state?.editData;
 
@@ -123,13 +123,13 @@ const NewClient = () => {
         CodeNumber: "",
         Email: "",
       });
-      if (cloneData.Contacts) {
-        setContacts(cloneData.Contacts);
+      if (cloneData.Contacts && Array.isArray(cloneData.Contacts.$values)) {
+        setContacts(cloneData.Contacts.$values);
       }
     } else if (editData) {
       setFormData(editData);
-      if (editData.Contacts) {
-        setContacts(editData.Contacts);
+      if (editData.Contacts && Array.isArray(editData.Contacts.$values)) {
+        setContacts(editData.Contacts.$values);
       }
     }
   }, [cloneData, editData]);
@@ -140,7 +140,7 @@ const NewClient = () => {
     }
   }, [token, navigate]);
 
-  // Handle form input changes
+  // Handle form input changes - Fixed to prevent field deactivation
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -249,7 +249,7 @@ const NewClient = () => {
     }
   };
 
-  // Input component
+  // Input component - Fixed to prevent deactivation issue
   const InputField = ({ 
     label, 
     name, 
@@ -276,7 +276,7 @@ const NewClient = () => {
         {as === "textarea" ? (
           <textarea
             name={name}
-            value={value}
+            value={value || ""}
             onChange={(e) => onChange(name, e.target.value)}
             placeholder={placeholder}
             rows={4}
@@ -285,7 +285,7 @@ const NewClient = () => {
         ) : as === "select" ? (
           <select
             name={name}
-            value={value}
+            value={value || ""}
             onChange={(e) => onChange(name, e.target.value)}
             className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
           >
@@ -336,7 +336,7 @@ const NewClient = () => {
           <input
             type={type}
             name={name}
-            value={value}
+            value={value || ""}
             onChange={(e) => onChange(name, e.target.value)}
             placeholder={placeholder}
             className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
@@ -603,7 +603,7 @@ const NewClient = () => {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={formData.HasSecondaryAddress}
+                    checked={formData.HasSecondaryAddress || false}
                     onChange={(e) => handleInputChange("HasSecondaryAddress", e.target.checked)}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />

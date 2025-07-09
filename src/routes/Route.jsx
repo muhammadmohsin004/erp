@@ -11,7 +11,12 @@ import ForgotPassword from '../pages/Auth/ForgotPassword';
 import NotFound from '../pages/error/NotFound';
 import CompaniesManagement from '../pages/SuperAdmin/CompaniesManagement';
 import ProtectedRoute from './ProtectedRoute';
-
+import NewClient from '../pages/clients/NewClient';
+import WarehouseList from '../pages/WarehouseList/WarehouseList';
+import NewWarehouse from '../pages/WarehouseList/NewWarehouse';
+import DefaultWarehouseList from '../pages/WarehouseList/DefaultWarehouseList';
+import SupplierList from '../pages/Inventories/Supplier/SupplierList';
+import NewSupplier from '../pages/Inventories/Supplier/NewSupplier';
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -301,6 +306,12 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
+     {
+      path: "/admin/new-clients",
+      component: NewClient,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
     {
       path: "/manager/clients",
       component: Clients,
@@ -322,6 +333,37 @@ const getRouteConfig = () => {
     {
       path: "/admin/inventory",
       component: () => <div>Inventory Page</div>,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/WareHouse",
+      component: WarehouseList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-warehouse",
+      component: NewWarehouse,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+   {
+      path: "/admin/Defualt-WareHouse",
+      component: DefaultWarehouseList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+
+    {
+      path: "/admin/Manage-Suppliers",
+      component: SupplierList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-supplier",
+      component: NewSupplier,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
