@@ -1,4 +1,4 @@
-// routes/Route.jsx - Updated with SuperAdmin routes
+// routes/Route.jsx - Dynamic Routes Version
 import React from "react";
 import { Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
@@ -11,11 +11,16 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import NotFound from "../pages/error/NotFound";
 import CompaniesManagement from "../pages/SuperAdmin/CompaniesManagement";
 import ProtectedRoute from "./ProtectedRoute";
+import NewClient from "../pages/clients/NewClient";
+import WarehouseList from "../pages/WarehouseList/WarehouseList";
+import NewWarehouse from "../pages/WarehouseList/NewWarehouse";
+import DefaultWarehouseList from "../pages/WarehouseList/DefaultWarehouseList";
+import SupplierList from "../pages/Inventories/Supplier/SupplierList";
+import NewSupplier from "../pages/Inventories/Supplier/NewSupplier";
 import SuperDashboard from "../pages/SuperAdmin/SuperDashboard";
 import SuperAnalytics from "../pages/SuperAdmin/SuperDashboard/SuperAnalytics";
 import AddCompany from "../pages/SuperAdmin/CompaniesManagement/AddCompany";
 import ManageUsers from "../pages/SuperAdmin/UserManagement/ManageUsers";
-
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -306,6 +311,12 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
+      path: "/admin/new-clients",
+      component: NewClient,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
       path: "/manager/clients",
       component: Clients,
       roles: ["Manager", "Employee"],
@@ -314,7 +325,7 @@ const getRouteConfig = () => {
     {
       path: "/employee/clients",
       component: Clients,
-      roles: ["Employee"],
+      roles: ["SuperAdmin", "Admin", "Manager", "Employee"],
       layout: true,
     },
     {
@@ -326,6 +337,37 @@ const getRouteConfig = () => {
     {
       path: "/admin/inventory",
       component: () => <div>Inventory Page</div>,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/WareHouse",
+      component: WarehouseList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-warehouse",
+      component: NewWarehouse,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/Defualt-WareHouse",
+      component: DefaultWarehouseList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+
+    {
+      path: "/admin/Manage-Suppliers",
+      component: SupplierList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-supplier",
+      component: NewSupplier,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

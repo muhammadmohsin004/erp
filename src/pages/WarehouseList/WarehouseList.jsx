@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
-  User,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -19,9 +18,12 @@ import {
   Filter,
   Download,
   X,
-  FileText,
-  Users,
+  Warehouse,
+  Package,
   Calendar,
+  Users,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import {
   AiOutlineEye, // Eye icon for view
@@ -32,7 +34,7 @@ import {
   AiOutlineFilter, // Filter icon
   AiOutlineDownload, // Download icon for export
 } from "react-icons/ai";
-import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
+import { useWarehouse } from "../../Contexts/WarehouseContext/WarehouseContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import Modall from "../../components/elements/modal/Modal";
 import SearchAndFilters from "../../components/elements/searchAndFilters/SearchAndFilters";
@@ -40,98 +42,116 @@ import Table from "../../components/elements/table/Table";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 
-const ClientList = () => {
+const WarehouseList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
-    Clients: language === "ar" ? "العملاء" : "Clients",
+    "Add Warehouse": language === "ar" ? "إضافة مستودع" : "Add Warehouse",
+    Warehouses: language === "ar" ? "المستودعات" : "Warehouses",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    NoClients: language === "ar" ? "لا يوجد عملاء" : "No clients found",
+    NoWarehouses: language === "ar" ? "لا يوجد مستودعات" : "No warehouses found",
     Name: language === "ar" ? "الاسم" : "Name",
-    Email: language === "ar" ? "البريد الإلكتروني" : "Email",
+    Code: language === "ar" ? "الكود" : "Code",
+    Manager: language === "ar" ? "المدير" : "Manager",
     Phone: language === "ar" ? "الهاتف" : "Phone",
-    Location: language === "ar" ? "الموقع" : "Location",
+    Address: language === "ar" ? "العنوان" : "Address",
+    Status: language === "ar" ? "الحالة" : "Status",
     Actions: language === "ar" ? "الإجراءات" : "Actions",
     Showing: language === "ar" ? "عرض" : "Showing",
     Of: language === "ar" ? "من" : "of",
     Items: language === "ar" ? "عناصر" : "Items",
-    Individual: language === "ar" ? "فردي" : "Individual",
-    Business: language === "ar" ? "تجاري" : "Business",
+    Active: language === "ar" ? "نشط" : "Active",
+    Inactive: language === "ar" ? "غير نشط" : "Inactive",
+    Primary: language === "ar" ? "أساسي" : "Primary",
     Total: language === "ar" ? "المجموع" : "Total",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     View: language === "ar" ? "عرض" : "View",
     Edit: language === "ar" ? "تعديل" : "Edit",
     Clone: language === "ar" ? "نسخ" : "Clone",
     Delete: language === "ar" ? "حذف" : "Delete",
+    Toggle: language === "ar" ? "تبديل الحالة" : "Toggle Status",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Client": language === "ar" ? "حذف العميل" : "Delete Client",
+    "Delete Warehouse": language === "ar" ? "حذف المستودع" : "Delete Warehouse",
     "This action cannot be undone":
       language === "ar"
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
+    "Warehouse Details": language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
     Close: language === "ar" ? "إغلاق" : "Close",
-    "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
-    "Business Name": language === "ar" ? "اسم النشاط التجاري" : "Business Name",
-    Address: language === "ar" ? "العنوان" : "Address",
-    "VAT Number": language === "ar" ? "الرقم الضريبي" : "VAT Number",
-    "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
-    Notes: language === "ar" ? "ملاحظات" : "Notes",
-    "All Types": language === "ar" ? "جميع الأنواع" : "All Types",
-    Country: language === "ar" ? "البلد" : "Country",
+    Description: language === "ar" ? "الوصف" : "Description",
+    Email: language === "ar" ? "البريد الإلكتروني" : "Email",
+    "Shipping Address": language === "ar" ? "عنوان الشحن" : "Shipping Address",
     City: language === "ar" ? "المدينة" : "City",
+    Country: language === "ar" ? "البلد" : "Country",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
     "No results found":
       language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "All Status": language === "ar" ? "جميع الحالات" : "All Status",
+    Permissions: language === "ar" ? "الصلاحيات" : "Permissions",
+    "View Permission": language === "ar" ? "صلاحية العرض" : "View Permission",
+    "Create Invoice Permission": language === "ar" ? "صلاحية إنشاء الفاتورة" : "Create Invoice Permission",
+    "Update Stock Permission": language === "ar" ? "صلاحية تحديث المخزون" : "Update Stock Permission",
   };
 
-  // Get clients context
+  // Get warehouse context
   const {
-    clients,
-    isLoading: clientsLoading,
+    warehouses,
+    loading: warehousesLoading,
     error,
     pagination,
-    statistics,
-    getClients,
-    getClient,
-    deleteClient,
-    getStatistics,
-  } = useClients();
+    getWarehouses,
+    getWarehouse,
+    deleteWarehouse,
+    toggleWarehouseStatus,
+    searchWarehouses,
+    filterWarehousesByStatus,
+    sortWarehouses,
+    changePage,
+    setFilters,
+  } = useWarehouse();
+
+  // Process warehouses data from API response
+  const warehousesData = warehouses?.Data?.$values || warehouses || [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
-    clientType: "",
-    country: "",
-    city: "",
+    status: "",
     sortBy: "CreatedAt",
     sortAscending: false,
   });
-  const [selectedClients, setSelectedClients] = useState([]);
+  const [selectedWarehouses, setSelectedWarehouses] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientToDelete, setClientToDelete] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  const [warehouseToDelete, setWarehouseToDelete] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isTogglingStatus, setIsTogglingStatus] = useState(null);
 
-  // Fetch clients on component mount
+  // Mock statistics - you can replace this with actual API call
+  const [statistics, setStatistics] = useState({
+    totalWarehouses: 0,
+    activeWarehouses: 0,
+    primaryWarehouses: 0,
+    warehousesThisMonth: 0,
+  });
+
+  // Fetch warehouses on component mount
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        await getClients();
-        await getStatistics();
+        await getWarehouses();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -140,24 +160,42 @@ const ClientList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token]);
+  }, [token, getWarehouses]);
+
+  // Update statistics when warehouses change
+  useEffect(() => {
+    if (Array.isArray(warehousesData) && warehousesData.length > 0) {
+      const stats = {
+        totalWarehouses: pagination?.TotalItems || warehousesData.length,
+        activeWarehouses: warehousesData.filter(w => w.Status === "Active").length,
+        primaryWarehouses: warehousesData.filter(w => w.Primary === "1" || w.Primary === "Yes").length,
+        warehousesThisMonth: warehousesData.filter(w => {
+          const createdDate = new Date(w.CreatedAt);
+          const now = new Date();
+          return createdDate.getMonth() === now.getMonth() && 
+                 createdDate.getFullYear() === now.getFullYear();
+        }).length,
+      };
+      setStatistics(stats);
+    }
+  }, [warehousesData, pagination]);
 
   // Handle search when searchTerm changes (with debounce)
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
       if (searchTerm !== undefined) {
-        handleSearchClients();
+        handleSearchWarehouses();
       }
     }, 500); // 500ms debounce
 
     return () => clearTimeout(delayedSearch);
   }, [searchTerm]);
 
-  // Handle filters change - remove auto-apply, only apply on button click
+  // Handle filters change
   useEffect(() => {
-    setSelectedClients([]);
+    setSelectedWarehouses([]);
     setSelectAll(false);
-  }, [clients]);
+  }, [warehousesData]);
 
   useEffect(() => {
     if (!token) {
@@ -166,122 +204,127 @@ const ClientList = () => {
   }, [token, navigate]);
 
   // Search function
-  const handleSearchClients = async () => {
+  const handleSearchWarehouses = async () => {
     try {
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      await searchWarehouses(searchTerm);
     } catch (error) {
-      console.error("Error searching clients:", error);
+      console.error("Error searching warehouses:", error);
     }
   };
 
-  // Client selection
-  const handleClientSelection = (clientId) => {
-    setSelectedClients((prev) => {
-      if (prev.includes(clientId)) {
-        return prev.filter((id) => id !== clientId);
+  // Warehouse selection
+  const handleWarehouseSelection = (warehouseId) => {
+    setSelectedWarehouses((prev) => {
+      if (prev.includes(warehouseId)) {
+        return prev.filter((id) => id !== warehouseId);
       } else {
-        return [...prev, clientId];
+        return [...prev, warehouseId];
       }
     });
   };
 
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedClients([]);
+      setSelectedWarehouses([]);
     } else {
-      const clientIds = Array.isArray(clients)
-        ? clients.map((client) => client.Id)
+      const warehouseIds = Array.isArray(warehousesData)
+        ? warehousesData.map((warehouse) => warehouse.Id)
         : [];
-      setSelectedClients(clientIds);
+      setSelectedWarehouses(warehouseIds);
     }
     setSelectAll(!selectAll);
   };
 
-  // Client actions
-  const handleViewClient = async (clientId) => {
+  // Warehouse actions
+  const handleViewWarehouse = async (warehouseId) => {
     try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        setSelectedClient(clientData.data);
+      const warehouseData = await getWarehouse(warehouseId);
+      if (warehouseData) {
+        setSelectedWarehouse(warehouseData);
         setShowViewModal(true);
       }
     } catch (error) {
-      console.error("Error fetching client details:", error);
-      alert("Failed to fetch client details");
+      console.error("Error fetching warehouse details:", error);
+      alert("Failed to fetch warehouse details");
     }
   };
 
-  const handleEditClient = async (clientId) => {
+  const handleEditWarehouse = async (warehouseId) => {
     try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        navigate("/admin/new-clients", {
+      const warehouseData = await getWarehouse(warehouseId);
+      if (warehouseData) {
+        navigate("/admin/new-warehouse", {
           state: {
-            editData: clientData.data,
+            editData: warehouseData,
             isEditing: true,
           },
         });
       }
     } catch (error) {
-      console.error("Error fetching client for edit:", error);
-      alert("Failed to fetch client details for editing");
+      console.error("Error fetching warehouse for edit:", error);
+      alert("Failed to fetch warehouse details for editing");
     }
   };
 
-  const handleCloneClient = async (clientId) => {
+  const handleCloneWarehouse = async (warehouseId) => {
     try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        navigate("/admin/new-clients", {
+      const warehouseData = await getWarehouse(warehouseId);
+      if (warehouseData) {
+        navigate("/admin/new-warehouse", {
           state: {
             cloneData: {
-              ...clientData.data,
-              FullName: `${clientData.data.FullName || ""} (Copy)`,
-              Email: "",
-              CodeNumber: "",
+              ...warehouseData,
+              Name: `${warehouseData.Name || ""} (Copy)`,
+              Code: "",
+              Primary: "0",
               Id: undefined,
             },
           },
         });
       }
     } catch (error) {
-      console.error("Error cloning client:", error);
-      alert("Failed to clone client");
+      console.error("Error cloning warehouse:", error);
+      alert("Failed to clone warehouse");
     }
   };
 
-  const handleDeleteClient = (clientId) => {
-    const client = Array.isArray(clients)
-      ? clients.find((c) => c.Id === clientId)
+  const handleDeleteWarehouse = (warehouseId) => {
+    const warehouse = Array.isArray(warehousesData)
+      ? warehousesData.find((w) => w.Id === warehouseId)
       : null;
-    if (client) {
-      setClientToDelete(client);
+    if (warehouse) {
+      setWarehouseToDelete(warehouse);
       setShowDeleteModal(true);
     } else {
-      alert("Client not found");
+      alert("Warehouse not found");
     }
   };
 
-  const confirmDeleteClient = async () => {
-    if (!clientToDelete) return;
+  const handleToggleStatus = async (warehouseId) => {
+    setIsTogglingStatus(warehouseId);
+    try {
+      await toggleWarehouseStatus(warehouseId);
+    } catch (error) {
+      console.error("Error toggling warehouse status:", error);
+      alert("Failed to toggle warehouse status");
+    } finally {
+      setIsTogglingStatus(null);
+    }
+  };
+
+  const confirmDeleteWarehouse = async () => {
+    if (!warehouseToDelete) return;
 
     setIsDeleting(true);
     try {
-      await deleteClient(clientToDelete.Id);
+      await deleteWarehouse(warehouseToDelete.Id);
       setShowDeleteModal(false);
-      setClientToDelete(null);
-      // Refresh the client list
-      await getClients({
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      setWarehouseToDelete(null);
+      // Refresh the warehouse list
+      await getWarehouses();
     } catch (error) {
-      console.error("Error deleting client:", error);
-      alert("Failed to delete client");
+      console.error("Error deleting warehouse:", error);
+      alert("Failed to delete warehouse");
     } finally {
       setIsDeleting(false);
     }
@@ -292,11 +335,7 @@ const ClientList = () => {
     if (newPage < 1 || newPage > pagination.totalPages) return;
 
     try {
-      await getClients({
-        page: newPage,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      await changePage(newPage);
     } catch (error) {
       console.error("Error changing page:", error);
     }
@@ -305,11 +344,13 @@ const ClientList = () => {
   // Filter functions
   const handleApplyFilters = async () => {
     try {
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      setFilters(filterOptions);
+      if (filterOptions.status) {
+        await filterWarehousesByStatus(filterOptions.status);
+      }
+      if (filterOptions.sortBy) {
+        await sortWarehouses(filterOptions.sortBy, filterOptions.sortAscending);
+      }
       setShowFilters(false);
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -319,16 +360,14 @@ const ClientList = () => {
   const handleClearFilters = async () => {
     setSearchTerm("");
     setFilterOptions({
-      clientType: "",
-      country: "",
-      city: "",
+      status: "",
       sortBy: "CreatedAt",
       sortAscending: false,
     });
     setShowFilters(false);
 
     try {
-      await getClients({ page: 1 });
+      await getWarehouses();
     } catch (error) {
       console.error("Error clearing filters:", error);
     }
@@ -337,8 +376,8 @@ const ClientList = () => {
   // Export functionality
   const handleExport = () => {
     console.log(
-      "Export clients:",
-      selectedClients.length > 0 ? selectedClients : "all"
+      "Export warehouses:",
+      selectedWarehouses.length > 0 ? selectedWarehouses : "all"
     );
     alert("Export functionality to be implemented");
   };
@@ -376,11 +415,11 @@ const ClientList = () => {
         <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
           <Container className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
-              {translations.Clients}
+              {translations.Warehouses}
             </h1>
-            {selectedClients.length > 0 && (
+            {selectedWarehouses.length > 0 && (
               <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {selectedClients.length} {translations.Selected}
+                {selectedWarehouses.length} {translations.Selected}
               </Span>
             )}
           </Container>
@@ -422,13 +461,13 @@ const ClientList = () => {
               bgColor="bg-blue-600 hover:bg-blue-700"
               textColor="text-white"
               rounded="rounded-lg"
-              buttonText={translations["Add Client"]}
+              buttonText={translations["Add Warehouse"]}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => navigate("/admin/new-clients")}
+              onClick={() => navigate("/admin/new-warehouse")}
             />
           </Container>
         </Container>
@@ -436,29 +475,29 @@ const ClientList = () => {
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard
-            title={`${translations.Total} ${translations.Clients}`}
-            value={statistics?.totalClients || 0}
-            icon={Users}
+            title={`${translations.Total} ${translations.Warehouses}`}
+            value={statistics?.totalWarehouses || 0}
+            icon={Warehouse}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
           />
           <StatCard
-            title={translations.Individual}
-            value={statistics?.individualClients || 0}
-            icon={User}
+            title={translations.Active}
+            value={statistics?.activeWarehouses || 0}
+            icon={Package}
             bgColor="bg-green-50"
             iconColor="text-green-600"
           />
           <StatCard
-            title={translations.Business}
-            value={statistics?.businessClients || 0}
+            title={translations.Primary}
+            value={statistics?.primaryWarehouses || 0}
             icon={Building}
             bgColor="bg-purple-50"
             iconColor="text-purple-600"
           />
           <StatCard
             title={translations["This Month"]}
-            value={statistics?.clientsThisMonth || 0}
+            value={statistics?.warehousesThisMonth || 0}
             icon={Calendar}
             bgColor="bg-yellow-50"
             iconColor="text-yellow-600"
@@ -476,9 +515,9 @@ const ClientList = () => {
           </Container>
         </Container>
 
-        {/* Client Table */}
+        {/* Warehouse Table */}
         <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {clientsLoading ? (
+          {warehousesLoading ? (
             <Container className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <Span className="text-blue-500 text-lg block mt-4">
@@ -499,24 +538,18 @@ const ClientList = () => {
                 px="px-4"
                 fontWeight="font-medium"
                 fontSize="text-sm"
-                onClick={() => getClients()}
+                onClick={() => getWarehouses()}
               />
             </Container>
-          ) : !Array.isArray(clients) || clients.length === 0 ? (
+          ) : !Array.isArray(warehousesData) || warehousesData.length === 0 ? (
             <Container className="text-center py-12">
-              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <Warehouse className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm ||
-                filterOptions.clientType ||
-                filterOptions.country ||
-                filterOptions.city
+                {searchTerm || filterOptions.status
                   ? translations["No results found"]
-                  : translations.NoClients}
+                  : translations.NoWarehouses}
               </h3>
-              {(searchTerm ||
-                filterOptions.clientType ||
-                filterOptions.country ||
-                filterOptions.city) && (
+              {(searchTerm || filterOptions.status) && (
                 <FilledButton
                   bgColor="bg-blue-600 hover:bg-blue-700"
                   textColor="text-white"
@@ -545,19 +578,19 @@ const ClientList = () => {
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {translations["Client Type"]}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {translations.Name}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        {translations.Email}
+                        {translations.Code}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        {translations.Phone}
+                        {translations.Manager}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                        {translations.Location}
+                        {translations.Address}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {translations.Status}
                       </th>
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {translations.Actions}
@@ -565,118 +598,114 @@ const ClientList = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {clients.map((client) => (
-                      <tr key={client.Id} className="hover:bg-gray-50">
+                    {warehousesData.map((warehouse) => (
+                      <tr key={warehouse.Id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
-                            checked={selectedClients.includes(client.Id)}
-                            onChange={() => handleClientSelection(client.Id)}
+                            checked={selectedWarehouses.includes(warehouse.Id)}
+                            onChange={() => handleWarehouseSelection(warehouse.Id)}
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
                         <td className="px-6 py-4">
-                          <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              client.ClientType === "Individual"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {translations[client.ClientType] ||
-                              client.ClientType}
-                          </Span>
-                        </td>
-                        <td className="px-6 py-4">
                           <Container>
-                            <Span className="text-sm font-medium text-gray-900">
-                              {client.ClientType === "Business"
-                                ? client.BusinessName ||
-                                  client.FullName ||
-                                  "N/A"
-                                : client.FullName || "N/A"}
-                            </Span>
-                            {client.ClientType === "Business" &&
-                              client.FullName &&
-                              client.BusinessName && (
-                                <Span className="text-sm text-gray-500 block">
-                                  {client.FullName}
+                            <Container className="flex items-center gap-2">
+                              <Span className="text-sm font-medium text-gray-900">
+                                {warehouse.Name || "N/A"}
+                              </Span>
+                              {(warehouse.Primary === "1" || warehouse.Primary === "Yes") && (
+                                <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                  {translations.Primary}
                                 </Span>
                               )}
-                            {client.CodeNumber && (
+                              {warehouse.IsDefault && (
+                                <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                  Default
+                                </Span>
+                              )}
+                            </Container>
+                            {warehouse.Description && (
                               <Span className="text-sm text-gray-500 block">
-                                Code: {client.CodeNumber}
+                                {warehouse.Description}
                               </Span>
                             )}
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
-                          {client.Email ? (
-                            <a
-                              href={`mailto:${client.Email}`}
-                              className="text-sm text-blue-600 hover:text-blue-800"
-                            >
-                              {client.Email}
-                            </a>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
+                          <Span className="text-sm text-gray-900">
+                            {warehouse.Code || "-"}
+                          </Span>
                         </td>
                         <td className="px-6 py-4 hidden lg:table-cell">
-                          {client.Mobile || client.Telephone ? (
-                            <Container>
-                              {client.Mobile && (
-                                <Container>
+                          <Container>
+                            {warehouse.ManagerName ? (
+                              <Container>
+                                <Span className="text-sm text-gray-900 block">
+                                  {warehouse.ManagerName}
+                                </Span>
+                                {warehouse.Phone && (
                                   <a
-                                    href={`tel:${client.Mobile}`}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
+                                    href={`tel:${warehouse.Phone}`}
+                                    className="text-xs text-blue-600 hover:text-blue-800"
                                   >
-                                    {client.Mobile}
+                                    {warehouse.Phone}
                                   </a>
-                                  <Span className="text-xs text-gray-500">
-                                    {" "}
-                                    (Mobile)
-                                  </Span>
-                                </Container>
-                              )}
-                              {client.Telephone && (
-                                <Container>
+                                )}
+                                {warehouse.Email && (
                                   <a
-                                    href={`tel:${client.Telephone}`}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
+                                    href={`mailto:${warehouse.Email}`}
+                                    className="text-xs text-blue-600 hover:text-blue-800 block"
                                   >
-                                    {client.Telephone}
+                                    {warehouse.Email}
                                   </a>
-                                  <Span className="text-xs text-gray-500">
-                                    {" "}
-                                    (Tel)
-                                  </Span>
-                                </Container>
-                              )}
-                            </Container>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
+                                )}
+                              </Container>
+                            ) : (
+                              <Span className="text-sm text-gray-500">-</Span>
+                            )}
+                          </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {client.City || client.Country ? (
-                            <Container className="flex items-center">
-                              <MapPin className="w-4 h-4 text-gray-400 mr-1" />
-                              <Span className="text-sm text-gray-900">
-                                {[client.City, client.Country]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </Span>
+                          {warehouse.Address || warehouse.ShippingAddress || warehouse.City ? (
+                            <Container className="flex items-start">
+                              <MapPin className="w-4 h-4 text-gray-400 mr-1 mt-0.5 flex-shrink-0" />
+                              <Container className="text-sm text-gray-900">
+                                {warehouse.Address && (
+                                  <Span className="block">{warehouse.Address}</Span>
+                                )}
+                                {warehouse.ShippingAddress && warehouse.ShippingAddress !== warehouse.Address && (
+                                  <Span className="block text-gray-600">
+                                    Ship: {warehouse.ShippingAddress}
+                                  </Span>
+                                )}
+                                <Span className="block">
+                                  {[warehouse.City, warehouse.State, warehouse.PostalCode, warehouse.Country]
+                                    .filter(Boolean)
+                                    .join(", ")}
+                                </Span>
+                              </Container>
                             </Container>
                           ) : (
                             <Span className="text-sm text-gray-500">-</Span>
                           )}
                         </td>
                         <td className="px-6 py-4">
+                          <Span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              warehouse.Status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {translations[warehouse.Status] || warehouse.Status}
+                          </Span>
+                        </td>
+                        <td className="px-6 py-4">
                           <Container className="flex justify-center gap-1">
                             {/* View Button */}
                             <button
-                              onClick={() => handleViewClient(client.Id)}
+                              onClick={() => handleViewWarehouse(warehouse.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                               title={translations.View}
                             >
@@ -685,7 +714,7 @@ const ClientList = () => {
 
                             {/* Edit Button */}
                             <button
-                              onClick={() => handleEditClient(client.Id)}
+                              onClick={() => handleEditWarehouse(warehouse.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
                               title={translations.Edit}
                             >
@@ -694,16 +723,32 @@ const ClientList = () => {
 
                             {/* Clone Button */}
                             <button
-                              onClick={() => handleCloneClient(client.Id)}
+                              onClick={() => handleCloneWarehouse(warehouse.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1"
                               title={translations.Clone}
                             >
                               <AiOutlineCopy className="w-3 h-3" />
                             </button>
 
+                            {/* Toggle Status Button */}
+                            <button
+                              onClick={() => handleToggleStatus(warehouse.Id)}
+                              disabled={isTogglingStatus === warehouse.Id}
+                              className="inline-flex items-center justify-center w-7 h-7 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 disabled:opacity-50"
+                              title={translations.Toggle}
+                            >
+                              {isTogglingStatus === warehouse.Id ? (
+                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                              ) : warehouse.Status === "Active" ? (
+                                <ToggleRight className="w-3 h-3" />
+                              ) : (
+                                <ToggleLeft className="w-3 h-3" />
+                              )}
+                            </button>
+
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteClient(client.Id)}
+                              onClick={() => handleDeleteWarehouse(warehouse.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -718,16 +763,16 @@ const ClientList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
+              {pagination && pagination.TotalPages > 1 && (
                 <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
                   <Span className="text-sm text-gray-500">
                     {translations.Showing}{" "}
-                    {(pagination.page - 1) * pagination.pageSize + 1} -{" "}
+                    {(pagination.CurrentPage - 1) * pagination.PageSize + 1} -{" "}
                     {Math.min(
-                      pagination.page * pagination.pageSize,
-                      pagination.totalItems
+                      pagination.CurrentPage * pagination.PageSize,
+                      pagination.TotalItems
                     )}{" "}
-                    {translations.Of} {pagination.totalItems}{" "}
+                    {translations.Of} {pagination.TotalItems}{" "}
                     {translations.Items}
                   </Span>
                   <Container className="flex gap-2">
@@ -741,7 +786,7 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === 1}
+                      disabled={pagination.CurrentPage === 1}
                       onClick={() => handlePageChange(1)}
                     />
                     <FilledButton
@@ -754,11 +799,11 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === 1}
-                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.CurrentPage === 1}
+                      onClick={() => handlePageChange(pagination.CurrentPage - 1)}
                     />
                     <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.page} / {pagination.totalPages}
+                      {pagination.CurrentPage} / {pagination.TotalPages}
                     </Span>
                     <FilledButton
                       isIcon={true}
@@ -770,8 +815,8 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === pagination.totalPages}
-                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.CurrentPage === pagination.TotalPages}
+                      onClick={() => handlePageChange(pagination.CurrentPage + 1)}
                     />
                     <FilledButton
                       isIcon={true}
@@ -783,8 +828,8 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === pagination.totalPages}
-                      onClick={() => handlePageChange(pagination.totalPages)}
+                      disabled={pagination.CurrentPage === pagination.TotalPages}
+                      onClick={() => handlePageChange(pagination.TotalPages)}
                     />
                   </Container>
                 </Container>
@@ -794,14 +839,14 @@ const ClientList = () => {
         </Container>
       </Container>
 
-      {/* View Client Modal */}
+      {/* View Warehouse Modal */}
       <Modall
         modalOpen={showViewModal}
         setModalOpen={setShowViewModal}
         title={
           <Container className="flex items-center gap-2">
             <Eye className="w-5 h-5" />
-            <Span>{translations["Client Details"]}</Span>
+            <Span>{translations["Warehouse Details"]}</Span>
           </Container>
         }
         width={800}
@@ -809,150 +854,128 @@ const ClientList = () => {
         cancelText={translations.Close}
         okAction={() => {
           setShowViewModal(false);
-          handleEditClient(selectedClient?.Id);
+          handleEditWarehouse(selectedWarehouse?.Id);
         }}
         cancelAction={() => setShowViewModal(false)}
         body={
-          selectedClient && (
+          selectedWarehouse && (
             <Container className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
               <Container className="space-y-4">
                 <Container>
                   <Span className="text-sm font-medium text-gray-500">
-                    {translations["Client Type"]}
+                    {translations.Name}
                   </Span>
-                  <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedClient.ClientType === "Individual"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {translations[selectedClient.ClientType] ||
-                      selectedClient.ClientType}
+                  <Span className="text-sm text-gray-900 block mt-1">
+                    {selectedWarehouse.Name || "N/A"}
                   </Span>
                 </Container>
 
-                {selectedClient.ClientType === "Individual" ? (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Name}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.FullName || "N/A"}
-                    </Span>
-                  </Container>
-                ) : (
-                  <>
-                    <Container>
-                      <Span className="text-sm font-medium text-gray-500">
-                        {translations["Business Name"]}
-                      </Span>
-                      <Span className="text-sm text-gray-900 block mt-1">
-                        {selectedClient.BusinessName || "N/A"}
-                      </Span>
-                    </Container>
-                    {selectedClient.FullName && (
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-500">
-                          Contact Person
-                        </Span>
-                        <Span className="text-sm text-gray-900 block mt-1">
-                          {selectedClient.FullName}
-                        </Span>
-                      </Container>
-                    )}
-                  </>
-                )}
+                <Container>
+                  <Span className="text-sm font-medium text-gray-500">
+                    {translations.Code}
+                  </Span>
+                  <Span className="text-sm text-gray-900 block mt-1">
+                    {selectedWarehouse.Code || "N/A"}
+                  </Span>
+                </Container>
 
-                {selectedClient.CodeNumber && (
+                <Container>
+                  <Span className="text-sm font-medium text-gray-500">
+                    {translations.Status}
+                  </Span>
+                  <Span
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                      selectedWarehouse.Status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {translations[selectedWarehouse.Status] || selectedWarehouse.Status}
+                  </Span>
+                </Container>
+
+                {(selectedWarehouse.Primary === "1" || selectedWarehouse.Primary === "Yes") && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
-                      {translations["Code Number"]}
+                      Type
                     </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.CodeNumber}
+                    <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 bg-yellow-100 text-yellow-800">
+                      {translations.Primary}
                     </Span>
                   </Container>
                 )}
 
-                {selectedClient.Email && (
+                {selectedWarehouse.Description && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Description}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedWarehouse.Description}
+                    </Span>
+                  </Container>
+                )}
+
+                {selectedWarehouse.ManagerName && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Manager}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedWarehouse.ManagerName}
+                    </Span>
+                  </Container>
+                )}
+
+                {selectedWarehouse.Email && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Email}
                     </Span>
                     <a
-                      href={`mailto:${selectedClient.Email}`}
+                      href={`mailto:${selectedWarehouse.Email}`}
                       className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
                     >
-                      {selectedClient.Email}
+                      {selectedWarehouse.Email}
                     </a>
                   </Container>
                 )}
 
-                {(selectedClient.Mobile || selectedClient.Telephone) && (
+                {selectedWarehouse.Phone && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Phone}
                     </Span>
-                    <Container className="mt-1">
-                      {selectedClient.Mobile && (
-                        <Container>
-                          <a
-                            href={`tel:${selectedClient.Mobile}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {selectedClient.Mobile}
-                          </a>
-                          <Span className="text-xs text-gray-500">
-                            {" "}
-                            (Mobile)
-                          </Span>
-                        </Container>
-                      )}
-                      {selectedClient.Telephone && (
-                        <Container>
-                          <a
-                            href={`tel:${selectedClient.Telephone}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {selectedClient.Telephone}
-                          </a>
-                          <Span className="text-xs text-gray-500">
-                            {" "}
-                            (Telephone)
-                          </Span>
-                        </Container>
-                      )}
-                    </Container>
+                    <a
+                      href={`tel:${selectedWarehouse.Phone}`}
+                      className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
+                    >
+                      {selectedWarehouse.Phone}
+                    </a>
                   </Container>
                 )}
               </Container>
 
               <Container className="space-y-4">
-                {(selectedClient.StreetAddress1 ||
-                  selectedClient.City ||
-                  selectedClient.Country) && (
+                {(selectedWarehouse.Address ||
+                  selectedWarehouse.City ||
+                  selectedWarehouse.Country) && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Address}
                     </Span>
                     <Container className="mt-1">
-                      {selectedClient.StreetAddress1 && (
+                      {selectedWarehouse.Address && (
                         <Span className="text-sm text-gray-900 block">
-                          {selectedClient.StreetAddress1}
-                        </Span>
-                      )}
-                      {selectedClient.StreetAddress2 && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedClient.StreetAddress2}
+                          {selectedWarehouse.Address}
                         </Span>
                       )}
                       <Span className="text-sm text-gray-900 block">
                         {[
-                          selectedClient.City,
-                          selectedClient.State,
-                          selectedClient.PostalCode,
-                          selectedClient.Country,
+                          selectedWarehouse.City,
+                          selectedWarehouse.State,
+                          selectedWarehouse.PostalCode,
+                          selectedWarehouse.Country,
                         ]
                           .filter(Boolean)
                           .join(", ")}
@@ -961,150 +984,81 @@ const ClientList = () => {
                   </Container>
                 )}
 
-                {selectedClient.VatNumber && (
+                {selectedWarehouse.ShippingAddress && 
+                 selectedWarehouse.ShippingAddress !== selectedWarehouse.Address && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
-                      {translations["VAT Number"]}
+                      {translations["Shipping Address"]}
                     </Span>
                     <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.VatNumber}
+                      {selectedWarehouse.ShippingAddress}
                     </Span>
                   </Container>
                 )}
 
-                {selectedClient.Currency && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Currency
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.Currency}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.Category && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Category
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.Category}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.InvoicingMethod && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Invoicing Method
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.InvoicingMethod}
-                    </Span>
-                  </Container>
-                )}
-              </Container>
-
-              {selectedClient.Notes && (
-                <Container className="md:col-span-2">
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations.Notes}
+                <Container>
+                  <Span className="text-sm font-medium text-gray-500 mb-2 block">
+                    {translations.Permissions}
                   </Span>
-                  <Span className="text-sm text-gray-900 block mt-1">
-                    {selectedClient.Notes}
-                  </Span>
+                  <Container className="space-y-2">
+                    <Container className="flex items-center justify-between">
+                      <Span className="text-sm text-gray-600">
+                        {translations["View Permission"]}
+                      </Span>
+                      <Span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          selectedWarehouse.ViewPermission === "1"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {selectedWarehouse.ViewPermission === "1" ? "Yes" : "No"}
+                      </Span>
+                    </Container>
+                    <Container className="flex items-center justify-between">
+                      <Span className="text-sm text-gray-600">
+                        {translations["Create Invoice Permission"]}
+                      </Span>
+                      <Span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          selectedWarehouse.CreateInvoicePermission === "1"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {selectedWarehouse.CreateInvoicePermission === "1" ? "Yes" : "No"}
+                      </Span>
+                    </Container>
+                    <Container className="flex items-center justify-between">
+                      <Span className="text-sm text-gray-600">
+                        {translations["Update Stock Permission"]}
+                      </Span>
+                      <Span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          selectedWarehouse.UpdateStockPermission === "1"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {selectedWarehouse.UpdateStockPermission === "1" ? "Yes" : "No"}
+                      </Span>
+                    </Container>
+                  </Container>
                 </Container>
-              )}
-
-              {/* Contacts Section */}
-              {selectedClient.Contacts &&
-                Array.isArray(selectedClient.Contacts.$values) &&
-                selectedClient.Contacts.$values.length > 0 && (
-                  <Container className="md:col-span-2">
-                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
-                      Additional Contacts
-                    </Span>
-                    <Container className="border border-gray-200 rounded-lg p-4 space-y-3">
-                      {selectedClient.Contacts.$values.map((contact, index) => (
-                        <Container
-                          key={contact.Id || index}
-                          className={
-                            index > 0 ? "border-t border-gray-200 pt-3" : ""
-                          }
-                        >
-                          <Container className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <Container>
-                              <Span className="text-sm font-medium text-gray-900">
-                                {[contact.FirstName, contact.LastName]
-                                  .filter(Boolean)
-                                  .join(" ")}
-                              </Span>
-                            </Container>
-                            <Container>
-                              {contact.Email && (
-                                <a
-                                  href={`mailto:${contact.Email}`}
-                                  className="text-sm text-blue-600 hover:text-blue-800 block"
-                                >
-                                  {contact.Email}
-                                </a>
-                              )}
-                              {(contact.Mobile || contact.Telephone) && (
-                                <Span className="text-xs text-gray-500">
-                                  {contact.Mobile &&
-                                    `Mobile: ${contact.Mobile}`}
-                                  {contact.Mobile && contact.Telephone && " | "}
-                                  {contact.Telephone &&
-                                    `Tel: ${contact.Telephone}`}
-                                </Span>
-                              )}
-                            </Container>
-                          </Container>
-                        </Container>
-                      ))}
-                    </Container>
-                  </Container>
-                )}
-
-              {/* Attachments Section */}
-              {selectedClient.Attachments &&
-                Array.isArray(selectedClient.Attachments.$values) &&
-                selectedClient.Attachments.$values.length > 0 && (
-                  <Container className="md:col-span-2">
-                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
-                      Attachments
-                    </Span>
-                    <Container className="flex flex-wrap gap-2">
-                      {selectedClient.Attachments.$values.map(
-                        (attachment, index) => (
-                          <Container
-                            key={attachment.Id || index}
-                            className="border border-gray-200 rounded-lg p-2 flex items-center gap-2"
-                          >
-                            <FileText className="w-4 h-4 text-gray-400" />
-                            <Span className="text-sm text-gray-900">
-                              {attachment.File || "Attachment"}
-                            </Span>
-                          </Container>
-                        )
-                      )}
-                    </Container>
-                  </Container>
-                )}
+              </Container>
 
               <Container className="md:col-span-2 pt-4 border-t border-gray-200">
                 <Container className="text-xs text-gray-500 space-y-1">
                   <Container>
                     Created:{" "}
-                    {selectedClient.CreatedAt
-                      ? new Date(selectedClient.CreatedAt).toLocaleDateString()
+                    {selectedWarehouse.CreatedAt
+                      ? new Date(selectedWarehouse.CreatedAt).toLocaleDateString()
                       : "N/A"}
                   </Container>
-                  {selectedClient.UpdatedAt && (
+                  {selectedWarehouse.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedClient.UpdatedAt).toLocaleDateString()}
+                      {new Date(selectedWarehouse.UpdatedAt).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -1121,13 +1075,13 @@ const ClientList = () => {
         title={
           <Container className="flex items-center gap-2 text-red-600">
             <Trash2 className="w-5 h-5" />
-            <Span>{translations["Delete Client"]}</Span>
+            <Span>{translations["Delete Warehouse"]}</Span>
           </Container>
         }
         width={500}
         okText={translations.Delete}
         cancelText={translations.Cancel}
-        okAction={confirmDeleteClient}
+        okAction={confirmDeleteWarehouse}
         cancelAction={() => setShowDeleteModal(false)}
         okButtonDisabled={isDeleting}
         body={
@@ -1140,10 +1094,8 @@ const ClientList = () => {
             </h3>
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
-              permanently delete the client{" "}
-              <strong>
-                "{clientToDelete?.FullName || clientToDelete?.BusinessName}"
-              </strong>{" "}
+              permanently delete the warehouse{" "}
+              <strong>"{warehouseToDelete?.Name}"</strong>{" "}
               and all associated data.
             </Span>
           </Container>
@@ -1180,60 +1132,22 @@ const ClientList = () => {
               <Container className="space-y-4">
                 <Container>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Client Type"]}
+                    {translations.Status}
                   </label>
                   <select
-                    value={filterOptions.clientType}
+                    value={filterOptions.status}
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
-                        clientType: e.target.value,
+                        status: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">{translations["All Types"]}</option>
-                    <option value="Individual">
-                      {translations.Individual}
-                    </option>
-                    <option value="Business">{translations.Business}</option>
+                    <option value="">{translations["All Status"]}</option>
+                    <option value="Active">{translations.Active}</option>
+                    <option value="Inactive">{translations.Inactive}</option>
                   </select>
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.Country}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={`${translations.Search} ${translations.Country}...`}
-                    value={filterOptions.country}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        country: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.City}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={`${translations.Search} ${translations.City}...`}
-                    value={filterOptions.city}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        city: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
                 </Container>
 
                 <Container>
@@ -1251,10 +1165,12 @@ const ClientList = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="CreatedAt">Date Created</option>
-                    <option value="FullName">Name</option>
-                    <option value="BusinessName">Business Name</option>
-                    <option value="Email">Email</option>
-                    <option value="ClientType">Client Type</option>
+                    <option value="name">Name</option>
+                    <option value="code">Code</option>
+                    <option value="status">Status</option>
+                    <option value="city">City</option>
+                    <option value="managername">Manager Name</option>
+                    <option value="primary">Primary</option>
                   </select>
                 </Container>
 
@@ -1310,4 +1226,4 @@ const ClientList = () => {
   );
 };
 
-export default ClientList;
+export default WarehouseList;

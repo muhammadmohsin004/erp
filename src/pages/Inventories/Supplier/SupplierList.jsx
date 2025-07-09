@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
-  User,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -19,9 +18,11 @@ import {
   Filter,
   Download,
   X,
-  FileText,
   Users,
   Calendar,
+  Package,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import {
   AiOutlineEye, // Eye icon for view
@@ -32,39 +33,42 @@ import {
   AiOutlineFilter, // Filter icon
   AiOutlineDownload, // Download icon for export
 } from "react-icons/ai";
-import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
-import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
-import Modall from "../../components/elements/modal/Modal";
-import SearchAndFilters from "../../components/elements/searchAndFilters/SearchAndFilters";
-import Table from "../../components/elements/table/Table";
-import Container from "../../components/elements/container/Container";
-import Span from "../../components/elements/span/Span";
+import { useSupplier } from "../../../Contexts/SupplierContext/SupplierContext";
+import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import Modall from "../../../components/elements/modal/Modal";
+import SearchAndFilters from "../../../components/elements/searchAndFilters/SearchAndFilters";
+import Table from "../../../components/elements/table/Table";
+import Container from "../../../components/elements/container/Container";
+import Span from "../../../components/elements/span/Span";
 
-const ClientList = () => {
+const SupplierList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
-    Clients: language === "ar" ? "العملاء" : "Clients",
+    "Add Supplier": language === "ar" ? "إضافة مورد" : "Add Supplier",
+    Suppliers: language === "ar" ? "الموردين" : "Suppliers",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    NoClients: language === "ar" ? "لا يوجد عملاء" : "No clients found",
+    NoSuppliers: language === "ar" ? "لا يوجد موردين" : "No suppliers found",
     Name: language === "ar" ? "الاسم" : "Name",
+    ContactPerson: language === "ar" ? "الشخص المسؤول" : "Contact Person",
     Email: language === "ar" ? "البريد الإلكتروني" : "Email",
     Phone: language === "ar" ? "الهاتف" : "Phone",
-    Location: language === "ar" ? "الموقع" : "Location",
+    Address: language === "ar" ? "العنوان" : "Address",
+    City: language === "ar" ? "المدينة" : "City",
+    Status: language === "ar" ? "الحالة" : "Status",
     Actions: language === "ar" ? "الإجراءات" : "Actions",
     Showing: language === "ar" ? "عرض" : "Showing",
     Of: language === "ar" ? "من" : "of",
     Items: language === "ar" ? "عناصر" : "Items",
-    Individual: language === "ar" ? "فردي" : "Individual",
-    Business: language === "ar" ? "تجاري" : "Business",
+    Active: language === "ar" ? "نشط" : "Active",
+    Inactive: language === "ar" ? "غير نشط" : "Inactive",
     Total: language === "ar" ? "المجموع" : "Total",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     View: language === "ar" ? "عرض" : "View",
@@ -72,66 +76,73 @@ const ClientList = () => {
     Clone: language === "ar" ? "نسخ" : "Clone",
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Client": language === "ar" ? "حذف العميل" : "Delete Client",
+    "Delete Supplier": language === "ar" ? "حذف المورد" : "Delete Supplier",
     "This action cannot be undone":
       language === "ar"
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
+    "Supplier Details": language === "ar" ? "تفاصيل المورد" : "Supplier Details",
     Close: language === "ar" ? "إغلاق" : "Close",
-    "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
-    "Business Name": language === "ar" ? "اسم النشاط التجاري" : "Business Name",
-    Address: language === "ar" ? "العنوان" : "Address",
-    "VAT Number": language === "ar" ? "الرقم الضريبي" : "VAT Number",
-    "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
     Notes: language === "ar" ? "ملاحظات" : "Notes",
-    "All Types": language === "ar" ? "جميع الأنواع" : "All Types",
+    "Tax ID": language === "ar" ? "الرقم الضريبي" : "Tax ID",
     Country: language === "ar" ? "البلد" : "Country",
-    City: language === "ar" ? "المدينة" : "City",
+    State: language === "ar" ? "الولاية" : "State",
+    "Zip Code": language === "ar" ? "الرمز البريدي" : "Zip Code",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
     "No results found":
       language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "All Status": language === "ar" ? "جميع الحالات" : "All Status",
   };
 
-  // Get clients context
+  // Get supplier context
   const {
-    clients,
-    isLoading: clientsLoading,
+    suppliers,
+    loading: suppliersLoading,
     error,
     pagination,
-    statistics,
-    getClients,
-    getClient,
-    deleteClient,
-    getStatistics,
-  } = useClients();
+    getSuppliers,
+    getSupplier,
+    deleteSupplier,
+    searchSuppliers,
+    filterSuppliersByStatus,
+    sortSuppliers,
+    changePage,
+    setFilters,
+  } = useSupplier();
+
+  // Process suppliers data from API response
+  const suppliersData = suppliers?.Data.$values || suppliers || [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
-    clientType: "",
-    country: "",
-    city: "",
+    status: "",
     sortBy: "CreatedAt",
     sortAscending: false,
   });
-  const [selectedClients, setSelectedClients] = useState([]);
+  const [selectedSuppliers, setSelectedSuppliers] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientToDelete, setClientToDelete] = useState(null);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [supplierToDelete, setSupplierToDelete] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch clients on component mount
+  // Mock statistics - you can replace this with actual API call
+  const [statistics, setStatistics] = useState({
+    totalSuppliers: 0,
+    activeSuppliers: 0,
+    suppliersThisMonth: 0,
+  });
+
+  // Fetch suppliers on component mount
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        await getClients();
-        await getStatistics();
+        await getSuppliers();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -140,24 +151,41 @@ const ClientList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token]);
+  }, [token, getSuppliers]);
+
+  // Update statistics when suppliers change
+  useEffect(() => {
+    if (Array.isArray(suppliersData) && suppliersData.length > 0) {
+      const stats = {
+        totalSuppliers: pagination?.TotalItems || suppliersData.length,
+        activeSuppliers: suppliersData.filter(s => s.Status === "Active").length,
+        suppliersThisMonth: suppliersData.filter(s => {
+          const createdDate = new Date(s.CreatedAt);
+          const now = new Date();
+          return createdDate.getMonth() === now.getMonth() && 
+                 createdDate.getFullYear() === now.getFullYear();
+        }).length,
+      };
+      setStatistics(stats);
+    }
+  }, [suppliersData, pagination]);
 
   // Handle search when searchTerm changes (with debounce)
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
       if (searchTerm !== undefined) {
-        handleSearchClients();
+        handleSearchSuppliers();
       }
     }, 500); // 500ms debounce
 
     return () => clearTimeout(delayedSearch);
   }, [searchTerm]);
 
-  // Handle filters change - remove auto-apply, only apply on button click
+  // Handle filters change
   useEffect(() => {
-    setSelectedClients([]);
+    setSelectedSuppliers([]);
     setSelectAll(false);
-  }, [clients]);
+  }, [suppliersData]);
 
   useEffect(() => {
     if (!token) {
@@ -166,122 +194,113 @@ const ClientList = () => {
   }, [token, navigate]);
 
   // Search function
-  const handleSearchClients = async () => {
+  const handleSearchSuppliers = async () => {
     try {
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      await searchSuppliers(searchTerm);
     } catch (error) {
-      console.error("Error searching clients:", error);
+      console.error("Error searching suppliers:", error);
     }
   };
 
-  // Client selection
-  const handleClientSelection = (clientId) => {
-    setSelectedClients((prev) => {
-      if (prev.includes(clientId)) {
-        return prev.filter((id) => id !== clientId);
+  // Supplier selection
+  const handleSupplierSelection = (supplierId) => {
+    setSelectedSuppliers((prev) => {
+      if (prev.includes(supplierId)) {
+        return prev.filter((id) => id !== supplierId);
       } else {
-        return [...prev, clientId];
+        return [...prev, supplierId];
       }
     });
   };
 
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedClients([]);
+      setSelectedSuppliers([]);
     } else {
-      const clientIds = Array.isArray(clients)
-        ? clients.map((client) => client.Id)
+      const supplierIds = Array.isArray(suppliersData)
+        ? suppliersData.map((supplier) => supplier.Id)
         : [];
-      setSelectedClients(clientIds);
+      setSelectedSuppliers(supplierIds);
     }
     setSelectAll(!selectAll);
   };
 
-  // Client actions
-  const handleViewClient = async (clientId) => {
+  // Supplier actions
+  const handleViewSupplier = async (supplierId) => {
     try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        setSelectedClient(clientData.data);
+      const supplierData = await getSupplier(supplierId);
+      if (supplierData) {
+        setSelectedSupplier(supplierData);
         setShowViewModal(true);
       }
     } catch (error) {
-      console.error("Error fetching client details:", error);
-      alert("Failed to fetch client details");
+      console.error("Error fetching supplier details:", error);
+      alert("Failed to fetch supplier details");
     }
   };
 
-  const handleEditClient = async (clientId) => {
+  const handleEditSupplier = async (supplierId) => {
     try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        navigate("/admin/new-clients", {
+      const supplierData = await getSupplier(supplierId);
+      if (supplierData) {
+        navigate("/admin/new-supplier", {
           state: {
-            editData: clientData.data,
+            editData: supplierData,
             isEditing: true,
           },
         });
       }
     } catch (error) {
-      console.error("Error fetching client for edit:", error);
-      alert("Failed to fetch client details for editing");
+      console.error("Error fetching supplier for edit:", error);
+      alert("Failed to fetch supplier details for editing");
     }
   };
 
-  const handleCloneClient = async (clientId) => {
+  const handleCloneSupplier = async (supplierId) => {
     try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        navigate("/admin/new-clients", {
+      const supplierData = await getSupplier(supplierId);
+      if (supplierData) {
+        navigate("/admin/new-supplier", {
           state: {
             cloneData: {
-              ...clientData.data,
-              FullName: `${clientData.data.FullName || ""} (Copy)`,
-              Email: "",
-              CodeNumber: "",
+              ...supplierData,
+              Name: `${supplierData.Name || ""} (Copy)`,
               Id: undefined,
             },
           },
         });
       }
     } catch (error) {
-      console.error("Error cloning client:", error);
-      alert("Failed to clone client");
+      console.error("Error cloning supplier:", error);
+      alert("Failed to clone supplier");
     }
   };
 
-  const handleDeleteClient = (clientId) => {
-    const client = Array.isArray(clients)
-      ? clients.find((c) => c.Id === clientId)
+  const handleDeleteSupplier = (supplierId) => {
+    const supplier = Array.isArray(suppliersData)
+      ? suppliersData.find((s) => s.Id === supplierId)
       : null;
-    if (client) {
-      setClientToDelete(client);
+    if (supplier) {
+      setSupplierToDelete(supplier);
       setShowDeleteModal(true);
     } else {
-      alert("Client not found");
+      alert("Supplier not found");
     }
   };
 
-  const confirmDeleteClient = async () => {
-    if (!clientToDelete) return;
+  const confirmDeleteSupplier = async () => {
+    if (!supplierToDelete) return;
 
     setIsDeleting(true);
     try {
-      await deleteClient(clientToDelete.Id);
+      await deleteSupplier(supplierToDelete.Id);
       setShowDeleteModal(false);
-      setClientToDelete(null);
-      // Refresh the client list
-      await getClients({
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      setSupplierToDelete(null);
+      // Refresh the supplier list
+      await getSuppliers();
     } catch (error) {
-      console.error("Error deleting client:", error);
-      alert("Failed to delete client");
+      console.error("Error deleting supplier:", error);
+      alert("Failed to delete supplier");
     } finally {
       setIsDeleting(false);
     }
@@ -289,14 +308,10 @@ const ClientList = () => {
 
   // Pagination
   const handlePageChange = async (newPage) => {
-    if (newPage < 1 || newPage > pagination.totalPages) return;
+    if (newPage < 1 || newPage > pagination.TotalPages) return;
 
     try {
-      await getClients({
-        page: newPage,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      await changePage(newPage);
     } catch (error) {
       console.error("Error changing page:", error);
     }
@@ -305,11 +320,13 @@ const ClientList = () => {
   // Filter functions
   const handleApplyFilters = async () => {
     try {
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
+      setFilters(filterOptions);
+      if (filterOptions.status) {
+        await filterSuppliersByStatus(filterOptions.status);
+      }
+      if (filterOptions.sortBy) {
+        await sortSuppliers(filterOptions.sortBy, filterOptions.sortAscending);
+      }
       setShowFilters(false);
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -319,16 +336,14 @@ const ClientList = () => {
   const handleClearFilters = async () => {
     setSearchTerm("");
     setFilterOptions({
-      clientType: "",
-      country: "",
-      city: "",
+      status: "",
       sortBy: "CreatedAt",
       sortAscending: false,
     });
     setShowFilters(false);
 
     try {
-      await getClients({ page: 1 });
+      await getSuppliers();
     } catch (error) {
       console.error("Error clearing filters:", error);
     }
@@ -337,8 +352,8 @@ const ClientList = () => {
   // Export functionality
   const handleExport = () => {
     console.log(
-      "Export clients:",
-      selectedClients.length > 0 ? selectedClients : "all"
+      "Export suppliers:",
+      selectedSuppliers.length > 0 ? selectedSuppliers : "all"
     );
     alert("Export functionality to be implemented");
   };
@@ -376,11 +391,11 @@ const ClientList = () => {
         <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
           <Container className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
-              {translations.Clients}
+              {translations.Suppliers}
             </h1>
-            {selectedClients.length > 0 && (
+            {selectedSuppliers.length > 0 && (
               <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {selectedClients.length} {translations.Selected}
+                {selectedSuppliers.length} {translations.Selected}
               </Span>
             )}
           </Container>
@@ -422,43 +437,36 @@ const ClientList = () => {
               bgColor="bg-blue-600 hover:bg-blue-700"
               textColor="text-white"
               rounded="rounded-lg"
-              buttonText={translations["Add Client"]}
+              buttonText={translations["Add Supplier"]}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => navigate("/admin/new-clients")}
+              onClick={() => navigate("/admin/new-supplier")}
             />
           </Container>
         </Container>
 
         {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           <StatCard
-            title={`${translations.Total} ${translations.Clients}`}
-            value={statistics?.totalClients || 0}
-            icon={Users}
+            title={`${translations.Total} ${translations.Suppliers}`}
+            value={statistics?.totalSuppliers || 0}
+            icon={Building}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
           />
           <StatCard
-            title={translations.Individual}
-            value={statistics?.individualClients || 0}
-            icon={User}
+            title={translations.Active}
+            value={statistics?.activeSuppliers || 0}
+            icon={Users}
             bgColor="bg-green-50"
             iconColor="text-green-600"
           />
           <StatCard
-            title={translations.Business}
-            value={statistics?.businessClients || 0}
-            icon={Building}
-            bgColor="bg-purple-50"
-            iconColor="text-purple-600"
-          />
-          <StatCard
             title={translations["This Month"]}
-            value={statistics?.clientsThisMonth || 0}
+            value={statistics?.suppliersThisMonth || 0}
             icon={Calendar}
             bgColor="bg-yellow-50"
             iconColor="text-yellow-600"
@@ -476,9 +484,9 @@ const ClientList = () => {
           </Container>
         </Container>
 
-        {/* Client Table */}
+        {/* Supplier Table */}
         <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {clientsLoading ? (
+          {suppliersLoading ? (
             <Container className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <Span className="text-blue-500 text-lg block mt-4">
@@ -499,24 +507,18 @@ const ClientList = () => {
                 px="px-4"
                 fontWeight="font-medium"
                 fontSize="text-sm"
-                onClick={() => getClients()}
+                onClick={() => getSuppliers()}
               />
             </Container>
-          ) : !Array.isArray(clients) || clients.length === 0 ? (
+          ) : !Array.isArray(suppliersData) || suppliersData.length === 0 ? (
             <Container className="text-center py-12">
-              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm ||
-                filterOptions.clientType ||
-                filterOptions.country ||
-                filterOptions.city
+                {searchTerm || filterOptions.status
                   ? translations["No results found"]
-                  : translations.NoClients}
+                  : translations.NoSuppliers}
               </h3>
-              {(searchTerm ||
-                filterOptions.clientType ||
-                filterOptions.country ||
-                filterOptions.city) && (
+              {(searchTerm || filterOptions.status) && (
                 <FilledButton
                   bgColor="bg-blue-600 hover:bg-blue-700"
                   textColor="text-white"
@@ -545,19 +547,19 @@ const ClientList = () => {
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {translations["Client Type"]}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {translations.Name}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        {translations.Email}
+                        {translations.ContactPerson}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        {translations.Phone}
+                        {translations.Email}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                        {translations.Location}
+                        {translations.Phone}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {translations.Status}
                       </th>
                       <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {translations.Actions}
@@ -565,118 +567,75 @@ const ClientList = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {clients.map((client) => (
-                      <tr key={client.Id} className="hover:bg-gray-50">
+                    {suppliersData.map((supplier) => (
+                      <tr key={supplier.Id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
-                            checked={selectedClients.includes(client.Id)}
-                            onChange={() => handleClientSelection(client.Id)}
+                            checked={selectedSuppliers.includes(supplier.Id)}
+                            onChange={() => handleSupplierSelection(supplier.Id)}
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
                         <td className="px-6 py-4">
-                          <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              client.ClientType === "Individual"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {translations[client.ClientType] ||
-                              client.ClientType}
-                          </Span>
-                        </td>
-                        <td className="px-6 py-4">
                           <Container>
-                            <Span className="text-sm font-medium text-gray-900">
-                              {client.ClientType === "Business"
-                                ? client.BusinessName ||
-                                  client.FullName ||
-                                  "N/A"
-                                : client.FullName || "N/A"}
-                            </Span>
-                            {client.ClientType === "Business" &&
-                              client.FullName &&
-                              client.BusinessName && (
-                                <Span className="text-sm text-gray-500 block">
-                                  {client.FullName}
-                                </Span>
-                              )}
-                            {client.CodeNumber && (
+                            <Container className="flex items-center gap-2">
+                              <Span className="text-sm font-medium text-gray-900">
+                                {supplier.Name || "N/A"}
+                              </Span>
+                            </Container>
+                            {supplier.Notes && (
                               <Span className="text-sm text-gray-500 block">
-                                Code: {client.CodeNumber}
+                                {supplier.Notes}
                               </Span>
                             )}
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
-                          {client.Email ? (
+                          <Span className="text-sm text-gray-900">
+                            {supplier.ContactPerson || "-"}
+                          </Span>
+                        </td>
+                        <td className="px-6 py-4 hidden lg:table-cell">
+                          {supplier.Email ? (
                             <a
-                              href={`mailto:${client.Email}`}
+                              href={`mailto:${supplier.Email}`}
                               className="text-sm text-blue-600 hover:text-blue-800"
                             >
-                              {client.Email}
+                              {supplier.Email}
                             </a>
                           ) : (
                             <Span className="text-sm text-gray-500">-</Span>
                           )}
                         </td>
-                        <td className="px-6 py-4 hidden lg:table-cell">
-                          {client.Mobile || client.Telephone ? (
-                            <Container>
-                              {client.Mobile && (
-                                <Container>
-                                  <a
-                                    href={`tel:${client.Mobile}`}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                  >
-                                    {client.Mobile}
-                                  </a>
-                                  <Span className="text-xs text-gray-500">
-                                    {" "}
-                                    (Mobile)
-                                  </Span>
-                                </Container>
-                              )}
-                              {client.Telephone && (
-                                <Container>
-                                  <a
-                                    href={`tel:${client.Telephone}`}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                  >
-                                    {client.Telephone}
-                                  </a>
-                                  <Span className="text-xs text-gray-500">
-                                    {" "}
-                                    (Tel)
-                                  </Span>
-                                </Container>
-                              )}
-                            </Container>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
-                        </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {client.City || client.Country ? (
-                            <Container className="flex items-center">
-                              <MapPin className="w-4 h-4 text-gray-400 mr-1" />
-                              <Span className="text-sm text-gray-900">
-                                {[client.City, client.Country]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </Span>
-                            </Container>
+                          {supplier.Phone ? (
+                            <a
+                              href={`tel:${supplier.Phone}`}
+                              className="text-sm text-blue-600 hover:text-blue-800"
+                            >
+                              {supplier.Phone}
+                            </a>
                           ) : (
                             <Span className="text-sm text-gray-500">-</Span>
                           )}
                         </td>
                         <td className="px-6 py-4">
+                          <Span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              supplier.Status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {translations[supplier.Status] || supplier.Status}
+                          </Span>
+                        </td>
+                        <td className="px-6 py-4">
                           <Container className="flex justify-center gap-1">
                             {/* View Button */}
                             <button
-                              onClick={() => handleViewClient(client.Id)}
+                              onClick={() => handleViewSupplier(supplier.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                               title={translations.View}
                             >
@@ -685,7 +644,7 @@ const ClientList = () => {
 
                             {/* Edit Button */}
                             <button
-                              onClick={() => handleEditClient(client.Id)}
+                              onClick={() => handleEditSupplier(supplier.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
                               title={translations.Edit}
                             >
@@ -694,7 +653,7 @@ const ClientList = () => {
 
                             {/* Clone Button */}
                             <button
-                              onClick={() => handleCloneClient(client.Id)}
+                              onClick={() => handleCloneSupplier(supplier.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1"
                               title={translations.Clone}
                             >
@@ -703,7 +662,7 @@ const ClientList = () => {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteClient(client.Id)}
+                              onClick={() => handleDeleteSupplier(supplier.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -718,16 +677,16 @@ const ClientList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
+              {pagination && pagination.TotalPages > 1 && (
                 <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
                   <Span className="text-sm text-gray-500">
                     {translations.Showing}{" "}
-                    {(pagination.page - 1) * pagination.pageSize + 1} -{" "}
+                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
                     {Math.min(
-                      pagination.page * pagination.pageSize,
-                      pagination.totalItems
+                      pagination.PageNumber * pagination.PageSize,
+                      pagination.TotalItems
                     )}{" "}
-                    {translations.Of} {pagination.totalItems}{" "}
+                    {translations.Of} {pagination.TotalItems}{" "}
                     {translations.Items}
                   </Span>
                   <Container className="flex gap-2">
@@ -741,7 +700,7 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === 1}
+                      disabled={pagination.PageNumber === 1}
                       onClick={() => handlePageChange(1)}
                     />
                     <FilledButton
@@ -754,11 +713,11 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === 1}
-                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.PageNumber === 1}
+                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
                     />
                     <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.page} / {pagination.totalPages}
+                      {pagination.PageNumber} / {pagination.TotalPages}
                     </Span>
                     <FilledButton
                       isIcon={true}
@@ -770,8 +729,8 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === pagination.totalPages}
-                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.PageNumber === pagination.TotalPages}
+                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
                     />
                     <FilledButton
                       isIcon={true}
@@ -783,8 +742,8 @@ const ClientList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.page === pagination.totalPages}
-                      onClick={() => handlePageChange(pagination.totalPages)}
+                      disabled={pagination.PageNumber === pagination.TotalPages}
+                      onClick={() => handlePageChange(pagination.TotalPages)}
                     />
                   </Container>
                 </Container>
@@ -794,14 +753,14 @@ const ClientList = () => {
         </Container>
       </Container>
 
-      {/* View Client Modal */}
+      {/* View Supplier Modal */}
       <Modall
         modalOpen={showViewModal}
         setModalOpen={setShowViewModal}
         title={
           <Container className="flex items-center gap-2">
             <Eye className="w-5 h-5" />
-            <Span>{translations["Client Details"]}</Span>
+            <Span>{translations["Supplier Details"]}</Span>
           </Container>
         }
         width={800}
@@ -809,150 +768,106 @@ const ClientList = () => {
         cancelText={translations.Close}
         okAction={() => {
           setShowViewModal(false);
-          handleEditClient(selectedClient?.Id);
+          handleEditSupplier(selectedSupplier?.Id);
         }}
         cancelAction={() => setShowViewModal(false)}
         body={
-          selectedClient && (
+          selectedSupplier && (
             <Container className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
               <Container className="space-y-4">
                 <Container>
                   <Span className="text-sm font-medium text-gray-500">
-                    {translations["Client Type"]}
+                    {translations.Name}
                   </Span>
-                  <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedClient.ClientType === "Individual"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {translations[selectedClient.ClientType] ||
-                      selectedClient.ClientType}
+                  <Span className="text-sm text-gray-900 block mt-1">
+                    {selectedSupplier.Name || "N/A"}
                   </Span>
                 </Container>
 
-                {selectedClient.ClientType === "Individual" ? (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Name}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.FullName || "N/A"}
-                    </Span>
-                  </Container>
-                ) : (
-                  <>
-                    <Container>
-                      <Span className="text-sm font-medium text-gray-500">
-                        {translations["Business Name"]}
-                      </Span>
-                      <Span className="text-sm text-gray-900 block mt-1">
-                        {selectedClient.BusinessName || "N/A"}
-                      </Span>
-                    </Container>
-                    {selectedClient.FullName && (
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-500">
-                          Contact Person
-                        </Span>
-                        <Span className="text-sm text-gray-900 block mt-1">
-                          {selectedClient.FullName}
-                        </Span>
-                      </Container>
-                    )}
-                  </>
-                )}
+                <Container>
+                  <Span className="text-sm font-medium text-gray-500">
+                    {translations.ContactPerson}
+                  </Span>
+                  <Span className="text-sm text-gray-900 block mt-1">
+                    {selectedSupplier.ContactPerson || "N/A"}
+                  </Span>
+                </Container>
 
-                {selectedClient.CodeNumber && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["Code Number"]}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.CodeNumber}
-                    </Span>
-                  </Container>
-                )}
+                <Container>
+                  <Span className="text-sm font-medium text-gray-500">
+                    {translations.Status}
+                  </Span>
+                  <Span
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                      selectedSupplier.Status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {translations[selectedSupplier.Status] || selectedSupplier.Status}
+                  </Span>
+                </Container>
 
-                {selectedClient.Email && (
+                {selectedSupplier.Email && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Email}
                     </Span>
                     <a
-                      href={`mailto:${selectedClient.Email}`}
+                      href={`mailto:${selectedSupplier.Email}`}
                       className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
                     >
-                      {selectedClient.Email}
+                      {selectedSupplier.Email}
                     </a>
                   </Container>
                 )}
 
-                {(selectedClient.Mobile || selectedClient.Telephone) && (
+                {selectedSupplier.Phone && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Phone}
                     </Span>
-                    <Container className="mt-1">
-                      {selectedClient.Mobile && (
-                        <Container>
-                          <a
-                            href={`tel:${selectedClient.Mobile}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {selectedClient.Mobile}
-                          </a>
-                          <Span className="text-xs text-gray-500">
-                            {" "}
-                            (Mobile)
-                          </Span>
-                        </Container>
-                      )}
-                      {selectedClient.Telephone && (
-                        <Container>
-                          <a
-                            href={`tel:${selectedClient.Telephone}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {selectedClient.Telephone}
-                          </a>
-                          <Span className="text-xs text-gray-500">
-                            {" "}
-                            (Telephone)
-                          </Span>
-                        </Container>
-                      )}
-                    </Container>
+                    <a
+                      href={`tel:${selectedSupplier.Phone}`}
+                      className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
+                    >
+                      {selectedSupplier.Phone}
+                    </a>
+                  </Container>
+                )}
+
+                {selectedSupplier.TaxId && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["Tax ID"]}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedSupplier.TaxId}
+                    </Span>
                   </Container>
                 )}
               </Container>
 
               <Container className="space-y-4">
-                {(selectedClient.StreetAddress1 ||
-                  selectedClient.City ||
-                  selectedClient.Country) && (
+                {(selectedSupplier.Address ||
+                  selectedSupplier.City ||
+                  selectedSupplier.Country) && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Address}
                     </Span>
                     <Container className="mt-1">
-                      {selectedClient.StreetAddress1 && (
+                      {selectedSupplier.Address && (
                         <Span className="text-sm text-gray-900 block">
-                          {selectedClient.StreetAddress1}
-                        </Span>
-                      )}
-                      {selectedClient.StreetAddress2 && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedClient.StreetAddress2}
+                          {selectedSupplier.Address}
                         </Span>
                       )}
                       <Span className="text-sm text-gray-900 block">
                         {[
-                          selectedClient.City,
-                          selectedClient.State,
-                          selectedClient.PostalCode,
-                          selectedClient.Country,
+                          selectedSupplier.City,
+                          selectedSupplier.State,
+                          selectedSupplier.ZipCode,
+                          selectedSupplier.Country,
                         ]
                           .filter(Boolean)
                           .join(", ")}
@@ -961,150 +876,30 @@ const ClientList = () => {
                   </Container>
                 )}
 
-                {selectedClient.VatNumber && (
+                {selectedSupplier.Notes && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
-                      {translations["VAT Number"]}
+                      {translations.Notes}
                     </Span>
                     <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.VatNumber}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.Currency && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Currency
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.Currency}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.Category && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Category
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.Category}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.InvoicingMethod && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Invoicing Method
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.InvoicingMethod}
+                      {selectedSupplier.Notes}
                     </Span>
                   </Container>
                 )}
               </Container>
 
-              {selectedClient.Notes && (
-                <Container className="md:col-span-2">
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations.Notes}
-                  </Span>
-                  <Span className="text-sm text-gray-900 block mt-1">
-                    {selectedClient.Notes}
-                  </Span>
-                </Container>
-              )}
-
-              {/* Contacts Section */}
-              {selectedClient.Contacts &&
-                Array.isArray(selectedClient.Contacts.$values) &&
-                selectedClient.Contacts.$values.length > 0 && (
-                  <Container className="md:col-span-2">
-                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
-                      Additional Contacts
-                    </Span>
-                    <Container className="border border-gray-200 rounded-lg p-4 space-y-3">
-                      {selectedClient.Contacts.$values.map((contact, index) => (
-                        <Container
-                          key={contact.Id || index}
-                          className={
-                            index > 0 ? "border-t border-gray-200 pt-3" : ""
-                          }
-                        >
-                          <Container className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <Container>
-                              <Span className="text-sm font-medium text-gray-900">
-                                {[contact.FirstName, contact.LastName]
-                                  .filter(Boolean)
-                                  .join(" ")}
-                              </Span>
-                            </Container>
-                            <Container>
-                              {contact.Email && (
-                                <a
-                                  href={`mailto:${contact.Email}`}
-                                  className="text-sm text-blue-600 hover:text-blue-800 block"
-                                >
-                                  {contact.Email}
-                                </a>
-                              )}
-                              {(contact.Mobile || contact.Telephone) && (
-                                <Span className="text-xs text-gray-500">
-                                  {contact.Mobile &&
-                                    `Mobile: ${contact.Mobile}`}
-                                  {contact.Mobile && contact.Telephone && " | "}
-                                  {contact.Telephone &&
-                                    `Tel: ${contact.Telephone}`}
-                                </Span>
-                              )}
-                            </Container>
-                          </Container>
-                        </Container>
-                      ))}
-                    </Container>
-                  </Container>
-                )}
-
-              {/* Attachments Section */}
-              {selectedClient.Attachments &&
-                Array.isArray(selectedClient.Attachments.$values) &&
-                selectedClient.Attachments.$values.length > 0 && (
-                  <Container className="md:col-span-2">
-                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
-                      Attachments
-                    </Span>
-                    <Container className="flex flex-wrap gap-2">
-                      {selectedClient.Attachments.$values.map(
-                        (attachment, index) => (
-                          <Container
-                            key={attachment.Id || index}
-                            className="border border-gray-200 rounded-lg p-2 flex items-center gap-2"
-                          >
-                            <FileText className="w-4 h-4 text-gray-400" />
-                            <Span className="text-sm text-gray-900">
-                              {attachment.File || "Attachment"}
-                            </Span>
-                          </Container>
-                        )
-                      )}
-                    </Container>
-                  </Container>
-                )}
-
               <Container className="md:col-span-2 pt-4 border-t border-gray-200">
                 <Container className="text-xs text-gray-500 space-y-1">
                   <Container>
                     Created:{" "}
-                    {selectedClient.CreatedAt
-                      ? new Date(selectedClient.CreatedAt).toLocaleDateString()
+                    {selectedSupplier.CreatedAt
+                      ? new Date(selectedSupplier.CreatedAt).toLocaleDateString()
                       : "N/A"}
                   </Container>
-                  {selectedClient.UpdatedAt && (
+                  {selectedSupplier.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedClient.UpdatedAt).toLocaleDateString()}
+                      {new Date(selectedSupplier.UpdatedAt).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -1121,13 +916,13 @@ const ClientList = () => {
         title={
           <Container className="flex items-center gap-2 text-red-600">
             <Trash2 className="w-5 h-5" />
-            <Span>{translations["Delete Client"]}</Span>
+            <Span>{translations["Delete Supplier"]}</Span>
           </Container>
         }
         width={500}
         okText={translations.Delete}
         cancelText={translations.Cancel}
-        okAction={confirmDeleteClient}
+        okAction={confirmDeleteSupplier}
         cancelAction={() => setShowDeleteModal(false)}
         okButtonDisabled={isDeleting}
         body={
@@ -1140,10 +935,8 @@ const ClientList = () => {
             </h3>
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
-              permanently delete the client{" "}
-              <strong>
-                "{clientToDelete?.FullName || clientToDelete?.BusinessName}"
-              </strong>{" "}
+              permanently delete the supplier{" "}
+              <strong>"{supplierToDelete?.Name}"</strong>{" "}
               and all associated data.
             </Span>
           </Container>
@@ -1180,60 +973,22 @@ const ClientList = () => {
               <Container className="space-y-4">
                 <Container>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Client Type"]}
+                    {translations.Status}
                   </label>
                   <select
-                    value={filterOptions.clientType}
+                    value={filterOptions.status}
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
-                        clientType: e.target.value,
+                        status: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">{translations["All Types"]}</option>
-                    <option value="Individual">
-                      {translations.Individual}
-                    </option>
-                    <option value="Business">{translations.Business}</option>
+                    <option value="">{translations["All Status"]}</option>
+                    <option value="Active">{translations.Active}</option>
+                    <option value="Inactive">{translations.Inactive}</option>
                   </select>
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.Country}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={`${translations.Search} ${translations.Country}...`}
-                    value={filterOptions.country}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        country: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.City}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={`${translations.Search} ${translations.City}...`}
-                    value={filterOptions.city}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        city: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
                 </Container>
 
                 <Container>
@@ -1251,10 +1006,11 @@ const ClientList = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="CreatedAt">Date Created</option>
-                    <option value="FullName">Name</option>
-                    <option value="BusinessName">Business Name</option>
-                    <option value="Email">Email</option>
-                    <option value="ClientType">Client Type</option>
+                    <option value="Name">Name</option>
+                    <option value="ContactPerson">Contact Person</option>
+                    <option value="Status">Status</option>
+                    <option value="City">City</option>
+                    <option value="Country">Country</option>
                   </select>
                 </Container>
 
@@ -1310,4 +1066,4 @@ const ClientList = () => {
   );
 };
 
-export default ClientList;
+export default SupplierList;
