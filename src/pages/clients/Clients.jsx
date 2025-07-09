@@ -1,1179 +1,1301 @@
-import React, { useState, useEffect } from 'react';
-import Table from '../../components/elements/table/Table';
-import Modal from '../../components/elements/modal/Modal';
-import SearchAndFilter from '../../components/elements/searchAndFilters/SearchAndFilters';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Users, 
-  Building2, 
-  TrendingUp,
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  Plus,
+  Settings,
+  User,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Mail,
   Phone,
   MapPin,
-  Calendar,
-  FileText,
-  Download,
-  Upload,
-  X,
-  Save,
-  User,
   Building,
-} from 'lucide-react';
-import { useClients } from '../../Contexts/apiClientContext/apiClientContext';
+  Eye,
+  Edit,
+  Copy,
+  Trash2,
+  Search,
+  Filter,
+  Download,
+  X,
+  FileText,
+  Users,
+  TrendingUp,
+  Calendar,
+} from "lucide-react";
+import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
+import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
+import Modall from "../../components/elements/modal/Modal";
+import SearchAndFilters from "../../components/elements/searchAndFilters/SearchAndFilters";
+import Table from "../../components/elements/table/Table";
+import Container from "../../components/elements/container/Container";
+import Span from "../../components/elements/span/Span";
 
-const Clients = () => {
+const ClientList = () => {
+  const navigate = useNavigate();
+  const language = useSelector((state) => state.language?.language || "en");
+  const token = useSelector((state) => state.auth?.token);
+
+  const translations = {
+    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
+    Clients: language === "ar" ? "العملاء" : "Clients",
+    "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
+    Search: language === "ar" ? "بحث" : "Search",
+    Filters: language === "ar" ? "الفلاتر" : "Filters",
+    Export: language === "ar" ? "تصدير" : "Export",
+    Selected: language === "ar" ? "محدد" : "Selected",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    NoClients: language === "ar" ? "لا يوجد عملاء" : "No clients found",
+    Name: language === "ar" ? "الاسم" : "Name",
+    Email: language === "ar" ? "البريد الإلكتروني" : "Email",
+    Phone: language === "ar" ? "الهاتف" : "Phone",
+    Location: language === "ar" ? "الموقع" : "Location",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    Showing: language === "ar" ? "عرض" : "Showing",
+    Of: language === "ar" ? "من" : "of",
+    Items: language === "ar" ? "عناصر" : "Items",
+    Individual: language === "ar" ? "فردي" : "Individual",
+    Business: language === "ar" ? "تجاري" : "Business",
+    Total: language === "ar" ? "المجموع" : "Total",
+    "This Month": language === "ar" ? "هذا الشهر" : "This Month",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Clone: language === "ar" ? "نسخ" : "Clone",
+    Delete: language === "ar" ? "حذف" : "Delete",
+    "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
+    "Delete Client": language === "ar" ? "حذف العميل" : "Delete Client",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
+    Close: language === "ar" ? "إغلاق" : "Close",
+    "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
+    "Business Name": language === "ar" ? "اسم النشاط التجاري" : "Business Name",
+    Address: language === "ar" ? "العنوان" : "Address",
+    "VAT Number": language === "ar" ? "الرقم الضريبي" : "VAT Number",
+    "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
+    Notes: language === "ar" ? "ملاحظات" : "Notes",
+    "All Types": language === "ar" ? "جميع الأنواع" : "All Types",
+    Country: language === "ar" ? "البلد" : "Country",
+    City: language === "ar" ? "المدينة" : "City",
+    "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+  };
+
+  // Get clients context
   const {
     clients,
-    currentClient,
-    isLoading,
+    isLoading: clientsLoading,
     error,
     pagination,
     statistics,
-    searchTerm,
-    clientType,
     getClients,
     getClient,
-    createClient,
-    updateClient,
     deleteClient,
     getStatistics,
-    setSearchTerm,
-    setClientType,
-    clearCurrentClient,
-    clearError,
-    goToPage,
-    changePageSize
   } = useClients();
 
-  // Modal states
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  // Local state management
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isFocused] = useState(false);
+  const [filterOptions, setFilterOptions] = useState({
+    clientType: "",
+    country: "",
+    city: "",
+    sortBy: "CreatedAt",
+    sortAscending: false,
+  });
+  const [selectedClients, setSelectedClients] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientToDelete, setClientToDelete] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedClientId, setSelectedClientId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Form states
-  const [formData, setFormData] = useState({
-    clientType: 'Individual',
-    fullName: '',
-    businessName: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    telephone: '',
-    mobile: '',
-    streetAddress1: '',
-    streetAddress2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: '',
-    vatNumber: '',
-    codeNumber: '',
-    invoicingMethod: '',
-    currency: 'USD',
-    category: '',
-    notes: '',
-    displayLanguage: 'English',
-    hasSecondaryAddress: false,
-    contacts: [],
-    attachments: []
-  });
-
-  const [newContact, setNewContact] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    telephone: '',
-    mobile: ''
-  });
-
-  const [attachmentFiles, setAttachmentFiles] = useState([]);
-
-  // Load data on component mount
+  // Fetch clients on component mount
   useEffect(() => {
-    getClients();
-    getStatistics();
-  }, []);
-
-  // Table columns configuration
-  const columns = [
-    {
-      key: 'codeNumber',
-      label: 'Code',
-      sortable: true,
-      render: (value) => (
-        <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-          {value || 'N/A'}
-        </span>
-      )
-    },
-    {
-      key: 'clientType',
-      label: 'Type',
-      sortable: true,
-      render: (value) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          value === 'Individual' 
-            ? 'bg-blue-100 text-blue-800' 
-            : 'bg-green-100 text-green-800'
-        }`}>
-          {value === 'Individual' ? <User className="w-3 h-3 mr-1" /> : <Building className="w-3 h-3 mr-1" />}
-          {value}
-        </span>
-      )
-    },
-    {
-      key: 'name',
-      label: 'Name',
-      sortable: true,
-      render: (value, row) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-gray-900">
-            {row.clientType === 'Individual' ? row.fullName : row.businessName}
-          </span>
-          {row.clientType === 'Business' && row.fullName && (
-            <span className="text-sm text-gray-500">{row.fullName}</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      sortable: true,
-      render: (value) => (
-        <div className="flex items-center">
-          {value ? (
-            <>
-              <Mail className="w-4 h-4 text-gray-400 mr-2" />
-              <span className="text-sm">{value}</span>
-            </>
-          ) : (
-            <span className="text-gray-400 text-sm">No email</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'mobile',
-      label: 'Phone',
-      render: (value, row) => (
-        <div className="flex items-center">
-          {value || row.telephone ? (
-            <>
-              <Phone className="w-4 h-4 text-gray-400 mr-2" />
-              <span className="text-sm">{value || row.telephone}</span>
-            </>
-          ) : (
-            <span className="text-gray-400 text-sm">No phone</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'city',
-      label: 'Location',
-      render: (value, row) => (
-        <div className="flex items-center">
-          {value || row.country ? (
-            <>
-              <MapPin className="w-4 h-4 text-gray-400 mr-2" />
-              <span className="text-sm">{value}{value && row.country ? ', ' : ''}{row.country}</span>
-            </>
-          ) : (
-            <span className="text-gray-400 text-sm">No location</span>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'createdAt',
-      label: 'Created',
-      sortable: true,
-      render: (value) => (
-        <div className="flex items-center">
-          <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-          <span className="text-sm">{new Date(value).toLocaleDateString()}</span>
-        </div>
-      )
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (value, row) => (
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => handleView(row.id)}
-            className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
-            title="View"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleEdit(row.id)}
-            className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded"
-            title="Edit"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleDelete(row.id)}
-            className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
-            title="Delete"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      )
-    }
-  ];
-
-  // Search and filter configuration
-  const searchAndFilterConfig = {
-    searchPlaceholder: "Search clients...",
-    searchValue: searchTerm,
-    onSearchChange: setSearchTerm,
-    filters: [
-      {
-        key: 'clientType',
-        label: 'Client Type',
-        type: 'select',
-        value: clientType,
-        onChange: setClientType,
-        options: [
-          { value: '', label: 'All Types' },
-          { value: 'Individual', label: 'Individual' },
-          { value: 'Business', label: 'Business' }
-        ]
+    const fetchInitialData = async () => {
+      try {
+        await getClients();
+        await getStatistics();
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
       }
-    ],
-    onApplyFilters: () => getClients({ page: 1 }),
-    onClearFilters: () => {
-      setSearchTerm('');
-      setClientType('');
-      getClients({ page: 1, searchTerm: '', clientType: '' });
+    };
+
+    if (token) {
+      fetchInitialData();
     }
-  };
+  }, [token]);
 
-  // Event handlers
-  const handleView = async (clientId) => {
-    setSelectedClientId(clientId);
-    await getClient(clientId);
-    setShowViewModal(true);
-  };
+  // Handle search when searchTerm changes (with debounce)
+  useEffect(() => {
+    const delayedSearch = setTimeout(() => {
+      if (searchTerm !== undefined) {
+        handleSearchClients();
+      }
+    }, 500); // 500ms debounce
 
-  const handleEdit = async (clientId) => {
-    setSelectedClientId(clientId);
-    await getClient(clientId);
-    if (currentClient) {
-      setFormData({
-        ...currentClient,
-        contacts: currentClient.contacts || [],
-        attachments: currentClient.attachments || []
-      });
-      setShowEditModal(true);
+    return () => clearTimeout(delayedSearch);
+  }, [searchTerm]);
+
+  // Handle filters change
+  useEffect(() => {
+    const applyFilters = async () => {
+      try {
+        await getClients({
+          page: 1,
+          searchTerm: searchTerm,
+          ...filterOptions,
+        });
+      } catch (error) {
+        console.error("Error applying filters:", error);
+      }
+    };
+
+    // Only apply filters if any filter is set
+    if (filterOptions.clientType || filterOptions.country || filterOptions.city || 
+        filterOptions.sortBy !== "CreatedAt" || filterOptions.sortAscending) {
+      applyFilters();
     }
-  };
+  }, [filterOptions]);
 
-  const handleDelete = (clientId) => {
-    setSelectedClientId(clientId);
-    setShowDeleteModal(true);
-  };
+  // Reset selections when clients change
+  useEffect(() => {
+    setSelectedClients([]);
+    setSelectAll(false);
+  }, [clients]);
 
-  const handleCreate = () => {
-    resetForm();
-    setShowCreateModal(true);
-  };
+  useEffect(() => {
+    if (!token) {
+      navigate("/admin-Login");
+    }
+  }, [token, navigate]);
 
-  const resetForm = () => {
-    setFormData({
-      clientType: 'Individual',
-      fullName: '',
-      businessName: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      telephone: '',
-      mobile: '',
-      streetAddress1: '',
-      streetAddress2: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      country: '',
-      vatNumber: '',
-      codeNumber: '',
-      invoicingMethod: '',
-      currency: 'USD',
-      category: '',
-      notes: '',
-      displayLanguage: 'English',
-      hasSecondaryAddress: false,
-      contacts: [],
-      attachments: []
-    });
-    setAttachmentFiles([]);
-    setNewContact({
-      firstName: '',
-      lastName: '',
-      email: '',
-      telephone: '',
-      mobile: ''
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Search function
+  const handleSearchClients = async () => {
     try {
-      if (showEditModal) {
-        await updateClient(selectedClientId, formData, attachmentFiles);
-        setShowEditModal(false);
+      await getClients({
+        page: 1,
+        searchTerm: searchTerm,
+        ...filterOptions,
+      });
+    } catch (error) {
+      console.error("Error searching clients:", error);
+    }
+  };
+
+  // Client selection
+  const handleClientSelection = (clientId) => {
+    setSelectedClients((prev) => {
+      if (prev.includes(clientId)) {
+        return prev.filter((id) => id !== clientId);
       } else {
-        await createClient(formData, attachmentFiles);
-        setShowCreateModal(false);
+        return [...prev, clientId];
       }
-      resetForm();
-      getClients();
-      getStatistics();
-    } catch (error) {
-      console.error('Error saving client:', error);
-    }
+    });
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedClients([]);
+    } else {
+      const clientIds = Array.isArray(clients) ? clients.map((client) => client.Id) : [];
+      setSelectedClients(clientIds);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  // Client actions
+  const handleViewClient = async (clientId) => {
     try {
-      await deleteClient(selectedClientId);
-      setShowDeleteModal(false);
-      getClients();
-      getStatistics();
+      const clientData = await getClient(clientId);
+      if (clientData && clientData.data) {
+        setSelectedClient(clientData.data);
+        setShowViewModal(true);
+      }
     } catch (error) {
-      console.error('Error deleting client:', error);
+      console.error("Error fetching client details:", error);
+      alert("Failed to fetch client details");
     }
   };
 
-  const addContact = () => {
-    if (newContact.firstName || newContact.lastName || newContact.email) {
-      setFormData(prev => ({
-        ...prev,
-        contacts: [...prev.contacts, { ...newContact, id: Date.now() }]
-      }));
-      setNewContact({
-        firstName: '',
-        lastName: '',
-        email: '',
-        telephone: '',
-        mobile: ''
+  const handleEditClient = (clientId) => {
+    navigate(`/admin/new-clients`, {
+      state: {
+        editData: clients.find(c => c.Id === clientId),
+        isEditing: true
+      }
+    });
+  };
+
+  const handleCloneClient = async (clientId) => {
+    try {
+      const clientData = await getClient(clientId);
+      if (clientData && clientData.data) {
+        navigate("/admin/new-clients", {
+          state: {
+            cloneData: {
+              ...clientData.data,
+              FullName: `${clientData.data.FullName || ''} (Copy)`,
+              Email: "",
+              CodeNumber: "",
+              Id: undefined,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error cloning client:", error);
+      alert("Failed to clone client");
+    }
+  };
+
+  const handleDeleteClient = (clientId) => {
+    const client = Array.isArray(clients)
+      ? clients.find((c) => c.Id === clientId)
+      : null;
+    if (client) {
+      setClientToDelete(client);
+      setShowDeleteModal(true);
+    } else {
+      alert("Client not found");
+    }
+  };
+
+  const confirmDeleteClient = async () => {
+    if (!clientToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteClient(clientToDelete.Id);
+      setShowDeleteModal(false);
+      setClientToDelete(null);
+      // Refresh the client list
+      await getClients({
+        searchTerm: searchTerm,
+        ...filterOptions,
       });
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      alert("Failed to delete client");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const removeContact = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      contacts: prev.contacts.filter((_, i) => i !== index)
-    }));
+  // Pagination
+  const handlePageChange = async (newPage) => {
+    if (newPage < 1 || newPage > pagination.totalPages) return;
+    
+    try {
+      await getClients({
+        page: newPage,
+        searchTerm: searchTerm,
+        ...filterOptions,
+      });
+    } catch (error) {
+      console.error("Error changing page:", error);
+    }
   };
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setAttachmentFiles(prev => [...prev, ...files]);
+  // Filter functions
+  const handleApplyFilters = async () => {
+    try {
+      await getClients({
+        page: 1,
+        searchTerm: searchTerm,
+        ...filterOptions,
+      });
+      setShowFilters(false);
+    } catch (error) {
+      console.error("Error applying filters:", error);
+    }
   };
 
-  const removeFile = (index) => {
-    setAttachmentFiles(prev => prev.filter((_, i) => i !== index));
+  const handleClearFilters = async () => {
+    setSearchTerm("");
+    setFilterOptions({
+      clientType: "",
+      country: "",
+      city: "",
+      sortBy: "CreatedAt",
+      sortAscending: false,
+    });
+    setShowFilters(false);
+    
+    try {
+      await getClients({ page: 1 });
+    } catch (error) {
+      console.error("Error clearing filters:", error);
+    }
   };
 
-  // Statistics cards - FIXED: Now accepts icon as a prop
-  const StatCard = ({ title, value, icon: IconComponent, color }) => (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center">
-        <div className={`p-3 rounded-full ${color}`}>
-          <IconComponent className="w-6 h-6 text-white" />
-        </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-        </div>
-      </div>
-    </div>
+  // Export functionality
+  const handleExport = () => {
+    console.log(
+      "Export clients:",
+      selectedClients.length > 0 ? selectedClients : "all"
+    );
+    alert("Export functionality to be implemented");
+  };
+
+  // Statistics Card Component
+  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor }) => (
+    <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+      <Container className="flex items-center justify-between">
+        <Container>
+          <Span className="text-gray-500 text-sm font-medium">{title}</Span>
+          <Span className="text-2xl font-bold text-gray-900 mt-1 block">
+            {value || 0}
+          </Span>
+        </Container>
+        <Container className={`${bgColor} p-3 rounded-lg`}>
+          <Icon className={`w-6 h-6 ${iconColor}`} />
+        </Container>
+      </Container>
+    </Container>
   );
 
+  // Loading state
+  if (!token) {
+    return (
+      <Container className="flex justify-center items-center min-h-screen">
+        <Span className="text-blue-500 text-lg">Loading...</Span>
+      </Container>
+    );
+  }
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <Container className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Clients</h1>
-        <p className="text-gray-600">Manage your client database</p>
-      </div>
-
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          title="Total Clients"
-          value={statistics?.totalClients || 0}
-          icon={Users}
-          color="bg-blue-500"
-        />
-        <StatCard
-          title="Individual Clients"
-          value={statistics?.individualClients || 0}
-          icon={User}
-          color="bg-green-500"
-        />
-        <StatCard
-          title="Business Clients"
-          value={statistics?.businessClients || 0}
-          icon={Building2}
-          color="bg-purple-500"
-        />
-        <StatCard
-          title="This Month"
-          value={statistics?.clientsThisMonth || 0}
-          icon={TrendingUp}
-          color="bg-orange-500"
-        />
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
-          <button onClick={clearError} className="text-red-600 hover:text-red-800">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <SearchAndFilter {...searchAndFilterConfig} />
-      </div>
-
-      {/* Main Content */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Client List</h2>
-            <button
-              onClick={handleCreate}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Client</span>
-            </button>
-          </div>
-        </div>
-
-        <Table
-          columns={columns}
-          data={clients || []}
-          loading={isLoading}
-          pagination={{
-            currentPage: pagination?.page || 1,
-            totalPages: Math.ceil((pagination?.totalItems || 0) / (pagination?.pageSize || 10)),
-            pageSize: pagination?.pageSize || 10,
-            totalItems: pagination?.totalItems || 0,
-            onPageChange: goToPage,
-            onPageSizeChange: changePageSize
-          }}
-        />
-      </div>
-
-      {/* Create/Edit Modal */}
-      <Modal
-        isOpen={showCreateModal || showEditModal}
-        onClose={() => {
-          setShowCreateModal(false);
-          setShowEditModal(false);
-          resetForm();
-        }}
-        title={showEditModal ? 'Edit Client' : 'Create New Client'}
-        size="xl"
-      >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Client Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client Type *
-            </label>
-            <select
-              value={formData.clientType}
-              onChange={(e) => setFormData(prev => ({ ...prev, clientType: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              <option value="Individual">Individual</option>
-              <option value="Business">Business</option>
-            </select>
-          </div>
-
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {formData.clientType === 'Individual' ? (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Business Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.businessName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contact Person
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </>
+      <Container className="px-6 py-6">
+        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {translations.Clients}
+            </h1>
+            {selectedClients.length > 0 && (
+              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                {selectedClients.length} {translations.Selected}
+              </Span>
             )}
+          </Container>
+          <Container className="flex gap-3 flex-wrap">
+            <FilledButton
+              isIcon={true}
+              icon={Filter}
+              iconSize="w-4 h-4"
+              bgColor="bg-gray-100 hover:bg-gray-200"
+              textColor="text-gray-700"
+              rounded="rounded-lg"
+              buttonText={translations.Filters}
+              height="h-10"
+              px="px-4"
+              fontWeight="font-medium"
+              fontSize="text-sm"
+              isIconLeft={true}
+              onClick={() => setShowFilters(true)}
+            />
+            <FilledButton
+              isIcon={true}
+              icon={Download}
+              iconSize="w-4 h-4"
+              bgColor="bg-gray-100 hover:bg-gray-200"
+              textColor="text-gray-700"
+              rounded="rounded-lg"
+              buttonText={translations.Export}
+              height="h-10"
+              px="px-4"
+              fontWeight="font-medium"
+              fontSize="text-sm"
+              isIconLeft={true}
+              onClick={handleExport}
+            />
+            <FilledButton
+              isIcon={true}
+              icon={Plus}
+              iconSize="w-4 h-4"
+              bgColor="bg-blue-600 hover:bg-blue-700"
+              textColor="text-white"
+              rounded="rounded-lg"
+              buttonText={translations["Add Client"]}
+              height="h-10"
+              px="px-4"
+              fontWeight="font-medium"
+              fontSize="text-sm"
+              isIconLeft={true}
+              onClick={() => navigate("/admin/new-clients")}
+            />
+          </Container>
+        </Container>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Code Number *
-              </label>
-              <input
-                type="text"
-                value={formData.codeNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, codeNumber: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
+        {/* Statistics Cards */}
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <StatCard
+            title={`${translations.Total} ${translations.Clients}`}
+            value={statistics?.totalClients || 0}
+            icon={Users}
+            bgColor="bg-blue-50"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            title={translations.Individual}
+            value={statistics?.individualClients || 0}
+            icon={User}
+            bgColor="bg-green-50"
+            iconColor="text-green-600"
+          />
+          <StatCard
+            title={translations.Business}
+            value={statistics?.businessClients || 0}
+            icon={Building}
+            bgColor="bg-purple-50"
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            title={translations["This Month"]}
+            value={statistics?.clientsThisMonth || 0}
+            icon={Calendar}
+            bgColor="bg-yellow-50"
+            iconColor="text-yellow-600"
+          />
+        </Container>
+
+        {/* Search Bar */}
+        <Container className="mb-6">
+          <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <SearchAndFilters
+              isFocused={isFocused}
+              searchValue={searchTerm}
+              setSearchValue={setSearchTerm}
+            />
+          </Container>
+        </Container>
+
+        {/* Client Table */}
+        <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
+          {clientsLoading ? (
+            <Container className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <Span className="text-blue-500 text-lg block mt-4">
+                {translations.Loading}
+              </Span>
+            </Container>
+          ) : error ? (
+            <Container className="text-center py-12">
+              <Span className="text-red-500 text-lg block mb-4">Error: {error}</Span>
+              <FilledButton
+                bgColor="bg-blue-600 hover:bg-blue-700"
+                textColor="text-white"
+                rounded="rounded-lg"
+                buttonText="Retry"
+                height="h-10"
+                px="px-4"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                onClick={() => getClients()}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mobile
-              </label>
-              <input
-                type="tel"
-                value={formData.mobile}
-                onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Telephone
-              </label>
-              <input
-                type="tel"
-                value={formData.telephone}
-                onChange={(e) => setFormData(prev => ({ ...prev, telephone: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Address Information */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Address Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address 1
-                </label>
-                <input
-                  type="text"
-                  value={formData.streetAddress1}
-                  onChange={(e) => setFormData(prev => ({ ...prev, streetAddress1: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            </Container>
+          ) : !Array.isArray(clients) || clients.length === 0 ? (
+            <Container className="text-center py-12">
+              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ||
+                filterOptions.clientType ||
+                filterOptions.country ||
+                filterOptions.city
+                  ? translations["No results found"]
+                  : translations.NoClients}
+              </h3>
+              {(searchTerm ||
+                filterOptions.clientType ||
+                filterOptions.country ||
+                filterOptions.city) && (
+                <FilledButton
+                  bgColor="bg-blue-600 hover:bg-blue-700"
+                  textColor="text-white"
+                  rounded="rounded-lg"
+                  buttonText={`${translations["Clear All"]} ${translations.Filters}`}
+                  height="h-10"
+                  px="px-4"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  onClick={handleClearFilters}
                 />
-              </div>
+              )}
+            </Container>
+          ) : (
+            <>
+              <Container className="overflow-x-auto">
+                <Table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {translations["Client Type"]}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {translations.Name}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                        {translations.Email}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                        {translations.Phone}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                        {translations.Location}
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {translations.Actions}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {clients.map((client) => (
+                      <tr key={client.Id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedClients.includes(client.Id)}
+                            onChange={() => handleClientSelection(client.Id)}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              client.ClientType === "Individual"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {translations[client.ClientType] ||
+                              client.ClientType}
+                          </Span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <Container>
+                            <Span className="text-sm font-medium text-gray-900">
+                              {client.ClientType === "Business"
+                                ? client.BusinessName ||
+                                  client.FullName ||
+                                  "N/A"
+                                : client.FullName || "N/A"}
+                            </Span>
+                            {client.ClientType === "Business" &&
+                              client.FullName &&
+                              client.BusinessName && (
+                                <Span className="text-sm text-gray-500 block">
+                                  {client.FullName}
+                                </Span>
+                              )}
+                            {client.CodeNumber && (
+                              <Span className="text-sm text-gray-500 block">
+                                Code: {client.CodeNumber}
+                              </Span>
+                            )}
+                          </Container>
+                        </td>
+                        <td className="px-6 py-4 hidden md:table-cell">
+                          {client.Email ? (
+                            <a
+                              href={`mailto:${client.Email}`}
+                              className="text-sm text-blue-600 hover:text-blue-800"
+                            >
+                              {client.Email}
+                            </a>
+                          ) : (
+                            <Span className="text-sm text-gray-500">-</Span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 hidden lg:table-cell">
+                          {client.Mobile || client.Telephone ? (
+                            <Container>
+                              {client.Mobile && (
+                                <Container>
+                                  <a
+                                    href={`tel:${client.Mobile}`}
+                                    className="text-sm text-blue-600 hover:text-blue-800"
+                                  >
+                                    {client.Mobile}
+                                  </a>
+                                  <Span className="text-xs text-gray-500">
+                                    {" "}
+                                    (Mobile)
+                                  </Span>
+                                </Container>
+                              )}
+                              {client.Telephone && (
+                                <Container>
+                                  <a
+                                    href={`tel:${client.Telephone}`}
+                                    className="text-sm text-blue-600 hover:text-blue-800"
+                                  >
+                                    {client.Telephone}
+                                  </a>
+                                  <Span className="text-xs text-gray-500">
+                                    {" "}
+                                    (Tel)
+                                  </Span>
+                                </Container>
+                              )}
+                            </Container>
+                          ) : (
+                            <Span className="text-sm text-gray-500">-</Span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 hidden xl:table-cell">
+                          {client.City || client.Country ? (
+                            <Container className="flex items-center">
+                              <MapPin className="w-4 h-4 text-gray-400 mr-1" />
+                              <Span className="text-sm text-gray-900">
+                                {[client.City, client.Country]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </Span>
+                            </Container>
+                          ) : (
+                            <Span className="text-sm text-gray-500">-</Span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <Container className="flex justify-center gap-2">
+                            <FilledButton
+                              isIcon={true}
+                              icon={Eye}
+                              iconSize="w-4 h-4"
+                              bgColor="bg-blue-600 hover:bg-blue-700"
+                              textColor="text-white"
+                              rounded="rounded-md"
+                              buttonText=""
+                              height="h-8"
+                              width="w-8"
+                              onClick={() => handleViewClient(client.Id)}
+                            />
+                            <FilledButton
+                              isIcon={true}
+                              icon={Edit}
+                              iconSize="w-4 h-4"
+                              bgColor="bg-green-600 hover:bg-green-700"
+                              textColor="text-white"
+                              rounded="rounded-md"
+                              buttonText=""
+                              height="h-8"
+                              width="w-8"
+                              onClick={() => handleEditClient(client.Id)}
+                            />
+                            <FilledButton
+                              isIcon={true}
+                              icon={Copy}
+                              iconSize="w-4 h-4"
+                              bgColor="bg-yellow-600 hover:bg-yellow-700"
+                              textColor="text-white"
+                              rounded="rounded-md"
+                              buttonText=""
+                              height="h-8"
+                              width="w-8"
+                              onClick={() => handleCloneClient(client.Id)}
+                            />
+                            <FilledButton
+                              isIcon={true}
+                              icon={Trash2}
+                              iconSize="w-4 h-4"
+                              bgColor="bg-red-600 hover:bg-red-700"
+                              textColor="text-white"
+                              rounded="rounded-md"
+                              buttonText=""
+                              height="h-8"
+                              width="w-8"
+                              onClick={() => handleDeleteClient(client.Id)}
+                            />
+                          </Container>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Container>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address 2
-                </label>
-                <input
-                  type="text"
-                  value={formData.streetAddress2}
-                  onChange={(e) => setFormData(prev => ({ ...prev, streetAddress2: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                  <Span className="text-sm text-gray-500">
+                    {translations.Showing}{" "}
+                    {(pagination.page - 1) * pagination.pageSize + 1} -{" "}
+                    {Math.min(
+                      pagination.page * pagination.pageSize,
+                      pagination.totalItems
+                    )}{" "}
+                    {translations.Of} {pagination.totalItems}{" "}
+                    {translations.Items}
+                  </Span>
+                  <Container className="flex gap-2">
+                    <FilledButton
+                      isIcon={true}
+                      icon={ChevronsLeft}
+                      iconSize="w-4 h-4"
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-md"
+                      buttonText=""
+                      height="h-8"
+                      width="w-8"
+                      disabled={pagination.page === 1}
+                      onClick={() => handlePageChange(1)}
+                    />
+                    <FilledButton
+                      isIcon={true}
+                      icon={ChevronLeft}
+                      iconSize="w-4 h-4"
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-md"
+                      buttonText=""
+                      height="h-8"
+                      width="w-8"
+                      disabled={pagination.page === 1}
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                    />
+                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                      {pagination.page} / {pagination.totalPages}
+                    </Span>
+                    <FilledButton
+                      isIcon={true}
+                      icon={ChevronRight}
+                      iconSize="w-4 h-4"
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-md"
+                      buttonText=""
+                      height="h-8"
+                      width="w-8"
+                      disabled={pagination.page === pagination.totalPages}
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                    />
+                    <FilledButton
+                      isIcon={true}
+                      icon={ChevronsRight}
+                      iconSize="w-4 h-4"
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-md"
+                      buttonText=""
+                      height="h-8"
+                      width="w-8"
+                      disabled={pagination.page === pagination.totalPages}
+                      onClick={() => handlePageChange(pagination.totalPages)}
+                    />
+                  </Container>
+                </Container>
+              )}
+            </>
+          )}
+        </Container>
+      </Container>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State/Province
-                </label>
-                <input
-                  type="text"
-                  value={formData.state}
-                  onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Postal Code
-                </label>
-                <input
-                  type="text"
-                  value={formData.postalCode}
-                  onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country
-                </label>
-                <input
-                  type="text"
-                  value={formData.country}
-                  onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Information */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Additional Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  VAT Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.vatNumber}
-                  onChange={(e) => setFormData(prev => ({ ...prev, vatNumber: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Currency
-                </label>
-                <select
-                  value={formData.currency}
-                  onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="CAD">CAD</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Display Language
-                </label>
-                <select
-                  value={formData.displayLanguage}
-                  onChange={(e) => setFormData(prev => ({ ...prev, displayLanguage: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="English">English</option>
-                  <option value="Spanish">Spanish</option>
-                  <option value="French">French</option>
-                  <option value="German">German</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Contacts Section */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Additional Contacts</h3>
-            
-            {/* Add Contact Form */}
-            <div className="bg-gray-50 p-4 rounded-lg mb-4">
-              <h4 className="font-medium text-gray-900 mb-3">Add New Contact</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-                <input
-                  type="text"
-                  placeholder="First Name"
-                  value={newContact.firstName}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, firstName: e.target.value }))}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <input
-                  type="tel"
-                  placeholder="Mobile"
-                  value={newContact.mobile}
-                  onChange={(e) => setNewContact(prev => ({ ...prev, mobile: e.target.value }))}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={addContact}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Contacts List */}
-            {formData.contacts.length > 0 && (
-              <div className="space-y-2">
-                {formData.contacts.map((contact, index) => (
-                  <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                      <span><strong>Name:</strong> {contact.firstName} {contact.lastName}</span>
-                      <span><strong>Email:</strong> {contact.email}</span>
-                      <span><strong>Tel:</strong> {contact.telephone}</span>
-                      <span><strong>Mobile:</strong> {contact.mobile}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeContact(index)}
-                      className="text-red-600 hover:text-red-800 p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* File Attachments */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">File Attachments</h3>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Files
-              </label>
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Supported formats: JPG, PNG, PDF, DOC, DOCX, TXT (Max 10MB each)
-              </p>
-            </div>
-
-            {/* Selected Files */}
-            {attachmentFiles.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">Selected Files:</h4>
-                {attachmentFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                    <div className="flex items-center">
-                      <FileText className="w-4 h-4 text-gray-500 mr-2" />
-                      <span className="text-sm">{file.name}</span>
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Existing Attachments (for edit mode) */}
-            {showEditModal && formData.attachments && formData.attachments.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-medium text-gray-900 mb-2">Existing Attachments:</h4>
-                <div className="space-y-2">
-                  {formData.attachments.map((attachment, index) => (
-                    <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded">
-                      <div className="flex items-center">
-                        <FileText className="w-4 h-4 text-blue-500 mr-2" />
-                        <span className="text-sm">{attachment.file || attachment.fileName}</span>
-                      </div>
-                      <button
-                        type="button"
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Download"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t">
-            <button
-              type="button"
-              onClick={() => {
-                setShowCreateModal(false);
-                setShowEditModal(false);
-                resetForm();
-              }}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-            >
-              <Save className="w-4 h-4" />
-              <span>{isLoading ? 'Saving...' : showEditModal ? 'Update Client' : 'Create Client'}</span>
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* View Modal */}
-      <Modal
-        isOpen={showViewModal}
-        onClose={() => {
+      {/* View Client Modal */}
+      <Modall
+        modalOpen={showViewModal}
+        setModalOpen={setShowViewModal}
+        title={
+          <Container className="flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            <Span>{translations["Client Details"]}</Span>
+          </Container>
+        }
+        width={800}
+        okText={translations.Edit}
+        cancelText={translations.Close}
+        okAction={() => {
           setShowViewModal(false);
-          clearCurrentClient();
+          handleEditClient(selectedClient?.Id);
         }}
-        title="Client Details"
-        size="lg"
-      >
-        {currentClient && (
-          <div className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      currentClient.clientType === 'Individual' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {currentClient.clientType === 'Individual' ? <User className="w-3 h-3 mr-1" /> : <Building className="w-3 h-3 mr-1" />}
-                      {currentClient.clientType}
-                    </span>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm text-gray-600">Code Number</p>
-                    <p className="font-medium">{currentClient.codeNumber || 'N/A'}</p>
-                  </div>
+        cancelAction={() => setShowViewModal(false)}
+        body={
+          selectedClient && (
+            <Container className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              <Container className="space-y-4">
+                <Container>
+                  <Span className="text-sm font-medium text-gray-500">
+                    {translations["Client Type"]}
+                  </Span>
+                  <Span
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                      selectedClient.ClientType === "Individual"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {translations[selectedClient.ClientType] ||
+                      selectedClient.ClientType}
+                  </Span>
+                </Container>
 
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      {currentClient.clientType === 'Individual' ? 'Full Name' : 'Business Name'}
-                    </p>
-                    <p className="font-medium">
-                      {currentClient.clientType === 'Individual' 
-                        ? currentClient.fullName 
-                        : currentClient.businessName}
-                    </p>
-                  </div>
-
-                  {currentClient.clientType === 'Business' && currentClient.fullName && (
-                    <div>
-                      <p className="text-sm text-gray-600">Contact Person</p>
-                      <p className="font-medium">{currentClient.fullName}</p>
-                    </div>
-                  )}
-
-                  <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-medium">{currentClient.email || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">Mobile</p>
-                    <p className="font-medium">{currentClient.mobile || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">Telephone</p>
-                    <p className="font-medium">{currentClient.telephone || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Address Information</h3>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600">Street Address</p>
-                    <p className="font-medium">
-                      {currentClient.streetAddress1 || 'N/A'}
-                      {currentClient.streetAddress2 && (
-                        <><br />{currentClient.streetAddress2}</>
-                      )}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">City</p>
-                    <p className="font-medium">{currentClient.city || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">State/Province</p>
-                    <p className="font-medium">{currentClient.state || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">Postal Code</p>
-                    <p className="font-medium">{currentClient.postalCode || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600">Country</p>
-                    <p className="font-medium">{currentClient.country || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Information */}
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-gray-600">VAT Number</p>
-                  <p className="font-medium">{currentClient.vatNumber || 'N/A'}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Currency</p>
-                  <p className="font-medium">{currentClient.currency || 'N/A'}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Category</p>
-                  <p className="font-medium">{currentClient.category || 'N/A'}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600">Display Language</p>
-                  <p className="font-medium">{currentClient.displayLanguage || 'N/A'}</p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <p className="text-sm text-gray-600">Notes</p>
-                  <p className="font-medium">{currentClient.notes || 'No notes'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Contacts */}
-            {currentClient.contacts && currentClient.contacts.length > 0 && (
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Contacts</h3>
-                <div className="space-y-3">
-                  {currentClient.contacts.map((contact, index) => (
-                    <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-sm text-gray-600">Name</p>
-                          <p className="font-medium">{contact.firstName} {contact.lastName}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Email</p>
-                          <p className="font-medium">{contact.email || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Telephone</p>
-                          <p className="font-medium">{contact.telephone || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Mobile</p>
-                          <p className="font-medium">{contact.mobile || 'N/A'}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Attachments */}
-            {currentClient.attachments && currentClient.attachments.length > 0 && (
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
-                <div className="space-y-2">
-                  {currentClient.attachments.map((attachment, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                      <div className="flex items-center">
-                        <FileText className="w-5 h-5 text-gray-500 mr-3" />
-                        <div>
-                          <p className="font-medium">{attachment.file || attachment.fileName}</p>
-                          <p className="text-sm text-gray-600">
-                            Uploaded: {new Date(attachment.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        className="text-blue-600 hover:text-blue-800 p-2"
-                        title="Download"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Timestamps */}
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-gray-600">Created</p>
-                  <p className="font-medium">{new Date(currentClient.createdAt).toLocaleString()}</p>
-                </div>
-                {currentClient.updatedAt && (
-                  <div>
-                    <p className="text-sm text-gray-600">Last Updated</p>
-                    <p className="font-medium">{new Date(currentClient.updatedAt).toLocaleString()}</p>
-                  </div>
+                {selectedClient.ClientType === "Individual" ? (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Name}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedClient.FullName || "N/A"}
+                    </Span>
+                  </Container>
+                ) : (
+                  <>
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations["Business Name"]}
+                      </Span>
+                      <Span className="text-sm text-gray-900 block mt-1">
+                        {selectedClient.BusinessName || "N/A"}
+                      </Span>
+                    </Container>
+                    {selectedClient.FullName && (
+                      <Container>
+                        <Span className="text-sm font-medium text-gray-500">
+                          Contact Person
+                        </Span>
+                        <Span className="text-sm text-gray-900 block mt-1">
+                          {selectedClient.FullName}
+                        </Span>
+                      </Container>
+                    )}
+                  </>
                 )}
-              </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-end space-x-3 pt-6 border-t">
-              <button
-                onClick={() => {
-                  setShowViewModal(false);
-                  handleEdit(currentClient.id);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Edit Client</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+                {selectedClient.CodeNumber && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["Code Number"]}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedClient.CodeNumber}
+                    </Span>
+                  </Container>
+                )}
+
+                {selectedClient.Email && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Email}
+                    </Span>
+                    <a
+                      href={`mailto:${selectedClient.Email}`}
+                      className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
+                    >
+                      {selectedClient.Email}
+                    </a>
+                  </Container>
+                )}
+
+                {(selectedClient.Mobile || selectedClient.Telephone) && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Phone}
+                    </Span>
+                    <Container className="mt-1">
+                      {selectedClient.Mobile && (
+                        <Container>
+                          <a
+                            href={`tel:${selectedClient.Mobile}`}
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            {selectedClient.Mobile}
+                          </a>
+                          <Span className="text-xs text-gray-500"> (Mobile)</Span>
+                        </Container>
+                      )}
+                      {selectedClient.Telephone && (
+                        <Container>
+                          <a
+                            href={`tel:${selectedClient.Telephone}`}
+                            className="text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            {selectedClient.Telephone}
+                          </a>
+                          <Span className="text-xs text-gray-500"> (Telephone)</Span>
+                        </Container>
+                      )}
+                    </Container>
+                  </Container>
+                )}
+              </Container>
+
+              <Container className="space-y-4">
+                {(selectedClient.StreetAddress1 ||
+                  selectedClient.City ||
+                  selectedClient.Country) && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Address}
+                    </Span>
+                    <Container className="mt-1">
+                      {selectedClient.StreetAddress1 && (
+                        <Span className="text-sm text-gray-900 block">
+                          {selectedClient.StreetAddress1}
+                        </Span>
+                      )}
+                      {selectedClient.StreetAddress2 && (
+                        <Span className="text-sm text-gray-900 block">
+                          {selectedClient.StreetAddress2}
+                        </Span>
+                      )}
+                      <Span className="text-sm text-gray-900 block">
+                        {[
+                          selectedClient.City,
+                          selectedClient.State,
+                          selectedClient.PostalCode,
+                          selectedClient.Country,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </Span>
+                    </Container>
+                  </Container>
+                )}
+
+                {selectedClient.VatNumber && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["VAT Number"]}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedClient.VatNumber}
+                    </Span>
+                  </Container>
+                )}
+
+                {selectedClient.Currency && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      Currency
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedClient.Currency}
+                    </Span>
+                  </Container>
+                )}
+
+                {selectedClient.Category && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      Category
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedClient.Category}
+                    </Span>
+                  </Container>
+                )}
+
+                {selectedClient.InvoicingMethod && (
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      Invoicing Method
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedClient.InvoicingMethod}
+                    </Span>
+                  </Container>
+                )}
+              </Container>
+
+              {selectedClient.Notes && (
+                <Container className="md:col-span-2">
+                  <Span className="text-sm font-medium text-gray-500">
+                    {translations.Notes}
+                  </Span>
+                  <Span className="text-sm text-gray-900 block mt-1">
+                    {selectedClient.Notes}
+                  </Span>
+                </Container>
+              )}
+
+              {/* Contacts Section */}
+              {selectedClient.Contacts &&
+                Array.isArray(selectedClient.Contacts.$values) &&
+                selectedClient.Contacts.$values.length > 0 && (
+                  <Container className="md:col-span-2">
+                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
+                      Additional Contacts
+                    </Span>
+                    <Container className="border border-gray-200 rounded-lg p-4 space-y-3">
+                      {selectedClient.Contacts.$values.map((contact, index) => (
+                        <Container
+                          key={contact.Id || index}
+                          className={index > 0 ? "border-t border-gray-200 pt-3" : ""}
+                        >
+                          <Container className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <Container>
+                              <Span className="text-sm font-medium text-gray-900">
+                                {[contact.FirstName, contact.LastName]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                              </Span>
+                            </Container>
+                            <Container>
+                              {contact.Email && (
+                                <a
+                                  href={`mailto:${contact.Email}`}
+                                  className="text-sm text-blue-600 hover:text-blue-800 block"
+                                >
+                                  {contact.Email}
+                                </a>
+                              )}
+                              {(contact.Mobile || contact.Telephone) && (
+                                <Span className="text-xs text-gray-500">
+                                  {contact.Mobile && `Mobile: ${contact.Mobile}`}
+                                  {contact.Mobile && contact.Telephone && " | "}
+                                  {contact.Telephone && `Tel: ${contact.Telephone}`}
+                                </Span>
+                              )}
+                            </Container>
+                          </Container>
+                        </Container>
+                      ))}
+                    </Container>
+                  </Container>
+                )}
+
+              {/* Attachments Section */}
+              {selectedClient.Attachments &&
+                Array.isArray(selectedClient.Attachments.$values) &&
+                selectedClient.Attachments.$values.length > 0 && (
+                  <Container className="md:col-span-2">
+                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
+                      Attachments
+                    </Span>
+                    <Container className="flex flex-wrap gap-2">
+                      {selectedClient.Attachments.$values.map((attachment, index) => (
+                        <Container
+                          key={attachment.Id || index}
+                          className="border border-gray-200 rounded-lg p-2 flex items-center gap-2"
+                        >
+                          <FileText className="w-4 h-4 text-gray-400" />
+                          <Span className="text-sm text-gray-900">
+                            {attachment.File || "Attachment"}
+                          </Span>
+                        </Container>
+                      ))}
+                    </Container>
+                  </Container>
+                )}
+
+              <Container className="md:col-span-2 pt-4 border-t border-gray-200">
+                <Container className="text-xs text-gray-500 space-y-1">
+                  <Container>
+                    Created: {selectedClient.CreatedAt ? new Date(selectedClient.CreatedAt).toLocaleDateString() : "N/A"}
+                  </Container>
+                  {selectedClient.UpdatedAt && (
+                    <Container>
+                      Updated: {new Date(selectedClient.UpdatedAt).toLocaleDateString()}
+                    </Container>
+                  )}
+                </Container>
+              </Container>
+            </Container>
+          )
+        }
+      />
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title="Delete Client"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <div className="flex items-center">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-              <Trash2 className="h-6 w-6 text-red-600" />
-            </div>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-900">Delete Client</h3>
-            <p className="text-sm text-gray-500 mt-2">
-              Are you sure you want to delete this client? This action cannot be undone.
-            </p>
-          </div>
-          <div className="flex items-center justify-center space-x-3">
-            <button
-              onClick={() => setShowDeleteModal(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteConfirm}
-              disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              {isLoading ? 'Deleting...' : 'Delete'}
-            </button>
-          </div>
-        </div>
-      </Modal>
-    </div>
+      <Modall
+        modalOpen={showDeleteModal}
+        setModalOpen={setShowDeleteModal}
+        title={
+          <Container className="flex items-center gap-2 text-red-600">
+            <Trash2 className="w-5 h-5" />
+            <Span>{translations["Delete Client"]}</Span>
+          </Container>
+        }
+        width={500}
+        okText={translations.Delete}
+        cancelText={translations.Cancel}
+        okAction={confirmDeleteClient}
+        cancelAction={() => setShowDeleteModal(false)}
+        okButtonDisabled={isDeleting}
+        body={
+          <Container className="text-center py-4">
+            <Container className="bg-red-50 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <Trash2 className="w-8 h-8 text-red-600" />
+            </Container>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {translations["Are you sure?"]}
+            </h3>
+            <Span className="text-gray-500 mb-4 block">
+              {translations["This action cannot be undone"]}. This will permanently
+              delete the client{" "}
+              <strong>
+                "{clientToDelete?.FullName || clientToDelete?.BusinessName}"
+              </strong>{" "}
+              and all associated data.
+            </Span>
+          </Container>
+        }
+      />
+
+      {/* Filters Sidebar/Offcanvas */}
+      {showFilters && (
+        <Container className="fixed inset-0 z-50 overflow-hidden">
+          <Container 
+            className="absolute inset-0 bg-black bg-opacity-50" 
+            onClick={() => setShowFilters(false)} 
+          />
+          <Container className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl">
+            <Container className="p-6">
+              <Container className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-medium text-gray-900">
+                  {translations.Filters}
+                </h3>
+                <FilledButton
+                  isIcon={true}
+                  icon={X}
+                  iconSize="w-4 h-4"
+                  bgColor="bg-gray-100 hover:bg-gray-200"
+                  textColor="text-gray-700"
+                  rounded="rounded-md"
+                  buttonText=""
+                  height="h-8"
+                  width="w-8"
+                  onClick={() => setShowFilters(false)}
+                />
+              </Container>
+
+              <Container className="space-y-4">
+                <Container>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {translations["Client Type"]}
+                  </label>
+                  <select
+                    value={filterOptions.clientType}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        clientType: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">{translations["All Types"]}</option>
+                    <option value="Individual">{translations.Individual}</option>
+                    <option value="Business">{translations.Business}</option>
+                  </select>
+                </Container>
+
+                <Container>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {translations.Country}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={`${translations.Search} ${translations.Country}...`}
+                    value={filterOptions.country}
+                    onChange={(e) =>
+                      setFilterOptions({ ...filterOptions, country: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </Container>
+
+                <Container>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {translations.City}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={`${translations.Search} ${translations.City}...`}
+                    value={filterOptions.city}
+                    onChange={(e) =>
+                      setFilterOptions({ ...filterOptions, city: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </Container>
+
+                <Container>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sort By
+                  </label>
+                  <select
+                    value={filterOptions.sortBy}
+                    onChange={(e) =>
+                      setFilterOptions({ ...filterOptions, sortBy: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="CreatedAt">Date Created</option>
+                    <option value="FullName">Name</option>
+                    <option value="BusinessName">Business Name</option>
+                    <option value="Email">Email</option>
+                    <option value="ClientType">Client Type</option>
+                  </select>
+                </Container>
+
+                <Container>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={filterOptions.sortAscending}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          sortAscending: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <Span className="ml-2 text-sm text-gray-700">Sort Ascending</Span>
+                  </label>
+                </Container>
+              </Container>
+
+              <Container className="flex gap-3 mt-6">
+                <FilledButton
+                  bgColor="bg-blue-600 hover:bg-blue-700"
+                  textColor="text-white"
+                  rounded="rounded-lg"
+                  buttonText={translations["Apply Filters"]}
+                  height="h-10"
+                  width="flex-1"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  onClick={handleApplyFilters}
+                />
+                <FilledButton
+                  bgColor="bg-gray-100 hover:bg-gray-200"
+                  textColor="text-gray-700"
+                  rounded="rounded-lg"
+                  buttonText={translations["Clear All"]}
+                  height="h-10"
+                  width="flex-1"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  onClick={handleClearFilters}
+                />
+              </Container>
+            </Container>
+          </Container>
+        </Container>
+      )}
+    </Container>
   );
 };
 
-export default Clients; 
+export default ClientList;

@@ -33,7 +33,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('company');
       window.location.href = '/login';
@@ -108,14 +108,16 @@ const clientsReducer = (state, action) => {
       };
 
     case CLIENTS_ACTIONS.SET_CLIENTS:
+      // Handle the API response format with Data.$values
+      const clientsData = action.payload.Data?.$values || action.payload.data || action.payload;
       return {
         ...state,
-        clients: action.payload.data,
+        clients: Array.isArray(clientsData) ? clientsData : [],
         pagination: {
-          page: action.payload.page,
-          pageSize: action.payload.pageSize,
-          totalItems: action.payload.totalItems,
-          totalPages: Math.ceil(action.payload.totalItems / action.payload.pageSize),
+          page: action.payload.page || state.pagination.page,
+          pageSize: action.payload.pageSize || state.pagination.pageSize,
+          totalItems: action.payload.totalItems || clientsData.length,
+          totalPages: action.payload.totalPages || Math.ceil((action.payload.totalItems || clientsData.length) / (action.payload.pageSize || state.pagination.pageSize)),
         },
         isLoading: false,
         error: null,
@@ -151,9 +153,9 @@ const clientsReducer = (state, action) => {
       return {
         ...state,
         clients: state.clients.map(client =>
-          client.id === action.payload.id ? action.payload : client
+          client.Id === action.payload.Id ? action.payload : client
         ),
-        currentClient: state.currentClient?.id === action.payload.id ? action.payload : state.currentClient,
+        currentClient: state.currentClient?.Id === action.payload.Id ? action.payload : state.currentClient,
         isLoading: false,
         error: null,
       };
@@ -161,8 +163,8 @@ const clientsReducer = (state, action) => {
     case CLIENTS_ACTIONS.DELETE_CLIENT:
       return {
         ...state,
-        clients: state.clients.filter(client => client.id !== action.payload),
-        currentClient: state.currentClient?.id === action.payload ? null : state.currentClient,
+        clients: state.clients.filter(client => client.Id !== action.payload),
+        currentClient: state.currentClient?.Id === action.payload ? null : state.currentClient,
         pagination: {
           ...state.pagination,
           totalItems: state.pagination.totalItems - 1,
@@ -175,14 +177,14 @@ const clientsReducer = (state, action) => {
       return {
         ...state,
         searchTerm: action.payload,
-        pagination: { ...state.pagination, page: 1 }, // Reset to first page
+        pagination: { ...state.pagination, page: 1 },
       };
 
     case CLIENTS_ACTIONS.SET_CLIENT_TYPE:
       return {
         ...state,
         clientType: action.payload,
-        pagination: { ...state.pagination, page: 1 }, // Reset to first page
+        pagination: { ...state.pagination, page: 1 },
       };
 
     case CLIENTS_ACTIONS.SET_SORT:
@@ -190,7 +192,7 @@ const clientsReducer = (state, action) => {
         ...state,
         sortBy: action.payload.sortBy,
         sortAscending: action.payload.sortAscending,
-        pagination: { ...state.pagination, page: 1 }, // Reset to first page
+        pagination: { ...state.pagination, page: 1 },
       };
 
     case CLIENTS_ACTIONS.SET_PAGINATION:
@@ -249,6 +251,40 @@ export const ClientsProvider = ({ children }) => {
     throw new Error(errorMessage);
   }, []);
 
+  // Calculate statistics from client data
+  const calculateStatisticsFromClients = useCallback((clients) => {
+    if (!Array.isArray(clients)) return {
+      totalClients: 0,
+      individualClients: 0,
+      businessClients: 0,
+      clientsThisMonth: 0,
+    };
+
+    const total = clients.length;
+    const individual = clients.filter(c => c.ClientType?.toLowerCase() === 'individual').length;
+    const business = clients.filter(c => c.ClientType?.toLowerCase() === 'business').length;
+    
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const thisMonth = clients.filter((c) => {
+      if (c.CreatedAt) {
+        const clientDate = new Date(c.CreatedAt);
+        return (
+          clientDate.getMonth() === currentMonth &&
+          clientDate.getFullYear() === currentYear
+        );
+      }
+      return false;
+    }).length;
+
+    return {
+      totalClients: total,
+      individualClients: individual,
+      businessClients: business,
+      clientsThisMonth: thisMonth,
+    };
+  }, []);
+
   // Clients API methods
   const clientsApi = {
     // Get clients with pagination, search, and filters
@@ -273,6 +309,16 @@ export const ClientsProvider = ({ children }) => {
           payload: response.data,
         });
 
+        // Calculate and set statistics from the received data
+        const clientsData = response.data.Data?.$values || response.data.data || response.data;
+        if (Array.isArray(clientsData)) {
+          const stats = calculateStatisticsFromClients(clientsData);
+          dispatch({
+            type: CLIENTS_ACTIONS.SET_STATISTICS,
+            payload: stats,
+          });
+        }
+
         return response.data;
       } catch (error) {
         handleApiError(error);
@@ -287,12 +333,14 @@ export const ClientsProvider = ({ children }) => {
 
         const response = await apiClient.get(`/clients/${clientId}`);
         
+        const clientData = response.data.Data || response.data.data || response.data;
+        
         dispatch({
           type: CLIENTS_ACTIONS.SET_CURRENT_CLIENT,
-          payload: response.data.data,
+          payload: clientData,
         });
 
-        return response.data;
+        return { data: clientData };
       } catch (error) {
         handleApiError(error);
       }
@@ -308,12 +356,12 @@ export const ClientsProvider = ({ children }) => {
         
         // Append client data
         Object.keys(clientData).forEach(key => {
-          if (clientData[key] !== null && clientData[key] !== undefined) {
+          if (clientData[key] !== null && clientData[key] !== undefined && clientData[key] !== '') {
             if (key === 'contacts' && Array.isArray(clientData[key])) {
               // Handle contacts array
               clientData[key].forEach((contact, index) => {
                 Object.keys(contact).forEach(contactKey => {
-                  if (contact[contactKey] !== null && contact[contactKey] !== undefined) {
+                  if (contact[contactKey] !== null && contact[contactKey] !== undefined && contact[contactKey] !== '') {
                     formData.append(`contacts[${index}].${contactKey}`, contact[contactKey]);
                   }
                 });
@@ -335,9 +383,11 @@ export const ClientsProvider = ({ children }) => {
           },
         });
 
+        const newClient = response.data.Data || response.data.data || response.data;
+
         dispatch({
           type: CLIENTS_ACTIONS.ADD_CLIENT,
-          payload: response.data.data,
+          payload: newClient,
         });
 
         return response.data;
@@ -356,12 +406,12 @@ export const ClientsProvider = ({ children }) => {
         
         // Append client data
         Object.keys(clientData).forEach(key => {
-          if (clientData[key] !== null && clientData[key] !== undefined) {
+          if (clientData[key] !== null && clientData[key] !== undefined && clientData[key] !== '') {
             if (key === 'contacts' && Array.isArray(clientData[key])) {
               // Handle contacts array
               clientData[key].forEach((contact, index) => {
                 Object.keys(contact).forEach(contactKey => {
-                  if (contact[contactKey] !== null && contact[contactKey] !== undefined) {
+                  if (contact[contactKey] !== null && contact[contactKey] !== undefined && contact[contactKey] !== '') {
                     formData.append(`contacts[${index}].${contactKey}`, contact[contactKey]);
                   }
                 });
@@ -383,9 +433,11 @@ export const ClientsProvider = ({ children }) => {
           },
         });
 
+        const updatedClient = response.data.Data || response.data.data || response.data;
+
         dispatch({
           type: CLIENTS_ACTIONS.UPDATE_CLIENT,
-          payload: response.data.data,
+          payload: updatedClient,
         });
 
         return response.data;
@@ -416,24 +468,51 @@ export const ClientsProvider = ({ children }) => {
     // Get client statistics
     getStatistics: async () => {
       try {
+        // If we have clients data, calculate statistics from it
+        if (state.clients.length > 0) {
+          const stats = calculateStatisticsFromClients(state.clients);
+          dispatch({
+            type: CLIENTS_ACTIONS.SET_STATISTICS,
+            payload: stats,
+          });
+          return { data: stats };
+        }
+
+        // Otherwise try to fetch from API
         dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-        const response = await apiClient.get('/clients/statistics');
-        
+        try {
+          const response = await apiClient.get('/clients/statistics');
+          const statsData = response.data.Data || response.data.data || response.data;
+          
+          dispatch({
+            type: CLIENTS_ACTIONS.SET_STATISTICS,
+            payload: statsData,
+          });
+
+          return response.data;
+        } catch (error) {
+          // If statistics endpoint doesn't exist, calculate from clients
+          const allClientsResponse = await apiClient.get('/clients');
+          const allClients = allClientsResponse.data.Data?.$values || allClientsResponse.data.data || [];
+          const stats = calculateStatisticsFromClients(allClients);
+          
+          dispatch({
+            type: CLIENTS_ACTIONS.SET_STATISTICS,
+            payload: stats,
+          });
+
+          return { data: stats };
+        }
+      } catch (error) {
+        // Fallback to calculating from current state
+        const stats = calculateStatisticsFromClients(state.clients);
         dispatch({
           type: CLIENTS_ACTIONS.SET_STATISTICS,
-          payload: response.data.data || {
-            totalClients: 0,
-            individualClients: 0,
-            businessClients: 0,
-            clientsThisMonth: 0,
-          },
+          payload: stats,
         });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
+        return { data: stats };
       }
     },
 
@@ -532,8 +611,8 @@ export const ClientsProvider = ({ children }) => {
     getTotalPages: () => Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
     hasNextPage: () => state.pagination.page < Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
     hasPrevPage: () => state.pagination.page > 1,
-    getClientById: (clientId) => state.clients.find(client => client.id === clientId),
-    isClientLoaded: (clientId) => state.clients.some(client => client.id === clientId),
+    getClientById: (clientId) => state.clients.find(client => client.Id === clientId),
+    isClientLoaded: (clientId) => state.clients.some(client => client.Id === clientId),
     
     // Filter helpers
     hasFilters: () => state.searchTerm || state.clientType,

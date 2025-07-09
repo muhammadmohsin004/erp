@@ -4,6 +4,7 @@ import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Dashboard from '../pages/dashboard/Dashboard';
 import Clients from '../pages/clients/Clients';
+import NewClient from '../pages/clients/NewClient';
 import LoginPage from '../pages/Auth/LoginPage';
 import Signup from '../pages/Auth/Signup';
 import ResetPassword from '../pages/Auth/ResetPassword';
@@ -133,7 +134,13 @@ const getRouteConfig = () => {
     {
       path: '/admin/clients',
       component: Clients,
-      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      roles: [ 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/admin/new-clients',
+      component: NewClient,
+      roles: [ 'Admin', 'Manager', 'Employee'],
       layout: true
     },
     {
