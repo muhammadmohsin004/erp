@@ -1,0 +1,27 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+  :root {
+    --color-gradient-purple: linear-gradient(
+      135deg,
+      #8a2be2 0%,
+      #9932cc 50%,
+      #8a2be2 100%
+    );
+  }
+}
+
+@layer utilities {
+  .bg-gradient-purple {
+    background-image: var(--color-gradient-purple);
+  }
+
+  .text-gradient-purple {
+    background-image: var(--color-gradient-purple);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}

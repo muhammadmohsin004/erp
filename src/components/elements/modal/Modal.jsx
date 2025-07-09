@@ -10,7 +10,7 @@ const Modall = ({
   modalOpen,
   setModalOpen,
   okButtonDisabled = false, // Default is false, but can be passed as a prop
-  cancelButtonDisabled = false, // Default is false, but can be passed as a prop
+  cancelButtonDisabled = false, // Default is false, but can be passsed as a prop
   width = 550, // Default width is 520, but can be passed as a prop
 }) => {
   return (
