@@ -9,7 +9,8 @@ import { SuperAdminProvider } from "./Contexts/superAdminApiClient/superAdminApi
 import { ClientsProvider } from "./Contexts/apiClientContext/apiClientContext";
 import { WarehouseProvider } from "./Contexts/WarehouseContext/WarehouseContext";
 import { SupplierProvider } from "./Contexts/SupplierContext/SupplierContext";
-
+import { ServiceProvider } from "./Contexts/ServiceContext/ServiceContext";
+import { ProductsManagerProvider } from "./Contexts/ProductsManagerContext/ProductsManagerContext";
 function App() {
   return (
     <Router>
@@ -19,7 +20,11 @@ function App() {
             <ClientsProvider>
               <WarehouseProvider>
                 <SupplierProvider>
-                  <Routes />
+                  <ServiceProvider>
+                    <ProductsManagerProvider>
+                      <Routes />
+                    </ProductsManagerProvider>
+                  </ServiceProvider>
                 </SupplierProvider>
               </WarehouseProvider>
             </ClientsProvider>

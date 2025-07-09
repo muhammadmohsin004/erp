@@ -23,6 +23,8 @@ import {
   Warehouse,
   ArrowDownLeftFromCircleIcon,
   ShieldUser,
+  ServerCrashIcon,
+MessageSquarePlus,
   Archive,
   Boxes,
 } from "lucide-react";
@@ -259,6 +261,21 @@ const Sidebar = ({ isOpen }) => {
           label: "Suppliers",
           path: getRoleBasedPath("/Manage-Suppliers"),
           icon: ShieldUser,
+        },
+        {
+          label: "Services",
+          path: getRoleBasedPath("/Services-Manager"),
+          icon: ServerCrashIcon,
+        },
+         {
+          label: "Products Manager",
+          path: getRoleBasedPath("/Products-Manager"),
+          icon: MessageSquarePlus,
+        },
+        {
+          label: "Products Images Manager",
+          path: getRoleBasedPath("/product-Images-Manager"),
+          icon: MessageSquarePlus,
         },
         {
           label: "Stock Management",

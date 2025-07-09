@@ -7,9 +7,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Mail,
-  Phone,
-  MapPin,
+  Settings,
+  DollarSign,
+  Code,
   Building,
   Eye,
   Edit,
@@ -18,11 +18,9 @@ import {
   Filter,
   Download,
   X,
-  Users,
   Calendar,
   Package,
-  ToggleLeft,
-  ToggleRight,
+  Layers,
 } from "lucide-react";
 import {
   AiOutlineEye, // Eye icon for view
@@ -33,7 +31,7 @@ import {
   AiOutlineFilter, // Filter icon
   AiOutlineDownload, // Download icon for export
 } from "react-icons/ai";
-import { useSupplier } from "../../../Contexts/SupplierContext/SupplierContext";
+import { useService } from "../../../Contexts/ServiceContext/ServiceContext";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Modall from "../../../components/elements/modal/Modal";
 import SearchAndFilters from "../../../components/elements/searchAndFilters/SearchAndFilters";
@@ -41,27 +39,29 @@ import Table from "../../../components/elements/table/Table";
 import Container from "../../../components/elements/container/Container";
 import Span from "../../../components/elements/span/Span";
 
-const SupplierList = () => {
+const ServiceList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Add Supplier": language === "ar" ? "إضافة مورد" : "Add Supplier",
-    Suppliers: language === "ar" ? "الموردين" : "Suppliers",
+    "Add Service": language === "ar" ? "إضافة خدمة" : "Add Service",
+    Services: language === "ar" ? "الخدمات" : "Services",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    NoSuppliers: language === "ar" ? "لا يوجد موردين" : "No suppliers found",
+    NoServices: language === "ar" ? "لا يوجد خدمات" : "No services found",
     Name: language === "ar" ? "الاسم" : "Name",
-    ContactPerson: language === "ar" ? "الشخص المسؤول" : "Contact Person",
-    Email: language === "ar" ? "البريد الإلكتروني" : "Email",
-    Phone: language === "ar" ? "الهاتف" : "Phone",
-    Address: language === "ar" ? "العنوان" : "Address",
-    City: language === "ar" ? "المدينة" : "City",
+    "Service Code": language === "ar" ? "كود الخدمة" : "Service Code",
+    Description: language === "ar" ? "الوصف" : "Description",
+    "Unit Price": language === "ar" ? "سعر الوحدة" : "Unit Price",
+    "Purchase Price": language === "ar" ? "سعر الشراء" : "Purchase Price",
+    "Minimum Price": language === "ar" ? "الحد الأدنى للسعر" : "Minimum Price",
+    Discount: language === "ar" ? "الخصم" : "Discount",
+    "Discount Type": language === "ar" ? "نوع الخصم" : "Discount Type",
     Status: language === "ar" ? "الحالة" : "Status",
     Actions: language === "ar" ? "الإجراءات" : "Actions",
     Showing: language === "ar" ? "عرض" : "Showing",
@@ -76,73 +76,75 @@ const SupplierList = () => {
     Clone: language === "ar" ? "نسخ" : "Clone",
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Supplier": language === "ar" ? "حذف المورد" : "Delete Supplier",
+    "Delete Service": language === "ar" ? "حذف الخدمة" : "Delete Service",
     "This action cannot be undone":
       language === "ar"
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Supplier Details": language === "ar" ? "تفاصيل المورد" : "Supplier Details",
+    "Service Details": language === "ar" ? "تفاصيل الخدمة" : "Service Details",
     Close: language === "ar" ? "إغلاق" : "Close",
-    Notes: language === "ar" ? "ملاحظات" : "Notes",
-    "Tax ID": language === "ar" ? "الرقم الضريبي" : "Tax ID",
-    Country: language === "ar" ? "البلد" : "Country",
-    State: language === "ar" ? "الولاية" : "State",
-    "Zip Code": language === "ar" ? "الرمز البريدي" : "Zip Code",
+    "Internal Notes": language === "ar" ? "ملاحظات داخلية" : "Internal Notes",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
     "No results found":
       language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
+    Categories: language === "ar" ? "الفئات" : "Categories",
+    Taxes: language === "ar" ? "الضرائب" : "Taxes",
+    Tags: language === "ar" ? "العلامات" : "Tags",
+    Images: language === "ar" ? "الصور" : "Images",
+    Price: language === "ar" ? "السعر" : "Price",
   };
 
-  // Get supplier context
+  // Get service context
   const {
-    suppliers,
-    loading: suppliersLoading,
+    services,
+    loading: servicesLoading,
     error,
     pagination,
-    getSuppliers,
-    getSupplier,
-    deleteSupplier,
-    searchSuppliers,
-    filterSuppliersByStatus,
-    sortSuppliers,
+    getServices,
+    getService,
+    deleteService,
+    searchServices,
+    filterServicesByStatus,
+    sortServices,
     changePage,
     setFilters,
-  } = useSupplier();
+  } = useService();
 
-  // Process suppliers data from API response
-  const suppliersData = suppliers?.Data?.$values || suppliers || [];
+  // Process services data from API response
+  const servicesData = services?.Data?.$values || [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     status: "",
-    sortBy: "CreatedAt",
+    sortBy: "Id",
     sortAscending: false,
   });
-  const [selectedSuppliers, setSelectedSuppliers] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const [supplierToDelete, setSupplierToDelete] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
+  const [serviceToDelete, setServiceToDelete] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Mock statistics - you can replace this with actual API call
+  // Statistics state
   const [statistics, setStatistics] = useState({
-    totalSuppliers: 0,
-    activeSuppliers: 0,
-    suppliersThisMonth: 0,
+    totalServices: 0,
+    activeServices: 0,
+    servicesThisMonth: 0,
+    totalRevenue: 0,
   });
 
-  // Fetch suppliers on component mount
+  // Fetch services on component mount
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        await getSuppliers();
+        await getServices();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -151,30 +153,34 @@ const SupplierList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token, getSuppliers]);
+  }, [token, getServices]);
 
-  // Update statistics when suppliers change
+  // Update statistics when services change
   useEffect(() => {
-    if (Array.isArray(suppliersData) && suppliersData.length > 0) {
+    if (Array.isArray(servicesData) && servicesData.length > 0) {
       const stats = {
-        totalSuppliers: pagination?.TotalItems || suppliersData.length,
-        activeSuppliers: suppliersData.filter(s => s.Status === "Active").length,
-        suppliersThisMonth: suppliersData.filter(s => {
+        totalServices: pagination?.TotalItems || servicesData.length,
+        activeServices: servicesData.filter(s => s.Status === "Active").length,
+        servicesThisMonth: servicesData.filter(s => {
           const createdDate = new Date(s.CreatedAt);
           const now = new Date();
           return createdDate.getMonth() === now.getMonth() && 
                  createdDate.getFullYear() === now.getFullYear();
         }).length,
+        totalRevenue: servicesData.reduce((sum, s) => {
+          const unitPrice = parseFloat(s.UnitPrice) || 0;
+          return sum + unitPrice;
+        }, 0),
       };
       setStatistics(stats);
     }
-  }, [suppliersData, pagination]);
+  }, [servicesData, pagination]);
 
   // Handle search when searchTerm changes (with debounce)
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
       if (searchTerm !== undefined) {
-        handleSearchSuppliers();
+        handleSearchServices();
       }
     }, 500); // 500ms debounce
 
@@ -183,9 +189,9 @@ const SupplierList = () => {
 
   // Handle filters change
   useEffect(() => {
-    setSelectedSuppliers([]);
+    setSelectedServices([]);
     setSelectAll(false);
-  }, [suppliersData]);
+  }, [servicesData]);
 
   useEffect(() => {
     if (!token) {
@@ -194,113 +200,119 @@ const SupplierList = () => {
   }, [token, navigate]);
 
   // Search function
-  const handleSearchSuppliers = async () => {
+  const handleSearchServices = async () => {
     try {
-      await searchSuppliers(searchTerm);
+      if (searchTerm.trim() === "") {
+        // If search term is empty, fetch fresh data
+        await getServices();
+      } else {
+        await searchServices(searchTerm);
+      }
     } catch (error) {
-      console.error("Error searching suppliers:", error);
+      console.error("Error searching services:", error);
     }
   };
 
-  // Supplier selection
-  const handleSupplierSelection = (supplierId) => {
-    setSelectedSuppliers((prev) => {
-      if (prev.includes(supplierId)) {
-        return prev.filter((id) => id !== supplierId);
+  // Service selection
+  const handleServiceSelection = (serviceId) => {
+    setSelectedServices((prev) => {
+      if (prev.includes(serviceId)) {
+        return prev.filter((id) => id !== serviceId);
       } else {
-        return [...prev, supplierId];
+        return [...prev, serviceId];
       }
     });
   };
 
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedSuppliers([]);
+      setSelectedServices([]);
     } else {
-      const supplierIds = Array.isArray(suppliersData)
-        ? suppliersData.map((supplier) => supplier.Id)
+      const serviceIds = Array.isArray(servicesData)
+        ? servicesData.map((service) => service.Id)
         : [];
-      setSelectedSuppliers(supplierIds);
+      setSelectedServices(serviceIds);
     }
     setSelectAll(!selectAll);
   };
 
-  // Supplier actions
-  const handleViewSupplier = async (supplierId) => {
+  // Service actions
+  const handleViewService = async (serviceId) => {
     try {
-      const supplierData = await getSupplier(supplierId);
-      if (supplierData) {
-        setSelectedSupplier(supplierData);
+      const serviceData = await getService(serviceId);
+      if (serviceData) {
+        setSelectedService(serviceData);
         setShowViewModal(true);
       }
     } catch (error) {
-      console.error("Error fetching supplier details:", error);
-      alert("Failed to fetch supplier details");
+      console.error("Error fetching service details:", error);
+      alert("Failed to fetch service details");
     }
   };
 
-  const handleEditSupplier = async (supplierId) => {
+  const handleEditService = async (serviceId) => {
     try {
-      const supplierData = await getSupplier(supplierId);
-      if (supplierData) {
-        navigate("/admin/new-supplier", {
+      const serviceData = await getService(serviceId);
+      if (serviceData) {
+        navigate("/admin/new-service", {
           state: {
-            editData: supplierData,
+            editData: serviceData,
             isEditing: true,
           },
         });
       }
     } catch (error) {
-      console.error("Error fetching supplier for edit:", error);
-      alert("Failed to fetch supplier details for editing");
+      console.error("Error fetching service for edit:", error);
+      alert("Failed to fetch service details for editing");
     }
   };
 
-  const handleCloneSupplier = async (supplierId) => {
+  const handleCloneService = async (serviceId) => {
     try {
-      const supplierData = await getSupplier(supplierId);
-      if (supplierData) {
-        navigate("/admin/new-supplier", {
+      const serviceData = await getService(serviceId);
+      if (serviceData) {
+        navigate("/admin/new-service", {
           state: {
             cloneData: {
-              ...supplierData,
-              Name: `${supplierData.Name || ""} (Copy)`,
+              ...serviceData,
+              Name: `${serviceData.Name || ""} (Copy)`,
+              ServiceCode: "",
               Id: undefined,
             },
           },
         });
       }
     } catch (error) {
-      console.error("Error cloning supplier:", error);
-      alert("Failed to clone supplier");
+      console.error("Error cloning service:", error);
+      alert("Failed to clone service");
     }
   };
 
-  const handleDeleteSupplier = (supplierId) => {
-    const supplier = Array.isArray(suppliersData)
-      ? suppliersData.find((s) => s.Id === supplierId)
+  const handleDeleteService = (serviceId) => {
+    const service = Array.isArray(servicesData)
+      ? servicesData.find((s) => s.Id === serviceId)
       : null;
-    if (supplier) {
-      setSupplierToDelete(supplier);
+    if (service) {
+      setServiceToDelete(service);
       setShowDeleteModal(true);
     } else {
-      alert("Supplier not found");
+      alert("Service not found");
     }
   };
 
-  const confirmDeleteSupplier = async () => {
-    if (!supplierToDelete) return;
+  const confirmDeleteService = async () => {
+    if (!serviceToDelete) return;
 
     setIsDeleting(true);
     try {
-      await deleteSupplier(supplierToDelete.Id);
+      await deleteService(serviceToDelete.Id);
       setShowDeleteModal(false);
-      setSupplierToDelete(null);
-      // Refresh the supplier list
-      await getSuppliers();
+      setServiceToDelete(null);
+      // Refresh the service list
+      await getServices();
     } catch (error) {
-      console.error("Error deleting supplier:", error);
-      alert("Failed to delete supplier");
+      console.error("Error deleting service:", error);
+      alert("Failed to delete service");
     } finally {
       setIsDeleting(false);
     }
@@ -322,10 +334,10 @@ const SupplierList = () => {
     try {
       setFilters(filterOptions);
       if (filterOptions.status) {
-        await filterSuppliersByStatus(filterOptions.status);
+        await filterServicesByStatus(filterOptions.status);
       }
       if (filterOptions.sortBy) {
-        await sortSuppliers(filterOptions.sortBy, filterOptions.sortAscending);
+        await sortServices(filterOptions.sortBy, filterOptions.sortAscending);
       }
       setShowFilters(false);
     } catch (error) {
@@ -337,13 +349,20 @@ const SupplierList = () => {
     setSearchTerm("");
     setFilterOptions({
       status: "",
-      sortBy: "CreatedAt",
+      sortBy: "Id",
       sortAscending: false,
     });
     setShowFilters(false);
 
     try {
-      await getSuppliers();
+      // Reset filters in context and fetch fresh data
+      setFilters({
+        searchTerm: '',
+        status: '',
+        sortBy: 'Id',
+        sortAscending: false
+      });
+      await getServices();
     } catch (error) {
       console.error("Error clearing filters:", error);
     }
@@ -352,20 +371,26 @@ const SupplierList = () => {
   // Export functionality
   const handleExport = () => {
     console.log(
-      "Export suppliers:",
-      selectedSuppliers.length > 0 ? selectedSuppliers : "all"
+      "Export services:",
+      selectedServices.length > 0 ? selectedServices : "all"
     );
     alert("Export functionality to be implemented");
   };
 
+  // Format currency
+  const formatCurrency = (value) => {
+    const numValue = parseFloat(value) || 0;
+    return numValue.toFixed(2);
+  };
+
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor }) => (
+  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {value || 0}
+            {isCurrency ? `$${formatCurrency(value)}` : (value || 0)}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -379,7 +404,7 @@ const SupplierList = () => {
   if (!token) {
     return (
       <Container className="flex justify-center items-center min-h-screen">
-        <Span className="text-blue-500 text-lg">Loading...</Span>
+        <Span className="text-blue-500 text-lg">{translations.Loading}</Span>
       </Container>
     );
   }
@@ -391,11 +416,11 @@ const SupplierList = () => {
         <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
           <Container className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
-              {translations.Suppliers}
+              {translations.Services}
             </h1>
-            {selectedSuppliers.length > 0 && (
+            {selectedServices.length > 0 && (
               <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {selectedSuppliers.length} {translations.Selected}
+                {selectedServices.length} {translations.Selected}
               </Span>
             )}
           </Container>
@@ -437,39 +462,47 @@ const SupplierList = () => {
               bgColor="bg-blue-600 hover:bg-blue-700"
               textColor="text-white"
               rounded="rounded-lg"
-              buttonText={translations["Add Supplier"]}
+              buttonText={translations["Add Service"]}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => navigate("/admin/new-supplier")}
+              onClick={() => navigate("/admin/new-service")}
             />
           </Container>
         </Container>
 
         {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard
-            title={`${translations.Total} ${translations.Suppliers}`}
-            value={statistics?.totalSuppliers || 0}
-            icon={Building}
+            title={`${translations.Total} ${translations.Services}`}
+            value={statistics?.totalServices || 0}
+            icon={Layers}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
           />
           <StatCard
             title={translations.Active}
-            value={statistics?.activeSuppliers || 0}
-            icon={Users}
+            value={statistics?.activeServices || 0}
+            icon={Settings}
             bgColor="bg-green-50"
             iconColor="text-green-600"
           />
           <StatCard
             title={translations["This Month"]}
-            value={statistics?.suppliersThisMonth || 0}
+            value={statistics?.servicesThisMonth || 0}
             icon={Calendar}
             bgColor="bg-yellow-50"
             iconColor="text-yellow-600"
+          />
+          <StatCard
+            title={`${translations.Total} ${translations.Price}`}
+            value={statistics?.totalRevenue || 0}
+            icon={DollarSign}
+            bgColor="bg-purple-50"
+            iconColor="text-purple-600"
+            isCurrency={true}
           />
         </Container>
 
@@ -484,9 +517,9 @@ const SupplierList = () => {
           </Container>
         </Container>
 
-        {/* Supplier Table */}
+        {/* Service Table */}
         <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {suppliersLoading ? (
+          {servicesLoading ? (
             <Container className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <Span className="text-blue-500 text-lg block mt-4">
@@ -507,16 +540,16 @@ const SupplierList = () => {
                 px="px-4"
                 fontWeight="font-medium"
                 fontSize="text-sm"
-                onClick={() => getSuppliers()}
+                onClick={() => getServices()}
               />
             </Container>
-          ) : !Array.isArray(suppliersData) || suppliersData.length === 0 ? (
+          ) : !Array.isArray(servicesData) || servicesData.length === 0 ? (
             <Container className="text-center py-12">
-              <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <Layers className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {searchTerm || filterOptions.status
                   ? translations["No results found"]
-                  : translations.NoSuppliers}
+                  : translations.NoServices}
               </h3>
               {(searchTerm || filterOptions.status) && (
                 <FilledButton
@@ -550,13 +583,13 @@ const SupplierList = () => {
                         {translations.Name}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        {translations.ContactPerson}
+                        {translations["Service Code"]}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        {translations.Email}
+                        {translations["Unit Price"]}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                        {translations.Phone}
+                        {translations.Discount}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {translations.Status}
@@ -567,13 +600,13 @@ const SupplierList = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {suppliersData.map((supplier) => (
-                      <tr key={supplier.Id} className="hover:bg-gray-50">
+                    {servicesData.map((service) => (
+                      <tr key={service.Id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
-                            checked={selectedSuppliers.includes(supplier.Id)}
-                            onChange={() => handleSupplierSelection(supplier.Id)}
+                            checked={selectedServices.includes(service.Id)}
+                            onChange={() => handleServiceSelection(service.Id)}
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -581,41 +614,44 @@ const SupplierList = () => {
                           <Container>
                             <Container className="flex items-center gap-2">
                               <Span className="text-sm font-medium text-gray-900">
-                                {supplier.Name || "N/A"}
+                                {service.Name || "N/A"}
                               </Span>
                             </Container>
-                            {supplier.Notes && (
-                              <Span className="text-sm text-gray-500 block">
-                                {supplier.Notes}
+                            {service.Description && (
+                              <Span className="text-sm text-gray-500 block truncate max-w-xs">
+                                {service.Description}
                               </Span>
                             )}
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
-                          <Span className="text-sm text-gray-900">
-                            {supplier.ContactPerson || "-"}
-                          </Span>
+                          <Container className="flex items-center gap-1">
+                            <Code className="w-3 h-3 text-gray-400" />
+                            <Span className="text-sm text-gray-900">
+                              {service.ServiceCode || "-"}
+                            </Span>
+                          </Container>
                         </td>
                         <td className="px-6 py-4 hidden lg:table-cell">
-                          {supplier.Email ? (
-                            <a
-                              href={`mailto:${supplier.Email}`}
-                              className="text-sm text-blue-600 hover:text-blue-800"
-                            >
-                              {supplier.Email}
-                            </a>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
+                          <Container className="flex items-center gap-1">
+                            <DollarSign className="w-3 h-3 text-green-600" />
+                            <Span className="text-sm font-medium text-green-600">
+                              {formatCurrency(service.UnitPrice)}
+                            </Span>
+                          </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {supplier.Phone ? (
-                            <a
-                              href={`tel:${supplier.Phone}`}
-                              className="text-sm text-blue-600 hover:text-blue-800"
-                            >
-                              {supplier.Phone}
-                            </a>
+                          {service.Discount && parseFloat(service.Discount) > 0 ? (
+                            <Container className="flex items-center gap-1">
+                              <Span className="text-sm text-orange-600">
+                                {formatCurrency(service.Discount)}
+                                {service.DiscountType && (
+                                  <span className="text-xs text-gray-500 ml-1">
+                                    ({service.DiscountType})
+                                  </span>
+                                )}
+                              </Span>
+                            </Container>
                           ) : (
                             <Span className="text-sm text-gray-500">-</Span>
                           )}
@@ -623,19 +659,19 @@ const SupplierList = () => {
                         <td className="px-6 py-4">
                           <Span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              supplier.Status === "Active"
+                              service.Status === "Active"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {translations[supplier.Status] || supplier.Status}
+                            {translations[service.Status] || service.Status}
                           </Span>
                         </td>
                         <td className="px-6 py-4">
                           <Container className="flex justify-center gap-1">
                             {/* View Button */}
                             <button
-                              onClick={() => handleViewSupplier(supplier.Id)}
+                              onClick={() => handleViewService(service.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                               title={translations.View}
                             >
@@ -644,7 +680,7 @@ const SupplierList = () => {
 
                             {/* Edit Button */}
                             <button
-                              onClick={() => handleEditSupplier(supplier.Id)}
+                              onClick={() => handleEditService(service.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
                               title={translations.Edit}
                             >
@@ -653,7 +689,7 @@ const SupplierList = () => {
 
                             {/* Clone Button */}
                             <button
-                              onClick={() => handleCloneSupplier(supplier.Id)}
+                              onClick={() => handleCloneService(service.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1"
                               title={translations.Clone}
                             >
@@ -662,7 +698,7 @@ const SupplierList = () => {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteSupplier(supplier.Id)}
+                              onClick={() => handleDeleteService(service.Id)}
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -677,7 +713,7 @@ const SupplierList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages > 1 && (
+              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
                 <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
                   <Span className="text-sm text-gray-500">
                     {translations.Showing}{" "}
@@ -700,7 +736,7 @@ const SupplierList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.PageNumber === 1}
+                      disabled={!pagination.HasPreviousPage}
                       onClick={() => handlePageChange(1)}
                     />
                     <FilledButton
@@ -713,7 +749,7 @@ const SupplierList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.PageNumber === 1}
+                      disabled={!pagination.HasPreviousPage}
                       onClick={() => handlePageChange(pagination.PageNumber - 1)}
                     />
                     <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
@@ -729,7 +765,7 @@ const SupplierList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.PageNumber === pagination.TotalPages}
+                      disabled={!pagination.HasNextPage}
                       onClick={() => handlePageChange(pagination.PageNumber + 1)}
                     />
                     <FilledButton
@@ -742,7 +778,7 @@ const SupplierList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.PageNumber === pagination.TotalPages}
+                      disabled={!pagination.HasNextPage}
                       onClick={() => handlePageChange(pagination.TotalPages)}
                     />
                   </Container>
@@ -753,153 +789,182 @@ const SupplierList = () => {
         </Container>
       </Container>
 
-      {/* View Supplier Modal */}
+      {/* View Service Modal */}
       <Modall
         modalOpen={showViewModal}
         setModalOpen={setShowViewModal}
         title={
           <Container className="flex items-center gap-2">
             <Eye className="w-5 h-5" />
-            <Span>{translations["Supplier Details"]}</Span>
+            <Span>{translations["Service Details"]}</Span>
           </Container>
         }
-        width={800}
+        width={900}
         okText={translations.Edit}
         cancelText={translations.Close}
         okAction={() => {
           setShowViewModal(false);
-          handleEditSupplier(selectedSupplier?.Id);
+          handleEditService(selectedService?.Id);
         }}
         cancelAction={() => setShowViewModal(false)}
         body={
-          selectedSupplier && (
-            <Container className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-              <Container className="space-y-4">
-                <Container>
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations.Name}
-                  </Span>
-                  <Span className="text-sm text-gray-900 block mt-1">
-                    {selectedSupplier.Name || "N/A"}
-                  </Span>
-                </Container>
-
-                <Container>
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations.ContactPerson}
-                  </Span>
-                  <Span className="text-sm text-gray-900 block mt-1">
-                    {selectedSupplier.ContactPerson || "N/A"}
-                  </Span>
-                </Container>
-
-                <Container>
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations.Status}
-                  </Span>
-                  <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedSupplier.Status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {translations[selectedSupplier.Status] || selectedSupplier.Status}
-                  </Span>
-                </Container>
-
-                {selectedSupplier.Email && (
+          selectedService && (
+            <Container className="max-h-96 overflow-y-auto">
+              <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Basic Information */}
+                <Container className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
+                  
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
-                      {translations.Email}
-                    </Span>
-                    <a
-                      href={`mailto:${selectedSupplier.Email}`}
-                      className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
-                    >
-                      {selectedSupplier.Email}
-                    </a>
-                  </Container>
-                )}
-
-                {selectedSupplier.Phone && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Phone}
-                    </Span>
-                    <a
-                      href={`tel:${selectedSupplier.Phone}`}
-                      className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
-                    >
-                      {selectedSupplier.Phone}
-                    </a>
-                  </Container>
-                )}
-
-                {selectedSupplier.TaxId && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["Tax ID"]}
+                      {translations.Name}
                     </Span>
                     <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedSupplier.TaxId}
+                      {selectedService.Name || "N/A"}
                     </Span>
                   </Container>
-                )}
-              </Container>
 
-              <Container className="space-y-4">
-                {(selectedSupplier.Address ||
-                  selectedSupplier.City ||
-                  selectedSupplier.Country) && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
-                      {translations.Address}
+                      {translations["Service Code"]}
                     </Span>
-                    <Container className="mt-1">
-                      {selectedSupplier.Address && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedSupplier.Address}
-                        </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedService.ServiceCode || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Description}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedService.Description || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Status}
+                    </Span>
+                    <Span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                        selectedService.Status === "Active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {translations[selectedService.Status] || selectedService.Status}
+                    </Span>
+                  </Container>
+                </Container>
+
+                {/* Pricing Information */}
+                <Container className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Pricing Information</h3>
+                  
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["Purchase Price"]}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      ${formatCurrency(selectedService.PurchasePrice)}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["Unit Price"]}
+                    </Span>
+                    <Span className="text-sm text-green-600 font-medium block mt-1">
+                      ${formatCurrency(selectedService.UnitPrice)}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["Minimum Price"]}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      ${formatCurrency(selectedService.MinimumPrice)}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Discount}
+                    </Span>
+                    <Span className="text-sm text-orange-600 block mt-1">
+                      ${formatCurrency(selectedService.Discount)}
+                      {selectedService.DiscountType && (
+                        <span className="text-xs text-gray-500 ml-1">
+                          ({selectedService.DiscountType})
+                        </span>
                       )}
-                      <Span className="text-sm text-gray-900 block">
-                        {[
-                          selectedSupplier.City,
-                          selectedSupplier.State,
-                          selectedSupplier.ZipCode,
-                          selectedSupplier.Country,
-                        ]
-                          .filter(Boolean)
-                          .join(", ")}
-                      </Span>
-                    </Container>
-                  </Container>
-                )}
-
-                {selectedSupplier.Notes && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Notes}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedSupplier.Notes}
                     </Span>
                   </Container>
-                )}
+                </Container>
               </Container>
 
-              <Container className="md:col-span-2 pt-4 border-t border-gray-200">
-                <Container className="text-xs text-gray-500 space-y-1">
+              {/* Additional Information */}
+              <Container className="mt-6 pt-4 border-t border-gray-200">
+                {selectedService.InternalNotes && (
+                  <Container className="mb-4">
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations["Internal Notes"]}
+                    </Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {selectedService.InternalNotes}
+                    </Span>
+                  </Container>
+                )}
+
+                {/* Related Data Counts */}
+                <Container className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Container className="text-center">
+                    <Span className="text-lg font-bold text-blue-600">
+                      {selectedService.Categories?.length || 0}
+                    </Span>
+                    <Span className="text-xs text-gray-500 block">
+                      {translations.Categories}
+                    </Span>
+                  </Container>
+                  <Container className="text-center">
+                    <Span className="text-lg font-bold text-green-600">
+                      {selectedService.Taxes?.length || 0}
+                    </Span>
+                    <Span className="text-xs text-gray-500 block">
+                      {translations.Taxes}
+                    </Span>
+                  </Container>
+                  <Container className="text-center">
+                    <Span className="text-lg font-bold text-purple-600">
+                      {selectedService.Tags?.length || 0}
+                    </Span>
+                    <Span className="text-xs text-gray-500 block">
+                      {translations.Tags}
+                    </Span>
+                  </Container>
+                  <Container className="text-center">
+                    <Span className="text-lg font-bold text-orange-600">
+                      {selectedService.Images?.length || 0}
+                    </Span>
+                    <Span className="text-xs text-gray-500 block">
+                      {translations.Images}
+                    </Span>
+                  </Container>
+                </Container>
+
+                <Container className="text-xs text-gray-500 space-y-1 mt-4">
                   <Container>
                     Created:{" "}
-                    {selectedSupplier.CreatedAt
-                      ? new Date(selectedSupplier.CreatedAt).toLocaleDateString()
+                    {selectedService.CreatedAt
+                      ? new Date(selectedService.CreatedAt).toLocaleDateString()
                       : "N/A"}
                   </Container>
-                  {selectedSupplier.UpdatedAt && (
+                  {selectedService.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedSupplier.UpdatedAt).toLocaleDateString()}
+                      {new Date(selectedService.UpdatedAt).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -916,13 +981,13 @@ const SupplierList = () => {
         title={
           <Container className="flex items-center gap-2 text-red-600">
             <Trash2 className="w-5 h-5" />
-            <Span>{translations["Delete Supplier"]}</Span>
+            <Span>{translations["Delete Service"]}</Span>
           </Container>
         }
         width={500}
         okText={translations.Delete}
         cancelText={translations.Cancel}
-        okAction={confirmDeleteSupplier}
+        okAction={confirmDeleteService}
         cancelAction={() => setShowDeleteModal(false)}
         okButtonDisabled={isDeleting}
         body={
@@ -935,8 +1000,8 @@ const SupplierList = () => {
             </h3>
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
-              permanently delete the supplier{" "}
-              <strong>"{supplierToDelete?.Name}"</strong>{" "}
+              permanently delete the service{" "}
+              <strong>"{serviceToDelete?.Name}"</strong>{" "}
               and all associated data.
             </Span>
           </Container>
@@ -1005,12 +1070,13 @@ const SupplierList = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="CreatedAt">Date Created</option>
+                    <option value="Id">Date Created</option>
                     <option value="Name">Name</option>
-                    <option value="ContactPerson">Contact Person</option>
+                    <option value="ServiceCode">Service Code</option>
+                    <option value="UnitPrice">Unit Price</option>
+                    <option value="PurchasePrice">Purchase Price</option>
+                    <option value="Discount">Discount</option>
                     <option value="Status">Status</option>
-                    <option value="City">City</option>
-                    <option value="Country">Country</option>
                   </select>
                 </Container>
 
@@ -1066,4 +1132,4 @@ const SupplierList = () => {
   );
 };
 
-export default SupplierList;
+export default ServiceList;

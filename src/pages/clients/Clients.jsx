@@ -159,11 +159,14 @@ const ClientList = () => {
     setSelectAll(false);
   }, [clients]);
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/admin-Login");
-    }
-  }, [token, navigate]);
+ useEffect(() => {
+  // Check both Redux state and localStorage
+  const localToken = localStorage.getItem('token'); // or whatever key you use for the token
+  
+  if (!token && !localToken) {
+    navigate("/admin-Login");
+  }
+}, [token, navigate]);
 
   // Search function
   const handleSearchClients = async () => {

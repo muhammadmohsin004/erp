@@ -21,6 +21,13 @@ import SuperDashboard from "../pages/SuperAdmin/SuperDashboard";
 import SuperAnalytics from "../pages/SuperAdmin/SuperDashboard/SuperAnalytics";
 import AddCompany from "../pages/SuperAdmin/CompaniesManagement/AddCompany";
 import ManageUsers from "../pages/SuperAdmin/UserManagement/ManageUsers";
+import ServiceList from "../pages/Inventories/Service/ServiceList";
+import NewService from "../pages/Inventories/Service/NewService";
+import ProductsList from "../pages/Inventories/ProductsManager/ProductsList";
+import ProductCategories from "../pages/Inventories/ProductsManager/ProductCategories";
+import ProductBrands from "../pages/Inventories/ProductsManager/ProductBrands";
+import ProductStatistics from "../pages/Inventories/ProductsManager/ProductStatistics";
+import ProductImages from "../pages/Inventories/ProductsManager/ProductImages";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -368,6 +375,48 @@ const getRouteConfig = () => {
     {
       path: "/admin/new-supplier",
       component: NewSupplier,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/Services-Manager",
+      component: ServiceList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-service",
+      component: NewService,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/Products-Manager",
+      component: ProductsList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/product-categories",
+      component: ProductCategories,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/product-brands",
+      component: ProductBrands,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/product-statistics",
+      component: ProductStatistics,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/product-Images-Manager",
+      component: ProductImages,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
