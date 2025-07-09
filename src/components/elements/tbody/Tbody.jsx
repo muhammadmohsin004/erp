@@ -1,28 +1,26 @@
-import  { forwardRef, useRef } from "react";
+// components/table/Tbody.jsx
+import { forwardRef, useRef } from "react";
 
-// Using forwardRef to forward ref properly and use fallback ref if none passed
 const Tbody = forwardRef(
   (
     { onClick = undefined, style = {}, className = "", children = null },
     ref
   ) => {
-    // Create a fallback ref if none is passed
     const internalRef = useRef(null);
-    const finalRef = ref || internalRef; // Use the passed `ref`, or fallback to `internalRef`
+    const finalRef = ref || internalRef;
 
     return (
       <tbody
         onClick={onClick}
         ref={finalRef}
         style={style}
-        className={className}
+        className={`bg-white divide-y divide-gray-200 ${className}`}
       >
         {children}
       </tbody>
     );
   }
 );
+
 Tbody.displayName = "Tbody";
-
-
 export default Tbody;

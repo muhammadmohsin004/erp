@@ -1,9 +1,9 @@
-/* eslint-disable react/prop-types */
 import Container from "../container/Container";
 import Span from "../span/Span";
+import { Eye, EyeOff } from "lucide-react";
 
 const InputField = ({
-  register = () => ({}), // Default function to prevent errors
+  register = null, // Make it nullable to detect if RHF is being used
   name = "",
   placeholder,
   type,
@@ -23,6 +23,24 @@ const InputField = ({
     setIsVisible(!isVisible);
   };
 
+  // Determine if we're using React Hook Form or regular state
+  const isUsingRHF = register !== null && typeof register === "function";
+
+  // Get input props based on the mode
+  const getInputProps = () => {
+    if (isUsingRHF) {
+      return register(name, validationRules);
+    } else {
+      return {
+        value: value || "",
+        onChange: onChange,
+        name: name,
+      };
+    }
+  };
+
+  const inputProps = getInputProps();
+
   return (
     <Container className={marginBottom}>
       {label !== undefined && (
@@ -33,27 +51,32 @@ const InputField = ({
           disabled ? "bg-[#f2f2f2]" : "bg-transparent"
         }`}
       >
+        {/* Icon on the left */}
+        {Icon && type !== "password" && (
+          <Icon className="text-xl text-primary mr-2" />
+        )}
+
         <input
           disabled={disabled}
           className="outline-none border-none w-full bg-transparent"
-          type={isVisible ? "text" : type} // Toggle input type based on visibility
+          type={isVisible ? "text" : type}
           placeholder={placeholder}
-          {...(register ? register(name, validationRules) : {})} // Ensure register is not called if not provided
-          onChange={onChange}
-          value={value}
+          {...inputProps}
         />
+
+        {/* Password visibility toggle */}
         {type === "password" && (
           <Span onClick={toggleVisibility} className="cursor-pointer">
             {isVisible ? (
-              <Icon className="text-xl text-primary" />
+              <EyeOff className="text-xl text-primary" />
             ) : (
-              <Icon className="text-xl text-primary" />
+              <Eye className="text-xl text-primary" />
             )}
           </Span>
         )}
       </Container>
 
-      {/* Only render error message if errors exist for the given field */}
+      {/* Error message */}
       {errors[name] && (
         <Span className="text-red-500 text-sm">{errors[name].message}</Span>
       )}

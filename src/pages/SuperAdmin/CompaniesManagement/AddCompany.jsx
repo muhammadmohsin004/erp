@@ -1,51 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Building, 
-  Mail, 
-  Phone, 
-  Globe, 
-  CreditCard, 
-  Lock, 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Building,
+  Mail,
+  Phone,
+  Globe,
+  CreditCard,
+  Lock,
   AlertCircle,
   User,
   MapPin,
   Save,
-  ArrowLeft
-} from 'lucide-react';
-import { useSuperAdmin } from '../../contexts/SuperAdminContext';
+  ArrowLeft,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import InputField from "../../../components/elements/inputField/InputField";
+import SelectBox from "../../../components/elements/selectBox/SelectBox";
+import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 
 const AddCompany = () => {
   const navigate = useNavigate();
-  const { 
-    createCompany, 
-    getSubscriptionPlans, 
-    subscriptionPlans, 
-    isLoading, 
-    error, 
-    clearError 
+  const {
+    createCompany,
+    getSubscriptionPlans,
+    subscriptionPlans,
+    isLoading,
+    error,
+    clearError,
   } = useSuperAdmin();
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    country: '',
-    website: '',
-    taxNumber: '',
-    subscriptionPlanId: '',
-    adminFirstName: '',
-    adminLastName: '',
-    adminEmail: '',
-    adminPhone: '',
-    adminPassword: ''
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    website: "",
+    taxNumber: "",
+    subscriptionPlanId: "",
+    adminFirstName: "",
+    adminLastName: "",
+    adminEmail: "",
+    adminPhone: "",
+    adminPassword: "",
+    SubscriptionPlan: "",
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   // Load subscription plans on component mount
   useEffect(() => {
@@ -59,53 +66,69 @@ const AddCompany = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear field error when user starts typing
     if (formErrors[name]) {
-      setFormErrors(prev => ({
+      setFormErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
 
   const validateForm = () => {
     const errors = {};
-    
+
     // Required fields validation
-    if (!formData.name.trim()) errors.name = 'Company name is required';
-    if (!formData.email.trim()) errors.email = 'Company email is required';
-    if (!formData.address.trim()) errors.address = 'Address is required';
-    if (!formData.city.trim()) errors.city = 'City is required';
-    if (!formData.state.trim()) errors.state = 'State/Province is required';
-    if (!formData.country.trim()) errors.country = 'Country is required';
-    if (!formData.adminFirstName.trim()) errors.adminFirstName = 'Admin first name is required';
-    if (!formData.adminLastName.trim()) errors.adminLastName = 'Admin last name is required';
-    if (!formData.adminEmail.trim()) errors.adminEmail = 'Admin email is required';
-    if (!formData.adminPassword.trim()) errors.adminPassword = 'Admin password is required';
-    if (!formData.subscriptionPlanId) errors.subscriptionPlanId = 'Subscription plan is required';
+    if (!formData.name.trim())
+      errors.name = { message: "Company name is required" };
+    if (!formData.email.trim())
+      errors.email = { message: "Company email is required" };
+    if (!formData.address.trim())
+      errors.address = { message: "Address is required" };
+    if (!formData.city.trim()) errors.city = { message: "City is required" };
+    if (!formData.state.trim())
+      errors.state = { message: "State/Province is required" };
+    if (!formData.country.trim())
+      errors.country = { message: "Country is required" };
+    if (!formData.adminFirstName.trim())
+      errors.adminFirstName = { message: "Admin first name is required" };
+    if (!formData.adminLastName.trim())
+      errors.adminLastName = { message: "Admin last name is required" };
+    if (!formData.adminEmail.trim())
+      errors.adminEmail = { message: "Admin email is required" };
+    if (!formData.adminPassword.trim())
+      errors.adminPassword = { message: "Admin password is required" };
+    if (!formData.subscriptionPlanId)
+      errors.subscriptionPlanId = { message: "Subscription plan is required" };
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = { message: "Please enter a valid email address" };
     }
     if (formData.adminEmail && !emailRegex.test(formData.adminEmail)) {
-      errors.adminEmail = 'Please enter a valid admin email address';
+      errors.adminEmail = {
+        message: "Please enter a valid admin email address",
+      };
     }
 
     // Password validation
     if (formData.adminPassword && formData.adminPassword.length < 8) {
-      errors.adminPassword = 'Password must be at least 8 characters';
+      errors.adminPassword = {
+        message: "Password must be at least 8 characters",
+      };
     }
 
     // Website validation
-    if (formData.website && !formData.website.startsWith('http')) {
-      errors.website = 'Website must start with http:// or https://';
+    if (formData.website && !formData.website.startsWith("http")) {
+      errors.website = {
+        message: "Website must start with http:// or https://",
+      };
     }
 
     setFormErrors(errors);
@@ -114,14 +137,35 @@ const AddCompany = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Prevent double submission
+    if (isSubmitting) return;
+
+    console.log("Form data before validation:", formData);
+    console.log("SubscriptionPlanId:", formData.subscriptionPlanId);
+
     if (!validateForm()) {
+      console.log("Form validation failed");
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
+      // Ensure subscriptionPlanId is a valid number
+      const subscriptionPlanId = parseInt(formData.subscriptionPlanId);
+
+      if (isNaN(subscriptionPlanId)) {
+        setFormErrors((prev) => ({
+          ...prev,
+          subscriptionPlanId: {
+            message: "Please select a valid subscription plan",
+          },
+        }));
+        setIsSubmitting(false);
+        return;
+      }
+
       // Prepare payload with API field names
       const payload = {
         Name: formData.name,
@@ -133,35 +177,62 @@ const AddCompany = () => {
         Country: formData.country,
         Website: formData.website || null,
         TaxNumber: formData.taxNumber || null,
-        SubscriptionPlanId: parseInt(formData.subscriptionPlanId),
+        SubscriptionPlanId: subscriptionPlanId,
         AdminFirstName: formData.adminFirstName,
         AdminLastName: formData.adminLastName,
         AdminEmail: formData.adminEmail,
         AdminPhone: formData.adminPhone || null,
-        AdminPassword: formData.adminPassword
+        AdminPassword: formData.adminPassword,
+        SubscriptionPlan: "plan",
       };
 
+      console.log("Payload being sent:", payload);
+
       const result = await createCompany(payload);
-      
+
       if (result) {
         // Success - navigate back to companies list
-        navigate('/superadmin/companies');
+        navigate("/superadmin/companies");
       }
     } catch (err) {
-      console.error('Error creating company:', err);
+      console.error("Error creating company:", err);
+      // Don't reset the form on error, let user see their input
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleBack = () => {
-    navigate('/superadmin/companies');
+    navigate("/superadmin/companies");
+  };
+
+  const subscriptionPlansList = subscriptionPlans || [];
+
+  // Prepare subscription plan options for SelectBox
+  const subscriptionPlanOptions = subscriptionPlansList.map((plan) => ({
+    label: `${plan.Name} - $${plan.MonthlyPrice}/month`,
+    value: plan.Id.toString(), // Convert to string for consistency
+  }));
+
+  const handleSelectChange = (value) => {
+    console.log("Select change:", value);
+    setFormData((prev) => ({
+      ...prev,
+      subscriptionPlanId: value,
+    }));
+
+    // Clear field error when user makes selection
+    if (formErrors.subscriptionPlanId) {
+      setFormErrors((prev) => ({
+        ...prev,
+        subscriptionPlanId: "",
+      }));
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header */}
         <div className="mb-8">
           <button
@@ -171,14 +242,18 @@ const AddCompany = () => {
             <ArrowLeft className="mr-2" size={20} />
             Back to Companies
           </button>
-          
+
           <div className="flex items-center">
             <div className="bg-blue-100 rounded-lg p-3 mr-4">
               <Building className="text-blue-600" size={24} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Add New Company</h1>
-              <p className="text-gray-600">Create a new company with admin account and subscription</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Add New Company
+              </h1>
+              <p className="text-gray-600">
+                Create a new company with admin account and subscription
+              </p>
             </div>
           </div>
         </div>
@@ -201,7 +276,6 @@ const AddCompany = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-8">
-          
           {/* Company Details Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
@@ -210,112 +284,66 @@ const AddCompany = () => {
                 Company Details
               </h2>
             </div>
-            
+
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
                 {/* Company Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.name ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter company name"
-                  />
-                  {formErrors.name && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
-                  )}
-                </div>
+                <InputField
+                  name="name"
+                  label="Company Name *"
+                  type="text"
+                  placeholder="Enter company name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  errors={formErrors}
+                />
 
                 {/* Company Email */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Email *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                        formErrors.email ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                      }`}
-                      placeholder="company@example.com"
-                    />
-                  </div>
-                  {formErrors.email && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
-                  )}
-                </div>
+                <InputField
+                  name="email"
+                  label="Company Email *"
+                  type="email"
+                  placeholder="company@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  errors={formErrors}
+                  icon={Mail}
+                />
 
                 {/* Phone */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                      placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
-                </div>
+                <InputField
+                  name="phone"
+                  label="Phone Number"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  errors={formErrors}
+                  icon={Phone}
+                />
 
                 {/* Website */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Website
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Globe className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="url"
-                      name="website"
-                      value={formData.website}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                        formErrors.website ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                      }`}
-                      placeholder="https://www.example.com"
-                    />
-                  </div>
-                  {formErrors.website && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.website}</p>
-                  )}
-                </div>
+                <InputField
+                  name="website"
+                  label="Website"
+                  type="url"
+                  placeholder="https://www.example.com"
+                  value={formData.website}
+                  onChange={handleChange}
+                  errors={formErrors}
+                  icon={Globe}
+                />
 
                 {/* Tax Number */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tax Number
-                  </label>
-                  <input
-                    type="text"
+                  <InputField
                     name="taxNumber"
+                    label="Tax Number"
+                    type="text"
+                    placeholder="Enter tax identification number"
                     value={formData.taxNumber}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                    placeholder="Enter tax identification number"
+                    errors={formErrors}
                   />
                 </div>
               </div>
@@ -330,88 +358,52 @@ const AddCompany = () => {
                 Address Information
               </h2>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Street Address */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Street Address *
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                    formErrors.address ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter street address"
-                />
-                {formErrors.address && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.address}</p>
-                )}
-              </div>
+              <InputField
+                name="address"
+                label="Street Address *"
+                type="text"
+                placeholder="Enter street address"
+                value={formData.address}
+                onChange={handleChange}
+                errors={formErrors}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* City */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City *
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.city ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter city"
-                  />
-                  {formErrors.city && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.city}</p>
-                  )}
-                </div>
+                <InputField
+                  name="city"
+                  label="City *"
+                  type="text"
+                  placeholder="Enter city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  errors={formErrors}
+                />
 
                 {/* State */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State/Province *
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.state ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter state/province"
-                  />
-                  {formErrors.state && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.state}</p>
-                  )}
-                </div>
+                <InputField
+                  name="state"
+                  label="State/Province *"
+                  type="text"
+                  placeholder="Enter state/province"
+                  value={formData.state}
+                  onChange={handleChange}
+                  errors={formErrors}
+                />
 
                 {/* Country */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Country *
-                  </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.country ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter country"
-                  />
-                  {formErrors.country && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.country}</p>
-                  )}
-                </div>
+                <InputField
+                  name="country"
+                  label="Country *"
+                  type="text"
+                  placeholder="Enter country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  errors={formErrors}
+                />
               </div>
             </div>
           </div>
@@ -424,119 +416,69 @@ const AddCompany = () => {
                 Administrator Account
               </h2>
             </div>
-            
+
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
                 {/* Admin First Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="adminFirstName"
-                    value={formData.adminFirstName}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.adminFirstName ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter first name"
-                  />
-                  {formErrors.adminFirstName && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.adminFirstName}</p>
-                  )}
-                </div>
+                <InputField
+                  name="adminFirstName"
+                  label="First Name *"
+                  type="text"
+                  placeholder="Enter first name"
+                  value={formData.adminFirstName}
+                  onChange={handleChange}
+                  errors={formErrors}
+                />
 
                 {/* Admin Last Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="adminLastName"
-                    value={formData.adminLastName}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.adminLastName ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter last name"
-                  />
-                  {formErrors.adminLastName && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.adminLastName}</p>
-                  )}
-                </div>
+                <InputField
+                  name="adminLastName"
+                  label="Last Name *"
+                  type="text"
+                  placeholder="Enter last name"
+                  value={formData.adminLastName}
+                  onChange={handleChange}
+                  errors={formErrors}
+                />
 
                 {/* Admin Email */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="email"
-                      name="adminEmail"
-                      value={formData.adminEmail}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                        formErrors.adminEmail ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                      }`}
-                      placeholder="admin@example.com"
-                    />
-                  </div>
-                  {formErrors.adminEmail && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.adminEmail}</p>
-                  )}
-                </div>
+                <InputField
+                  name="adminEmail"
+                  label="Email Address *"
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={formData.adminEmail}
+                  onChange={handleChange}
+                  errors={formErrors}
+                  icon={Mail}
+                />
 
                 {/* Admin Phone */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="tel"
-                      name="adminPhone"
-                      value={formData.adminPhone}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                      placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
-                </div>
+                <InputField
+                  name="adminPhone"
+                  label="Phone Number"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={formData.adminPhone}
+                  onChange={handleChange}
+                  errors={formErrors}
+                  icon={Phone}
+                />
 
                 {/* Admin Password */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="password"
-                      name="adminPassword"
-                      value={formData.adminPassword}
-                      onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                        formErrors.adminPassword ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter password (minimum 8 characters)"
-                      minLength="8"
-                    />
-                  </div>
-                  {formErrors.adminPassword && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.adminPassword}</p>
-                  )}
+                  <InputField
+                    name="adminPassword"
+                    label="Password *"
+                    type="password"
+                    placeholder="Enter password (minimum 8 characters)"
+                    value={formData.adminPassword}
+                    onChange={handleChange}
+                    errors={formErrors}
+                    icon={Lock}
+                    isVisible={isPasswordVisible}
+                    setIsVisible={setIsPasswordVisible}
+                  />
                   <p className="mt-1 text-sm text-gray-600">
                     Password must be at least 8 characters long
                   </p>
@@ -553,38 +495,64 @@ const AddCompany = () => {
                 Subscription Plan
               </h2>
             </div>
-            
+
             <div className="p-6">
               <div className="max-w-md">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Plan *
-                </label>
-                
                 {isLoading ? (
                   <div className="flex items-center justify-center py-4">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                     <span className="ml-2 text-gray-600">Loading plans...</span>
                   </div>
                 ) : (
-                  <select
+                  <SelectBox
                     name="subscriptionPlanId"
+                    label="Select Plan *"
+                    placeholder="Select a subscription plan"
                     value={formData.subscriptionPlanId}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
-                      formErrors.subscriptionPlanId ? 'border-red-500 ring-2 ring-red-200' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Select a subscription plan</option>
-                    {subscriptionPlans?.map(plan => (
-                      <option key={plan.id} value={plan.id}>
-                        {plan.name} - ${plan.monthlyPrice}/month
-                      </option>
-                    ))}
-                  </select>
+                    handleChange={handleSelectChange}
+                    optionList={subscriptionPlanOptions}
+                    errors={formErrors}
+                    disabled={isLoading || isSubmitting}
+                    width="w-full"
+                  />
                 )}
-                
-                {formErrors.subscriptionPlanId && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.subscriptionPlanId}</p>
+
+                {/* Debug information */}
+                {!isLoading && subscriptionPlansList.length === 0 && (
+                  <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <p className="text-sm text-yellow-800">
+                      No subscription plans available.
+                    </p>
+                  </div>
+                )}
+
+                {/* Show selected plan details */}
+                {formData.subscriptionPlanId && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    {(() => {
+                      const selectedPlan = subscriptionPlansList.find(
+                        (plan) =>
+                          plan.Id.toString() === formData.subscriptionPlanId
+                      );
+                      return selectedPlan ? (
+                        <div>
+                          <p className="text-sm font-medium text-blue-800">
+                            Selected: {selectedPlan.Name}
+                          </p>
+                          <p className="text-xs text-blue-600 mt-1">
+                            {selectedPlan.Description}
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            ${selectedPlan.MonthlyPrice}/month • Max Users:{" "}
+                            {selectedPlan.MaxUsers} • Max Products:{" "}
+                            {selectedPlan.MaxProducts}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-red-600">Plan not found</p>
+                      );
+                    })()}
+                  </div>
                 )}
               </div>
             </div>
@@ -592,31 +560,41 @@ const AddCompany = () => {
 
           {/* Form Actions */}
           <div className="flex justify-end space-x-4 pt-6">
-            <button
+            <FilledButton
+              buttonText="Cancel"
+              bgColor="bg-white"
+              textColor="text-gray-700"
+              rounded="rounded-lg"
+              height="h-auto"
+              width="w-auto"
+              fontWeight="font-medium"
+              fontSize="text-base"
               type="button"
               onClick={handleBack}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-            >
-              Cancel
-            </button>
-            
-            <button
+              px="px-6 py-3"
+              disabled={isSubmitting}
+            />
+
+            <FilledButton
+              isIcon={true}
+              icon={Save}
+              isIconLeft={true}
+              iconSize="w-5 h-5"
+              buttonText={
+                isSubmitting ? "Creating Company..." : "Create Company"
+              }
+              bgColor="bg-blue-600 hover:bg-blue-700"
+              textColor="text-white"
+              rounded="rounded-lg"
+              height="h-auto"
+              width="w-auto"
+              fontWeight="font-medium"
+              fontSize="text-base"
               type="submit"
+              onClick={() => {}}
+              px="px-6 py-3"
               disabled={isSubmitting || isLoading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-            >
-              {isSubmitting ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Creating Company...
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <Save className="mr-2" size={18} />
-                  Create Company
-                </div>
-              )}
-            </button>
+            />
           </div>
         </form>
       </div>

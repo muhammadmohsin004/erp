@@ -1,22 +1,22 @@
-import React, { createContext, useContext, useReducer } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useReducer } from "react";
+import axios from "axios";
 
 // Base URL configuration
-const BASE_URL = 'https://api.speed-erp.com/api';
+const BASE_URL = "https://api.speed-erp.com/api";
 
 // Create axios instance with default configuration
 const superAdminApiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor to add auth token
 superAdminApiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -32,10 +32,10 @@ superAdminApiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('company');
-      window.location.href = '/login';
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("company");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -45,30 +45,30 @@ superAdminApiClient.interceptors.response.use(
 const initialState = {
   // Dashboard
   dashboard: null,
-  
+
   // Companies
   companies: [],
   companyDetail: null,
   companiesPagination: null,
-  
+
   // Users
   allUsers: [],
   usersPagination: null,
-  
+
   // Subscription Plans
   subscriptionPlans: [],
-  
+
   // Analytics
   systemAnalytics: null,
-  
+
   // Support Tickets
   supportTickets: [],
   ticketsPagination: null,
-  
+
   // System Logs
   systemLogs: [],
   logsPagination: null,
-  
+
   // Loading states
   isLoading: false,
   isDashboardLoading: false,
@@ -77,48 +77,48 @@ const initialState = {
   isAnalyticsLoading: false,
   isTicketsLoading: false,
   isLogsLoading: false,
-  
+
   // Error state
   error: null,
 };
 
 // Action types
 const SUPERADMIN_ACTIONS = {
-  SET_LOADING: 'SET_LOADING',
-  SET_DASHBOARD_LOADING: 'SET_DASHBOARD_LOADING',
-  SET_COMPANIES_LOADING: 'SET_COMPANIES_LOADING',
-  SET_USERS_LOADING: 'SET_USERS_LOADING',
-  SET_ANALYTICS_LOADING: 'SET_ANALYTICS_LOADING',
-  SET_TICKETS_LOADING: 'SET_TICKETS_LOADING',
-  SET_LOGS_LOADING: 'SET_LOGS_LOADING',
-  SET_ERROR: 'SET_ERROR',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  
+  SET_LOADING: "SET_LOADING",
+  SET_DASHBOARD_LOADING: "SET_DASHBOARD_LOADING",
+  SET_COMPANIES_LOADING: "SET_COMPANIES_LOADING",
+  SET_USERS_LOADING: "SET_USERS_LOADING",
+  SET_ANALYTICS_LOADING: "SET_ANALYTICS_LOADING",
+  SET_TICKETS_LOADING: "SET_TICKETS_LOADING",
+  SET_LOGS_LOADING: "SET_LOGS_LOADING",
+  SET_ERROR: "SET_ERROR",
+  CLEAR_ERROR: "CLEAR_ERROR",
+
   // Dashboard
-  SET_DASHBOARD: 'SET_DASHBOARD',
-  
+  SET_DASHBOARD: "SET_DASHBOARD",
+
   // Companies
-  SET_COMPANIES: 'SET_COMPANIES',
-  SET_COMPANY_DETAIL: 'SET_COMPANY_DETAIL',
-  ADD_COMPANY: 'ADD_COMPANY',
-  UPDATE_COMPANY: 'UPDATE_COMPANY',
-  REMOVE_COMPANY: 'REMOVE_COMPANY',
-  
+  SET_COMPANIES: "SET_COMPANIES",
+  SET_COMPANY_DETAIL: "SET_COMPANY_DETAIL",
+  ADD_COMPANY: "ADD_COMPANY",
+  UPDATE_COMPANY: "UPDATE_COMPANY",
+  REMOVE_COMPANY: "REMOVE_COMPANY",
+
   // Users
-  SET_ALL_USERS: 'SET_ALL_USERS',
-  
+  SET_ALL_USERS: "SET_ALL_USERS",
+
   // Subscription Plans
-  SET_SUBSCRIPTION_PLANS: 'SET_SUBSCRIPTION_PLANS',
-  ADD_SUBSCRIPTION_PLAN: 'ADD_SUBSCRIPTION_PLAN',
-  
+  SET_SUBSCRIPTION_PLANS: "SET_SUBSCRIPTION_PLANS",
+  ADD_SUBSCRIPTION_PLAN: "ADD_SUBSCRIPTION_PLAN",
+
   // Analytics
-  SET_SYSTEM_ANALYTICS: 'SET_SYSTEM_ANALYTICS',
-  
+  SET_SYSTEM_ANALYTICS: "SET_SYSTEM_ANALYTICS",
+
   // Support Tickets
-  SET_SUPPORT_TICKETS: 'SET_SUPPORT_TICKETS',
-  
+  SET_SUPPORT_TICKETS: "SET_SUPPORT_TICKETS",
+
   // System Logs
-  SET_SYSTEM_LOGS: 'SET_SYSTEM_LOGS',
+  SET_SYSTEM_LOGS: "SET_SYSTEM_LOGS",
 };
 
 // Reducer function
@@ -221,12 +221,15 @@ const superAdminReducer = (state, action) => {
     case SUPERADMIN_ACTIONS.UPDATE_COMPANY:
       return {
         ...state,
-        companies: state.companies.map(company =>
-          company.id === action.payload.id ? { ...company, ...action.payload } : company
+        companies: state.companies.map((company) =>
+          company.id === action.payload.id
+            ? { ...company, ...action.payload }
+            : company
         ),
-        companyDetail: state.companyDetail?.id === action.payload.id 
-          ? { ...state.companyDetail, ...action.payload } 
-          : state.companyDetail,
+        companyDetail:
+          state.companyDetail?.id === action.payload.id
+            ? { ...state.companyDetail, ...action.payload }
+            : state.companyDetail,
         isLoading: false,
         error: null,
       };
@@ -234,8 +237,13 @@ const superAdminReducer = (state, action) => {
     case SUPERADMIN_ACTIONS.REMOVE_COMPANY:
       return {
         ...state,
-        companies: state.companies.filter(company => company.id !== action.payload),
-        companyDetail: state.companyDetail?.id === action.payload ? null : state.companyDetail,
+        companies: state.companies.filter(
+          (company) => company.id !== action.payload
+        ),
+        companyDetail:
+          state.companyDetail?.id === action.payload
+            ? null
+            : state.companyDetail,
         isLoading: false,
         error: null,
       };
@@ -305,14 +313,15 @@ export const SuperAdminProvider = ({ children }) => {
 
   // Helper function to handle API errors
   const handleApiError = (error) => {
-    let errorMessage = 'An unexpected error occurred';
-    
+    let errorMessage = "An unexpected error occurred";
+
     if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
     } else if (error.response?.data) {
-      errorMessage = typeof error.response.data === 'string' 
-        ? error.response.data 
-        : JSON.stringify(error.response.data);
+      errorMessage =
+        typeof error.response.data === "string"
+          ? error.response.data
+          : JSON.stringify(error.response.data);
     } else if (error.message) {
       errorMessage = error.message;
     }
@@ -330,11 +339,14 @@ export const SuperAdminProvider = ({ children }) => {
     // ========== DASHBOARD ==========
     getDashboard: async () => {
       try {
-        dispatch({ type: SUPERADMIN_ACTIONS.SET_DASHBOARD_LOADING, payload: true });
+        dispatch({
+          type: SUPERADMIN_ACTIONS.SET_DASHBOARD_LOADING,
+          payload: true,
+        });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.get('/superadmin/dashboard');
-        
+        const response = await superAdminApiClient.get("/superadmin/dashboard");
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_DASHBOARD,
           payload: response.data,
@@ -347,26 +359,37 @@ export const SuperAdminProvider = ({ children }) => {
     },
 
     // ========== COMPANY MANAGEMENT ==========
-    getCompanies: async (page = 1, pageSize = 10, search = '', status = '', plan = '') => {
+    getCompanies: async (
+      page = 1,
+      pageSize = 10,
+      search = "",
+      status = "",
+      plan = ""
+    ) => {
       try {
-        dispatch({ type: SUPERADMIN_ACTIONS.SET_COMPANIES_LOADING, payload: true });
+        dispatch({
+          type: SUPERADMIN_ACTIONS.SET_COMPANIES_LOADING,
+          payload: true,
+        });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
         const params = new URLSearchParams({
           page: page.toString(),
           pageSize: pageSize.toString(),
         });
-        
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (plan) params.append('plan', plan);
 
-        const response = await superAdminApiClient.get(`/superadmin/companies?${params}`);
-        
+        if (search) params.append("search", search);
+        if (status) params.append("status", status);
+        if (plan) params.append("plan", plan);
+
+        const response = await superAdminApiClient.get(
+          `/superadmin/companies?${params}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_COMPANIES,
           payload: {
-            companies: response.data.items,
+            companies: response.data.Items?.$values,
             pagination: {
               totalCount: response.data.totalCount,
               page: response.data.page,
@@ -376,7 +399,7 @@ export const SuperAdminProvider = ({ children }) => {
           },
         });
 
-        return response.data;
+        return response.data?.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -387,8 +410,10 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.get(`/superadmin/companies/${id}`);
-        
+        const response = await superAdminApiClient.get(
+          `/superadmin/companies/${id}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_COMPANY_DETAIL,
           payload: response.data,
@@ -405,8 +430,11 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.post('/superadmin/companies', companyData);
-        
+        const response = await superAdminApiClient.post(
+          "/superadmin/companies",
+          companyData
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.ADD_COMPANY,
           payload: response.data,
@@ -423,8 +451,11 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.put(`/superadmin/companies/${id}/suspend`, suspendData);
-        
+        const response = await superAdminApiClient.put(
+          `/superadmin/companies/${id}/suspend`,
+          suspendData
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.UPDATE_COMPANY,
           payload: { id, isActive: false },
@@ -441,8 +472,10 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.put(`/superadmin/companies/${id}/activate`);
-        
+        const response = await superAdminApiClient.put(
+          `/superadmin/companies/${id}/activate`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.UPDATE_COMPANY,
           payload: { id, isActive: true },
@@ -459,8 +492,10 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.delete(`/superadmin/companies/${id}`);
-        
+        const response = await superAdminApiClient.delete(
+          `/superadmin/companies/${id}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.REMOVE_COMPANY,
           payload: id,
@@ -473,7 +508,14 @@ export const SuperAdminProvider = ({ children }) => {
     },
 
     // ========== USER MANAGEMENT ==========
-    getAllUsers: async (page = 1, pageSize = 10, search = '', companyId = null, role = '', isActive = null) => {
+    getAllUsers: async (
+      page = 1,
+      pageSize = 10,
+      search = "",
+      companyId = null,
+      role = "",
+      isActive = null
+    ) => {
       try {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_USERS_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
@@ -482,14 +524,16 @@ export const SuperAdminProvider = ({ children }) => {
           page: page.toString(),
           pageSize: pageSize.toString(),
         });
-        
-        if (search) params.append('search', search);
-        if (companyId) params.append('companyId', companyId.toString());
-        if (role) params.append('role', role);
-        if (isActive !== null) params.append('isActive', isActive.toString());
 
-        const response = await superAdminApiClient.get(`/superadmin/users?${params}`);
-        
+        if (search) params.append("search", search);
+        if (companyId) params.append("companyId", companyId.toString());
+        if (role) params.append("role", role);
+        if (isActive !== null) params.append("isActive", isActive.toString());
+
+        const response = await superAdminApiClient.get(
+          `/superadmin/users?${params}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_ALL_USERS,
           payload: {
@@ -514,8 +558,10 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.post(`/superadmin/users/${userId}/impersonate`);
-        
+        const response = await superAdminApiClient.post(
+          `/superadmin/users/${userId}/impersonate`
+        );
+
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: false });
         return response.data;
       } catch (error) {
@@ -529,14 +575,16 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.get('/superadmin/subscription-plans');
-        
+        const response = await superAdminApiClient.get(
+          "/superadmin/subscription-plans"
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_SUBSCRIPTION_PLANS,
-          payload: response.data,
+          payload: response.data?.$values,
         });
 
-        return response.data;
+        return response.data?.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -547,8 +595,11 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
-        const response = await superAdminApiClient.post('/superadmin/subscription-plans', planData);
-        
+        const response = await superAdminApiClient.post(
+          "/superadmin/subscription-plans",
+          planData
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.ADD_SUBSCRIPTION_PLAN,
           payload: response.data,
@@ -563,15 +614,20 @@ export const SuperAdminProvider = ({ children }) => {
     // ========== SYSTEM ANALYTICS ==========
     getSystemAnalytics: async (startDate = null, endDate = null) => {
       try {
-        dispatch({ type: SUPERADMIN_ACTIONS.SET_ANALYTICS_LOADING, payload: true });
+        dispatch({
+          type: SUPERADMIN_ACTIONS.SET_ANALYTICS_LOADING,
+          payload: true,
+        });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
         const params = new URLSearchParams();
-        if (startDate) params.append('startDate', startDate);
-        if (endDate) params.append('endDate', endDate);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
 
-        const response = await superAdminApiClient.get(`/superadmin/analytics?${params}`);
-        
+        const response = await superAdminApiClient.get(
+          `/superadmin/analytics?${params}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_SYSTEM_ANALYTICS,
           payload: response.data,
@@ -584,22 +640,33 @@ export const SuperAdminProvider = ({ children }) => {
     },
 
     // ========== SUPPORT TICKETS ==========
-    getSupportTickets: async (page = 1, pageSize = 10, status = '', priority = '', companyId = null) => {
+    getSupportTickets: async (
+      page = 1,
+      pageSize = 10,
+      status = "",
+      priority = "",
+      companyId = null
+    ) => {
       try {
-        dispatch({ type: SUPERADMIN_ACTIONS.SET_TICKETS_LOADING, payload: true });
+        dispatch({
+          type: SUPERADMIN_ACTIONS.SET_TICKETS_LOADING,
+          payload: true,
+        });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
 
         const params = new URLSearchParams({
           page: page.toString(),
           pageSize: pageSize.toString(),
         });
-        
-        if (status) params.append('status', status);
-        if (priority) params.append('priority', priority);
-        if (companyId) params.append('companyId', companyId.toString());
 
-        const response = await superAdminApiClient.get(`/superadmin/support-tickets?${params}`);
-        
+        if (status) params.append("status", status);
+        if (priority) params.append("priority", priority);
+        if (companyId) params.append("companyId", companyId.toString());
+
+        const response = await superAdminApiClient.get(
+          `/superadmin/support-tickets?${params}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_SUPPORT_TICKETS,
           payload: {
@@ -620,7 +687,14 @@ export const SuperAdminProvider = ({ children }) => {
     },
 
     // ========== SYSTEM LOGS ==========
-    getSystemLogs: async (page = 1, pageSize = 50, level = '', action = '', startDate = null, endDate = null) => {
+    getSystemLogs: async (
+      page = 1,
+      pageSize = 50,
+      level = "",
+      action = "",
+      startDate = null,
+      endDate = null
+    ) => {
       try {
         dispatch({ type: SUPERADMIN_ACTIONS.SET_LOGS_LOADING, payload: true });
         dispatch({ type: SUPERADMIN_ACTIONS.CLEAR_ERROR });
@@ -629,14 +703,16 @@ export const SuperAdminProvider = ({ children }) => {
           page: page.toString(),
           pageSize: pageSize.toString(),
         });
-        
-        if (level) params.append('level', level);
-        if (action) params.append('action', action);
-        if (startDate) params.append('startDate', startDate);
-        if (endDate) params.append('endDate', endDate);
 
-        const response = await superAdminApiClient.get(`/superadmin/system-logs?${params}`);
-        
+        if (level) params.append("level", level);
+        if (action) params.append("action", action);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
+
+        const response = await superAdminApiClient.get(
+          `/superadmin/system-logs?${params}`
+        );
+
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_SYSTEM_LOGS,
           payload: {
@@ -670,7 +746,7 @@ export const SuperAdminProvider = ({ children }) => {
   const contextValue = {
     // State
     ...state,
-    
+
     // API methods
     ...superAdminApi,
   };
@@ -686,7 +762,7 @@ export const SuperAdminProvider = ({ children }) => {
 export const useSuperAdmin = () => {
   const context = useContext(SuperAdminContext);
   if (!context) {
-    throw new Error('useSuperAdmin must be used within a SuperAdminProvider');
+    throw new Error("useSuperAdmin must be used within a SuperAdminProvider");
   }
   return context;
 };

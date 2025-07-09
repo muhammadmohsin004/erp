@@ -1,942 +1,742 @@
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import { GET_ALL_TICKETS, GET_ANALYTICS } from "../../../services/apiRoutes";
-import { get } from "../../../services/apiService";
-import AlertDialog from "../../../utitlities/Alert";
+import React, { useState, useEffect } from "react";
 import {
-  Card,
-  CardBody,
-  CardTitle,
-  Row,
-  Col,
-  Spinner,
-  Alert,
-  Badge,
-  Table,
-  Button
-} from "react-bootstrap";
+  RefreshCw,
+  Building,
+  Users,
+  TrendingUp,
+  Activity,
+  Ticket,
+  AlertTriangle,
+  Clock,
+  DollarSign,
+  HardDrive,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import {
-  Bar,
+  LineChart,
   Line,
+  BarChart,
+  Bar,
+  PieChart,
   Pie,
-  Doughnut,
-  PolarArea
-} from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Filler,
-  RadialLinearScale
-} from "chart.js";
+  Area,
+  AreaChart,
+} from "recharts";
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Filler,
-  RadialLinearScale
-);
+// Mock context hook (replace with your actual context)
+const useSuperAdmin = () => {
+  const [state, setState] = useState({
+    stats: {
+      TotalCompanies: 150,
+      CompanyGrowthPercentage: 12.5,
+      TotalUsers: 1250,
+      UserGrowthPercentage: 8.3,
+      MonthlyRevenue: 45000,
+      RevenueGrowthPercentage: 15.2,
+      OpenTickets: 23,
+      StorageUsedGB: 1250,
+      TotalApiCalls: 850000,
+      ActiveCompanies: 142,
+      NewCompaniesThisMonth: 15,
+      ActiveUsers: 1180,
+      YearlyRevenue: 540000,
+      ResolvedTickets: 187,
+      TotalLogins: 3450,
+      ApiCallsCount: 850000,
+      SuspendedCompanies: 8,
+      NewUsersThisMonth: 95,
+    },
+    recentCompanies: [
+      { Id: 1, Name: "Tech Corp", Status: "Active", CreatedAt: "2024-01-15" },
+      { Id: 2, Name: "Start Inc", Status: "Pending", CreatedAt: "2024-01-14" },
+      {
+        Id: 3,
+        Name: "Digital Solutions",
+        Status: "Active",
+        CreatedAt: "2024-01-13",
+      },
+      {
+        Id: 4,
+        Name: "Innovation Labs",
+        Status: "Inactive",
+        CreatedAt: "2024-01-12",
+      },
+      {
+        Id: 5,
+        Name: "Future Systems",
+        Status: "Active",
+        CreatedAt: "2024-01-11",
+      },
+    ],
+    recentTickets: [
+      {
+        Id: 1,
+        TicketNumber: "TK-001",
+        Subject: "Login Issues",
+        Priority: "High",
+        Status: "Open",
+        CreatedAt: "2024-01-15",
+      },
+      {
+        Id: 2,
+        TicketNumber: "TK-002",
+        Subject: "Payment Gateway Error",
+        Priority: "Critical",
+        Status: "In Progress",
+        CreatedAt: "2024-01-14",
+      },
+      {
+        Id: 3,
+        TicketNumber: "TK-003",
+        Subject: "Feature Request",
+        Priority: "Low",
+        Status: "Resolved",
+        CreatedAt: "2024-01-13",
+      },
+      {
+        Id: 4,
+        TicketNumber: "TK-004",
+        Subject: "Database Connection",
+        Priority: "Medium",
+        Status: "Closed",
+        CreatedAt: "2024-01-12",
+      },
+      {
+        Id: 5,
+        TicketNumber: "TK-005",
+        Subject: "UI Bug Report",
+        Priority: "Medium",
+        Status: "Open",
+        CreatedAt: "2024-01-11",
+      },
+    ],
+    systemAlerts: [
+      {
+        Id: 1,
+        Message: "Server load is high",
+        Type: "warning",
+        IsResolved: false,
+        CreatedAt: "2024-01-15",
+      },
+      {
+        Id: 2,
+        Message: "Database backup completed",
+        Type: "success",
+        IsResolved: true,
+        CreatedAt: "2024-01-14",
+      },
+      {
+        Id: 3,
+        Message: "Security update required",
+        Type: "error",
+        IsResolved: false,
+        CreatedAt: "2024-01-13",
+      },
+    ],
+    isLoading: false,
+    error: null,
+    lastUpdated: new Date(),
+  });
+
+  const refreshDashboard = async () => {
+    setState((prev) => ({ ...prev, isLoading: true }));
+    // Simulate API call
+    setTimeout(() => {
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        lastUpdated: new Date(),
+      }));
+    }, 1000);
+  };
+
+  return {
+    ...state,
+    refreshDashboard,
+    formatCurrency: (amount) => `$${amount.toLocaleString()}`,
+    formatDate: (dateString) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    },
+    getStatusColor: (status) => {
+      switch (status?.toLowerCase()) {
+        case "active":
+          return "bg-green-100 text-green-800";
+        case "inactive":
+          return "bg-red-100 text-red-800";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800";
+        case "open":
+          return "bg-blue-100 text-blue-800";
+        case "closed":
+          return "bg-gray-100 text-gray-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    },
+    getPriorityColor: (priority) => {
+      switch (priority?.toLowerCase()) {
+        case "low":
+          return "bg-green-100 text-green-800";
+        case "medium":
+          return "bg-blue-100 text-blue-800";
+        case "high":
+          return "bg-orange-100 text-orange-800";
+        case "critical":
+          return "bg-red-100 text-red-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    },
+  };
+};
 
 const SuperAnalytics = () => {
-  const token = localStorage.getItem("authToken");
+  const {
+    stats,
+    recentCompanies,
+    recentTickets,
+    systemAlerts,
+    isLoading,
+    error,
+    lastUpdated,
+    refreshDashboard,
+    formatCurrency,
+    formatDate,
+    getStatusColor,
+    getPriorityColor,
+  } = useSuperAdmin();
 
-  // Fetch analytics data
-  const { 
-    data: analytics = [], 
-    isLoading, 
-    isError, 
-    error, 
-    refetch 
-  } = useQuery({
-    queryKey: ["analytics"],
-    queryFn: async () => {
-      const res = await get(GET_ANALYTICS, token);
-      return res.Analytics?.$values || [];
-    },
-    onError: (err) => {
-      console.error("Analytics Query Error", err);
-      AlertDialog("Error", err.message || "Failed to load analytics data", "error");
-    },
-    refetchOnWindowFocus: false,
-    retry: 3,
-    retryDelay: 1000
-  });
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch tickets data
-  const { 
-    data: ticketsData = {}, 
-    isLoading: isLoadingTickets,
-    isError: isErrorTickets,
-    error: errorTickets
-  } = useQuery({
-    queryKey: ["tickets"],
-    queryFn: async () => {
-      const res = await get(GET_ALL_TICKETS, token);
-      return res || { Items: [], TotalCount: 0 };
-    },
-    onError: (err) => {
-      console.error("Tickets Query Error", err);
-      AlertDialog("Error", err.message || "Failed to load tickets data", "error");
-    },
-    refetchOnWindowFocus: false,
-    retry: 3,
-    retryDelay: 1000
-  });
-
-  // Safely extract tickets array
-  const tickets = Array.isArray(ticketsData?.Items) ? ticketsData.Items : [];
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshDashboard();
+    setRefreshing(false);
   };
 
-  // Safe filter function with fallback
-  const safeFilter = (array, condition) => {
-    if (!Array.isArray(array)) return [];
-    return array.filter(condition);
-  };
-
-  // Generate random revenue data for demonstration
-  const generateRevenueData = (baseRevenue) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Generate sample data for charts
+  const generateRevenueData = () => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     return months.map((month, index) => ({
       month,
-      revenue: Math.round(baseRevenue * (0.7 + Math.random() * 0.6))
+      revenue: Math.round(stats.MonthlyRevenue * (0.7 + Math.random() * 0.6)),
+      users: Math.round((stats.TotalUsers * (0.8 + Math.random() * 0.4)) / 12),
     }));
   };
 
-  // Prepare data for charts
-  const prepareChartData = () => {
-    if (!analytics || analytics.length === 0) return null;
-    
-    const data = analytics[0];
-    
-    // Safely get ticket counts
-    const openTickets = safeFilter(tickets, t => t.Status === 'Open').length;
-    const inProgressTickets = safeFilter(tickets, t => t.Status === 'In Progress').length;
-    const resolvedTickets = safeFilter(tickets, t => t.Status === 'Resolved').length;
-    const closedTickets = safeFilter(tickets, t => t.Status === 'Closed').length;
-    
-    const lowPriorityTickets = safeFilter(tickets, t => t.Priority === 'Low').length;
-    const mediumPriorityTickets = safeFilter(tickets, t => t.Priority === 'Medium').length;
-    const highPriorityTickets = safeFilter(tickets, t => t.Priority === 'High').length;
-    const criticalPriorityTickets = safeFilter(tickets, t => t.Priority === 'Critical').length;
+  const revenueData = generateRevenueData();
 
-    // Enhanced color schemes
-    const primaryColors = {
-      blue: 'rgba(54, 162, 235, 0.8)',
-      green: 'rgba(75, 192, 192, 0.8)',
-      yellow: 'rgba(255, 206, 86, 0.8)',
-      red: 'rgba(255, 99, 132, 0.8)',
-      purple: 'rgba(153, 102, 255, 0.8)',
-      orange: 'rgba(255, 159, 64, 0.8)',
-      teal: 'rgba(0, 188, 212, 0.8)',
-      indigo: 'rgba(63, 81, 181, 0.8)'
-    };
-
-    const borderColors = {
-      blue: 'rgba(54, 162, 235, 1)',
-      green: 'rgba(75, 192, 192, 1)',
-      yellow: 'rgba(255, 206, 86, 1)',
-      red: 'rgba(255, 99, 132, 1)',
-      purple: 'rgba(153, 102, 255, 1)',
-      orange: 'rgba(255, 159, 64, 1)',
-      teal: 'rgba(0, 188, 212, 1)',
-      indigo: 'rgba(63, 81, 181, 1)'
-    };
-
-    // Company Metrics - Enhanced Horizontal Bar Chart
-    const companyData = {
-      labels: ['Total Companies', 'Active Companies', 'New This Month', 'Suspended'],
-      datasets: [{
-        label: 'Companies',
-        data: [
-          data.TotalCompanies || 0,
-          data.ActiveCompanies || 0,
-          data.NewCompaniesThisMonth || 0,
-          data.SuspendedCompanies || 0
-        ],
-        backgroundColor: [
-          primaryColors.blue,
-          primaryColors.green,
-          primaryColors.yellow,
-          primaryColors.red
-        ],
-        borderColor: [
-          borderColors.blue,
-          borderColors.green,
-          borderColors.yellow,
-          borderColors.red
-        ],
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
-    };
-
-    // User Metrics - Enhanced Stacked Bar Chart
-    const userData = {
-      labels: ['User Statistics'],
-      datasets: [
-        {
-          label: 'Total Users',
-          data: [data.TotalUsers || 0],
-          backgroundColor: primaryColors.purple,
-          borderColor: borderColors.purple,
-          borderWidth: 2,
-          borderRadius: 6
-        },
-        {
-          label: 'Active Users',
-          data: [data.ActiveUsers || 0],
-          backgroundColor: primaryColors.blue,
-          borderColor: borderColors.blue,
-          borderWidth: 2,
-          borderRadius: 6
-        },
-        {
-          label: 'New This Month',
-          data: [data.NewUsersThisMonth || 0],
-          backgroundColor: primaryColors.orange,
-          borderColor: borderColors.orange,
-          borderWidth: 2,
-          borderRadius: 6
-        }
-      ]
-    };
-
-    // Revenue Data - Enhanced Gradient Line Chart
-    const revenueDataPoints = generateRevenueData(data.MonthlyRevenue || 0);
-    const revenueData = {
-      labels: revenueDataPoints.map(d => d.month),
-      datasets: [{
-        label: 'Monthly Revenue ($)',
-        data: revenueDataPoints.map(d => d.revenue),
-        borderColor: primaryColors.teal,
-        backgroundColor: (context) => {
-          const ctx = context.chart.ctx;
-          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, 'rgba(0, 188, 212, 0.3)');
-          gradient.addColorStop(1, 'rgba(0, 188, 212, 0.05)');
-          return gradient;
-        },
-        borderWidth: 3,
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: primaryColors.teal,
-        pointBorderColor: borderColors.teal,
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 8,
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderWidth: 3
-      }]
-    };
-
-    // Activity Data - Enhanced Doughnut Chart
-    const activityData = {
-      labels: ['Total Logins', 'API Calls', 'Storage Used (GB)'],
-      datasets: [{
-        label: 'Activity Metrics',
-        data: [
-          data.TotalLogins || 0,
-          data.ApiCallsCount || 0,
-          data.StorageUsedGB || 0
-        ],
-        backgroundColor: [
-          primaryColors.red,
-          primaryColors.blue,
-          primaryColors.yellow
-        ],
-        borderColor: [
-          borderColors.red,
-          borderColors.blue,
-          borderColors.yellow
-        ],
-        borderWidth: 3,
-        hoverOffset: 10
-      }]
-    };
-
-    // Support Tickets Overview - Enhanced Doughnut
-    const ticketsChartData = {
-      labels: ['Open Tickets', 'Resolved Tickets'],
-      datasets: [{
-        data: [data.OpenTickets || 0, data.ResolvedTickets || 0],
-        backgroundColor: [
-          primaryColors.red,
-          primaryColors.green
-        ],
-        borderColor: [
-          borderColors.red,
-          borderColors.green
-        ],
-        borderWidth: 3,
-        cutout: '65%',
-        hoverOffset: 15
-      }]
-    };
-
-    // Ticket Status Distribution - Enhanced Pie Chart
-    const ticketStatusData = {
-      labels: ['Open', 'In Progress', 'Resolved', 'Closed'],
-      datasets: [{
-        data: [
-          openTickets,
-          inProgressTickets,
-          resolvedTickets,
-          closedTickets
-        ],
-        backgroundColor: [
-          primaryColors.red,
-          primaryColors.yellow,
-          primaryColors.green,
-          primaryColors.purple
-        ],
-        borderColor: [
-          borderColors.red,
-          borderColors.yellow,
-          borderColors.green,
-          borderColors.purple
-        ],
-        borderWidth: 3,
-        hoverOffset: 10
-      }]
-    };
-
-    // Ticket Priority Distribution - Enhanced Polar Area Chart
-    const ticketPriorityData = {
-      labels: ['Low Priority', 'Medium Priority', 'High Priority', 'Critical Priority'],
-      datasets: [{
-        data: [
-          lowPriorityTickets,
-          mediumPriorityTickets,
-          highPriorityTickets,
-          criticalPriorityTickets
-        ],
-        backgroundColor: [
-          primaryColors.green,
-          primaryColors.yellow,
-          primaryColors.orange,
-          primaryColors.red
-        ],
-        borderColor: [
-          borderColors.green,
-          borderColors.yellow,
-          borderColors.orange,
-          borderColors.red
-        ],
-        borderWidth: 2
-      }]
-    };
-
-    return {
-      companyData,
-      userData,
-      revenueData,
-      activityData,
-      ticketsChartData,
-      ticketStatusData,
-      ticketPriorityData,
-      lastUpdated: formatDate(data.CreatedAt),
-      ticketCount: ticketsData.TotalCount || 0,
-      recentTickets: tickets.slice(0, 5),
-      analyticsData: data
-    };
-  };
-
-  const chartData = prepareChartData();
-
-  // Enhanced Chart Options
-  const horizontalBarOptions = {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12
-      }
+  const companyData = [
+    { name: "Total Companies", value: stats.TotalCompanies, color: "#3B82F6" },
+    {
+      name: "Active Companies",
+      value: stats.ActiveCompanies,
+      color: "#10B981",
     },
-    scales: {
-      x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          color: '#6c757d'
-        }
-      },
-      y: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          color: '#6c757d'
-        }
-      }
+    {
+      name: "New This Month",
+      value: stats.NewCompaniesThisMonth,
+      color: "#F59E0B",
     },
-    elements: {
-      bar: {
-        borderRadius: 6
-      }
-    }
-  };
+    { name: "Suspended", value: stats.SuspendedCompanies, color: "#EF4444" },
+  ];
 
-  const stackedBarOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          color: '#495057'
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12
-      }
+  const ticketStatusData = [
+    { name: "Open", value: stats.OpenTickets, color: "#EF4444" },
+    { name: "Resolved", value: stats.ResolvedTickets, color: "#10B981" },
+  ];
+
+  const activityData = [
+    { name: "Total Logins", value: stats.TotalLogins, color: "#8B5CF6" },
+    {
+      name: "API Calls",
+      value: Math.round(stats.ApiCallsCount / 1000),
+      color: "#3B82F6",
     },
-    scales: {
-      x: {
-        stacked: true,
-        grid: {
-          display: false
-        },
-        ticks: {
-          color: '#6c757d'
-        }
-      },
-      y: {
-        stacked: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
-        },
-        ticks: {
-          color: '#6c757d'
-        }
-      }
-    }
-  };
+    { name: "Storage (GB)", value: stats.StorageUsedGB, color: "#F59E0B" },
+  ];
 
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12,
-        callbacks: {
-          label: function(context) {
-            return `Revenue: $${context.parsed.y.toLocaleString()}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false
-        },
-        ticks: {
-          color: '#6c757d'
-        }
-      },
-      y: {
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)'
-        },
-        ticks: {
-          color: '#6c757d',
-          callback: function(value) {
-            return '$' + value.toLocaleString();
-          }
-        }
-      }
-    }
-  };
+  const priorityData = recentTickets.reduce((acc, ticket) => {
+    acc[ticket.Priority] = (acc[ticket.Priority] || 0) + 1;
+    return acc;
+  }, {});
 
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          color: '#495057'
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12
-      }
-    },
-    cutout: '60%'
-  };
+  const priorityChartData = Object.entries(priorityData).map(
+    ([priority, count]) => ({
+      name: priority,
+      value: count,
+      color:
+        priority === "Critical"
+          ? "#EF4444"
+          : priority === "High"
+          ? "#F59E0B"
+          : priority === "Medium"
+          ? "#3B82F6"
+          : "#10B981",
+    })
+  );
 
-  const pieOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          color: '#495057'
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12
-      }
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Loading Dashboard
+          </h2>
+          <p className="text-gray-600">
+            Please wait while we gather your analytics...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const polarOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          color: '#495057'
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12
-      }
-    },
-    scales: {
-      r: {
-        grid: {
-          circular: true,
-          color: 'rgba(0, 0, 0, 0.1)'
-        },
-        ticks: {
-          color: '#6c757d'
-        }
-      }
-    }
-  };
-
-  const getPriorityBadge = (priority) => {
-    switch (priority) {
-      case 'Low': return 'success';
-      case 'Medium': return 'primary';
-      case 'High': return 'warning';
-      case 'Critical': return 'danger';
-      default: return 'secondary';
-    }
-  };
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Open': return 'danger';
-      case 'In Progress': return 'warning';
-      case 'Resolved': return 'success';
-      case 'Closed': return 'secondary';
-      default: return 'info';
-    }
-  };
-
-  const formatNumber = (num) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num?.toString() || '0';
-  };
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
+          <div className="flex items-center mb-4">
+            <AlertCircle className="h-6 w-6 text-red-600 mr-2" />
+            <h2 className="text-lg font-semibold text-red-900">
+              Error Loading Data
+            </h2>
+          </div>
+          <p className="text-red-700 mb-4">{error}</p>
+          <button
+            onClick={handleRefresh}
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-  <div className="container">
-      <div className="super-analytics">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="mb-0">Analytics Dashboard</h1>
-        <Button 
-          variant="outline-primary" 
-          onClick={() => {
-            refetch();
-          }}
-          disabled={isLoading || isLoadingTickets}
-        >
-          <i className="bi bi-arrow-clockwise me-2"></i>
-          Refresh Data
-        </Button>
-      </div>
-      
-      {(isLoading || isLoadingTickets) ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" size="lg" />
-          <h5 className="mt-3 text-muted">Loading dashboard data...</h5>
-          <p className="text-muted">Please wait while we gather your analytics</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Analytics Dashboard
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Last updated: {formatDate(lastUpdated)}
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <Activity className="h-4 w-4 mr-1" />
+              Live Data
+            </span>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+              />
+              Refresh Data
+            </button>
+          </div>
         </div>
-      ) : (isError || isErrorTickets) ? (
-        <Alert variant="danger" className="shadow-sm">
-          <Alert.Heading>Error Loading Data</Alert.Heading>
-          <p className="mb-0">
-            {error?.message || errorTickets?.message || "An unexpected error occurred while loading the dashboard data."}
-          </p>
-        </Alert>
-      ) : (
-        <>
-          {chartData && chartData.analyticsData && (
-            <>
-              <div className="mb-4 d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  <i className="bi bi-clock me-1"></i>
-                  Last updated: {chartData.lastUpdated}
-                </small>
-                <Badge bg="info" className="px-3 py-2">
-                  <i className="bi bi-graph-up me-1"></i>
-                  Live Data
-                </Badge>
+
+        {/* Key Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Companies
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.TotalCompanies}
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  +{stats.CompanyGrowthPercentage}%
+                </p>
               </div>
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Building className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
 
-              {/* Company and User Metrics Row */}
-              <Row className="mb-4">
-                <Col lg={6} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CardTitle className="mb-0">
-                          <i className="bi bi-building me-2 text-primary"></i>
-                          Company Metrics
-                        </CardTitle>
-                        <Badge bg="primary" pill>
-                          {formatNumber(chartData.analyticsData.TotalCompanies)} Total
-                        </Badge>
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <Bar 
-                          data={chartData.companyData} 
-                          options={horizontalBarOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col lg={6} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CardTitle className="mb-0">
-                          <i className="bi bi-people me-2 text-primary"></i>
-                          User Metrics
-                        </CardTitle>
-                        <Badge bg="primary" pill>
-                          {formatNumber(chartData.analyticsData.TotalUsers)} Total
-                        </Badge>
-                      </div>
-                      <div style={{ height: '300px' }}>
-                        <Bar 
-                          data={chartData.userData} 
-                          options={stackedBarOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Users</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.TotalUsers}
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  +{stats.UserGrowthPercentage}%
+                </p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-full">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
 
-              {/* Revenue and Activity Row */}
-              <Row className="mb-4">
-                <Col lg={8} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <CardTitle>
-                        <i className="bi bi-graph-up me-2 text-success"></i>
-                        Revenue Trends
-                      </CardTitle>
-                      <div style={{ height: '350px' }}>
-                        <Line 
-                          data={chartData.revenueData} 
-                          options={lineOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col lg={4} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <CardTitle>
-                        <i className="bi bi-activity me-2 text-info"></i>
-                        Activity Overview
-                      </CardTitle>
-                      <div style={{ height: '350px' }}>
-                        <Doughnut 
-                          data={chartData.activityData} 
-                          options={doughnutOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Monthly Revenue
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(stats.MonthlyRevenue)}
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  +{stats.RevenueGrowthPercentage}%
+                </p>
+              </div>
+              <div className="p-3 bg-yellow-100 rounded-full">
+                <DollarSign className="h-6 w-6 text-yellow-600" />
+              </div>
+            </div>
+          </div>
 
-              {/* Ticket Analytics Row */}
-              <Row className="mb-4">
-                <Col lg={4} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CardTitle className="mb-0">
-                          <i className="bi bi-ticket me-2 text-warning"></i>
-                          Support Overview
-                        </CardTitle>
-                        <Badge bg="warning" pill>
-                          {chartData.analyticsData.OpenTickets + chartData.analyticsData.ResolvedTickets} Total
-                        </Badge>
-                      </div>
-                      <div style={{ height: '280px' }}>
-                        <Doughnut 
-                          data={chartData.ticketsChartData} 
-                          options={doughnutOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col lg={4} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CardTitle className="mb-0">
-                          <i className="bi bi-kanban me-2 text-primary"></i>
-                          Ticket Status
-                        </CardTitle>
-                        <Badge bg="primary" pill>
-                          {chartData.ticketCount} Active
-                        </Badge>
-                      </div>
-                      <div style={{ height: '280px' }}>
-                        <Pie 
-                          data={chartData.ticketStatusData} 
-                          options={pieOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col lg={4} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <CardTitle>
-                        <i className="bi bi-exclamation-triangle me-2 text-danger"></i>
-                        Priority Distribution
-                      </CardTitle>
-                      <div style={{ height: '280px' }}>
-                        <PolarArea 
-                          data={chartData.ticketPriorityData} 
-                          options={polarOptions} 
-                        />
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Open Tickets
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.OpenTickets}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {stats.ResolvedTickets} resolved
+                </p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-full">
+                <Ticket className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-              {/* Stats and Recent Tickets Row */}
-              <Row>
-                <Col lg={6} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <CardTitle>
-                        <i className="bi bi-speedometer2 me-2 text-success"></i>
-                        Key Performance Metrics
-                      </CardTitle>
-                      <Row>
-                        <Col md={6} className="mb-3">
-                          <div className="p-3 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
-                            <div className="d-flex align-items-center">
-                              <i className="bi bi-currency-dollar fs-3 text-primary me-3"></i>
-                              <div>
-                                <h6 className="text-muted mb-1">Monthly Revenue</h6>
-                                <h4 className="text-primary mb-0">${formatNumber(chartData.analyticsData.MonthlyRevenue)}</h4>
-                              </div>
-                            </div>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="p-3 bg-info bg-opacity-10 rounded-3 border border-info border-opacity-25">
-                            <div className="d-flex align-items-center">
-                              <i className="bi bi-diagram-3 fs-3 text-info me-3"></i>
-                              <div>
-                                <h6 className="text-muted mb-1">API Calls</h6>
-                                <h4 className="text-info mb-0">{formatNumber(chartData.analyticsData.ApiCallsCount)}</h4>
-                              </div>
-                            </div>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25">
-                            <div className="d-flex align-items-center">
-                              <i className="bi bi-hdd fs-3 text-warning me-3"></i>
-                              <div>
-                                <h6 className="text-muted mb-1">Storage Used</h6>
-                                <h4 className="text-warning mb-0">{chartData.analyticsData.StorageUsedGB} GB</h4>
-                              </div>
-                            </div>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
-                            <div className="d-flex align-items-center">
-                              <i className="bi bi-person-check fs-3 text-success me-3"></i>
-                              <div>
-                                <h6 className="text-muted mb-1">Total Logins</h6>
-                                <h4 className="text-success mb-0">{formatNumber(chartData.analyticsData.TotalLogins)}</h4>
-                              </div>
-                            </div>
-                          </div>
-                        </Col>
-                      </Row>
-                    </CardBody>
-                  </Card>
-                </Col>
-                <Col lg={6} className="mb-4">
-                  <Card className="shadow-sm border-0 h-100">
-                    <CardBody>
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CardTitle className="mb-0">
-                          <i className="bi bi-clock-history me-2 text-secondary"></i>
-                          Recent Tickets
-                        </CardTitle>
-                        <Badge bg="secondary" pill>
-                          {chartData.ticketCount} Total
-                        </Badge>
-                      </div>
-                      <div className="table-responsive">
-                        <Table hover className="mb-0">
-                          <thead className="table-light">
-                            <tr>
-                              <th>Ticket #</th>
-                              <th>Subject</th>
-                              <th>Priority</th>
-                              <th>Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {chartData.recentTickets.length > 0 ? (
-                              chartData.recentTickets.map(ticket => (
-                                <tr key={ticket.Id}>
-                                  <td>
-                                    <small className="text-muted">#{ticket.TicketNumber}</small>
-                                  </td>
-                                  <td>
-                                    <div className="text-truncate" style={{ maxWidth: '150px' }}>
-                                      {ticket.Subject}
-                                    </div>
-                                  </td>
-                                  <td>
-                                    <Badge bg={getPriorityBadge(ticket.Priority)} size="sm">
-                                      {ticket.Priority}
-                                    </Badge>
-                                  </td>
-                                  <td>
-                                    <Badge bg={getStatusBadge(ticket.Status)} size="sm">
-                                      {ticket.Status}
-                                    </Badge>
-                                  </td>
-                                </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan="4" className="text-center py-4">
-                                  <div className="text-muted">
-                                    <i className="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    No recent tickets found
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </Table>
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
-            </>
-          )}
-        </>
-      )}
+        {/* Charts Row 1 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Company Metrics */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Company Metrics
+              </h3>
+              <span className="text-sm text-gray-500">
+                {stats.TotalCompanies} Total
+              </span>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={companyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#3B82F6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Revenue Trends */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Revenue Trends
+              </h3>
+              <span className="text-sm text-gray-500">Monthly</span>
+            </div>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#10B981"
+                    fill="#10B981"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Row 2 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Ticket Status */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Ticket Status
+            </h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={ticketStatusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {ticketStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Priority Distribution */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Priority Distribution
+            </h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={priorityChartData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {priorityChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Activity Overview */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Activity Overview
+            </h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={activityData} layout="horizontal">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#8B5CF6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Tables Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Companies */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Companies
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Company
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentCompanies.map((company) => (
+                    <tr key={company.Id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {company.Name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                            company.Status
+                          )}`}
+                        >
+                          {company.Status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(company.CreatedAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Recent Tickets */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Tickets
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ticket #
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Subject
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Priority
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentTickets.map((ticket) => (
+                    <tr key={ticket.Id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        #{ticket.TicketNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                          {ticket.Subject}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(
+                            ticket.Priority
+                          )}`}
+                        >
+                          {ticket.Priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                            ticket.Status
+                          )}`}
+                        >
+                          {ticket.Status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* System Performance Metrics */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Storage Used
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.StorageUsedGB} GB
+                </p>
+              </div>
+              <div className="p-3 bg-purple-100 rounded-full">
+                <HardDrive className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">API Calls</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {(stats.ApiCallsCount / 1000).toFixed(0)}K
+                </p>
+              </div>
+              <div className="p-3 bg-indigo-100 rounded-full">
+                <Activity className="h-6 w-6 text-indigo-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Logins
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.TotalLogins}
+                </p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-full">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
   );
 };
 

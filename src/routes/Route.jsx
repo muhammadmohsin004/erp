@@ -11,6 +11,10 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import NotFound from "../pages/error/NotFound";
 import CompaniesManagement from "../pages/SuperAdmin/CompaniesManagement";
 import ProtectedRoute from "./ProtectedRoute";
+import SuperDashboard from "../pages/SuperAdmin/SuperDashboard";
+import SuperAnalytics from "../pages/SuperAdmin/SuperDashboard/SuperAnalytics";
+import AddCompany from "../pages/SuperAdmin/CompaniesManagement/AddCompany";
+import ManageUsers from "../pages/SuperAdmin/UserManagement/ManageUsers";
 
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -109,13 +113,13 @@ const getRouteConfig = () => {
     // SuperAdmin Dashboard Routes
     {
       path: "/superadmin/dashboard",
-      component: Dashboard,
+      component: SuperDashboard,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/super-analytics",
-      component: () => <div>Super Analytics Page</div>,
+      component: SuperAnalytics,
       roles: ["SuperAdmin"],
       layout: true,
     },
@@ -129,7 +133,7 @@ const getRouteConfig = () => {
     },
     {
       path: "/superadmin/add-company",
-      component: () => <div>Add New Company Page</div>,
+      component: AddCompany,
       roles: ["SuperAdmin"],
       layout: true,
     },
@@ -137,7 +141,7 @@ const getRouteConfig = () => {
     // SuperAdmin User Management Routes
     {
       path: "/superadmin/manage-users",
-      component: () => <div>Manage Users Page</div>,
+      component: ManageUsers,
       roles: ["SuperAdmin"],
       layout: true,
     },

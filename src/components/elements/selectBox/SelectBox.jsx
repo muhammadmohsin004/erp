@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { Select } from "antd";
 import Container from "../container/Container";
 import Span from "../span/Span";
@@ -12,13 +11,26 @@ const SelectBox = ({
   width,
   marginBottom,
   handleChange = () => {},
-  optionList,
+  optionList = [], // Default empty array
   value,
   mode = "single",
   disabled = false,
   label,
   onSearch = () => {},
 }) => {
+  // Handle change with proper value passing
+  const handleSelectChange = (selectedValue, option) => {
+    console.log("SelectBox onChange:", selectedValue, option);
+
+    // For single mode, pass the value directly
+    if (mode === "single") {
+      handleChange(selectedValue);
+    } else {
+      // For multiple mode, pass the array of values
+      handleChange(selectedValue, option);
+    }
+  };
+
   return (
     <Container className={marginBottom}>
       {label !== undefined && (
@@ -32,15 +44,19 @@ const SelectBox = ({
         className={`min-h-[38px] border-[1px] border-secondary rounded-md ${width}`}
         showSearch
         placeholder={placeholder}
-        value={value}
+        value={value || undefined} // Handle empty string as undefined
         optionFilterProp="children"
         filterOption={(input, option) => {
           return (option?.label ?? "")
             .toLowerCase()
             .includes(input.toLowerCase());
         }}
-        onChange={(e, options) => handleChange(e, options)}
+        onChange={handleSelectChange}
         options={optionList}
+        allowClear // Allow clearing selection
+        notFoundContent={
+          optionList.length === 0 ? "No options available" : "No match found"
+        }
       />
       {errors[name] && (
         <Span className="text-red-500 text-sm">{errors[name].message}</Span>

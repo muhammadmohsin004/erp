@@ -8,7 +8,7 @@ const Span = forwardRef(
   ) => {
     // Create a fallback ref if none is passed
     const internalRef = useRef(null);
-    const finalRef = ref || internalRef; // Use the passed `ref`, or fallback to `internalRef`
+    const finalRef = ref || internalRef; // Use the passed `ref`, or fallback to `internalRef`d
 
     return (
       <span

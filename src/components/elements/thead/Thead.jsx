@@ -1,4 +1,4 @@
-import  { forwardRef, useRef } from "react";
+import { forwardRef, useRef } from "react";
 
 // Using forwardRef to forward ref properly and use fallback ref if none passed
 const Thead = forwardRef(
@@ -6,7 +6,7 @@ const Thead = forwardRef(
     { onClick = undefined, style = {}, className = "", children = null },
     ref
   ) => {
-    // Create a fallback ref if none is passed
+    // Create a fallback ref if none is passedd
     const internalRef = useRef(null);
     const finalRef = ref || internalRef; // Use the passed `ref`, or fallback to `internalRef`
 
