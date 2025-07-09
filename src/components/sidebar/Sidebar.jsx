@@ -1,4 +1,4 @@
-// components/layout/Sidebar.jsx - Role-based navigation
+// components/layout/Sidebar.jsx - Role-based navigation with proper paths
 import React, { useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
@@ -20,7 +20,27 @@ const Sidebar = ({ isOpen }) => {
   // Get user role from localStorage
   const userRole = localStorage.getItem('role');
   
-  // Define all menu items with their role restrictions (no permission checks)
+  // Helper function to get role-based path prefix
+  const getRoleBasedPath = (basePath) => {
+    switch (userRole) {
+      case 'SuperAdmin':
+        return `/superadmin${basePath}`;
+      case 'Admin':
+        return `/admin${basePath}`;
+      case 'Manager':
+        return `/manager${basePath}`;
+      case 'Employee':
+        return `/employee${basePath}`;
+      case 'User':
+        return `/user${basePath}`;
+      case 'Viewer':
+        return `/viewer${basePath}`;
+      default:
+        return basePath;
+    }
+  };
+
+  // Define all menu items with their role restrictions and role-based paths
   const allMenuItems = [
     { 
       icon: BarChart3, 
@@ -31,79 +51,79 @@ const Sidebar = ({ isOpen }) => {
     { 
       icon: Building, 
       label: 'Companies', 
-      path: '/companies-management',
+      path: getRoleBasedPath('/companies'),
       roles: ['SuperAdmin']
     },
     { 
       icon: Users, 
       label: 'Clients', 
-      path: '/clients',
+      path: getRoleBasedPath('/clients'),
       roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee']
     },
     { 
       icon: Package, 
       label: 'Inventory', 
-      path: '/inventory',
+      path: getRoleBasedPath('/inventory'),
       roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee']
     },
     { 
       icon: DollarSign, 
       label: 'Sales', 
-      path: '/sales',
+      path: getRoleBasedPath('/sales'),
       roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee']
     },
     { 
       icon: FileText, 
       label: 'Bills', 
-      path: '/bills',
+      path: getRoleBasedPath('/bills'),
       roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee']
     },
     { 
       icon: Calculator, 
       label: 'Finance', 
-      path: '/finance',
+      path: getRoleBasedPath('/finance'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: Calculator, 
       label: 'Accounting', 
-      path: '/accounting',
+      path: getRoleBasedPath('/accounting'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: Users, 
       label: 'Employees', 
-      path: '/employees',
+      path: getRoleBasedPath('/employees'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: FileText, 
       label: 'Reports', 
-      path: '/reports',
+      path: getRoleBasedPath('/reports'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: FileText, 
       label: 'Templates', 
-      path: '/templates',
+      path: getRoleBasedPath('/templates'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: Settings, 
       label: 'Settings', 
-      path: '/settings',
+      path: getRoleBasedPath('/settings'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: DollarSign, 
       label: 'Salary Components', 
-      path: '/salary-components',
+      path: getRoleBasedPath('/salary-components'),
       roles: ['SuperAdmin', 'Admin', 'Manager']
     },
     { 
       icon: Key, 
       label: 'Permissions', 
-      path: '/permissions',
+      path: getRoleBasedPath('/permissions'),
       roles: ['SuperAdmin', 'Admin']
     }
   ];
@@ -118,21 +138,33 @@ const Sidebar = ({ isOpen }) => {
   // Get user info for display
   const getUserInfo = () => {
     const role = userRole || 'Guest';
-    const displayName = localStorage.getItem('username') || 'User';
+    const displayName = localStorage.getItem('username') || 
+                       JSON.parse(localStorage.getItem('user') || '{}')?.firstName || 
+                       'User';
     
     return { role, displayName };
   };
 
   const { role, displayName } = getUserInfo();
 
+  // Helper function to check if current path is active
+  const isPathActive = (itemPath, currentPath) => {
+    // Special handling for dashboard routes
+    if (itemPath.includes('/dashboard')) {
+      return currentPath === itemPath;
+    }
+    // For other routes, check if current path starts with the item path
+    return currentPath === itemPath || currentPath.startsWith(itemPath + '/');
+  };
+
   return (
     <div className={`fixed left-0 top-0 h-full bg-slate-900 text-white transition-all duration-300 z-50 ${isOpen ? 'w-64' : 'w-16'}`}>
       {/* Header */}
       <div className="flex items-center p-4 border-b border-slate-700">
         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-          <span className="text-white font-bold text-sm">S</span>
+          <span className="text-white font-bold text-sm">E</span>
         </div>
-        {isOpen && <span className="font-semibold text-lg">SPEEDERP</span>}
+        {isOpen && <span className="font-semibold text-lg">ESolution ERP</span>}
       </div>
 
       {/* User Profile */}
@@ -157,15 +189,11 @@ const Sidebar = ({ isOpen }) => {
             key={index}
             to={item.path}
             className={({ isActive }) => {
-              // Check if current path matches any of the dashboard variants
-              const isDashboardActive = item.label === 'Dashboard' && (
-                location.pathname === '/dashboard' || 
-                location.pathname === '/admin/dashboard' || 
-                location.pathname === '/admin/superadmin/dashboard'
-              );
+              // Check if current path matches the item path
+              const isCurrentActive = isActive || isPathActive(item.path, location.pathname);
               
               return `flex items-center px-4 py-3 text-sm hover:bg-slate-800 transition-colors ${
-                isActive || isDashboardActive ? 'bg-blue-600 text-white' : 'text-slate-300'
+                isCurrentActive ? 'bg-blue-600 text-white border-r-2 border-blue-400' : 'text-slate-300'
               }`;
             }}
           >
@@ -179,7 +207,10 @@ const Sidebar = ({ isOpen }) => {
       {isOpen && (
         <div className="p-4 border-t border-slate-700">
           <div className="text-xs text-slate-400">
-            Logged in as: <span className="text-blue-400 font-medium">{role}</span>
+            Access Level: <span className="text-blue-400 font-medium">{role}</span>
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            Current Path: {location.pathname}
           </div>
         </div>
       )}
@@ -191,14 +222,17 @@ const Sidebar = ({ isOpen }) => {
 function getDashboardPath(userRole) {
   switch (userRole) {
     case 'SuperAdmin':
-      return '/admin/superadmin/dashboard';
+      return '/superadmin/dashboard';
     case 'Admin':
-    case 'Manager':
-    case 'Employee':
       return '/admin/dashboard';
+    case 'Manager':
+      return '/manager/dashboard';
+    case 'Employee':
+      return '/employee/dashboard';
     case 'User':
+      return '/user/dashboard';
     case 'Viewer':
-      return '/dashboard';
+      return '/viewer/dashboard';
     default:
       return '/dashboard';
   }

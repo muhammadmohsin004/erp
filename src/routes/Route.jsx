@@ -1,4 +1,4 @@
-// routes/Route.jsx - Fixed version
+// routes/Route.jsx - Dynamic Routes Version
 import React from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -12,26 +12,58 @@ import NotFound from '../pages/error/NotFound';
 import CompaniesManagement from '../pages/SuperAdmin/CompaniesManagement';
 import ProtectedRoute from './ProtectedRoute';
 
+// Helper function to get role-based dashboard path
+const getDashboardPath = (userRole) => {
+  switch (userRole) {
+    case 'SuperAdmin':
+      return '/admin/superadmin/dashboard';
+    case 'Admin':
+      return '/admin/dashboard';
+    case 'Manager':
+      return '/admin/dashboard';
+    case 'Employee':
+      return '/admin/dashboard';
+    case 'User':
+      return '/dashboard';
+    case 'Viewer':
+      return '/dashboard';
+    default:
+      return '/dashboard';
+  }
+};
+
+// Helper function to get role-based path prefix
+const getRoleBasedPath = (basePath, userRole) => {
+  switch (userRole) {
+    case 'SuperAdmin':
+      return basePath.startsWith('/admin/superadmin') ? basePath : `/admin/superadmin${basePath}`;
+    case 'Admin':
+      return basePath.startsWith('/admin') ? basePath : `/admin${basePath}`;
+    case 'Manager':
+      return basePath.startsWith('/admin') ? basePath : `/admin${basePath}`;
+    case 'Employee':
+      return basePath.startsWith('/admin') ? basePath : `/admin${basePath}`;
+    case 'User':
+      return basePath;
+    case 'Viewer':
+      return basePath;
+    default:
+      return basePath;
+  }
+};
+
 // Helper component to handle role-based dashboard redirection
 const DashboardRedirect = () => {
   const userRole = localStorage.getItem('role');
+  const dashboardPath = getDashboardPath(userRole);
   
-  switch (userRole) {
-    case 'SuperAdmin':
-      return <Navigate to="/admin/superadmin/dashboard" replace />;
-    case 'Admin':
-      return <Navigate to="/admin/dashboard" replace />;
-    case 'Manager':
-      return <Navigate to="/admin/dashboard" replace />;
-    case 'Employee':
-      return <Navigate to="/admin/dashboard" replace />;
-    case 'User':
-      return <Navigate to="/dashboard" replace />;
-    case 'Viewer':
-      return <Navigate to="/dashboard" replace />;
-    default:
-      return <Navigate to="/login" replace />;
+  console.log('DashboardRedirect - Role:', userRole, 'Redirecting to:', dashboardPath);
+  
+  if (!userRole) {
+    return <Navigate to="/login" replace />;
   }
+  
+  return <Navigate to={dashboardPath} replace />;
 };
 
 // Unauthorized component
@@ -47,7 +79,11 @@ const UnauthorizedPage = () => (
         Go Back
       </button>
       <button 
-        onClick={() => window.location.href = '/'} 
+        onClick={() => {
+          const userRole = localStorage.getItem('role');
+          const dashboardPath = getDashboardPath(userRole);
+          window.location.href = dashboardPath;
+        }} 
         className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
       >
         Go to Dashboard
@@ -56,7 +92,198 @@ const UnauthorizedPage = () => (
   </div>
 );
 
+// Route configuration with dynamic paths
+const getRouteConfig = () => {
+  return [
+    // Dashboard Routes - Role-specific paths
+    {
+      path: '/admin/superadmin/dashboard',
+      component: Dashboard,
+      roles: ['SuperAdmin'],
+      layout: true
+    },
+    {
+      path: '/admin/dashboard',
+      component: Dashboard,
+      roles: ['Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/dashboard',
+      component: Dashboard,
+      roles: ['User', 'Viewer'],
+      layout: true
+    },
+    
+    // SuperAdmin specific routes
+    {
+      path: '/admin/superadmin/companies',
+      component: CompaniesManagement,
+      roles: ['SuperAdmin'],
+      layout: true
+    },
+    {
+      path: '/companies-management', // Legacy support
+      component: CompaniesManagement,
+      roles: ['SuperAdmin'],
+      layout: true
+    },
+    
+    // Admin/Manager/Employee routes with dynamic paths
+    {
+      path: '/admin/clients',
+      component: Clients,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/clients', // Legacy support
+      component: Clients,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/admin/inventory',
+      component: () => <div>Inventory Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/inventory', // Legacy support
+      component: () => <div>Inventory Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/admin/sales',
+      component: () => <div>Sales Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/sales', // Legacy support
+      component: () => <div>Sales Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/admin/bills',
+      component: () => <div>Bills Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    {
+      path: '/bills', // Legacy support
+      component: () => <div>Bills Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager', 'Employee'],
+      layout: true
+    },
+    
+    // Manager+ only routes
+    {
+      path: '/admin/finance',
+      component: () => <div>Finance Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/finance', // Legacy support
+      component: () => <div>Finance Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/admin/accounting',
+      component: () => <div>Accounting Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/accounting', // Legacy support
+      component: () => <div>Accounting Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/admin/employees',
+      component: () => <div>Employees Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/employees', // Legacy support
+      component: () => <div>Employees Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/admin/reports',
+      component: () => <div>Reports Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/reports', // Legacy support
+      component: () => <div>Reports Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/admin/templates',
+      component: () => <div>Templates Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/templates', // Legacy support
+      component: () => <div>Templates Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/admin/settings',
+      component: () => <div>Settings Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/settings', // Legacy support
+      component: () => <div>Settings Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/admin/salary-components',
+      component: () => <div>Salary Components Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    {
+      path: '/salary-components', // Legacy support
+      component: () => <div>Salary Components Page</div>,
+      roles: ['SuperAdmin', 'Admin', 'Manager'],
+      layout: true
+    },
+    
+    // Admin+ only routes
+    {
+      path: '/admin/permissions',
+      component: () => <div>Permission Settings Page</div>,
+      roles: ['SuperAdmin', 'Admin'],
+      layout: true
+    },
+    {
+      path: '/permissions', // Legacy support
+      component: () => <div>Permission Settings Page</div>,
+      roles: ['SuperAdmin', 'Admin'],
+      layout: true
+    }
+  ];
+};
+
 export const Routes = () => {
+  const routeConfig = getRouteConfig();
+
   return (
     <RouterRoutes>
       {/* Public Routes - Auth Pages (Outside of Layout) */}
@@ -68,185 +295,29 @@ export const Routes = () => {
       {/* Unauthorized access page */}
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       
-      {/* SuperAdmin Routes */}
-      <Route 
-        path="/admin/superadmin/dashboard" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin']}>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/companies-management" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin']}>
-            <Layout>
-              <CompaniesManagement />
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      {/* Admin Routes (Admin, Manager, Employee) */}
-      <Route 
-        path="/admin/dashboard" 
-        element={
-          <ProtectedRoute requiredRoles={['Admin', 'Manager', 'Employee']}>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      {/* Regular User Routes (User, Viewer) */}
-      <Route 
-        path="/dashboard" 
-        element={
-          <ProtectedRoute requiredRoles={['User', 'Viewer']}>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      {/* Shared Routes with Role-Based Access - No permissions required */}
-      <Route 
-        path="/clients" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager', 'Employee']}>
-            <Layout>
-              <Clients />
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/inventory" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager', 'Employee']}>
-            <Layout>
-              <div>Inventory Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/sales" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager', 'Employee']}>
-            <Layout>
-              <div>Sales Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/bills" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager', 'Employee']}>
-            <Layout>
-              <div>Bills Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/finance" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Finance Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/accounting" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Accounting Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/employees" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Employees Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/reports" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Reports Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/templates" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Templates Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/settings" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Settings Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/salary-components" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin', 'Manager']}>
-            <Layout>
-              <div>Salary Components Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/permissions" 
-        element={
-          <ProtectedRoute requiredRoles={['SuperAdmin', 'Admin']}>
-            <Layout>
-              <div>Permission Settings Page</div>
-            </Layout>
-          </ProtectedRoute>
-        } 
-      />
+      {/* Dynamic Protected Routes */}
+      {routeConfig.map((route, index) => {
+        const RouteComponent = route.component;
+        const element = route.layout ? (
+          <Layout>
+            <RouteComponent />
+          </Layout>
+        ) : (
+          <RouteComponent />
+        );
+
+        return (
+          <Route
+            key={`${route.path}-${index}`}
+            path={route.path}
+            element={
+              <ProtectedRoute requiredRoles={route.roles}>
+                {element}
+              </ProtectedRoute>
+            }
+          />
+        );
+      })}
       
       {/* Root redirect based on user role */}
       <Route 
