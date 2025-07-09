@@ -537,7 +537,7 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_ALL_USERS,
           payload: {
-            users: response.data.items,
+            users: response.data.Items.$values,
             pagination: {
               totalCount: response.data.totalCount,
               page: response.data.page,
@@ -547,7 +547,7 @@ export const SuperAdminProvider = ({ children }) => {
           },
         });
 
-        return response.data;
+        return response.data.Items.$values;
       } catch (error) {
         handleApiError(error);
       }

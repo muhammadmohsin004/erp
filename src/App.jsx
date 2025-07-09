@@ -9,6 +9,7 @@ import { SuperAdminProvider } from "./Contexts/superAdminApiClient/superAdminApi
 import { ClientsProvider } from "./Contexts/apiClientContext/apiClientContext";
 import { WarehouseProvider } from "./Contexts/WarehouseContext/WarehouseContext";
 import { SupplierProvider } from "./Contexts/SupplierContext/SupplierContext";
+import { SuperDashboardProvider } from "./Contexts/superAdminDashborad/SuperAdminContext";
 
 function App() {
   return (
@@ -16,13 +17,15 @@ function App() {
       <Provider store={store}>
         <AuthProvider>
           <SuperAdminProvider>
-            <ClientsProvider>
-              <WarehouseProvider>
-                <SupplierProvider>
-                  <Routes />
-                </SupplierProvider>
-              </WarehouseProvider>
-            </ClientsProvider>
+            <SuperDashboardProvider>
+              <ClientsProvider>
+                <WarehouseProvider>
+                  <SupplierProvider>
+                    <Routes />
+                  </SupplierProvider>
+                </WarehouseProvider>
+              </ClientsProvider>
+            </SuperDashboardProvider>
           </SuperAdminProvider>
         </AuthProvider>
       </Provider>

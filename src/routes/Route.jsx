@@ -21,6 +21,9 @@ import SuperDashboard from "../pages/SuperAdmin/SuperDashboard";
 import SuperAnalytics from "../pages/SuperAdmin/SuperDashboard/SuperAnalytics";
 import AddCompany from "../pages/SuperAdmin/CompaniesManagement/AddCompany";
 import ManageUsers from "../pages/SuperAdmin/UserManagement/ManageUsers";
+import ManagePlans from "../pages/SuperAdmin/Plans/ManagePlans";
+import Subscription from "../pages/SuperAdmin/Plans/Subscription";
+import SubscriptionReports from "../pages/SuperAdmin/Plans/SubscriptionReports";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -154,19 +157,19 @@ const getRouteConfig = () => {
     // SuperAdmin Plans & Subscriptions Routes
     {
       path: "/superadmin/manage-plan",
-      component: () => <div>Manage Subscription Page</div>,
+      component: ManagePlans,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/subscription",
-      component: () => <div>Subscriptions Page</div>,
+      component: Subscription,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/subscription-report",
-      component: () => <div>Subscription Reports Page</div>,
+      component: SubscriptionReports,
       roles: ["SuperAdmin"],
       layout: true,
     },

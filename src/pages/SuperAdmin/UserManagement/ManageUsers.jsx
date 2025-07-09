@@ -1,6 +1,5 @@
 // pages/users/ManageUsers.jsx
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   FiUsers,
   FiPlus,
@@ -12,26 +11,31 @@ import {
   FiChevronDown,
   FiDownload,
 } from "react-icons/fi";
-import { GET_ALL_USERS } from "../../services/apiRoutes";
-import { get } from "../../services/apiService";
-import Table from "../../components/table/Table";
-import Tbody from "../../components/table/Tbody";
-import TH from "../../components/table/TH";
-import TR from "../../components/table/TR";
-import TD from "../../components/table/TD";
-import FilledButton from "../../components/buttons/FilledButton";
-import SearchAndFilters from "../../components/search/SearchAndFilters";
-import Badge from "../../components/badge/Badge";
-import Dropdown from "../../components/dropdown/Dropdown";
-import Alert from "../../components/alert/Alert";
-import Pagination from "../../components/pagination/Pagination";
-import Container from "../../components/container/Container";
-import Card from "../../components/card/Card";
+import Table from "../../../components/elements/table/Table";
+import Tbody from "../../../components/elements/tbody/Tbody";
+import TH from "../../../components/elements/th/TH";
+import TR from "../../../components/elements/tr/TR";
+import TD from "../../../components/elements/td/TD";
+import FilledButton from "../../../components/elements//elements/buttons/filledButton/FilledButton";
+import SearchAndFilters from "../../../components/elements/searchAndFilters/SearchAndFilters";
+import Badge from "../../../components/elements/Badge/Badge";
+import Dropdown from "../../../components/elements/dropdown/Dropdown";
+import Alert from "../../../components/elements/Alert/Alert";
+import Pagination from "../../../components/elements/Pagination/Pagination";
+import Container from "../../../components/elements/container/Container";
+import Card from "../../../components/elements/card/Card";
+import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
 
 const ManageUsers = () => {
   // State for users data
+
+  const {
+    allUsers,
+
+    getAllUsers,
+  } = useSuperAdmin();
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -47,31 +51,11 @@ const ManageUsers = () => {
     key: "FirstName",
     direction: "asc",
   });
+  const users = allUsers;
 
-  const token = localStorage.getItem("authToken");
-
-  // Fetch users
-  const {
-    data: users = [],
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await get(GET_ALL_USERS, token);
-      return res.Items.$values || [];
-    },
-    onError: (err) => {
-      console.error("Query Error", err);
-      setError(err.message || "Failed to load users");
-    },
-    onSuccess: () => {
-      setLoading(false);
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  // Filter and sort users
+  useEffect(() => {
+    getAllUsers();
+  }, []);
   useEffect(() => {
     let result = [...users];
 

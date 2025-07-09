@@ -1,5 +1,6 @@
 // components/buttons/FilledButton.jsx
-import Span from "../span/Span";
+
+import Span from "../../../span/Span";
 
 const FilledButton = ({
   isIcon,

@@ -2,25 +2,38 @@ import React, { useState, useEffect } from "react";
 import { usePDF } from "react-to-pdf";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
-import { GET_ALL_SUPERADMIN_SUBSCRIPTION } from "../../../services/apiRoutes";
-import { useQuery } from "@tanstack/react-query";
-import { get } from "../../../services/apiService";
+import {
+  FiDownload,
+  FiRefreshCw,
+  FiCalendar,
+  FiFilter,
+  FiUsers,
+  FiStar,
+  FiDollarSign,
+  FiPieChart,
+  FiBarChart2,
+  FiList,
+} from "react-icons/fi";
+import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
 
 Chart.register(...registerables);
 
 const SubscriptionReports = () => {
-  // State for reports data
+  const {
+    subscriptionPlans,
+    isLoading,
+    error,
+    getSubscriptionPlans,
+    clearError,
+  } = useSuperAdmin();
+
   const [reports, setReports] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [dateRange, setDateRange] = useState("30days");
   const [exporting, setExporting] = useState(false);
   const [filter, setFilter] = useState("all");
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-
-  const token = localStorage.getItem("authToken");
 
   // PDF Generation Setup
   const { toPDF, targetRef } = usePDF({
@@ -32,38 +45,17 @@ const SubscriptionReports = () => {
     },
   });
 
-  const {
-    data: subscriptionData,
-    isLoading,
-    isError,
-    error: queryError,
-    refetch,
-  } = useQuery({
-    queryKey: ["subscriptionPlans"],
-    queryFn: async () => {
-      try {
-        const response = await get(GET_ALL_SUPERADMIN_SUBSCRIPTION, token);
-        return response.$values || [];
-      } catch (err) {
-        console.error("API Error:", err);
-        throw err;
-      }
-    },
-    onError: (err) => {
-      console.error("Query Error:", err);
-      setError(err.message || "Failed to load subscription plans");
-    },
-  });
+  useEffect(() => {
+    getSubscriptionPlans();
+  }, []);
 
   useEffect(() => {
-    if (subscriptionData) {
-      generateReports(subscriptionData);
+    if (subscriptionPlans) {
+      generateReports(subscriptionPlans);
     }
-  }, [subscriptionData, filter]);
+  }, [subscriptionPlans, filter]);
 
   const generateReports = (data) => {
-    setLoading(true);
-
     // Filter data based on selected filter
     let filteredData = data;
     if (filter !== "all") {
@@ -120,7 +112,6 @@ const SubscriptionReports = () => {
     };
 
     setReports(mockReports);
-    setLoading(false);
   };
 
   // Handle export to PDF
@@ -229,283 +220,74 @@ const SubscriptionReports = () => {
     },
   };
 
-  // Custom styles
-  const styles = {
-    container: {
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "20px",
-      fontFamily: "Arial, sans-serif",
-    },
-    header: {
-      display: "flex",
-      alignItems: "center",
-      marginBottom: "2rem",
-      fontSize: "28px",
-      fontWeight: "bold",
-      color: "#333",
-    },
-    card: {
-      backgroundColor: "white",
-      borderRadius: "12px",
-      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.08)",
-      marginBottom: "2rem",
-      overflow: "hidden",
-    },
-    cardBody: {
-      padding: "1.5rem",
-    },
-    toolbar: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: "2rem",
-      flexWrap: "wrap",
-      gap: "1rem",
-    },
-    toolbarLeft: {
-      display: "flex",
-      gap: "0.5rem",
-      flexWrap: "wrap",
-    },
-    toolbarRight: {
-      display: "flex",
-      gap: "0.5rem",
-    },
-    button: {
-      padding: "8px 16px",
-      border: "none",
-      borderRadius: "6px",
-      fontSize: "14px",
-      fontWeight: "500",
-      cursor: "pointer",
-      transition: "all 0.2s ease",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "8px",
-      textDecoration: "none",
-    },
-    buttonPrimary: {
-      backgroundColor: "#007bff",
-      color: "white",
-    },
-    buttonSecondary: {
-      backgroundColor: "#6c757d",
-      color: "white",
-    },
-    buttonOutlineSecondary: {
-      backgroundColor: "transparent",
-      border: "1px solid #6c757d",
-      color: "#6c757d",
-    },
-    dropdown: {
-      position: "relative",
-      display: "inline-block",
-    },
-    dropdownMenu: {
-      position: "absolute",
-      top: "100%",
-      left: "0",
-      backgroundColor: "white",
-      borderRadius: "8px",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-      border: "1px solid #e3e6f0",
-      minWidth: "200px",
-      zIndex: 1000,
-      padding: "8px 0",
-    },
-    dropdownItem: {
-      display: "block",
-      width: "100%",
-      padding: "8px 16px",
-      fontSize: "14px",
-      color: "#495057",
-      textDecoration: "none",
-      border: "none",
-      background: "none",
-      textAlign: "left",
-      cursor: "pointer",
-      transition: "background-color 0.2s",
-    },
-    tabs: {
-      display: "flex",
-      borderBottom: "2px solid #e9ecef",
-      marginBottom: "2rem",
-    },
-    tab: {
-      padding: "12px 24px",
-      backgroundColor: "transparent",
-      border: "none",
-      borderBottom: "2px solid transparent",
-      cursor: "pointer",
-      fontSize: "14px",
-      fontWeight: "500",
-      color: "#6c757d",
-      transition: "all 0.2s",
-    },
-    activeTab: {
-      color: "#007bff",
-      borderBottomColor: "#007bff",
-    },
-    row: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "1rem",
-      marginBottom: "1rem",
-    },
-    col3: {
-      flex: "0 0 calc(25% - 0.75rem)",
-      minWidth: "250px",
-    },
-    col4: {
-      flex: "0 0 calc(33.33% - 0.67rem)",
-      minWidth: "300px",
-    },
-    col6: {
-      flex: "0 0 calc(50% - 0.5rem)",
-      minWidth: "400px",
-    },
-    col8: {
-      flex: "0 0 calc(66.67% - 0.67rem)",
-      minWidth: "500px",
-    },
-    col12: {
-      flex: "1",
-      minWidth: "300px",
-    },
-    statCard: {
-      backgroundColor: "white",
-      borderRadius: "8px",
-      padding: "1.5rem",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    statIcon: {
-      backgroundColor: "rgba(0, 123, 255, 0.1)",
-      padding: "12px",
-      borderRadius: "8px",
-      color: "#007bff",
-    },
-    chartContainer: {
-      height: "300px",
-      position: "relative",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      fontSize: "14px",
-    },
-    th: {
-      backgroundColor: "#f8f9fa",
-      padding: "12px",
-      textAlign: "left",
-      fontWeight: "600",
-      color: "#495057",
-      borderBottom: "2px solid #dee2e6",
-    },
-    td: {
-      padding: "12px",
-      borderBottom: "1px solid #dee2e6",
-      verticalAlign: "middle",
-    },
-    tableStriped: {
-      backgroundColor: "#f8f9fa",
-    },
-    spinner: {
-      width: "40px",
-      height: "40px",
-      border: "4px solid #f3f3f3",
-      borderTop: "4px solid #007bff",
-      borderRadius: "50%",
-      animation: "spin 1s linear infinite",
-      margin: "0 auto",
-    },
-    alert: {
-      padding: "1rem",
-      borderRadius: "8px",
-      marginBottom: "1rem",
-      backgroundColor: "#f8d7da",
-      color: "#721c24",
-      border: "1px solid #f5c6cb",
-    },
-    loadingContainer: {
-      textAlign: "center",
-      padding: "3rem",
-    },
+  const getPlanTypeBadge = (planType) => {
+    switch ((planType || "").toLowerCase()) {
+      case "free":
+        return "bg-gray-200 text-gray-800";
+      case "basic":
+        return "bg-blue-100 text-blue-800";
+      case "professional":
+        return "bg-indigo-100 text-indigo-800";
+      case "enterprise":
+        return "bg-green-100 text-green-800";
+      case "standard":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
-    <>
-      <style>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .dropdown-item:hover {
-                    background-color: #f8f9fa !important;
-                }
-                .button:hover {
-                    transform: translateY(-1px);
-                    opacity: 0.9;
-                }
-                .tab:hover {
-                    color: #007bff !important;
-                }
-                tr:nth-child(even) {
-                    background-color: #f8f9fa;
-                }
-                tr:hover {
-                    background-color: #e8f4fd;
-                }
-            `}</style>
-
-      <div style={styles.container}>
-        <h2 style={styles.header}>📊 Subscription Reports</h2>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-2">
+          <FiPieChart className="mr-2" />
+          Subscription Reports
+        </h2>
 
         {error && (
-          <div style={styles.alert}>
-            {error}
-            <button
-              style={{
-                background: "none",
-                border: "none",
-                float: "right",
-                fontSize: "20px",
-                cursor: "pointer",
-                color: "#721c24",
-              }}
-              onClick={() => setError(null)}
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+            role="alert"
+          >
+            <span className="block sm:inline">{error}</span>
+            <span
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+              onClick={clearError}
             >
-              ×
-            </button>
+              <svg
+                className="fill-current h-6 w-6 text-red-500"
+                role="button"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <title>Close</title>
+                <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+              </svg>
+            </span>
           </div>
         )}
 
-        <div style={styles.card}>
-          <div style={styles.cardBody}>
-            <div style={styles.toolbar}>
-              <div style={styles.toolbarLeft}>
-                <div style={styles.dropdown}>
-                  <button
-                    style={{
-                      ...styles.button,
-                      ...styles.buttonOutlineSecondary,
-                    }}
-                    onClick={() => setShowDateDropdown(!showDateDropdown)}
-                  >
-                    📅{" "}
-                    {dateRange === "30days"
-                      ? "Last 30 Days"
-                      : dateRange === "90days"
-                      ? "Last 90 Days"
-                      : "Last 12 Months"}
-                  </button>
-                  {showDateDropdown && (
-                    <div style={styles.dropdownMenu}>
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
+                <button
+                  className="flex items-center px-4 py-2 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setShowDateDropdown(!showDateDropdown)}
+                >
+                  <FiCalendar className="mr-2" />
+                  {dateRange === "30days"
+                    ? "Last 30 Days"
+                    : dateRange === "90days"
+                    ? "Last 90 Days"
+                    : "Last 12 Months"}
+                </button>
+                {showDateDropdown && (
+                  <div className="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200">
+                    <div className="py-1">
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setDateRange("30days");
                           setShowDateDropdown(false);
@@ -514,7 +296,7 @@ const SubscriptionReports = () => {
                         Last 30 Days
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setDateRange("90days");
                           setShowDateDropdown(false);
@@ -523,7 +305,7 @@ const SubscriptionReports = () => {
                         Last 90 Days
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setDateRange("12months");
                           setShowDateDropdown(false);
@@ -532,23 +314,23 @@ const SubscriptionReports = () => {
                         Last 12 Months
                       </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
 
-                <div style={styles.dropdown}>
-                  <button
-                    style={{
-                      ...styles.button,
-                      ...styles.buttonOutlineSecondary,
-                    }}
-                    onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  >
-                    🔍 {filter === "all" ? "All Plans" : filter}
-                  </button>
-                  {showFilterDropdown && (
-                    <div style={styles.dropdownMenu}>
+              <div className="relative">
+                <button
+                  className="flex items-center px-4 py-2 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                >
+                  <FiFilter className="mr-2" />
+                  {filter === "all" ? "All Plans" : filter}
+                </button>
+                {showFilterDropdown && (
+                  <div className="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200">
+                    <div className="py-1">
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setFilter("all");
                           setShowFilterDropdown(false);
@@ -557,7 +339,7 @@ const SubscriptionReports = () => {
                         All Plans
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setFilter("Free");
                           setShowFilterDropdown(false);
@@ -566,7 +348,7 @@ const SubscriptionReports = () => {
                         Free Only
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setFilter("Basic");
                           setShowFilterDropdown(false);
@@ -575,7 +357,7 @@ const SubscriptionReports = () => {
                         Basic Only
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setFilter("Professional");
                           setShowFilterDropdown(false);
@@ -584,7 +366,7 @@ const SubscriptionReports = () => {
                         Professional Only
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setFilter("Enterprise");
                           setShowFilterDropdown(false);
@@ -593,7 +375,7 @@ const SubscriptionReports = () => {
                         Enterprise Only
                       </button>
                       <button
-                        style={styles.dropdownItem}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => {
                           setFilter("Standard");
                           setShowFilterDropdown(false);
@@ -602,690 +384,447 @@ const SubscriptionReports = () => {
                         Standard Only
                       </button>
                     </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                className="flex items-center px-4 py-2 rounded-md text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={getSubscriptionPlans}
+                disabled={isLoading}
+              >
+                <FiRefreshCw
+                  className={`mr-2 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </button>
+              <button
+                className="flex items-center px-4 py-2 rounded-md text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+                onClick={handleExportPDF}
+                disabled={exporting || !reports || isLoading}
+              >
+                <FiDownload className="mr-2" />
+                {exporting ? "Exporting..." : "Export PDF"}
+              </button>
+            </div>
+          </div>
+
+          {(showDateDropdown || showFilterDropdown) && (
+            <div
+              className="fixed inset-0 z-0"
+              onClick={() => {
+                setShowDateDropdown(false);
+                setShowFilterDropdown(false);
+              }}
+            />
+          )}
+
+          {isLoading && !reports ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <>
+              <div className="border-b border-gray-200 mb-6">
+                <nav className="flex -mb-px">
+                  <button
+                    className={`mr-8 py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+                      activeTab === "overview"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                    onClick={() => setActiveTab("overview")}
+                  >
+                    <FiPieChart className="mr-2" />
+                    Overview
+                  </button>
+                  <button
+                    className={`mr-8 py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+                      activeTab === "trends"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                    onClick={() => setActiveTab("trends")}
+                  >
+                    <FiBarChart2 className="mr-2" />
+                    Analysis
+                  </button>
+                  <button
+                    className={`mr-8 py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+                      activeTab === "detailed"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                    onClick={() => setActiveTab("detailed")}
+                  >
+                    <FiList className="mr-2" />
+                    Detailed Data
+                  </button>
+                </nav>
+              </div>
+
+              {/* PDF Content - Hidden from view but used for PDF generation */}
+              <div ref={targetRef} className="absolute -left-full -top-full">
+                <div className="p-5 bg-white font-sans">
+                  <div className="text-center mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                      Subscription Plans Report
+                    </h1>
+                    <p className="text-gray-600">
+                      Generated on: {new Date().toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {reports && (
+                    <>
+                      <div className="mb-6">
+                        <h3 className="text-lg font-bold mb-4">
+                          Summary Statistics
+                        </h3>
+                        <table className="w-full border-collapse mb-4">
+                          <tbody>
+                            <tr>
+                              <td className="p-2 border border-gray-300 font-bold">
+                                Total Plans
+                              </td>
+                              <td className="p-2 border border-gray-300">
+                                {reports.overview.totalPlans}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="p-2 border border-gray-300 font-bold">
+                                Popular Plans
+                              </td>
+                              <td className="p-2 border border-gray-300">
+                                {reports.overview.popularPlans}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="p-2 border border-gray-300 font-bold">
+                                Average Monthly Price
+                              </td>
+                              <td className="p-2 border border-gray-300">
+                                {formatCurrency(
+                                  reports.overview.avgMonthlyPrice
+                                )}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="p-2 border border-gray-300 font-bold">
+                                Average Yearly Price
+                              </td>
+                              <td className="p-2 border border-gray-300">
+                                {formatCurrency(
+                                  reports.overview.avgYearlyPrice
+                                )}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="mb-6">
+                        <h3 className="text-lg font-bold mb-4">
+                          Detailed Plan Information
+                        </h3>
+                        <table className="w-full border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-gray-300 p-2 text-left">
+                                Name
+                              </th>
+                              <th className="border border-gray-300 p-2 text-left">
+                                Type
+                              </th>
+                              <th className="border border-gray-300 p-2 text-left">
+                                Monthly
+                              </th>
+                              <th className="border border-gray-300 p-2 text-left">
+                                Yearly
+                              </th>
+                              <th className="border border-gray-300 p-2 text-left">
+                                Users
+                              </th>
+                              <th className="border border-gray-300 p-2 text-left">
+                                Popular
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {reports.detailed.map((plan, index) => (
+                              <tr key={index}>
+                                <td className="border border-gray-300 p-1">
+                                  {plan.Name}
+                                </td>
+                                <td className="border border-gray-300 p-1">
+                                  {plan.PlanType}
+                                </td>
+                                <td className="border border-gray-300 p-1">
+                                  {formatCurrency(plan.MonthlyPrice)}
+                                </td>
+                                <td className="border border-gray-300 p-1">
+                                  {formatCurrency(plan.YearlyPrice)}
+                                </td>
+                                <td className="border border-gray-300 p-1">
+                                  {plan.MaxUsers}
+                                </td>
+                                <td className="border border-gray-300 p-1">
+                                  {plan.IsPopular ? "Yes" : "No"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
 
-              <div style={styles.toolbarRight}>
-                <button
-                  style={{ ...styles.button, ...styles.buttonOutlineSecondary }}
-                  onClick={() => refetch()}
-                >
-                  🔄 Refresh
-                </button>
-                <button
-                  style={{ ...styles.button, ...styles.buttonPrimary }}
-                  onClick={handleExportPDF}
-                  disabled={exporting || !reports}
-                >
-                  📥 {exporting ? "Exporting..." : "Export PDF"}
-                </button>
-              </div>
-            </div>
-
-            {loading || isLoading ? (
-              <div style={styles.loadingContainer}>
-                <div style={styles.spinner}></div>
-                <p style={{ marginTop: "1rem", color: "#6c757d" }}>
-                  Loading reports...
-                </p>
-              </div>
-            ) : (
-              <>
-                <div style={styles.tabs}>
-                  <button
-                    style={{
-                      ...styles.tab,
-                      ...(activeTab === "overview" ? styles.activeTab : {}),
-                    }}
-                    onClick={() => setActiveTab("overview")}
-                  >
-                    Overview
-                  </button>
-                  <button
-                    style={{
-                      ...styles.tab,
-                      ...(activeTab === "trends" ? styles.activeTab : {}),
-                    }}
-                    onClick={() => setActiveTab("trends")}
-                  >
-                    Analysis
-                  </button>
-                  <button
-                    style={{
-                      ...styles.tab,
-                      ...(activeTab === "detailed" ? styles.activeTab : {}),
-                    }}
-                    onClick={() => setActiveTab("detailed")}
-                  >
-                    Detailed Data
-                  </button>
-                </div>
-
-                {/* PDF Content - Hidden from view but used for PDF generation */}
-                <div
-                  ref={targetRef}
-                  style={{
-                    position: "absolute",
-                    left: "-9999px",
-                    top: "-9999px",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "20px",
-                      backgroundColor: "white",
-                      fontFamily: "Arial, sans-serif",
-                    }}
-                  >
-                    <div style={{ textAlign: "center", marginBottom: "30px" }}>
-                      <h1
-                        style={{
-                          fontSize: "24px",
-                          fontWeight: "bold",
-                          color: "#333",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        Subscription Plans Report
-                      </h1>
-                      <p style={{ color: "#666", marginBottom: "20px" }}>
-                        Generated on: {new Date().toLocaleDateString()}
-                      </p>
+              {/* Tab Content */}
+              {activeTab === "overview" && reports && (
+                <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+                      <div>
+                        <h6 className="text-gray-500 text-sm font-medium mb-1">
+                          Total Plans
+                        </h6>
+                        <h3 className="text-2xl font-bold">
+                          {reports.overview.totalPlans}
+                        </h3>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg text-blue-500">
+                        <FiUsers className="text-xl" />
+                      </div>
                     </div>
 
-                    {reports && (
-                      <>
-                        <div style={{ marginBottom: "30px" }}>
-                          <h3
-                            style={{
-                              fontSize: "18px",
-                              fontWeight: "bold",
-                              marginBottom: "15px",
-                            }}
-                          >
-                            Summary Statistics
-                          </h3>
-                          <table
-                            style={{
-                              width: "100%",
-                              borderCollapse: "collapse",
-                              marginBottom: "20px",
-                            }}
-                          >
-                            <tbody>
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                    fontWeight: "bold",
-                                  }}
-                                >
-                                  Total Plans
-                                </td>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                  }}
-                                >
-                                  {reports.overview.totalPlans}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                    fontWeight: "bold",
-                                  }}
-                                >
-                                  Popular Plans
-                                </td>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                  }}
-                                >
-                                  {reports.overview.popularPlans}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                    fontWeight: "bold",
-                                  }}
-                                >
-                                  Average Monthly Price
-                                </td>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                  }}
-                                >
-                                  {formatCurrency(
-                                    reports.overview.avgMonthlyPrice
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                    fontWeight: "bold",
-                                  }}
-                                >
-                                  Average Yearly Price
-                                </td>
-                                <td
-                                  style={{
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                  }}
-                                >
-                                  {formatCurrency(
-                                    reports.overview.avgYearlyPrice
-                                  )}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
+                    <div className="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+                      <div>
+                        <h6 className="text-gray-500 text-sm font-medium mb-1">
+                          Popular Plans
+                        </h6>
+                        <h3 className="text-2xl font-bold">
+                          {reports.overview.popularPlans}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          out of {reports.overview.totalPlans}
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 p-3 rounded-lg text-yellow-500">
+                        <FiStar className="text-xl" />
+                      </div>
+                    </div>
 
-                        <div style={{ marginBottom: "30px" }}>
-                          <h3
-                            style={{
-                              fontSize: "18px",
-                              fontWeight: "bold",
-                              marginBottom: "15px",
-                            }}
-                          >
-                            Detailed Plan Information
-                          </h3>
-                          <table
-                            style={{
-                              width: "100%",
-                              borderCollapse: "collapse",
-                              fontSize: "12px",
-                            }}
-                          >
-                            <thead>
-                              <tr style={{ backgroundColor: "#f8f9fa" }}>
-                                <th
-                                  style={{
-                                    border: "1px solid #ddd",
-                                    padding: "8px",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  Name
-                                </th>
-                                <th
-                                  style={{
-                                    border: "1px solid #ddd",
-                                    padding: "8px",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  Type
-                                </th>
-                                <th
-                                  style={{
-                                    border: "1px solid #ddd",
-                                    padding: "8px",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  Monthly
-                                </th>
-                                <th
-                                  style={{
-                                    border: "1px solid #ddd",
-                                    padding: "8px",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  Yearly
-                                </th>
-                                <th
-                                  style={{
-                                    border: "1px solid #ddd",
-                                    padding: "8px",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  Users
-                                </th>
-                                <th
-                                  style={{
-                                    border: "1px solid #ddd",
-                                    padding: "8px",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  Popular
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {reports.detailed.map((plan, index) => (
-                                <tr key={index}>
-                                  <td
-                                    style={{
-                                      border: "1px solid #ddd",
-                                      padding: "6px",
-                                    }}
-                                  >
-                                    {plan.Name}
-                                  </td>
-                                  <td
-                                    style={{
-                                      border: "1px solid #ddd",
-                                      padding: "6px",
-                                    }}
+                    <div className="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+                      <div>
+                        <h6 className="text-gray-500 text-sm font-medium mb-1">
+                          Avg Monthly
+                        </h6>
+                        <h3 className="text-2xl font-bold">
+                          {formatCurrency(reports.overview.avgMonthlyPrice)}
+                        </h3>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg text-green-500">
+                        <FiDollarSign className="text-xl" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+                      <div>
+                        <h6 className="text-gray-500 text-sm font-medium mb-1">
+                          Avg Yearly
+                        </h6>
+                        <h3 className="text-2xl font-bold">
+                          {formatCurrency(reports.overview.avgYearlyPrice)}
+                        </h3>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg text-purple-500">
+                        <FiDollarSign className="text-xl" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div className="lg:col-span-2 bg-white rounded-lg shadow p-6">
+                      <h5 className="text-lg font-bold mb-4">
+                        Plan Pricing Comparison
+                      </h5>
+                      <div className="h-80">
+                        <Bar data={pricingChartData} options={chartOptions} />
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h5 className="text-lg font-bold mb-4">
+                        Plan Type Distribution
+                      </h5>
+                      <div className="h-80">
+                        <Pie
+                          data={planDistributionData}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: {
+                                position: "right",
+                              },
+                              tooltip: {
+                                callbacks: {
+                                  label: function (context) {
+                                    const label = context.label || "";
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce(
+                                      (a, b) => a + b,
+                                      0
+                                    );
+                                    const percentage = Math.round(
+                                      (value / total) * 100
+                                    );
+                                    return `${label}: ${value} (${percentage}%)`;
+                                  },
+                                },
+                              },
+                            },
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-lg shadow p-6">
+                      <h5 className="text-lg font-bold mb-4">
+                        Average Pricing
+                      </h5>
+                      <div className="h-80">
+                        <Bar
+                          data={{
+                            labels: ["Monthly", "Yearly"],
+                            datasets: [
+                              {
+                                label: "Average Price",
+                                data: [
+                                  reports.overview.avgMonthlyPrice,
+                                  reports.overview.avgYearlyPrice,
+                                ],
+                                backgroundColor: [
+                                  "rgba(54, 162, 235, 0.7)",
+                                  "rgba(75, 192, 192, 0.7)",
+                                ],
+                                borderWidth: 1,
+                              },
+                            ],
+                          }}
+                          options={chartOptions}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "detailed" && reports && (
+                <div>
+                  <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="p-6">
+                      <h5 className="text-lg font-bold mb-4">
+                        All Subscription Plans
+                      </h5>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Type
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Description
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Monthly Price
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Yearly Price
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Max Users
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Max Employees
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Max Products
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Popular
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {reports.detailed.map((plan, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {plan.Name}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span
+                                    className={`px-2 py-1 text-xs font-semibold rounded-full ${getPlanTypeBadge(
+                                      plan.PlanType
+                                    )}`}
                                   >
                                     {plan.PlanType}
-                                  </td>
-                                  <td
-                                    style={{
-                                      border: "1px solid #ddd",
-                                      padding: "6px",
-                                    }}
-                                  >
-                                    {formatCurrency(plan.MonthlyPrice)}
-                                  </td>
-                                  <td
-                                    style={{
-                                      border: "1px solid #ddd",
-                                      padding: "6px",
-                                    }}
-                                  >
-                                    {formatCurrency(plan.YearlyPrice)}
-                                  </td>
-                                  <td
-                                    style={{
-                                      border: "1px solid #ddd",
-                                      padding: "6px",
-                                    }}
-                                  >
-                                    {plan.MaxUsers}
-                                  </td>
-                                  <td
-                                    style={{
-                                      border: "1px solid #ddd",
-                                      padding: "6px",
-                                    }}
-                                  >
-                                    {plan.IsPopular ? "Yes" : "No"}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </>
-                    )}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                                  {plan.Description}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                                  {formatCurrency(plan.MonthlyPrice)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                                  {formatCurrency(plan.YearlyPrice)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {plan.MaxUsers}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {plan.MaxEmployees}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {plan.MaxProducts}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {plan.IsPopular ? (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      ⭐ Yes
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                      No
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Tab Content */}
-                {activeTab === "overview" && (
-                  <div>
-                    <div style={styles.row}>
-                      <div style={styles.col3}>
-                        <div style={styles.statCard}>
-                          <div>
-                            <h6
-                              style={{
-                                color: "#6c757d",
-                                marginBottom: "8px",
-                                fontSize: "14px",
-                              }}
-                            >
-                              Total Plans
-                            </h6>
-                            <h3
-                              style={{
-                                margin: "0",
-                                fontSize: "24px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {reports.overview.totalPlans}
-                            </h3>
-                          </div>
-                          <div style={styles.statIcon}>👥</div>
-                        </div>
-                      </div>
-
-                      <div style={styles.col3}>
-                        <div style={styles.statCard}>
-                          <div>
-                            <h6
-                              style={{
-                                color: "#6c757d",
-                                marginBottom: "8px",
-                                fontSize: "14px",
-                              }}
-                            >
-                              Popular Plans
-                            </h6>
-                            <h3
-                              style={{
-                                margin: "0",
-                                fontSize: "24px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {reports.overview.popularPlans}
-                            </h3>
-                            <small style={{ color: "#6c757d" }}>
-                              out of {reports.overview.totalPlans}
-                            </small>
-                          </div>
-                          <div
-                            style={{
-                              ...styles.statIcon,
-                              backgroundColor: "rgba(255, 193, 7, 0.1)",
-                              color: "#ffc107",
-                            }}
-                          >
-                            ⭐
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={styles.row}>
-                      <div style={styles.col8}>
-                        <div style={styles.card}>
-                          <div style={styles.cardBody}>
-                            <h5
-                              style={{
-                                marginBottom: "1rem",
-                                fontSize: "18px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              Plan Pricing Comparison
-                            </h5>
-                            <div style={styles.chartContainer}>
-                              <Bar
-                                data={pricingChartData}
-                                options={chartOptions}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div style={styles.col4}>
-                        <div style={styles.card}>
-                          <div style={styles.cardBody}>
-                            <h5
-                              style={{
-                                marginBottom: "1rem",
-                                fontSize: "18px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              Plan Type Distribution
-                            </h5>
-                            <div style={styles.chartContainer}>
-                              <Pie
-                                data={planDistributionData}
-                                options={{
-                                  responsive: true,
-                                  maintainAspectRatio: false,
-                                  plugins: {
-                                    legend: {
-                                      position: "right",
-                                    },
-                                    tooltip: {
-                                      callbacks: {
-                                        label: function (context) {
-                                          const label = context.label || "";
-                                          const value = context.raw || 0;
-                                          const total =
-                                            context.dataset.data.reduce(
-                                              (a, b) => a + b,
-                                              0
-                                            );
-                                          const percentage = Math.round(
-                                            (value / total) * 100
-                                          );
-                                          return `${label}: ${value} (${percentage}%)`;
-                                        },
-                                      },
-                                    },
-                                  },
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div style={styles.col6}>
-                        <div style={styles.card}>
-                          <div style={styles.cardBody}>
-                            <h5
-                              style={{
-                                marginBottom: "1rem",
-                                fontSize: "18px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              Average Pricing
-                            </h5>
-                            <div style={styles.chartContainer}>
-                              <Bar
-                                data={{
-                                  labels: ["Monthly", "Yearly"],
-                                  datasets: [
-                                    {
-                                      label: "Average Price",
-                                      data: [
-                                        reports.overview.avgMonthlyPrice,
-                                        reports.overview.avgYearlyPrice,
-                                      ],
-                                      backgroundColor: [
-                                        "rgba(54, 162, 235, 0.7)",
-                                        "rgba(75, 192, 192, 0.7)",
-                                      ],
-                                      borderWidth: 1,
-                                    },
-                                  ],
-                                }}
-                                options={chartOptions}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "detailed" && (
-                  <div>
-                    <div style={styles.row}>
-                      <div style={styles.col12}>
-                        <div style={styles.card}>
-                          <div style={styles.cardBody}>
-                            <h5
-                              style={{
-                                marginBottom: "1rem",
-                                fontSize: "18px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              All Subscription Plans
-                            </h5>
-                            <div style={{ overflowX: "auto" }}>
-                              <table style={styles.table}>
-                                <thead>
-                                  <tr>
-                                    <th style={styles.th}>Name</th>
-                                    <th style={styles.th}>Type</th>
-                                    <th style={styles.th}>Description</th>
-                                    <th style={styles.th}>Monthly Price</th>
-                                    <th style={styles.th}>Yearly Price</th>
-                                    <th style={styles.th}>Max Users</th>
-                                    <th style={styles.th}>Max Employees</th>
-                                    <th style={styles.th}>Max Products</th>
-                                    <th style={styles.th}>Popular</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {reports.detailed.map((plan, index) => (
-                                    <tr
-                                      key={index}
-                                      style={
-                                        index % 2 === 1
-                                          ? styles.tableStriped
-                                          : {}
-                                      }
-                                    >
-                                      <td style={styles.td}>{plan.Name}</td>
-                                      <td style={styles.td}>
-                                        <span
-                                          style={{
-                                            padding: "4px 8px",
-                                            borderRadius: "12px",
-                                            fontSize: "12px",
-                                            backgroundColor:
-                                              plan.PlanType === "Free"
-                                                ? "#e7f3ff"
-                                                : plan.PlanType === "Basic"
-                                                ? "#fff3cd"
-                                                : plan.PlanType ===
-                                                  "Professional"
-                                                ? "#d4edda"
-                                                : plan.PlanType === "Enterprise"
-                                                ? "#f8d7da"
-                                                : "#e2e3e5",
-                                            color:
-                                              plan.PlanType === "Free"
-                                                ? "#004085"
-                                                : plan.PlanType === "Basic"
-                                                ? "#856404"
-                                                : plan.PlanType ===
-                                                  "Professional"
-                                                ? "#155724"
-                                                : plan.PlanType === "Enterprise"
-                                                ? "#721c24"
-                                                : "#383d41",
-                                          }}
-                                        >
-                                          {plan.PlanType}
-                                        </span>
-                                      </td>
-                                      <td style={styles.td}>
-                                        <div
-                                          style={{
-                                            maxWidth: "200px",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                          }}
-                                        >
-                                          {plan.Description}
-                                        </div>
-                                      </td>
-                                      <td style={styles.td}>
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            color: "#28a745",
-                                          }}
-                                        >
-                                          {formatCurrency(plan.MonthlyPrice)}
-                                        </span>
-                                      </td>
-                                      <td style={styles.td}>
-                                        <span
-                                          style={{
-                                            fontWeight: "bold",
-                                            color: "#007bff",
-                                          }}
-                                        >
-                                          {formatCurrency(plan.YearlyPrice)}
-                                        </span>
-                                      </td>
-                                      <td style={styles.td}>{plan.MaxUsers}</td>
-                                      <td style={styles.td}>
-                                        {plan.MaxEmployees}
-                                      </td>
-                                      <td style={styles.td}>
-                                        {plan.MaxProducts}
-                                      </td>
-                                      <td style={styles.td}>
-                                        {plan.IsPopular ? (
-                                          <span
-                                            style={{
-                                              padding: "4px 8px",
-                                              borderRadius: "12px",
-                                              fontSize: "12px",
-                                              backgroundColor: "#fff3cd",
-                                              color: "#856404",
-                                              fontWeight: "bold",
-                                            }}
-                                          >
-                                            ⭐ Yes
-                                          </span>
-                                        ) : (
-                                          <span
-                                            style={{
-                                              padding: "4px 8px",
-                                              borderRadius: "12px",
-                                              fontSize: "12px",
-                                              backgroundColor: "#e2e3e5",
-                                              color: "#6c757d",
-                                            }}
-                                          >
-                                            No
-                                          </span>
-                                        )}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+              )}
+            </>
+          )}
         </div>
       </div>
-
-      {/* Click outside handlers */}
-      {(showDateDropdown || showFilterDropdown) && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 999,
-          }}
-          onClick={() => {
-            setShowDateDropdown(false);
-            setShowFilterDropdown(false);
-          }}
-        />
-      )}
-    </>
+    </div>
   );
 };
+
 export default SubscriptionReports;
