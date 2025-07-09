@@ -60,6 +60,7 @@ function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [formError, setFormError] = useState('');
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Helper function to save authentication data to localStorage
   const saveAuthDataToLocalStorage = (authData) => {
@@ -84,6 +85,9 @@ function LoginPage() {
       localStorage.setItem('requirePasswordChange', authData.RequirePasswordChange.toString());
       
       console.log('Authentication data saved to localStorage successfully');
+      console.log('Token saved:', authData.Token);
+      console.log('User data saved:', authData.User);
+      console.log('Role saved:', authData.Role);
     } catch (error) {
       console.error('Error saving authentication data to localStorage:', error);
     }
@@ -91,22 +95,15 @@ function LoginPage() {
 
   // Helper function to determine redirect path based on role
   const getRedirectPath = (role) => {
-    switch (role) {
-      case 'SuperAdmin':
-        return '/admin/superadmin/dashboard';
-      case 'Admin':
-        return '/admin/dashboard';
-      case 'Manager':
-        return '/admin/dashboard';
-      case 'Employee':
-        return '/admin/dashboard';
-      case 'User':
-        return '/dashboard';
-      case 'Viewer':
-        return '/dashboard';
-      default:
-        return '/dashboard';
-    }
+    const roleMap = {
+      'SuperAdmin': '/admin/superadmin/dashboard',
+      'Admin': '/admin/dashboard',
+      'Manager': '/admin/dashboard',
+      'Employee': '/admin/dashboard',
+      'User': '/dashboard',
+      'Viewer': '/dashboard'
+    };
+    return roleMap[role] || '/dashboard';
   };
 
   // Load remembered credentials on component mount
@@ -125,14 +122,38 @@ function LoginPage() {
     }
   }, []);
 
-  // Role-based navigation after successful login
+  // Check if user is already authenticated on component mount
   useEffect(() => {
-    if (isAuthenticated && user) {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    const storedRole = localStorage.getItem('role');
+    
+    console.log('Checking existing auth:', { token: !!token, user: !!storedUser, role: storedRole });
+    
+    if (token && storedUser && storedRole && !isSubmitting) {
+      try {
+        const redirectPath = getRedirectPath(storedRole);
+        console.log('User already authenticated, redirecting to:', redirectPath);
+        navigate(redirectPath, { replace: true });
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        // Clear invalid data
+        localStorage.clear();
+      }
+    }
+  }, [navigate, isSubmitting]);
+
+  // Role-based navigation after successful login from context
+  useEffect(() => {
+    if (isAuthenticated && user && !isSubmitting) {
+      console.log('Context authentication detected:', { user, isAuthenticated });
+      
       // Clear any previous errors
-      clearError();
+      if (clearError) clearError();
       
       // Handle password change requirement
       if (requirePasswordChange) {
+        console.log('Password change required, redirecting...');
         navigate('/change-password', { replace: true });
         return;
       }
@@ -141,10 +162,10 @@ function LoginPage() {
       const userRole = user.role || user.Role;
       const redirectPath = getRedirectPath(userRole);
       
-      console.log('Login successful, user role:', userRole, 'Redirecting to:', redirectPath);
+      console.log('Navigating from context - User role:', userRole, 'Redirecting to:', redirectPath);
       navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, user, navigate, clearError, requirePasswordChange]);
+  }, [isAuthenticated, user, navigate, clearError, requirePasswordChange, isSubmitting]);
 
   // Form validation
   useEffect(() => {
@@ -156,78 +177,98 @@ function LoginPage() {
     if (formError) {
       setFormError('');
     }
-    if (error) {
+    if (error && clearError) {
       clearError();
     }
-  }, [email, password]);
+  }, [email, password, formError, error, clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
+    setIsSubmitting(true);
 
     // Basic validation
     if (!email.includes('@')) {
       setFormError('Please enter a valid email address');
+      setIsSubmitting(false);
       return;
     }
 
     if (password.length < 6) {
       setFormError('Password must be at least 6 characters long');
+      setIsSubmitting(false);
       return;
     }
 
     try {
+      console.log('Attempting login with:', { email });
+      
       // Call login function which should return the auth response
       const authResponse = await login({ email, password });
       
-      console.log('Login response:', authResponse);
+      console.log('Login response received:', authResponse);
 
-      // Save authentication data to localStorage
+      // Check if login was successful
       if (authResponse && authResponse.Success) {
+        console.log('Login successful, saving to localStorage...');
+        
+        // Save authentication data to localStorage
         saveAuthDataToLocalStorage(authResponse);
         
         // Handle remember me functionality
         if (rememberMe) {
           const credentialsToSave = { email, password };
           localStorage.setItem('rememberedCredentials', JSON.stringify(credentialsToSave));
+          console.log('Credentials saved for remember me');
         } else {
           localStorage.removeItem('rememberedCredentials');
         }
         
+        // Check for password change requirement
+        if (authResponse.RequirePasswordChange) {
+          console.log('Password change required');
+          navigate('/change-password', { replace: true });
+          return;
+        }
+        
         // Navigate based on role
         const redirectPath = getRedirectPath(authResponse.Role);
-        console.log('Navigating to:', redirectPath);
-        navigate(redirectPath, { replace: true });
+        console.log('Login successful, navigating to:', redirectPath);
+        
+        // Small delay to ensure localStorage is written
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true });
+        }, 100);
+        
       } else {
-        setFormError(authResponse?.Message || 'Login failed. Please try again.');
+        // Login failed
+        const errorMessage = authResponse?.Message || authResponse?.message || 'Login failed. Please check your credentials.';
+        console.error('Login failed:', errorMessage);
+        setFormError(errorMessage);
       }
       
     } catch (err) {
       console.error('Login error:', err);
-      setFormError(err.message || 'An unexpected error occurred. Please try again.');
+      const errorMessage = err.response?.data?.Message || 
+                          err.response?.data?.message || 
+                          err.message || 
+                          'An unexpected error occurred. Please try again.';
+      setFormError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Check if user is already authenticated on component mount
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    const storedRole = localStorage.getItem('role');
-    
-    if (token && storedUser && storedRole) {
-      try {
-        // const userData = JSON.parse(storedUser);
-        const redirectPath = getRedirectPath(storedRole);
-        navigate(redirectPath, { replace: true });
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        // Clear invalid data
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('role');
-      }
-    }
-  }, [navigate]);
+  // Debug: Log current state
+  console.log('Current login page state:', {
+    isAuthenticated,
+    user,
+    isLoading,
+    isSubmitting,
+    formError,
+    error,
+    hasToken: !!localStorage.getItem('token')
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
@@ -348,6 +389,7 @@ function LoginPage() {
                             placeholder="Enter your email address"
                             className="block w-full pl-10 pr-3 py-3 border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
                             required
+                            disabled={isSubmitting}
                           />
                         </div>
                       </div>
@@ -368,11 +410,13 @@ function LoginPage() {
                             placeholder="Enter your password"
                             className="block w-full pl-10 pr-12 py-3 border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder-gray-500"
                             required
+                            disabled={isSubmitting}
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg transition-colors duration-200"
+                            disabled={isSubmitting}
                           >
                             {showPassword ? (
                               <EyeOff className="h-5 w-5 text-gray-400" />
@@ -392,6 +436,7 @@ function LoginPage() {
                             checked={rememberMe}
                             onChange={() => setRememberMe(!rememberMe)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            disabled={isSubmitting}
                           />
                           <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
                             Remember credentials
@@ -408,15 +453,15 @@ function LoginPage() {
                       {/* Login Button */}
                       <button
                         type="submit"
-                        disabled={isLoading || !isFormValid}
+                        disabled={isLoading || isSubmitting || !isFormValid}
                         className="w-full py-3 px-4 border border-transparent rounded-xl shadow-sm text-white font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         style={{
-                          background: isLoading || !isFormValid 
+                          background: (isLoading || isSubmitting || !isFormValid) 
                             ? '#9CA3AF' 
                             : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                         }}
                       >
-                        {isLoading ? (
+                        {(isLoading || isSubmitting) ? (
                           <div className="flex items-center justify-center">
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                             Signing you in...
