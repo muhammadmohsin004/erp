@@ -1,10 +1,9 @@
-/* eslint-disable react/prop-types */
+import React from 'react';
 import { IoSearch } from "react-icons/io5";
 import Container from "../container/Container";
 
 const SearchAndFilters = ({
   isFocused,
-  setIsFocused,
   searchValue,
   setSearchValue,
 }) => {
