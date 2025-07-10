@@ -484,11 +484,74 @@ const makeApiCall = async (url, options = {}) => {
 
   try {
     console.log('Making API call to:', url);
+    console.log('Request method:', options.method || 'GET');
+    console.log('Request headers:', { ...defaultOptions.headers, ...options.headers });
+    
+    // Log request body for POST/PUT requests
+    if (options.body) {
+      console.log('Request body:', options.body);
+      console.log('Request body parsed:', JSON.parse(options.body));
+    }
+    
     const response = await fetch(url, { ...defaultOptions, ...options });
     
+    console.log('Response status:', response.status);
+    console.log('Response statusText:', response.statusText);
+    console.log('Response headers:', Object.fromEntries(response.headers));
+    
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.Message || `HTTP error! status: ${response.status}`);
+      // Enhanced error handling to get more details
+      let errorData;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        errorData = await response.json();
+      } else {
+        const errorText = await response.text();
+        console.error('Non-JSON error response:', errorText);
+        errorData = { message: errorText };
+      }
+      
+      console.error('Detailed error response:', errorData);
+      
+      // Create comprehensive error message
+      let errorMessage = `HTTP ${response.status} ${response.statusText}`;
+      
+      if (errorData.Message) {
+        errorMessage += `: ${errorData.Message}`;
+      } else if (errorData.message) {
+        errorMessage += `: ${errorData.message}`;
+      } else if (errorData.title) {
+        errorMessage += `: ${errorData.title}`;
+      }
+      
+      // Include validation errors if present (check both 'errors' and 'ValidationErrors')
+      if (errorData.errors || errorData.ValidationErrors) {
+        const validationErrors = errorData.errors || errorData.ValidationErrors;
+        console.error('Validation errors:', validationErrors);
+        
+        if (Array.isArray(validationErrors)) {
+          // If it's an array of strings
+          errorMessage += ` | Validation errors: ${validationErrors.join(', ')}`;
+        } else if (typeof validationErrors === 'object') {
+          // If it's an object with key-value pairs
+          const validationErrorString = Object.entries(validationErrors)
+            .map(([key, values]) => {
+              const errorList = Array.isArray(values) ? values.join(', ') : values;
+              return `${key}: ${errorList}`;
+            })
+            .join('; ');
+          errorMessage += ` | Validation errors: ${validationErrorString}`;
+        }
+      }
+      
+      // Include trace ID if available for debugging
+      if (errorData.traceId) {
+        console.error('Error trace ID:', errorData.traceId);
+        errorMessage += ` | Trace ID: ${errorData.traceId}`;
+      }
+      
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
@@ -506,6 +569,9 @@ const makeApiCall = async (url, options = {}) => {
     }
     if (error.message.includes('ERR_CONNECTION_REFUSED')) {
       throw new Error('Connection refused. The API server might be down.');
+    }
+    if (error.message.includes('Failed to fetch')) {
+      throw new Error('Network error: Failed to connect to the server. Please check your internet connection.');
     }
     
     throw error;
@@ -605,26 +671,46 @@ export const ProductsManagerProvider = ({ children }) => {
     }
   }, []);
 
-  const createProduct = useCallback(async (productData) => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const response = await makeApiCall(API_BASE_URLS.products, {
-        method: 'POST',
-        body: JSON.stringify(productData)
-      });
-      
-      if (response.Success) {
-        dispatch({ type: actionTypes.ADD_PRODUCT, payload: response.Data });
-        return response.Data;
-      } else {
-        throw new Error(response.Message || 'Failed to create product');
-      }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
+const createProduct = useCallback(async (productData) => {
+  try {
+    dispatch({ type: actionTypes.SET_LOADING, payload: true });
+    
+    console.log("=== CONTEXT: Creating product ===");
+    console.log("Product data:", productData);
+    
+    // Debug: Check if token exists
+    const token = getAuthToken();
+    console.log("Token exists:", !!token);
+    console.log("Token preview:", token ? `${token.substring(0, 20)}...` : "No token");
+    
+    const response = await makeApiCall(API_BASE_URLS.products, {
+      method: 'POST',
+      body: JSON.stringify(productData)
+    });
+    
+    console.log("Create product response:", response);
+    
+    if (response.Success) {
+      dispatch({ type: actionTypes.ADD_PRODUCT, payload: response.Data });
+      return response.Data;
+    } else {
+      throw new Error(response.Message || 'Failed to create product');
     }
-  }, []);
+  } catch (error) {
+    console.error("Context create product error:", error);
+    
+    // Enhanced error logging for 401
+    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+      console.error("=== AUTHENTICATION ERROR ===");
+      console.error("Token from localStorage:", localStorage.getItem('token') ? 'EXISTS' : 'MISSING');
+      console.error("Token from sessionStorage:", sessionStorage.getItem('token') ? 'EXISTS' : 'MISSING');
+      console.error("Current user from Redux:", window.store?.getState?.()?.auth);
+    }
+    
+    dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+    throw error;
+  }
+}, []);
 
   const updateProduct = useCallback(async (id, productData) => {
     try {
@@ -898,122 +984,168 @@ export const ProductsManagerProvider = ({ children }) => {
   }, []);
 
   // Product Images Operations
-  const getProductImages = useCallback(async () => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const response = await makeApiCall(API_BASE_URLS.productImages);
-      
-      if (response.Success) {
-        dispatch({ type: actionTypes.SET_PRODUCT_IMAGES, payload: response });
-      } else {
-        throw new Error(response.Message || 'Failed to fetch product images');
-      }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+ const getProductImages = useCallback(async () => {
+  try {
+    dispatch({ type: actionTypes.SET_LOADING, payload: true });
+    
+    const response = await makeApiCall(API_BASE_URLS.productImages);
+    
+    if (response.Success) {
+      dispatch({ type: actionTypes.SET_PRODUCT_IMAGES, payload: response });
+    } else {
+      throw new Error(response.Message || 'Failed to fetch product images');
     }
-  }, []);
+  } catch (error) {
+    dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+  }
+}, []);
 
-  const getProductImagesByProductId = useCallback(async (productId) => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const response = await makeApiCall(`${API_BASE_URLS.productImages}/ByProduct/${productId}`);
-      
-      if (response.Success) {
-        dispatch({ type: actionTypes.SET_CURRENT_PRODUCT_IMAGES, payload: response.Data });
-        return response.Data;
-      } else {
-        throw new Error(response.Message || 'Failed to fetch product images');
-      }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
+const getProductImagesByProductId = useCallback(async (productId) => {
+  try {
+    dispatch({ type: actionTypes.SET_LOADING, payload: true });
+    
+    const response = await makeApiCall(`${API_BASE_URLS.productImages}/ByProduct/${productId}`);
+    
+    if (response.Success) {
+      dispatch({ type: actionTypes.SET_CURRENT_PRODUCT_IMAGES, payload: response.Data });
+      return response.Data;
+    } else {
+      throw new Error(response.Message || 'Failed to fetch product images');
     }
-  }, []);
+  } catch (error) {
+    dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+    return null;
+  }
+}, []);
 
-  const createProductImage = useCallback(async (imageData) => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const formData = new FormData();
-      Object.keys(imageData).forEach(key => {
-        formData.append(key, imageData[key]);
-      });
-      
-      const response = await makeApiCall(API_BASE_URLS.productImages, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-          // Don't set Content-Type for FormData
-        },
-        body: formData
-      });
-      
-      if (response.Success) {
-        dispatch({ type: actionTypes.ADD_PRODUCT_IMAGE, payload: response.Data });
-        return response.Data;
-      } else {
-        throw new Error(response.Message || 'Failed to create product image');
+// FIXED - Single Image Upload
+const createProductImage = useCallback(async (formData) => {
+  try {
+    dispatch({ type: actionTypes.SET_LOADING, payload: true });
+    
+    const token = getAuthToken();
+    
+    console.log('=== CONTEXT: Creating single image ===');
+    console.log('FormData received:', formData);
+    
+    // Log FormData contents for debugging
+    if (formData instanceof FormData) {
+      console.log('FormData entries:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+        if (value instanceof File) {
+          console.log(`  File details - Name: ${value.name}, Size: ${value.size}, Type: ${value.type}`);
+        }
       }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
     }
-  }, []);
+    
+    const response = await fetch(API_BASE_URLS.productImages, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // CRITICAL: Don't set Content-Type for FormData - browser sets it automatically with boundary
+      },
+      body: formData // Send FormData directly
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('Upload successful:', result);
+    
+    if (result.Success) {
+      dispatch({ type: actionTypes.ADD_PRODUCT_IMAGE, payload: result.Data });
+      return result.Data;
+    } else {
+      throw new Error(result.Message || 'Failed to create product image');
+    }
+  } catch (error) {
+    console.error('Context upload error:', error);
+    dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+    throw error; // Re-throw to let component handle it
+  }
+}, []);
 
-  const createMultipleProductImages = useCallback(async (imagesData) => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const formData = new FormData();
-      formData.append('ProductId', imagesData.ProductId);
-      formData.append('AltText', imagesData.AltText || '');
-      
-      imagesData.ImageFiles.forEach((file) => {
-        formData.append(`ImageFiles`, file);
-      });
-      
-      const response = await makeApiCall(`${API_BASE_URLS.productImages}/Multiple`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-          // Don't set Content-Type for FormData
-        },
-        body: formData
-      });
-      
-      if (response.Success) {
-        dispatch({ type: actionTypes.ADD_MULTIPLE_PRODUCT_IMAGES, payload: response.Data.UploadedImages });
-        return response.Data;
-      } else {
-        throw new Error(response.Message || 'Failed to create multiple product images');
+// FIXED - Multiple Images Upload
+const createMultipleProductImages = useCallback(async (formData) => {
+  try {
+    dispatch({ type: actionTypes.SET_LOADING, payload: true });
+    
+    const token = getAuthToken();
+    
+    console.log('=== CONTEXT: Creating multiple images ===');
+    console.log('FormData received:', formData);
+    
+    // Log FormData contents for debugging
+    if (formData instanceof FormData) {
+      console.log('FormData entries:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+        if (value instanceof File) {
+          console.log(`  File details - Name: ${value.name}, Size: ${value.size}, Type: ${value.type}`);
+        }
       }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
     }
-  }, []);
+    
+    const response = await fetch(`${API_BASE_URLS.productImages}/Multiple`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // CRITICAL: Don't set Content-Type for FormData
+      },
+      body: formData // Send FormData directly
+    });
+    
+    console.log('Multiple upload response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Multiple upload error response:', errorText);
+      throw new Error(`Multiple upload failed: ${response.status} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('Multiple upload successful:', result);
+    
+    if (result.Success) {
+      dispatch({ type: actionTypes.ADD_MULTIPLE_PRODUCT_IMAGES, payload: result.Data.UploadedImages });
+      return result.Data;
+    } else {
+      throw new Error(result.Message || 'Failed to create multiple product images');
+    }
+  } catch (error) {
+    console.error('Context multiple upload error:', error);
+    dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+    throw error; // Re-throw to let component handle it
+  }
+}, []);
 
-  const deleteProductImage = useCallback(async (id) => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const response = await makeApiCall(`${API_BASE_URLS.productImages}/${id}`, {
-        method: 'DELETE'
-      });
-      
-      if (response.Success) {
-        dispatch({ type: actionTypes.DELETE_PRODUCT_IMAGE, payload: id });
-        return true;
-      } else {
-        throw new Error(response.Message || 'Failed to delete product image');
-      }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return false;
+const deleteProductImage = useCallback(async (id) => {
+  try {
+    dispatch({ type: actionTypes.SET_LOADING, payload: true });
+    
+    const response = await makeApiCall(`${API_BASE_URLS.productImages}/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if (response.Success) {
+      dispatch({ type: actionTypes.DELETE_PRODUCT_IMAGE, payload: id });
+      return true;
+    } else {
+      throw new Error(response.Message || 'Failed to delete product image');
     }
-  }, []);
+  } catch (error) {
+    dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+    return false;
+  }
+}, []);
 
   // Statistics Operations
   const getStatisticsOverview = useCallback(async () => {

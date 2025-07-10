@@ -25,8 +25,15 @@ import {
   ShieldUser,
   ServerCrashIcon,
 MessageSquarePlus,
+ImagePlay,
+TableProperties,
   Archive,
   Boxes,
+  BadgeDollarSign,
+  TrendingUp,
+  MessageSquareQuote,
+  Plus,
+  Receipt,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen }) => {
@@ -275,7 +282,17 @@ const Sidebar = ({ isOpen }) => {
         {
           label: "Products Images Manager",
           path: getRoleBasedPath("/product-Images-Manager"),
-          icon: MessageSquarePlus,
+          icon: ImagePlay,
+        },
+        {
+          label: "Requition Manager",
+          path: getRoleBasedPath("/Requsition-Manager"),
+          icon: TableProperties,
+        },
+        {
+          label: "PriceList Manager",
+          path: getRoleBasedPath("/Price-List-Manager"),
+          icon: BadgeDollarSign,
         },
         {
           label: "Stock Management",
@@ -285,11 +302,31 @@ const Sidebar = ({ isOpen }) => {
       ],
     },
     {
-      icon: DollarSign,
-      label: "Sales",
-      path: getRoleBasedPath("/sales"),
-      roles: ["Admin", "Manager", "Employee"],
+  icon: DollarSign,
+  label: "Sales",
+  submenu: true,
+  key: "sales-management",
+  roles: ["Admin", "Manager", "Employee"],
+  submenuItems: [
+    
+    {
+      label: "Invoice Dashboard",
+      path: getRoleBasedPath("/invoice-dashboard"),
+      icon: Receipt,
     },
+    {
+      label: "All Invoices",
+      path: getRoleBasedPath("/invoices"),
+      icon: FileText,
+    },
+    {
+      label: "Create Invoice",
+      path: getRoleBasedPath("/new-invoice"),
+      icon: Plus,
+    },
+    
+  ],
+},
     {
       icon: FileText,
       label: "Bills",

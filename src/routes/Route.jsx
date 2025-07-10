@@ -32,6 +32,14 @@ import ManagePlans from "../pages/SuperAdmin/Plans/ManagePlans";
 import Subscription from "../pages/SuperAdmin/Plans/Subscription";
 import SubscriptionReports from "../pages/SuperAdmin/Plans/SubscriptionReports";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
+import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
+import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
+import PriceListList from "../pages/Inventories/PriceList/PriceListList";
+import NewPriceList from "../pages/Inventories/PriceList/NewPriceList";
+import InvoiceDashboard from "../pages/Sale/Invoice/InvoiceDashboard";
+import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
+import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
+import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
 
 
 // Helper function to get role-based dashboard path
@@ -429,6 +437,54 @@ const getRouteConfig = () => {
     {
       path: "/admin/product-Images-Manager",
       component: ProductImages,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+     {
+      path: "/admin/Requsition-Manager",
+      component: RequisitionList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-requisition",
+      component: NewRequisition,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/Price-List-Manager",
+      component: PriceListList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-price-list",
+      component: NewPriceList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/invoice-dashboard",
+      component: InvoiceDashboard,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+     {
+      path: "/admin/invoices",
+      component: InvoiceList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+     {
+      path: "/admin/new-invoice",
+      component: NewInvoice,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/invoice-view/:id",
+      component: InvoiceView,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
