@@ -11,23 +11,26 @@ import { WarehouseProvider } from "./Contexts/WarehouseContext/WarehouseContext"
 import { SupplierProvider } from "./Contexts/SupplierContext/SupplierContext";
 import { ServiceProvider } from "./Contexts/ServiceContext/ServiceContext";
 import { ProductsManagerProvider } from "./Contexts/ProductsManagerContext/ProductsManagerContext";
+import { SuperDashboardProvider } from "./Contexts/superAdminDashborad/SuperAdminContext";
 function App() {
   return (
     <Router>
       <Provider store={store}>
         <AuthProvider>
           <SuperAdminProvider>
-            <ClientsProvider>
-              <WarehouseProvider>
-                <SupplierProvider>
-                  <ServiceProvider>
-                    <ProductsManagerProvider>
-                      <Routes />
-                    </ProductsManagerProvider>
-                  </ServiceProvider>
-                </SupplierProvider>
-              </WarehouseProvider>
-            </ClientsProvider>
+            <SuperDashboardProvider>
+              <ClientsProvider>
+                <WarehouseProvider>
+                  <SupplierProvider>
+                    <ServiceProvider>
+                      <ProductsManagerProvider>
+                        <Routes />
+                      </ProductsManagerProvider>
+                    </ServiceProvider>
+                  </SupplierProvider>
+                </WarehouseProvider>
+              </ClientsProvider>
+            </SuperDashboardProvider>
           </SuperAdminProvider>
         </AuthProvider>
       </Provider>

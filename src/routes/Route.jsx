@@ -28,6 +28,10 @@ import ProductCategories from "../pages/Inventories/ProductsManager/ProductCateg
 import ProductBrands from "../pages/Inventories/ProductsManager/ProductBrands";
 import ProductStatistics from "../pages/Inventories/ProductsManager/ProductStatistics";
 import ProductImages from "../pages/Inventories/ProductsManager/ProductImages";
+import ManagePlans from "../pages/SuperAdmin/Plans/ManagePlans";
+import Subscription from "../pages/SuperAdmin/Plans/Subscription";
+import SubscriptionReports from "../pages/SuperAdmin/Plans/SubscriptionReports";
+
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
