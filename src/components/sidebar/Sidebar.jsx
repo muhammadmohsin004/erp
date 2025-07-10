@@ -371,10 +371,30 @@ const Sidebar = ({ isOpen }) => {
     },
     {
       icon: DollarSign,
-      label: "Salary Components",
-      path: getRoleBasedPath("/salary-components"),
-      roles: ["Admin", "Manager"],
+      label: "Salary Management",
+       submenu: true,
+  key: "salary-management",
+  roles: ["Admin", "Manager", "Employee"],
+  submenuItems: [
+    
+    {
+      label: "Salary",
+      path: getRoleBasedPath("/salary"),
+      icon: Receipt,
     },
+    {
+      label: "Salary Components",
+      path: getRoleBasedPath("/salary-componenets"),
+      icon: FileText,
+    },
+    {
+      label: "Overtime",
+      path: getRoleBasedPath("/overtime"),
+      icon: Plus,
+    },
+    
+  ],
+},
     {
       icon: Key,
       label: "Permissions",
