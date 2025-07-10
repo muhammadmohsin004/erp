@@ -25,8 +25,15 @@ import {
   ShieldUser,
   ServerCrashIcon,
   MessageSquarePlus,
+  ImagePlay,
+  TableProperties,
   Archive,
   Boxes,
+  BadgeDollarSign,
+  TrendingUp,
+  MessageSquareQuote,
+  Plus,
+  Receipt,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen }) => {
@@ -275,7 +282,17 @@ const Sidebar = ({ isOpen }) => {
         {
           label: "Products Images Manager",
           path: getRoleBasedPath("/product-Images-Manager"),
-          icon: MessageSquarePlus,
+          icon: ImagePlay,
+        },
+        {
+          label: "Requition Manager",
+          path: getRoleBasedPath("/Requsition-Manager"),
+          icon: TableProperties,
+        },
+        {
+          label: "PriceList Manager",
+          path: getRoleBasedPath("/Price-List-Manager"),
+          icon: BadgeDollarSign,
         },
         {
           label: "Stock Management",
@@ -287,8 +304,26 @@ const Sidebar = ({ isOpen }) => {
     {
       icon: DollarSign,
       label: "Sales",
-      path: getRoleBasedPath("/sales"),
+      submenu: true,
+      key: "sales-management",
       roles: ["Admin", "Manager", "Employee"],
+      submenuItems: [
+        {
+          label: "Invoice Dashboard",
+          path: getRoleBasedPath("/invoice-dashboard"),
+          icon: Receipt,
+        },
+        {
+          label: "All Invoices",
+          path: getRoleBasedPath("/invoices"),
+          icon: FileText,
+        },
+        {
+          label: "Create Invoice",
+          path: getRoleBasedPath("/new-invoice"),
+          icon: Plus,
+        },
+      ],
     },
     {
       icon: FileText,
@@ -352,9 +387,27 @@ const Sidebar = ({ isOpen }) => {
     },
     {
       icon: DollarSign,
-      label: "Salary Components",
-      path: getRoleBasedPath("/salary-components"),
-      roles: ["Admin", "Manager"],
+      label: "Salary Management",
+      submenu: true,
+      key: "salary-management",
+      roles: ["Admin", "Manager", "Employee"],
+      submenuItems: [
+        {
+          label: "Salary",
+          path: getRoleBasedPath("/salary"),
+          icon: Receipt,
+        },
+        {
+          label: "Salary Components",
+          path: getRoleBasedPath("/salary-componenets"),
+          icon: FileText,
+        },
+        {
+          label: "Overtime",
+          path: getRoleBasedPath("/overtime"),
+          icon: Plus,
+        },
+      ],
     },
     {
       icon: Key,

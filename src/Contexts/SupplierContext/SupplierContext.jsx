@@ -77,7 +77,7 @@ const supplierReducer = (state, action) => {
     
     case actionTypes.ADD_SUPPLIER:
       // Handle adding supplier to the nested structure
-      const currentSuppliersAdd = state.suppliers?.Data?.$values || [];
+      { const currentSuppliersAdd = state.suppliers?.Data?.$values || [];
       const updatedSuppliersAdd = [...currentSuppliersAdd, action.payload];
       return { 
         ...state, 
@@ -90,11 +90,11 @@ const supplierReducer = (state, action) => {
         },
         loading: false,
         error: null
-      };
+      }; }
     
     case actionTypes.UPDATE_SUPPLIER:
       // Handle updating supplier in the nested structure
-      const currentSuppliersUpdate = state.suppliers?.Data?.$values || [];
+      { const currentSuppliersUpdate = state.suppliers?.Data?.$values || [];
       const updatedSuppliersUpdate = currentSuppliersUpdate.map(supplier =>
         supplier.Id === action.payload.Id ? action.payload : supplier
       );
@@ -112,11 +112,11 @@ const supplierReducer = (state, action) => {
           : state.currentSupplier,
         loading: false,
         error: null
-      };
+      }; }
     
     case actionTypes.DELETE_SUPPLIER:
       // Handle deleting supplier from the nested structure
-      const currentSuppliersDelete = state.suppliers?.Data?.$values || [];
+      { const currentSuppliersDelete = state.suppliers?.Data?.$values || [];
       const updatedSuppliersDelete = currentSuppliersDelete.filter(
         supplier => supplier.Id !== action.payload
       );
@@ -134,7 +134,7 @@ const supplierReducer = (state, action) => {
           : state.currentSupplier,
         loading: false,
         error: null
-      };
+      }; }
     
     case actionTypes.CLEAR_ERROR:
       return { ...state, error: null };

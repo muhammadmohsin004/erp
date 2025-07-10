@@ -200,13 +200,16 @@ const NewProduct = () => {
     updateProduct,
     getCategoriesDropdown,
     getBrandsDropdown,
+    createProductImage,
     dropdowns,
+    loading,
+    error,
   } = useProductsManager();
 
   // Import supplier context separately since it's not part of ProductsManager
   const { getSuppliers, suppliers } = useSupplier
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    ? useSupplier()
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useSupplier()
     : { getSuppliers: null, suppliers: null };
 
   // Memoize translations to prevent re-creation
@@ -407,9 +410,6 @@ const NewProduct = () => {
         await getCategoriesDropdown();
         await getBrandsDropdown();
 
-        // Debug: Log the dropdowns data
-        console.log("Dropdowns state:", dropdowns);
-
         // Fetch suppliers if available
         if (getSuppliers) {
           await getSuppliers();
@@ -427,13 +427,24 @@ const NewProduct = () => {
   // Debug: Log dropdowns whenever it changes
   useEffect(() => {
     console.log("Dropdowns updated:", dropdowns);
-  }, [dropdowns]);
+    console.log("Suppliers updated:", suppliers);
+  }, [dropdowns, suppliers]);
 
   useEffect(() => {
     if (!token) {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+
+  // Debug effects
+  useEffect(() => {
+    console.log("Current form data:", formData);
+  }, [formData]);
+
+  useEffect(() => {
+    console.log("Loading state:", loading);
+    console.log("Error state:", error);
+  }, [loading, error]);
 
   // Memoize event handlers to prevent re-creation
   const handleInputChange = useCallback(
@@ -556,29 +567,80 @@ const NewProduct = () => {
   const validateForm = useCallback(() => {
     const newErrors = {};
 
-    if (!formData.Name.trim()) {
+    // Required fields validation
+    if (!formData.Name?.trim()) {
       newErrors.Name = translations.Required;
     }
 
-    if (!formData.UnitPrice || isNaN(parseFloat(formData.UnitPrice))) {
-      newErrors.UnitPrice = translations.Required;
+    if (
+      !formData.UnitPrice ||
+      isNaN(parseFloat(formData.UnitPrice)) ||
+      parseFloat(formData.UnitPrice) <= 0
+    ) {
+      newErrors.UnitPrice = "Valid unit price is required";
     }
 
+    // Optional numeric field validation
     if (formData.PurchasePrice && isNaN(parseFloat(formData.PurchasePrice))) {
       newErrors.PurchasePrice = "Invalid number format";
     }
 
-    if (formData.CurrentStock && isNaN(parseFloat(formData.CurrentStock))) {
+    if (formData.CurrentStock && isNaN(parseInt(formData.CurrentStock))) {
       newErrors.CurrentStock = "Invalid number format";
     }
 
-    if (formData.MinimumStock && isNaN(parseFloat(formData.MinimumStock))) {
+    if (formData.MinimumStock && isNaN(parseInt(formData.MinimumStock))) {
       newErrors.MinimumStock = "Invalid number format";
     }
 
+    // Business logic validation
+    if (formData.MinimumPrice && formData.UnitPrice) {
+      const minPrice = parseFloat(formData.MinimumPrice);
+      const unitPrice = parseFloat(formData.UnitPrice);
+      if (minPrice > unitPrice) {
+        newErrors.MinimumPrice =
+          "Minimum price cannot be higher than unit price";
+      }
+    }
+
+    console.log("Validation errors:", newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData, translations]);
+
+  // Helper function to upload images after product creation
+  const handleProductImages = async (productId) => {
+    try {
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+
+        // Only upload if it's a new file (has 'file' property)
+        if (image.file) {
+          const imageFormData = new FormData();
+          imageFormData.append("ImageFile", image.file);
+          imageFormData.append("ProductId", productId.toString());
+          imageFormData.append("AltText", `Product image ${i + 1}`);
+          imageFormData.append("IsMain", (i === primaryImageIndex).toString());
+
+          console.log(`Uploading image ${i + 1}...`);
+          await createProductImage(imageFormData);
+        }
+      }
+      console.log("All images uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      // Don't throw error here, product is already created
+      alert(
+        "Product created but some images failed to upload. You can add them later."
+      );
+    }
+  };
+
+  // Helper function to get brand name
+  const getBrandName = (brandId) => {
+    const brand = dropdowns?.brands?.find((b) => b.Id === parseInt(brandId));
+    return brand?.Name || "";
+  };
 
   // Handle form submission
   const handleSubmit = useCallback(
@@ -591,90 +653,122 @@ const NewProduct = () => {
 
       setIsSaving(true);
       try {
+        // FIXED: Structure the data to match your backend's CreateProductDto expectations
         const submitData = {
-          dto: {
-            Name: formData.Name,
-            ItemCode: formData.ItemCode,
-            Barcode: formData.Barcode,
-            Description: formData.Description,
-            ShortDescription: formData.ShortDescription,
-            Status: formData.Status,
-            PurchasePrice: formData.PurchasePrice
-              ? parseFloat(formData.PurchasePrice)
-              : null,
-            UnitPrice: parseFloat(formData.UnitPrice),
-            MinimumPrice: formData.MinimumPrice
-              ? parseFloat(formData.MinimumPrice)
-              : null,
-            CostPrice: formData.CostPrice
-              ? parseFloat(formData.CostPrice)
-              : null,
-            Discount: formData.Discount ? parseFloat(formData.Discount) : null,
-            DiscountType: formData.DiscountType,
-            TaxRate: parseFloat(formData.TaxRate),
-            CurrentStock: formData.CurrentStock
-              ? parseFloat(formData.CurrentStock)
-              : 0,
-            MinimumStock: formData.MinimumStock
-              ? parseFloat(formData.MinimumStock)
-              : null,
-            MaximumStock: formData.MaximumStock
-              ? parseFloat(formData.MaximumStock)
-              : null,
-            ReorderPoint: formData.ReorderPoint
-              ? parseFloat(formData.ReorderPoint)
-              : null,
-            UnitOfMeasure: formData.UnitOfMeasure,
-            TrackingType: formData.TrackingType,
-            CategoryId: formData.CategoryId
-              ? parseInt(formData.CategoryId)
-              : null,
-            BrandId: formData.BrandId ? parseInt(formData.BrandId) : null,
-            SupplierId: formData.SupplierId
-              ? parseInt(formData.SupplierId)
-              : null,
-            Tags: formData.Tags
-              ? formData.Tags.split(",")
-                  .map((tag) => ({ Name: tag.trim() }))
-                  .filter((tag) => tag.Name)
+          // Basic Information - match backend exactly
+          Name: formData.Name?.trim() || "",
+          ItemCode: formData.ItemCode?.trim() || "",
+          Barcode: formData.Barcode?.trim() || "",
+          Description: formData.Description?.trim() || "",
+          ShortDescription: formData.ShortDescription?.trim() || "",
+          Status: formData.Status || "Active",
+          InternalNotes: formData.InternalNotes?.trim() || "",
+
+          // Pricing - send as strings (your backend parses them)
+          PurchasePrice: formData.PurchasePrice || "0",
+          UnitPrice: formData.UnitPrice || "0",
+          MinimumPrice: formData.MinimumPrice || "0",
+          Discount: formData.Discount || "0",
+          DiscountType: formData.DiscountType || "percentage",
+
+          // Stock - send as numbers for InitialStock
+          InitialStock: formData.CurrentStock
+            ? parseInt(formData.CurrentStock)
+            : 0,
+          MinimumStock: formData.MinimumStock
+            ? parseInt(formData.MinimumStock)
+            : 0,
+          MaximumStock: formData.MaximumStock
+            ? parseInt(formData.MaximumStock)
+            : null,
+
+          // Inventory settings
+          TrackingType: formData.TrackingType || "Simple",
+          AllowNegativeStock: Boolean(formData.AllowBackorders),
+
+          // Foreign Keys - convert to integers or null
+          CategoryId: formData.CategoryId
+            ? parseInt(formData.CategoryId)
+            : null,
+          SupplierId: formData.SupplierId
+            ? parseInt(formData.SupplierId)
+            : null,
+          ManufacturerId: null, // Add if you have manufacturer dropdown
+
+          // Cost field (your backend expects this as number)
+          Cost: formData.CostPrice ? parseFloat(formData.CostPrice) : 0,
+
+          // Price List ID (if you have it)
+          PriceListId: null,
+
+          // Tags - convert to the format your backend expects
+          Tags: formData.Tags
+            ? formData.Tags.split(",")
+                .map((tag) => ({ Name: tag.trim() }))
+                .filter((tag) => tag.Name)
+            : [],
+
+          // Brands - if your backend expects this structure
+          Brands: formData.BrandId
+            ? [
+                {
+                  BrandId: parseInt(formData.BrandId),
+                  Name: getBrandName(formData.BrandId),
+                },
+              ]
+            : [],
+          Taxes:
+            formData.TaxRate && parseFloat(formData.TaxRate) > 0
+              ? [
+                  {
+                    TaxName: "VAT", // Backend expects TaxName
+                    TaxValue: formData.TaxRate.toString(), // Backend expects TaxValue as string
+                  },
+                ]
               : [],
-            Weight: formData.Weight ? parseFloat(formData.Weight) : null,
-            Length: formData.Length ? parseFloat(formData.Length) : null,
-            Width: formData.Width ? parseFloat(formData.Width) : null,
-            Height: formData.Height ? parseFloat(formData.Height) : null,
-            Manufacturer: formData.Manufacturer,
-            ModelNumber: formData.ModelNumber,
-            WarrantyPeriod: formData.WarrantyPeriod
-              ? parseInt(formData.WarrantyPeriod)
-              : null,
-            InternalNotes: formData.InternalNotes,
-            SEOTitle: formData.SEOTitle,
-            SEODescription: formData.SEODescription,
-            IsFeatured: Boolean(formData.IsFeatured),
-            TrackInventory: Boolean(formData.TrackInventory),
-            AllowBackorders: Boolean(formData.AllowBackorders),
-            SellWhenOutOfStock: Boolean(formData.SellWhenOutOfStock),
-            ShowOnWebsite: Boolean(formData.ShowOnWebsite),
-            RequireApproval: Boolean(formData.RequireApproval),
-            Images: images.map((img, index) => ({
-              ...img,
-              isPrimary: index === primaryImageIndex,
-            })),
-            Variants: variants.filter(
-              (variant) => variant.name && variant.price
-            ),
-          },
         };
+
+        console.log("=== SUBMITTING PRODUCT DATA ===");
+        console.log("Submit data:", submitData);
+
+        let savedProduct;
         if (isEditing && editData?.Id) {
-          await updateProduct(editData.Id, submitData);
+          savedProduct = await updateProduct(editData.Id, submitData);
         } else {
-          await createProduct(submitData);
+          savedProduct = await createProduct(submitData);
         }
 
+        console.log("Product saved:", savedProduct);
+
+        // Get the product ID from the response
+        const productId = savedProduct?.Id || savedProduct?.Data?.Id;
+
+        // Handle image uploads after product creation
+        if (productId && images.length > 0) {
+          console.log("Uploading product images...");
+          await handleProductImages(productId);
+        }
+
+        // Show success message
+        alert(`Product ${isEditing ? "updated" : "created"} successfully!`);
+
+        // Navigate back to products list
         navigate("/admin/Products-Manager");
       } catch (error) {
         console.error("Error saving product:", error);
-        alert("Failed to save product. Please try again.");
+        let errorMessage = `Failed to ${
+          isEditing ? "update" : "create"
+        } product: `;
+
+        if (error.message) {
+          errorMessage += error.message;
+        } else if (typeof error === "string") {
+          errorMessage += error;
+        } else {
+          errorMessage += "Unknown error occurred";
+        }
+
+        alert(errorMessage);
       } finally {
         setIsSaving(false);
       }
@@ -689,7 +783,9 @@ const NewProduct = () => {
       validateForm,
       updateProduct,
       createProduct,
+      createProductImage,
       navigate,
+      getBrandName,
     ]
   );
 

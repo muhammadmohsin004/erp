@@ -81,8 +81,7 @@ const ProductImages = () => {
 
   const translations = {
     "Product Images": language === "ar" ? "صور المنتجات" : "Product Images",
-    "Back to Products":
-      language === "ar" ? "العودة للمنتجات" : "Back to Products",
+    "Back to Products": language === "ar" ? "العودة للمنتجات" : "Back to Products",
     "Upload Image": language === "ar" ? "رفع صورة" : "Upload Image",
     "Upload Multiple": language === "ar" ? "رفع متعدد" : "Upload Multiple",
     Images: language === "ar" ? "الصور" : "Images",
@@ -111,149 +110,36 @@ const ProductImages = () => {
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Image": language === "ar" ? "حذف الصورة" : "Delete Image",
-    "This action cannot be undone":
-      language === "ar"
-        ? "لا يمكن التراجع عن هذا الإجراء"
-        : "This action cannot be undone",
+    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Image Details": language === "ar" ? "تفاصيل الصورة" : "Image Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found":
-      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "Grid View": language === "ar" ? "عرض شبكي" : "Grid View",
     "List View": language === "ar" ? "عرض قائمة" : "List View",
     "Total Images": language === "ar" ? "إجمالي الصور" : "Total Images",
     "Main Images": language === "ar" ? "الصور الرئيسية" : "Main Images",
     "Gallery Images": language === "ar" ? "صور المعرض" : "Gallery Images",
-    "Recently Uploaded":
-      language === "ar" ? "مرفوعة حديثاً" : "Recently Uploaded",
+    "Recently Uploaded": language === "ar" ? "مرفوعة حديثاً" : "Recently Uploaded",
     "Large Images": language === "ar" ? "صور كبيرة" : "Large Images",
     "Small Images": language === "ar" ? "صور صغيرة" : "Small Images",
-    "Image Management": language === "ar" ? "إدارة الصور" : "Image Management",
-    "Image Gallery": language === "ar" ? "معرض الصور" : "Image Gallery",
-    "Image Library": language === "ar" ? "مكتبة الصور" : "Image Library",
-    "Image Studio": language === "ar" ? "استوديو الصور" : "Image Studio",
-    "Image Analytics": language === "ar" ? "تحليلات الصور" : "Image Analytics",
-    "Image Optimization":
-      language === "ar" ? "تحسين الصور" : "Image Optimization",
-    "Image Processing": language === "ar" ? "معالجة الصور" : "Image Processing",
-    "Image Storage": language === "ar" ? "تخزين الصور" : "Image Storage",
-    "Image Backup": language === "ar" ? "نسخ احتياطي للصور" : "Image Backup",
-    "Image Sync": language === "ar" ? "مزامنة الصور" : "Image Sync",
-    "Image Quality": language === "ar" ? "جودة الصورة" : "Image Quality",
-    "Image Compression": language === "ar" ? "ضغط الصور" : "Image Compression",
-    "Image Resize": language === "ar" ? "تغيير حجم الصور" : "Image Resize",
-    "Image Crop": language === "ar" ? "قص الصور" : "Image Crop",
-    "Image Rotate": language === "ar" ? "تدوير الصور" : "Image Rotate",
-    "Image Flip": language === "ar" ? "قلب الصور" : "Image Flip",
-    "Image Filter": language === "ar" ? "فلتر الصور" : "Image Filter",
-    "Image Effects": language === "ar" ? "تأثيرات الصور" : "Image Effects",
-    "Image Watermark":
-      language === "ar" ? "علامة مائية للصور" : "Image Watermark",
-    "Image Metadata":
-      language === "ar" ? "بيانات الصور الوصفية" : "Image Metadata",
-    "Image Tags": language === "ar" ? "علامات الصور" : "Image Tags",
-    "Image Categories": language === "ar" ? "فئات الصور" : "Image Categories",
-    "Image Collections":
-      language === "ar" ? "مجموعات الصور" : "Image Collections",
-    "Image Albums": language === "ar" ? "ألبومات الصور" : "Image Albums",
-    "Image Favorites": language === "ar" ? "الصور المفضلة" : "Image Favorites",
-    "Image Archive": language === "ar" ? "أرشيف الصور" : "Image Archive",
-    "Image Trash": language === "ar" ? "سلة مهملات الصور" : "Image Trash",
-    "Image History": language === "ar" ? "تاريخ الصور" : "Image History",
-    "Image Versions": language === "ar" ? "إصدارات الصور" : "Image Versions",
-    "Image Duplicates":
-      language === "ar" ? "الصور المكررة" : "Image Duplicates",
-    "Image Performance": language === "ar" ? "أداء الصور" : "Image Performance",
-    "Image Usage": language === "ar" ? "استخدام الصور" : "Image Usage",
-    "Image Statistics":
-      language === "ar" ? "إحصائيات الصور" : "Image Statistics",
-    "Image Reports": language === "ar" ? "تقارير الصور" : "Image Reports",
-    "Image Insights": language === "ar" ? "رؤى الصور" : "Image Insights",
-    "Image Trends": language === "ar" ? "اتجاهات الصور" : "Image Trends",
-    "Image Metrics": language === "ar" ? "مقاييس الصور" : "Image Metrics",
-    "Image Dashboard":
-      language === "ar" ? "لوحة تحكم الصور" : "Image Dashboard",
-    "Drag & Drop": language === "ar" ? "السحب والإفلات" : "Drag & Drop",
-    "Choose Files": language === "ar" ? "اختر الملفات" : "Choose Files",
-    "Drop files here":
-      language === "ar" ? "اسحب الملفات هنا" : "Drop files here",
-    "Browse Files": language === "ar" ? "تصفح الملفات" : "Browse Files",
-    "Upload Progress": language === "ar" ? "تقدم الرفع" : "Upload Progress",
     Uploading: language === "ar" ? "جارٍ الرفع" : "Uploading",
-    "Upload Complete": language === "ar" ? "اكتمل الرفع" : "Upload Complete",
     "Upload Failed": language === "ar" ? "فشل الرفع" : "Upload Failed",
-    "Upload Cancelled":
-      language === "ar" ? "تم إلغاء الرفع" : "Upload Cancelled",
     "File too large": language === "ar" ? "الملف كبير جداً" : "File too large",
-    "Invalid file type":
-      language === "ar" ? "نوع ملف غير صالح" : "Invalid file type",
-    "Upload limit exceeded":
-      language === "ar" ? "تم تجاوز حد الرفع" : "Upload limit exceeded",
-    "Network error": language === "ar" ? "خطأ في الشبكة" : "Network error",
-    "Server error": language === "ar" ? "خطأ في الخادم" : "Server error",
-    "Unknown error": language === "ar" ? "خطأ غير معروف" : "Unknown error",
+    "Invalid file type": language === "ar" ? "نوع ملف غير صالح" : "Invalid file type",
     Retry: language === "ar" ? "إعادة المحاولة" : "Retry",
-    Skip: language === "ar" ? "تخطي" : "Skip",
-    Continue: language === "ar" ? "متابعة" : "Continue",
-    Finish: language === "ar" ? "إنهاء" : "Finish",
     Save: language === "ar" ? "حفظ" : "Save",
     Saving: language === "ar" ? "جارٍ الحفظ" : "Saving",
     Saved: language === "ar" ? "تم الحفظ" : "Saved",
     Required: language === "ar" ? "مطلوب" : "Required",
     Optional: language === "ar" ? "اختياري" : "Optional",
     "Select Product": language === "ar" ? "اختر منتج" : "Select Product",
-    "No Product Selected":
-      language === "ar" ? "لم يتم اختيار منتج" : "No Product Selected",
+    "No Product Selected": language === "ar" ? "لم يتم اختيار منتج" : "No Product Selected",
     Yes: language === "ar" ? "نعم" : "Yes",
     No: language === "ar" ? "لا" : "No",
-    True: language === "ar" ? "صحيح" : "True",
-    False: language === "ar" ? "خطأ" : "False",
-    Enabled: language === "ar" ? "مفعل" : "Enabled",
-    Disabled: language === "ar" ? "معطل" : "Disabled",
-    Active: language === "ar" ? "نشط" : "Active",
-    Inactive: language === "ar" ? "غير نشط" : "Inactive",
-    Published: language === "ar" ? "منشور" : "Published",
-    Draft: language === "ar" ? "مسودة" : "Draft",
-    Approved: language === "ar" ? "موافق عليه" : "Approved",
-    Rejected: language === "ar" ? "مرفوض" : "Rejected",
-    Pending: language === "ar" ? "في الانتظار" : "Pending",
-    Processing: language === "ar" ? "قيد المعالجة" : "Processing",
-    Completed: language === "ar" ? "مكتمل" : "Completed",
-    Failed: language === "ar" ? "فشل" : "Failed",
-    Cancelled: language === "ar" ? "ملغى" : "Cancelled",
-    Paused: language === "ar" ? "متوقف مؤقتاً" : "Paused",
-    Resumed: language === "ar" ? "مستأنف" : "Resumed",
-    Queued: language === "ar" ? "في الطابور" : "Queued",
-    Scheduled: language === "ar" ? "مجدول" : "Scheduled",
-    Expired: language === "ar" ? "منتهي الصلاحية" : "Expired",
-    Archived: language === "ar" ? "مؤرشف" : "Archived",
-    Deleted: language === "ar" ? "محذوف" : "Deleted",
-    Restored: language === "ar" ? "مستعاد" : "Restored",
-    Locked: language === "ar" ? "مقفل" : "Locked",
-    Unlocked: language === "ar" ? "مفتوح" : "Unlocked",
-    Visible: language === "ar" ? "مرئي" : "Visible",
-    Hidden: language === "ar" ? "مخفي" : "Hidden",
-    Public: language === "ar" ? "عام" : "Public",
-    Private: language === "ar" ? "خاص" : "Private",
-    Shared: language === "ar" ? "مشترك" : "Shared",
-    Restricted: language === "ar" ? "مقيد" : "Restricted",
-    Unlimited: language === "ar" ? "غير محدود" : "Unlimited",
-    Limited: language === "ar" ? "محدود" : "Limited",
-    Custom: language === "ar" ? "مخصص" : "Custom",
-    Default: language === "ar" ? "افتراضي" : "Default",
-    Auto: language === "ar" ? "تلقائي" : "Auto",
-    Manual: language === "ar" ? "يدوي" : "Manual",
-    items: language === "ar" ? "عناصر" : "items",
-    pages: language === "ar" ? "صفحات" : "pages",
-    "Go to page": language === "ar" ? "انتقل إلى الصفحة" : "Go to page",
-    "items per page": language === "ar" ? "عنصر في الصفحة" : "items per page",
-    Previous: language === "ar" ? "السابق" : "Previous",
-    Next: language === "ar" ? "التالي" : "Next",
-    First: language === "ar" ? "الأول" : "First",
-    Last: language === "ar" ? "الأخير" : "Last",
-    Page: language === "ar" ? "صفحة" : "Page",
+    Main: language === "ar" ? "رئيسي" : "Main",
+    Upload: language === "ar" ? "رفع" : "Upload",
   };
 
   // Get products context
@@ -271,14 +157,12 @@ const ProductImages = () => {
 
   // Process images data from API response
   const imagesData = productImages?.Data?.$values || [];
-  const productsDropdown = Array.isArray(dropdowns?.products)
-    ? dropdowns.products
-    : [];
+  const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products : [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused] = useState(false);
-  const [viewMode, setViewMode] = useState("grid"); // "grid" or "list"
+  const [viewMode, setViewMode] = useState("grid");
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -331,9 +215,6 @@ const ProductImages = () => {
     const fetchInitialData = async () => {
       try {
         await getProductImages();
-            const productsData = await getProductsDropdown();
-            console.log("Fetched products dropdown:", productsData);
-
         await getProductsDropdown();
       } catch (error) {
         console.error("Error fetching initial data:", error);
@@ -343,7 +224,7 @@ const ProductImages = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token]);
+  }, [token, getProductImages, getProductsDropdown]);
 
   // Update statistics when images change
   useEffect(() => {
@@ -360,18 +241,12 @@ const ProductImages = () => {
             uploadDate.getFullYear() === now.getFullYear()
           );
         }).length,
-        largeImages: imagesData.filter((img) => (img.FileSize || 0) > 1000000)
-          .length, // > 1MB
-        smallImages: imagesData.filter((img) => (img.FileSize || 0) <= 1000000)
-          .length, // <= 1MB
-        totalFileSize: imagesData.reduce(
-          (sum, img) => sum + (img.FileSize || 0),
-          0
-        ),
+        largeImages: imagesData.filter((img) => (img.FileSize || 0) > 1000000).length,
+        smallImages: imagesData.filter((img) => (img.FileSize || 0) <= 1000000).length,
+        totalFileSize: imagesData.reduce((sum, img) => sum + (img.FileSize || 0), 0),
         averageFileSize:
           imagesData.length > 0
-            ? imagesData.reduce((sum, img) => sum + (img.FileSize || 0), 0) /
-              imagesData.length
+            ? imagesData.reduce((sum, img) => sum + (img.FileSize || 0), 0) / imagesData.length
             : 0,
       };
       setStatistics(stats);
@@ -413,9 +288,7 @@ const ProductImages = () => {
     if (selectAll) {
       setSelectedImages([]);
     } else {
-      const imageIds = Array.isArray(imagesData)
-        ? imagesData.map((image) => image.Id)
-        : [];
+      const imageIds = Array.isArray(imagesData) ? imagesData.map((image) => image.Id) : [];
       setSelectedImages(imageIds);
     }
     setSelectAll(!selectAll);
@@ -455,17 +328,60 @@ const ProductImages = () => {
     }
   };
 
+  // File validation function
+  const validateFile = (file) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+
+    if (!validTypes.includes(file.type)) {
+      alert(`Invalid file type: ${file.name}. Please select JPEG, PNG, GIF, or WebP images.`);
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      alert(`File too large: ${file.name}. Maximum size is 10MB.`);
+      return false;
+    }
+
+    return true;
+  };
+
   // Upload handlers
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
-    setUploadFiles(imageFiles);
+    const validFiles = imageFiles.filter(validateFile);
+    setUploadFiles(validFiles);
+    console.log("Selected files:", validFiles);
   };
 
-  const handleSingleUpload = async (e) => {
-    e.preventDefault();
-    if (!uploadFiles.length || !uploadFormData.productId) {
-      alert("Please select a file and product");
+  const handleMultipleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+    const validFiles = imageFiles.filter(validateFile);
+
+    setMultipleUploadData({
+      ...multipleUploadData,
+      files: validFiles,
+    });
+    console.log("Selected multiple files:", validFiles);
+  };
+
+  const handleSingleUpload = async () => {
+    console.log("=== SINGLE UPLOAD DEBUG START ===");
+    console.log("Upload files:", uploadFiles);
+    console.log("Upload form data:", uploadFormData);
+
+    // Validate required fields
+    if (!uploadFiles.length) {
+      console.error("No files selected");
+      alert("Please select a file");
+      return;
+    }
+
+    if (!uploadFormData.productId) {
+      console.error("No product selected");
+      alert("Please select a product");
       return;
     }
 
@@ -473,47 +389,97 @@ const ProductImages = () => {
     try {
       const formData = new FormData();
       formData.append("ImageFile", uploadFiles[0]);
-      formData.append("ProductId", uploadFormData.productId);
-      formData.append("AltText", uploadFormData.altText);
-      formData.append("IsMain", uploadFormData.isMain);
+      formData.append("ProductId", uploadFormData.productId.toString());
+      formData.append("AltText", uploadFormData.altText || "");
+      formData.append("IsMain", uploadFormData.isMain.toString());
 
-      await createProductImage(formData);
+      console.log("=== FormData Contents ===");
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+        if (value instanceof File) {
+          console.log(`  File name: ${value.name}`);
+          console.log(`  File size: ${value.size}`);
+          console.log(`  File type: ${value.type}`);
+        }
+      }
+
+      console.log("Calling createProductImage...");
+      const result = await createProductImage(formData);
+      console.log("Upload successful:", result);
+
+      // Reset form after successful upload
       setShowUploadModal(false);
       setUploadFiles([]);
       setUploadFormData({ productId: null, altText: "", isMain: false });
       await getProductImages();
+
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Failed to upload image");
+      console.error("=== UPLOAD ERROR ===");
+      console.error("Error details:", error);
+      console.error("Error message:", error.message);
+      alert("Failed to upload image: " + (error.message || "Unknown error"));
     } finally {
       setIsUploading(false);
+      console.log("=== SINGLE UPLOAD DEBUG END ===");
     }
   };
 
-  const handleMultipleUpload = async (e) => {
-    e.preventDefault();
-    if (!multipleUploadData.files.length || !multipleUploadData.productId) {
-      alert("Please select files and product");
+  const handleMultipleUpload = async () => {
+    console.log("=== MULTIPLE UPLOAD DEBUG START ===");
+    console.log("Multiple upload data:", multipleUploadData);
+
+    // Validate required fields
+    if (!multipleUploadData.files.length) {
+      console.error("No files selected");
+      alert("Please select files");
+      return;
+    }
+
+    if (!multipleUploadData.productId) {
+      console.error("No product selected");
+      alert("Please select a product");
       return;
     }
 
     setIsUploading(true);
     try {
-      const uploadData = {
-        ProductId: multipleUploadData.productId,
-        AltText: multipleUploadData.altText,
-        ImageFiles: multipleUploadData.files,
-      };
+      const formData = new FormData();
 
-      await createMultipleProductImages(uploadData);
+      // Append each file individually
+      multipleUploadData.files.forEach((file) => {
+        formData.append("ImageFiles", file);
+      });
+
+      formData.append("ProductId", multipleUploadData.productId.toString());
+      formData.append("AltText", multipleUploadData.altText || "");
+
+      console.log("=== Multiple Upload FormData Contents ===");
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+        if (value instanceof File) {
+          console.log(`  File name: ${value.name}`);
+          console.log(`  File size: ${value.size}`);
+          console.log(`  File type: ${value.type}`);
+        }
+      }
+
+      console.log("Calling createMultipleProductImages...");
+      const result = await createMultipleProductImages(formData);
+      console.log("Multiple upload successful:", result);
+
+      // Reset form after successful upload
       setShowMultipleUploadModal(false);
       setMultipleUploadData({ productId: null, altText: "", files: [] });
       await getProductImages();
+
     } catch (error) {
-      console.error("Error uploading images:", error);
-      alert("Failed to upload images");
+      console.error("=== MULTIPLE UPLOAD ERROR ===");
+      console.error("Error details:", error);
+      console.error("Error message:", error.message);
+      alert("Failed to upload images: " + (error.message || "Unknown error"));
     } finally {
       setIsUploading(false);
+      console.log("=== MULTIPLE UPLOAD DEBUG END ===");
     }
   };
 
@@ -543,14 +509,7 @@ const ProductImages = () => {
   };
 
   // Statistics Card Component
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    bgColor,
-    iconColor,
-    formatter,
-  }) => (
+  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, formatter }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
       <Container className="flex items-center justify-between">
         <Container>
@@ -596,7 +555,7 @@ const ProductImages = () => {
 
         {image.IsMain && (
           <Container className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
-            {translations["Main"]}
+            {translations.Main}
           </Container>
         )}
 
@@ -623,15 +582,11 @@ const ProductImages = () => {
           <Span className="text-sm font-medium text-gray-900 truncate">
             {getProductName(image.ProductId)}
           </Span>
-          <Span className="text-xs text-gray-500">
-            {formatFileSize(image.FileSize)}
-          </Span>
+          <Span className="text-xs text-gray-500">{formatFileSize(image.FileSize)}</Span>
         </Container>
 
         {image.AltText && (
-          <Span className="text-xs text-gray-500 block truncate">
-            {image.AltText}
-          </Span>
+          <Span className="text-xs text-gray-500 block truncate">{image.AltText}</Span>
         )}
 
         <Container className="flex items-center justify-between mt-2">
@@ -659,11 +614,7 @@ const ProductImages = () => {
   }
 
   return (
-    <Container
-      className="min-h-screen bg-gray-50"
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-    >
+    <Container className="min-h-screen bg-gray-50" onDrop={handleDrop} onDragOver={handleDragOver}>
       {/* Header */}
       <Container className="px-6 py-6">
         <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
@@ -840,9 +791,7 @@ const ProductImages = () => {
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${
-                translations.Search
-              } ${translations.Images.toLowerCase()}...`}
+              placeholder={`${translations.Search} ${translations.Images.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -1028,9 +977,7 @@ const ProductImages = () => {
                             <Container className="flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-gray-400" />
                               <Span className="text-sm text-gray-900">
-                                {formatDate(
-                                  image.CreatedAt || image.UploadDate
-                                )}
+                                {formatDate(image.CreatedAt || image.UploadDate)}
                               </Span>
                             </Container>
                           </td>
@@ -1043,7 +990,6 @@ const ProductImages = () => {
                               >
                                 <AiOutlineEye className="w-3 h-3" />
                               </button>
-
                               <button
                                 onClick={() => handleDeleteImage(image.Id)}
                                 className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
@@ -1075,13 +1021,17 @@ const ProductImages = () => {
           </Container>
         }
         width={600}
-        okText={isUploading ? translations.Uploading : translations["Upload"]}
+        okText={isUploading ? translations.Uploading : translations.Upload}
         cancelText={translations.Cancel}
         okAction={handleSingleUpload}
-        cancelAction={() => setShowUploadModal(false)}
-        okButtonDisabled={isUploading}
+        cancelAction={() => {
+          setShowUploadModal(false);
+          setUploadFiles([]);
+          setUploadFormData({ productId: null, altText: "", isMain: false });
+        }}
+        okButtonDisabled={isUploading || !uploadFiles.length || !uploadFormData.productId}
         body={
-          <form onSubmit={handleSingleUpload} className="space-y-4">
+          <Container className="space-y-4">
             <Container>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {translations.Product} <span className="text-red-500">*</span>
@@ -1112,15 +1062,14 @@ const ProductImages = () => {
               </label>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                 onChange={handleFileSelect}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               />
               {uploadFiles.length > 0 && (
                 <Container className="mt-2 text-sm text-gray-600">
-                  Selected: {uploadFiles[0].name} (
-                  {formatFileSize(uploadFiles[0].size)})
+                  Selected: {uploadFiles[0].name} ({formatFileSize(uploadFiles[0].size)})
                 </Container>
               )}
             </Container>
@@ -1162,7 +1111,7 @@ const ProductImages = () => {
                 </Span>
               </label>
             </Container>
-          </form>
+          </Container>
         }
       />
 
@@ -1177,13 +1126,16 @@ const ProductImages = () => {
           </Container>
         }
         width={600}
-        okText={isUploading ? translations.Uploading : translations["Upload"]}
+        okText={isUploading ? translations.Uploading : translations.Upload}
         cancelText={translations.Cancel}
         okAction={handleMultipleUpload}
-        cancelAction={() => setShowMultipleUploadModal(false)}
-        okButtonDisabled={isUploading}
+        cancelAction={() => {
+          setShowMultipleUploadModal(false);
+          setMultipleUploadData({ productId: null, altText: "", files: [] });
+        }}
+        okButtonDisabled={isUploading || !multipleUploadData.files.length || !multipleUploadData.productId}
         body={
-          <form onSubmit={handleMultipleUpload} className="space-y-4">
+          <Container className="space-y-4">
             <Container>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {translations.Product} <span className="text-red-500">*</span>
@@ -1214,20 +1166,25 @@ const ProductImages = () => {
               </label>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                 multiple
-                onChange={(e) =>
-                  setMultipleUploadData({
-                    ...multipleUploadData,
-                    files: Array.from(e.target.files),
-                  })
-                }
+                onChange={handleMultipleFileSelect}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               />
               {multipleUploadData.files.length > 0 && (
-                <Container className="mt-2 text-sm text-gray-600">
-                  Selected: {multipleUploadData.files.length} files
+                <Container className="mt-2 space-y-1">
+                  <Container className="text-sm text-gray-600">
+                    Selected: {multipleUploadData.files.length} files
+                  </Container>
+                  <Container className="max-h-32 overflow-y-auto">
+                    {multipleUploadData.files.map((file, index) => (
+                      <Container key={index} className="text-xs text-gray-500 flex justify-between">
+                        <span>{file.name}</span>
+                        <span>{formatFileSize(file.size)}</span>
+                      </Container>
+                    ))}
+                  </Container>
                 </Container>
               )}
             </Container>
@@ -1249,8 +1206,11 @@ const ProductImages = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations["Alt Text"]}...`}
               />
+              <Container className="mt-1 text-xs text-gray-500">
+                This alt text will be applied to all uploaded images
+              </Container>
             </Container>
-          </form>
+          </Container>
         }
       />
 
@@ -1319,9 +1279,7 @@ const ProductImages = () => {
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {selectedImage.IsMain
-                          ? translations.Yes
-                          : translations.No}
+                        {selectedImage.IsMain ? translations.Yes : translations.No}
                       </Span>
                     </Container>
                   </Container>
@@ -1353,9 +1311,7 @@ const ProductImages = () => {
                         {translations["Upload Date"]}
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
-                        {formatDate(
-                          selectedImage.CreatedAt || selectedImage.UploadDate
-                        )}
+                        {formatDate(selectedImage.CreatedAt || selectedImage.UploadDate)}
                       </Span>
                     </Container>
                   </Container>
@@ -1377,10 +1333,13 @@ const ProductImages = () => {
           </Container>
         }
         width={500}
-        okText={translations.Delete}
+        okText={isDeleting ? translations.Loading : translations.Delete}
         cancelText={translations.Cancel}
         okAction={confirmDeleteImage}
-        cancelAction={() => setShowDeleteModal(false)}
+        cancelAction={() => {
+          setShowDeleteModal(false);
+          setImageToDelete(null);
+        }}
         okButtonDisabled={isDeleting}
         body={
           <Container className="text-center py-4">
@@ -1391,8 +1350,7 @@ const ProductImages = () => {
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will
-              permanently delete the image and all associated data.
+              {translations["This action cannot be undone"]}. This will permanently delete the image and all associated data.
             </Span>
             {imageToDelete && (
               <Container className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -1447,9 +1405,7 @@ const ProductImages = () => {
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
-                        productId: e.target.value
-                          ? parseInt(e.target.value)
-                          : null,
+                        productId: e.target.value ? parseInt(e.target.value) : null,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -1469,17 +1425,13 @@ const ProductImages = () => {
                   </label>
                   <select
                     value={
-                      filterOptions.isMain === null
-                        ? ""
-                        : filterOptions.isMain.toString()
+                      filterOptions.isMain === null ? "" : filterOptions.isMain.toString()
                     }
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
                         isMain:
-                          e.target.value === ""
-                            ? null
-                            : e.target.value === "true",
+                          e.target.value === "" ? null : e.target.value === "true",
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -1543,6 +1495,7 @@ const ProductImages = () => {
                   onClick={() => {
                     setShowFilters(false);
                     // Apply filters logic here
+                    // You can implement filtering based on filterOptions state
                   }}
                 />
                 <FilledButton
