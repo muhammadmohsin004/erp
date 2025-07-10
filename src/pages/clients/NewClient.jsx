@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -23,6 +23,115 @@ import FilledButton from "../../components/elements/elements/buttons/filledButto
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 
+// Move InputField component outside to prevent re-creation
+const InputField = React.memo(({ 
+  label, 
+  name, 
+  type = "text", 
+  required = false, 
+  placeholder = "", 
+  value, 
+  onChange, 
+  error,
+  icon: Icon,
+  as = "input"
+}) => (
+  <Container className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700">
+      {label}
+      {required && <Span className="text-red-500 ml-1">*</Span>}
+    </label>
+    <Container className="relative">
+      {Icon && (
+        <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-gray-400" />
+        </Container>
+      )}
+      {as === "textarea" ? (
+        <textarea
+          name={name}
+          value={value || ""}
+          onChange={(e) => onChange(name, e.target.value)}
+          placeholder={placeholder}
+          rows={4}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
+        />
+      ) : as === "select" ? (
+        <select
+          name={name}
+          value={value || ""}
+          onChange={(e) => onChange(name, e.target.value)}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {name === "ClientType" && (
+            <>
+              <option value="Individual">Individual</option>
+              <option value="Business">Business</option>
+            </>
+          )}
+          {name === "Currency" && (
+            <>
+              <option value="USD">USD - US Dollar</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="SAR">SAR - Saudi Riyal</option>
+              <option value="AED">AED - UAE Dirham</option>
+              <option value="PKR">PKR - Pakistani Rupee</option>
+            </>
+          )}
+          {name === "InvoicingMethod" && (
+            <>
+              <option value="Email">Email</option>
+              <option value="Print">Print</option>
+              <option value="Both">Both</option>
+            </>
+          )}
+          {name === "Country" && (
+            <>
+              <option value="United States (US)">United States (US)</option>
+              <option value="Germany (DE)">Germany (DE)</option>
+              <option value="Australia (AU)">Australia (AU)</option>
+              <option value="Saudi Arabia (SA)">Saudi Arabia (SA)</option>
+              <option value="UAE (AE)">UAE (AE)</option>
+              <option value="Pakistan (PK)">Pakistan (PK)</option>
+              <option value="Denmark">Denmark</option>
+            </>
+          )}
+          {name === "DisplayLanguage" && (
+            <>
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </>
+          )}
+        </select>
+      ) : (
+        <input
+          type={type}
+          name={name}
+          value={value || ""}
+          onChange={(e) => onChange(name, e.target.value)}
+          placeholder={placeholder}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
+        />
+      )}
+    </Container>
+    {error && <Span className="text-red-500 text-sm">{error}</Span>}
+  </Container>
+));
+
+// Move Section component outside to prevent re-creation
+const Section = React.memo(({ title, children, icon: Icon }) => (
+  <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <Container className="flex items-center gap-3 mb-6">
+      {Icon && <Icon className="w-5 h-5 text-blue-600" />}
+      <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+    </Container>
+    {children}
+  </Container>
+));
+
 const NewClient = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +140,8 @@ const NewClient = () => {
   
   const { createClient, updateClient } = useClients();
 
-  const translations = {
+  // Memoize translations to prevent re-creation
+  const translations = React.useMemo(() => ({
     "New Client": language === "ar" ? "عميل جديد" : "New Client",
     "Edit Client": language === "ar" ? "تعديل العميل" : "Edit Client",
     "Client Information": language === "ar" ? "معلومات العميل" : "Client Information",
@@ -75,7 +185,7 @@ const NewClient = () => {
     "Remove": language === "ar" ? "إزالة" : "Remove",
     "Choose Files": language === "ar" ? "اختر الملفات" : "Choose Files",
     "No files selected": language === "ar" ? "لم يتم اختيار ملفات" : "No files selected",
-  };
+  }), [language]);
 
   // Check if editing (from location state or URL)
   const isEditing = location.state?.isEditing || false;
@@ -140,24 +250,26 @@ const NewClient = () => {
     }
   }, [token, navigate]);
 
-  // Handle form input changes - Fixed to prevent field deactivation
-  const handleInputChange = (field, value) => {
+  // Memoize event handlers to prevent re-creation
+  const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     
     // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: null
-      }));
-    }
-  };
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, []);
 
   // Handle contact changes
-  const handleContactChange = (index, field, value) => {
+  const handleContactChange = useCallback((index, field, value) => {
     setContacts(prev => {
       const newContacts = [...prev];
       newContacts[index] = {
@@ -166,10 +278,10 @@ const NewClient = () => {
       };
       return newContacts;
     });
-  };
+  }, []);
 
   // Add new contact
-  const addContact = () => {
+  const addContact = useCallback(() => {
     setContacts(prev => [...prev, {
       FirstName: "",
       LastName: "",
@@ -177,26 +289,26 @@ const NewClient = () => {
       Mobile: "",
       Telephone: ""
     }]);
-  };
+  }, []);
 
   // Remove contact
-  const removeContact = (index) => {
+  const removeContact = useCallback((index) => {
     setContacts(prev => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
   // Handle file uploads
-  const handleFileUpload = (event) => {
+  const handleFileUpload = useCallback((event) => {
     const files = Array.from(event.target.files);
     setAttachments(prev => [...prev, ...files]);
-  };
+  }, []);
 
   // Remove attachment
-  const removeAttachment = (index) => {
+  const removeAttachment = useCallback((index) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
   // Validate form
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
     if (formData.ClientType === "Individual") {
@@ -215,10 +327,10 @@ const NewClient = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, translations]);
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -247,116 +359,7 @@ const NewClient = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  // Input component - Fixed to prevent deactivation issue
-  const InputField = ({ 
-    label, 
-    name, 
-    type = "text", 
-    required = false, 
-    placeholder = "", 
-    value, 
-    onChange, 
-    error,
-    icon: Icon,
-    as = "input"
-  }) => (
-    <Container className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        {label}
-        {required && <Span className="text-red-500 ml-1">*</Span>}
-      </label>
-      <Container className="relative">
-        {Icon && (
-          <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
-          </Container>
-        )}
-        {as === "textarea" ? (
-          <textarea
-            name={name}
-            value={value || ""}
-            onChange={(e) => onChange(name, e.target.value)}
-            placeholder={placeholder}
-            rows={4}
-            className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
-          />
-        ) : as === "select" ? (
-          <select
-            name={name}
-            value={value || ""}
-            onChange={(e) => onChange(name, e.target.value)}
-            className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
-          >
-            {placeholder && <option value="">{placeholder}</option>}
-            {name === "ClientType" && (
-              <>
-                <option value="Individual">{translations.Individual}</option>
-                <option value="Business">{translations.Business}</option>
-              </>
-            )}
-            {name === "Currency" && (
-              <>
-                <option value="USD">USD - US Dollar</option>
-                <option value="EUR">EUR - Euro</option>
-                <option value="SAR">SAR - Saudi Riyal</option>
-                <option value="AED">AED - UAE Dirham</option>
-                <option value="PKR">PKR - Pakistani Rupee</option>
-              </>
-            )}
-            {name === "InvoicingMethod" && (
-              <>
-                <option value="Email">Email</option>
-                <option value="Print">Print</option>
-                <option value="Both">Both</option>
-              </>
-            )}
-            {name === "Country" && (
-              <>
-                <option value="United States (US)">United States (US)</option>
-                <option value="Germany (DE)">Germany (DE)</option>
-                <option value="Australia (AU)">Australia (AU)</option>
-                <option value="Saudi Arabia (SA)">Saudi Arabia (SA)</option>
-                <option value="UAE (AE)">UAE (AE)</option>
-                <option value="Pakistan (PK)">Pakistan (PK)</option>
-                <option value="Denmark">Denmark</option>
-              </>
-            )}
-            {name === "DisplayLanguage" && (
-              <>
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-              </>
-            )}
-          </select>
-        ) : (
-          <input
-            type={type}
-            name={name}
-            value={value || ""}
-            onChange={(e) => onChange(name, e.target.value)}
-            placeholder={placeholder}
-            className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
-          />
-        )}
-      </Container>
-      {error && <Span className="text-red-500 text-sm">{error}</Span>}
-    </Container>
-  );
-
-  // Section component
-  const Section = ({ title, children, icon: Icon }) => (
-    <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <Container className="flex items-center gap-3 mb-6">
-        {Icon && <Icon className="w-5 h-5 text-blue-600" />}
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-      </Container>
-      {children}
-    </Container>
-  );
+  }, [formData, contacts, attachments, isEditing, editData, validateForm, updateClient, createClient, navigate]);
 
   return (
     <Container className="min-h-screen bg-gray-50">
