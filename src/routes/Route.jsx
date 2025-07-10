@@ -42,14 +42,6 @@ import SystemSettings from "../pages/SuperAdmin/Settings/SystemSettings";
 import AccountSettings from "../pages/SuperAdmin/Settings/AccountSettings";
 import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
-import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
-import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
-import PriceListList from "../pages/Inventories/PriceList/PriceListList";
-import NewPriceList from "../pages/Inventories/PriceList/NewPriceList";
-import InvoiceDashboard from "../pages/Sale/Invoice/InvoiceDashboard";
-import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
-import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
-import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
 
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -449,7 +441,7 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/Requsition-Manager",
       component: RequisitionList,
       roles: ["Admin", "Manager", "Employee"],
@@ -479,13 +471,13 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/invoices",
       component: InvoiceList,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/new-invoice",
       component: NewInvoice,
       roles: ["Admin", "Manager", "Employee"],
@@ -602,20 +594,20 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
-      path: "/admin/employees",
-      component: () => <div>Employees Page</div>,
+      path: "/admin/manage-employee",
+      component: ManageEmployees,
       roles: ["Admin", "Manager"],
       layout: true,
     },
     {
-      path: "/manager/employees",
-      component: () => <div>Employees Page</div>,
-      roles: ["Manager"],
+      path: "/admin/add-employee",
+      component: CreateNewEmployee,
+      roles: ["Admin", "Manager"],
       layout: true,
     },
     {
-      path: "/employees", // Legacy support
-      component: () => <div>Employees Page</div>,
+      path: "/admin/employee-salary", // Legacy support
+      component: EmployeeSalary,
       roles: ["Admin", "Manager"],
       layout: true,
     },
