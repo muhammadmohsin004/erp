@@ -41,6 +41,7 @@ import SystemLogs from "../pages/SuperAdmin/SystemLogs/SystemLogs";
 import SystemSettings from "../pages/SuperAdmin/Settings/SystemSettings";
 import AccountSettings from "../pages/SuperAdmin/Settings/AccountSettings";
 import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
+import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
 
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -407,6 +408,12 @@ const getRouteConfig = () => {
     {
       path: "/admin/Products-Manager",
       component: ProductsList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-product",
+      component: NewProduct,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

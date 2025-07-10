@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -21,6 +21,121 @@ import FilledButton from "../../components/elements/elements/buttons/filledButto
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 
+// Move InputField component outside to prevent re-creation
+const InputField = React.memo(({ 
+  label, 
+  name, 
+  type = "text", 
+  required = false, 
+  placeholder = "", 
+  value, 
+  onChange, 
+  error,
+  icon: Icon,
+  as = "input",
+  disabled = false
+}) => (
+  <Container className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700">
+      {label}
+      {required && <Span className="text-red-500 ml-1">*</Span>}
+    </label>
+    <Container className="relative">
+      {Icon && (
+        <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-gray-400" />
+        </Container>
+      )}
+      {as === "textarea" ? (
+        <textarea
+          name={name}
+          value={value || ""}
+          onChange={(e) => onChange(name, e.target.value)}
+          placeholder={placeholder}
+          rows={4}
+          disabled={disabled}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+        />
+      ) : as === "select" ? (
+        <select
+          name={name}
+          value={value || ""}
+          onChange={(e) => onChange(name, e.target.value)}
+          disabled={disabled}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {name === "Status" && (
+            <>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </>
+          )}
+          {name === "Primary" && (
+            <>
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </>
+          )}
+          {name === "ViewPermission" && (
+            <>
+              <option value="1">Enabled</option>
+              <option value="0">Disabled</option>
+            </>
+          )}
+          {name === "CreateInvoicePermission" && (
+            <>
+              <option value="1">Enabled</option>
+              <option value="0">Disabled</option>
+            </>
+          )}
+          {name === "UpdateStockPermission" && (
+            <>
+              <option value="1">Enabled</option>
+              <option value="0">Disabled</option>
+            </>
+          )}
+          {name === "Country" && (
+            <>
+              <option value="USA">United States</option>
+              <option value="Saudi Arabia">Saudi Arabia</option>
+              <option value="UAE">United Arab Emirates</option>
+              <option value="Pakistan">Pakistan</option>
+              <option value="Germany">Germany</option>
+              <option value="Australia">Australia</option>
+              <option value="Denmark">Denmark</option>
+              <option value="Canada">Canada</option>
+              <option value="United Kingdom">United Kingdom</option>
+            </>
+          )}
+        </select>
+      ) : (
+        <input
+          type={type}
+          name={name}
+          value={value || ""}
+          onChange={(e) => onChange(name, e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+        />
+      )}
+    </Container>
+    {error && <Span className="text-red-500 text-sm">{error}</Span>}
+  </Container>
+));
+
+// Move Section component outside to prevent re-creation
+const Section = React.memo(({ title, children, icon: Icon }) => (
+  <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <Container className="flex items-center gap-3 mb-6">
+      {Icon && <Icon className="w-5 h-5 text-blue-600" />}
+      <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+    </Container>
+    {children}
+  </Container>
+));
+
 const NewWarehouse = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,7 +144,8 @@ const NewWarehouse = () => {
   
   const { createWarehouse, updateWarehouse } = useWarehouse();
 
-  const translations = {
+  // Memoize translations to prevent re-creation
+  const translations = React.useMemo(() => ({
     "New Warehouse": language === "ar" ? "مستودع جديد" : "New Warehouse",
     "Edit Warehouse": language === "ar" ? "تعديل المستودع" : "Edit Warehouse",
     "Warehouse Information": language === "ar" ? "معلومات المستودع" : "Warehouse Information",
@@ -67,7 +183,7 @@ const NewWarehouse = () => {
     "Yes": language === "ar" ? "نعم" : "Yes",
     "No": language === "ar" ? "لا" : "No",
     "Same as main address": language === "ar" ? "نفس العنوان الرئيسي" : "Same as main address",
-  };
+  }), [language]);
 
   // Check if editing (from location state or URL)
   const isEditing = location.state?.isEditing || false;
@@ -124,32 +240,46 @@ const NewWarehouse = () => {
     }
   }, [token, navigate]);
 
-  // Handle form input changes
-  const handleInputChange = (field, value) => {
+  // Memoize event handlers to prevent re-creation
+  const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     
     // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: null
-      }));
-    }
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, []);
 
-    // Auto-update shipping address if same as main address
-    if (field === "Address" && sameAsMainAddress) {
-      setFormData(prev => ({
-        ...prev,
-        ShippingAddress: value
-      }));
-    }
-  };
+  // Handle input change with address auto-update
+  const handleInputChangeWithAddress = useCallback((field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+      // Auto-update shipping address if same as main address
+      ...(field === "Address" && sameAsMainAddress ? { ShippingAddress: value } : {})
+    }));
+    
+    // Clear error when user starts typing
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, [sameAsMainAddress]);
 
   // Handle same address checkbox
-  const handleSameAddressChange = (checked) => {
+  const handleSameAddressChange = useCallback((checked) => {
     setSameAsMainAddress(checked);
     if (checked) {
       setFormData(prev => ({
@@ -157,10 +287,10 @@ const NewWarehouse = () => {
         ShippingAddress: prev.Address
       }));
     }
-  };
+  }, []);
 
   // Validate form
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
     if (!formData.Name.trim()) {
@@ -173,10 +303,10 @@ const NewWarehouse = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, translations]);
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -205,122 +335,7 @@ const NewWarehouse = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  // Input component
-  const InputField = ({ 
-    label, 
-    name, 
-    type = "text", 
-    required = false, 
-    placeholder = "", 
-    value, 
-    onChange, 
-    error,
-    icon: Icon,
-    as = "input",
-    disabled = false
-  }) => (
-    <Container className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        {label}
-        {required && <Span className="text-red-500 ml-1">*</Span>}
-      </label>
-      <Container className="relative">
-        {Icon && (
-          <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
-          </Container>
-        )}
-        {as === "textarea" ? (
-          <textarea
-            name={name}
-            value={value || ""}
-            onChange={(e) => onChange(name, e.target.value)}
-            placeholder={placeholder}
-            rows={4}
-            disabled={disabled}
-            className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          />
-        ) : as === "select" ? (
-          <select
-            name={name}
-            value={value || ""}
-            onChange={(e) => onChange(name, e.target.value)}
-            disabled={disabled}
-            className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          >
-            {placeholder && <option value="">{placeholder}</option>}
-            {name === "Status" && (
-              <>
-                <option value="Active">{translations.Active}</option>
-                <option value="Inactive">{translations.Inactive}</option>
-              </>
-            )}
-            {name === "Primary" && (
-              <>
-                <option value="0">{translations.No}</option>
-                <option value="1">{translations.Yes}</option>
-              </>
-            )}
-            {name === "ViewPermission" && (
-              <>
-                <option value="1">{translations.Enabled}</option>
-                <option value="0">{translations.Disabled}</option>
-              </>
-            )}
-            {name === "CreateInvoicePermission" && (
-              <>
-                <option value="1">{translations.Enabled}</option>
-                <option value="0">{translations.Disabled}</option>
-              </>
-            )}
-            {name === "UpdateStockPermission" && (
-              <>
-                <option value="1">{translations.Enabled}</option>
-                <option value="0">{translations.Disabled}</option>
-              </>
-            )}
-            {name === "Country" && (
-              <>
-                <option value="USA">United States</option>
-                <option value="Saudi Arabia">Saudi Arabia</option>
-                <option value="UAE">United Arab Emirates</option>
-                <option value="Pakistan">Pakistan</option>
-                <option value="Germany">Germany</option>
-                <option value="Australia">Australia</option>
-                <option value="Denmark">Denmark</option>
-                <option value="Canada">Canada</option>
-                <option value="United Kingdom">United Kingdom</option>
-              </>
-            )}
-          </select>
-        ) : (
-          <input
-            type={type}
-            name={name}
-            value={value || ""}
-            onChange={(e) => onChange(name, e.target.value)}
-            placeholder={placeholder}
-            disabled={disabled}
-            className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          />
-        )}
-      </Container>
-      {error && <Span className="text-red-500 text-sm">{error}</Span>}
-    </Container>
-  );
-
-  // Section component
-  const Section = ({ title, children, icon: Icon }) => (
-    <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <Container className="flex items-center gap-3 mb-6">
-        {Icon && <Icon className="w-5 h-5 text-blue-600" />}
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-      </Container>
-      {children}
-    </Container>
-  );
+  }, [formData, isEditing, editData, validateForm, updateWarehouse, createWarehouse, navigate]);
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -513,7 +528,7 @@ const NewWarehouse = () => {
                   name="Address"
                   placeholder="Enter warehouse address"
                   value={formData.Address}
-                  onChange={handleInputChange}
+                  onChange={handleInputChangeWithAddress}
                   icon={MapPin}
                 />
               </Container>

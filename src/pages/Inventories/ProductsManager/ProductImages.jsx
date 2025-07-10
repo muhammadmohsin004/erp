@@ -21,7 +21,6 @@ import {
   Upload,
   Grid,
   List,
- 
   Maximize,
   Minimize,
   Star,
@@ -66,11 +65,7 @@ import {
   Smartphone,
   Tablet,
 } from "lucide-react";
-import {
-  AiOutlineEye,
-  AiOutlineDelete,
-  
-} from "react-icons/ai";
+import { AiOutlineEye, AiOutlineDelete } from "react-icons/ai";
 import { useProductsManager } from "../../../Contexts/ProductsManagerContext/ProductsManagerContext";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Modall from "../../../components/elements/modal/Modal";
@@ -86,47 +81,53 @@ const ProductImages = () => {
 
   const translations = {
     "Product Images": language === "ar" ? "صور المنتجات" : "Product Images",
-    "Back to Products": language === "ar" ? "العودة للمنتجات" : "Back to Products",
+    "Back to Products":
+      language === "ar" ? "العودة للمنتجات" : "Back to Products",
     "Upload Image": language === "ar" ? "رفع صورة" : "Upload Image",
     "Upload Multiple": language === "ar" ? "رفع متعدد" : "Upload Multiple",
-    "Images": language === "ar" ? "الصور" : "Images",
+    Images: language === "ar" ? "الصور" : "Images",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
-    "Search": language === "ar" ? "بحث" : "Search",
-    "Filters": language === "ar" ? "الفلاتر" : "Filters",
-    "Export": language === "ar" ? "تصدير" : "Export",
-    "Selected": language === "ar" ? "محدد" : "Selected",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    Search: language === "ar" ? "بحث" : "Search",
+    Filters: language === "ar" ? "الفلاتر" : "Filters",
+    Export: language === "ar" ? "تصدير" : "Export",
+    Selected: language === "ar" ? "محدد" : "Selected",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     "No Images": language === "ar" ? "لا يوجد صور" : "No images found",
-    "Image": language === "ar" ? "الصورة" : "Image",
-    "Product": language === "ar" ? "المنتج" : "Product",
+    Image: language === "ar" ? "الصورة" : "Image",
+    Product: language === "ar" ? "المنتج" : "Product",
     "Alt Text": language === "ar" ? "النص البديل" : "Alt Text",
     "Main Image": language === "ar" ? "الصورة الرئيسية" : "Main Image",
     "File Size": language === "ar" ? "حجم الملف" : "File Size",
-    "Dimensions": language === "ar" ? "الأبعاد" : "Dimensions",
-    "Format": language === "ar" ? "الصيغة" : "Format",
+    Dimensions: language === "ar" ? "الأبعاد" : "Dimensions",
+    Format: language === "ar" ? "الصيغة" : "Format",
     "Upload Date": language === "ar" ? "تاريخ الرفع" : "Upload Date",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "Showing": language === "ar" ? "عرض" : "Showing",
-    "Of": language === "ar" ? "من" : "of",
-    "Items": language === "ar" ? "عناصر" : "Items",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Delete": language === "ar" ? "حذف" : "Delete",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    Showing: language === "ar" ? "عرض" : "Showing",
+    Of: language === "ar" ? "من" : "of",
+    Items: language === "ar" ? "عناصر" : "Items",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Clone: language === "ar" ? "نسخ" : "Clone",
+    Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Image": language === "ar" ? "حذف الصورة" : "Delete Image",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Image Details": language === "ar" ? "تفاصيل الصورة" : "Image Details",
-    "Close": language === "ar" ? "إغلاق" : "Close",
+    Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "Grid View": language === "ar" ? "عرض شبكي" : "Grid View",
     "List View": language === "ar" ? "عرض قائمة" : "List View",
     "Total Images": language === "ar" ? "إجمالي الصور" : "Total Images",
     "Main Images": language === "ar" ? "الصور الرئيسية" : "Main Images",
     "Gallery Images": language === "ar" ? "صور المعرض" : "Gallery Images",
-    "Recently Uploaded": language === "ar" ? "مرفوعة حديثاً" : "Recently Uploaded",
+    "Recently Uploaded":
+      language === "ar" ? "مرفوعة حديثاً" : "Recently Uploaded",
     "Large Images": language === "ar" ? "صور كبيرة" : "Large Images",
     "Small Images": language === "ar" ? "صور صغيرة" : "Small Images",
     "Image Management": language === "ar" ? "إدارة الصور" : "Image Management",
@@ -134,7 +135,8 @@ const ProductImages = () => {
     "Image Library": language === "ar" ? "مكتبة الصور" : "Image Library",
     "Image Studio": language === "ar" ? "استوديو الصور" : "Image Studio",
     "Image Analytics": language === "ar" ? "تحليلات الصور" : "Image Analytics",
-    "Image Optimization": language === "ar" ? "تحسين الصور" : "Image Optimization",
+    "Image Optimization":
+      language === "ar" ? "تحسين الصور" : "Image Optimization",
     "Image Processing": language === "ar" ? "معالجة الصور" : "Image Processing",
     "Image Storage": language === "ar" ? "تخزين الصور" : "Image Storage",
     "Image Backup": language === "ar" ? "نسخ احتياطي للصور" : "Image Backup",
@@ -147,100 +149,111 @@ const ProductImages = () => {
     "Image Flip": language === "ar" ? "قلب الصور" : "Image Flip",
     "Image Filter": language === "ar" ? "فلتر الصور" : "Image Filter",
     "Image Effects": language === "ar" ? "تأثيرات الصور" : "Image Effects",
-    "Image Watermark": language === "ar" ? "علامة مائية للصور" : "Image Watermark",
-    "Image Metadata": language === "ar" ? "بيانات الصور الوصفية" : "Image Metadata",
+    "Image Watermark":
+      language === "ar" ? "علامة مائية للصور" : "Image Watermark",
+    "Image Metadata":
+      language === "ar" ? "بيانات الصور الوصفية" : "Image Metadata",
     "Image Tags": language === "ar" ? "علامات الصور" : "Image Tags",
     "Image Categories": language === "ar" ? "فئات الصور" : "Image Categories",
-    "Image Collections": language === "ar" ? "مجموعات الصور" : "Image Collections",
+    "Image Collections":
+      language === "ar" ? "مجموعات الصور" : "Image Collections",
     "Image Albums": language === "ar" ? "ألبومات الصور" : "Image Albums",
     "Image Favorites": language === "ar" ? "الصور المفضلة" : "Image Favorites",
     "Image Archive": language === "ar" ? "أرشيف الصور" : "Image Archive",
     "Image Trash": language === "ar" ? "سلة مهملات الصور" : "Image Trash",
     "Image History": language === "ar" ? "تاريخ الصور" : "Image History",
     "Image Versions": language === "ar" ? "إصدارات الصور" : "Image Versions",
-    "Image Duplicates": language === "ar" ? "الصور المكررة" : "Image Duplicates",
+    "Image Duplicates":
+      language === "ar" ? "الصور المكررة" : "Image Duplicates",
     "Image Performance": language === "ar" ? "أداء الصور" : "Image Performance",
     "Image Usage": language === "ar" ? "استخدام الصور" : "Image Usage",
-    "Image Statistics": language === "ar" ? "إحصائيات الصور" : "Image Statistics",
+    "Image Statistics":
+      language === "ar" ? "إحصائيات الصور" : "Image Statistics",
     "Image Reports": language === "ar" ? "تقارير الصور" : "Image Reports",
     "Image Insights": language === "ar" ? "رؤى الصور" : "Image Insights",
     "Image Trends": language === "ar" ? "اتجاهات الصور" : "Image Trends",
     "Image Metrics": language === "ar" ? "مقاييس الصور" : "Image Metrics",
-    "Image Dashboard": language === "ar" ? "لوحة تحكم الصور" : "Image Dashboard",
+    "Image Dashboard":
+      language === "ar" ? "لوحة تحكم الصور" : "Image Dashboard",
     "Drag & Drop": language === "ar" ? "السحب والإفلات" : "Drag & Drop",
     "Choose Files": language === "ar" ? "اختر الملفات" : "Choose Files",
-    "Drop files here": language === "ar" ? "اسحب الملفات هنا" : "Drop files here",
+    "Drop files here":
+      language === "ar" ? "اسحب الملفات هنا" : "Drop files here",
     "Browse Files": language === "ar" ? "تصفح الملفات" : "Browse Files",
     "Upload Progress": language === "ar" ? "تقدم الرفع" : "Upload Progress",
-    "Uploading": language === "ar" ? "جارٍ الرفع" : "Uploading",
+    Uploading: language === "ar" ? "جارٍ الرفع" : "Uploading",
     "Upload Complete": language === "ar" ? "اكتمل الرفع" : "Upload Complete",
     "Upload Failed": language === "ar" ? "فشل الرفع" : "Upload Failed",
-    "Upload Cancelled": language === "ar" ? "تم إلغاء الرفع" : "Upload Cancelled",
+    "Upload Cancelled":
+      language === "ar" ? "تم إلغاء الرفع" : "Upload Cancelled",
     "File too large": language === "ar" ? "الملف كبير جداً" : "File too large",
-    "Invalid file type": language === "ar" ? "نوع ملف غير صالح" : "Invalid file type",
-    "Upload limit exceeded": language === "ar" ? "تم تجاوز حد الرفع" : "Upload limit exceeded",
+    "Invalid file type":
+      language === "ar" ? "نوع ملف غير صالح" : "Invalid file type",
+    "Upload limit exceeded":
+      language === "ar" ? "تم تجاوز حد الرفع" : "Upload limit exceeded",
     "Network error": language === "ar" ? "خطأ في الشبكة" : "Network error",
     "Server error": language === "ar" ? "خطأ في الخادم" : "Server error",
     "Unknown error": language === "ar" ? "خطأ غير معروف" : "Unknown error",
-    "Retry": language === "ar" ? "إعادة المحاولة" : "Retry",
-    "Skip": language === "ar" ? "تخطي" : "Skip",
-    "Continue": language === "ar" ? "متابعة" : "Continue",
-    "Finish": language === "ar" ? "إنهاء" : "Finish",
-    "Save": language === "ar" ? "حفظ" : "Save",
-    "Saving": language === "ar" ? "جارٍ الحفظ" : "Saving",
-    "Saved": language === "ar" ? "تم الحفظ" : "Saved",
-    "Required": language === "ar" ? "مطلوب" : "Required",
-    "Optional": language === "ar" ? "اختياري" : "Optional",
+    Retry: language === "ar" ? "إعادة المحاولة" : "Retry",
+    Skip: language === "ar" ? "تخطي" : "Skip",
+    Continue: language === "ar" ? "متابعة" : "Continue",
+    Finish: language === "ar" ? "إنهاء" : "Finish",
+    Save: language === "ar" ? "حفظ" : "Save",
+    Saving: language === "ar" ? "جارٍ الحفظ" : "Saving",
+    Saved: language === "ar" ? "تم الحفظ" : "Saved",
+    Required: language === "ar" ? "مطلوب" : "Required",
+    Optional: language === "ar" ? "اختياري" : "Optional",
     "Select Product": language === "ar" ? "اختر منتج" : "Select Product",
-    "No Product Selected": language === "ar" ? "لم يتم اختيار منتج" : "No Product Selected",
-    "Yes": language === "ar" ? "نعم" : "Yes",
-    "No": language === "ar" ? "لا" : "No",
-    "True": language === "ar" ? "صحيح" : "True",
-    "False": language === "ar" ? "خطأ" : "False",
-    "Enabled": language === "ar" ? "مفعل" : "Enabled",
-    "Disabled": language === "ar" ? "معطل" : "Disabled",
-    "Active": language === "ar" ? "نشط" : "Active",
-    "Inactive": language === "ar" ? "غير نشط" : "Inactive",
-    "Published": language === "ar" ? "منشور" : "Published",
-    "Draft": language === "ar" ? "مسودة" : "Draft",
-    "Approved": language === "ar" ? "موافق عليه" : "Approved",
-    "Rejected": language === "ar" ? "مرفوض" : "Rejected",
-    "Pending": language === "ar" ? "في الانتظار" : "Pending",
-    "Processing": language === "ar" ? "قيد المعالجة" : "Processing",
-    "Completed": language === "ar" ? "مكتمل" : "Completed",
-    "Failed": language === "ar" ? "فشل" : "Failed",
-    "Cancelled": language === "ar" ? "ملغى" : "Cancelled",
-    "Paused": language === "ar" ? "متوقف مؤقتاً" : "Paused",
-    "Resumed": language === "ar" ? "مستأنف" : "Resumed",
-    "Queued": language === "ar" ? "في الطابور" : "Queued",
-    "Scheduled": language === "ar" ? "مجدول" : "Scheduled",
-    "Expired": language === "ar" ? "منتهي الصلاحية" : "Expired",
-    "Archived": language === "ar" ? "مؤرشف" : "Archived",
-    "Deleted": language === "ar" ? "محذوف" : "Deleted",
-    "Restored": language === "ar" ? "مستعاد" : "Restored",
-    "Locked": language === "ar" ? "مقفل" : "Locked",
-    "Unlocked": language === "ar" ? "مفتوح" : "Unlocked",
-    "Visible": language === "ar" ? "مرئي" : "Visible",
-    "Hidden": language === "ar" ? "مخفي" : "Hidden",
-    "Public": language === "ar" ? "عام" : "Public",
-    "Private": language === "ar" ? "خاص" : "Private",
-    "Shared": language === "ar" ? "مشترك" : "Shared",
-    "Restricted": language === "ar" ? "مقيد" : "Restricted",
-    "Unlimited": language === "ar" ? "غير محدود" : "Unlimited",
-    "Limited": language === "ar" ? "محدود" : "Limited",
-    "Custom": language === "ar" ? "مخصص" : "Custom",
-    "Default": language === "ar" ? "افتراضي" : "Default",
-    "Auto": language === "ar" ? "تلقائي" : "Auto",
-    "Manual": language === "ar" ? "يدوي" : "Manual",
-    "items": language === "ar" ? "عناصر" : "items",
-    "pages": language === "ar" ? "صفحات" : "pages",
+    "No Product Selected":
+      language === "ar" ? "لم يتم اختيار منتج" : "No Product Selected",
+    Yes: language === "ar" ? "نعم" : "Yes",
+    No: language === "ar" ? "لا" : "No",
+    True: language === "ar" ? "صحيح" : "True",
+    False: language === "ar" ? "خطأ" : "False",
+    Enabled: language === "ar" ? "مفعل" : "Enabled",
+    Disabled: language === "ar" ? "معطل" : "Disabled",
+    Active: language === "ar" ? "نشط" : "Active",
+    Inactive: language === "ar" ? "غير نشط" : "Inactive",
+    Published: language === "ar" ? "منشور" : "Published",
+    Draft: language === "ar" ? "مسودة" : "Draft",
+    Approved: language === "ar" ? "موافق عليه" : "Approved",
+    Rejected: language === "ar" ? "مرفوض" : "Rejected",
+    Pending: language === "ar" ? "في الانتظار" : "Pending",
+    Processing: language === "ar" ? "قيد المعالجة" : "Processing",
+    Completed: language === "ar" ? "مكتمل" : "Completed",
+    Failed: language === "ar" ? "فشل" : "Failed",
+    Cancelled: language === "ar" ? "ملغى" : "Cancelled",
+    Paused: language === "ar" ? "متوقف مؤقتاً" : "Paused",
+    Resumed: language === "ar" ? "مستأنف" : "Resumed",
+    Queued: language === "ar" ? "في الطابور" : "Queued",
+    Scheduled: language === "ar" ? "مجدول" : "Scheduled",
+    Expired: language === "ar" ? "منتهي الصلاحية" : "Expired",
+    Archived: language === "ar" ? "مؤرشف" : "Archived",
+    Deleted: language === "ar" ? "محذوف" : "Deleted",
+    Restored: language === "ar" ? "مستعاد" : "Restored",
+    Locked: language === "ar" ? "مقفل" : "Locked",
+    Unlocked: language === "ar" ? "مفتوح" : "Unlocked",
+    Visible: language === "ar" ? "مرئي" : "Visible",
+    Hidden: language === "ar" ? "مخفي" : "Hidden",
+    Public: language === "ar" ? "عام" : "Public",
+    Private: language === "ar" ? "خاص" : "Private",
+    Shared: language === "ar" ? "مشترك" : "Shared",
+    Restricted: language === "ar" ? "مقيد" : "Restricted",
+    Unlimited: language === "ar" ? "غير محدود" : "Unlimited",
+    Limited: language === "ar" ? "محدود" : "Limited",
+    Custom: language === "ar" ? "مخصص" : "Custom",
+    Default: language === "ar" ? "افتراضي" : "Default",
+    Auto: language === "ar" ? "تلقائي" : "Auto",
+    Manual: language === "ar" ? "يدوي" : "Manual",
+    items: language === "ar" ? "عناصر" : "items",
+    pages: language === "ar" ? "صفحات" : "pages",
     "Go to page": language === "ar" ? "انتقل إلى الصفحة" : "Go to page",
     "items per page": language === "ar" ? "عنصر في الصفحة" : "items per page",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "First": language === "ar" ? "الأول" : "First",
-    "Last": language === "ar" ? "الأخير" : "Last",
-    "Page": language === "ar" ? "صفحة" : "Page"
+    Previous: language === "ar" ? "السابق" : "Previous",
+    Next: language === "ar" ? "التالي" : "Next",
+    First: language === "ar" ? "الأول" : "First",
+    Last: language === "ar" ? "الأخير" : "Last",
+    Page: language === "ar" ? "صفحة" : "Page",
   };
 
   // Get products context
@@ -258,7 +271,9 @@ const ProductImages = () => {
 
   // Process images data from API response
   const imagesData = productImages?.Data?.$values || [];
-const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products : [];
+  const productsDropdown = Array.isArray(dropdowns?.products)
+    ? dropdowns.products
+    : [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
@@ -316,6 +331,9 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
     const fetchInitialData = async () => {
       try {
         await getProductImages();
+            const productsData = await getProductsDropdown();
+            console.log("Fetched products dropdown:", productsData);
+
         await getProductsDropdown();
       } catch (error) {
         console.error("Error fetching initial data:", error);
@@ -333,17 +351,28 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
       const now = new Date();
       const stats = {
         totalImages: imagesData.length,
-        mainImages: imagesData.filter(img => img.IsMain).length,
-        galleryImages: imagesData.filter(img => !img.IsMain).length,
-        recentlyUploaded: imagesData.filter(img => {
+        mainImages: imagesData.filter((img) => img.IsMain).length,
+        galleryImages: imagesData.filter((img) => !img.IsMain).length,
+        recentlyUploaded: imagesData.filter((img) => {
           const uploadDate = new Date(img.CreatedAt || img.UploadDate);
-          return uploadDate.getMonth() === now.getMonth() && 
-                 uploadDate.getFullYear() === now.getFullYear();
+          return (
+            uploadDate.getMonth() === now.getMonth() &&
+            uploadDate.getFullYear() === now.getFullYear()
+          );
         }).length,
-        largeImages: imagesData.filter(img => (img.FileSize || 0) > 1000000).length, // > 1MB
-        smallImages: imagesData.filter(img => (img.FileSize || 0) <= 1000000).length, // <= 1MB
-        totalFileSize: imagesData.reduce((sum, img) => sum + (img.FileSize || 0), 0),
-        averageFileSize: imagesData.length > 0 ? imagesData.reduce((sum, img) => sum + (img.FileSize || 0), 0) / imagesData.length : 0,
+        largeImages: imagesData.filter((img) => (img.FileSize || 0) > 1000000)
+          .length, // > 1MB
+        smallImages: imagesData.filter((img) => (img.FileSize || 0) <= 1000000)
+          .length, // <= 1MB
+        totalFileSize: imagesData.reduce(
+          (sum, img) => sum + (img.FileSize || 0),
+          0
+        ),
+        averageFileSize:
+          imagesData.length > 0
+            ? imagesData.reduce((sum, img) => sum + (img.FileSize || 0), 0) /
+              imagesData.length
+            : 0,
       };
       setStatistics(stats);
     }
@@ -360,7 +389,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
     setUploadFiles(imageFiles);
     setShowUploadModal(true);
   }, []);
@@ -394,7 +423,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
 
   // Image actions
   const handleViewImage = (imageId) => {
-    const image = imagesData.find(img => img.Id === imageId);
+    const image = imagesData.find((img) => img.Id === imageId);
     if (image) {
       setSelectedImage(image);
       setShowViewModal(true);
@@ -402,7 +431,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   };
 
   const handleDeleteImage = (imageId) => {
-    const image = imagesData.find(img => img.Id === imageId);
+    const image = imagesData.find((img) => img.Id === imageId);
     if (image) {
       setImageToDelete(image);
       setShowDeleteModal(true);
@@ -429,7 +458,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   // Upload handlers
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
     setUploadFiles(imageFiles);
   };
 
@@ -443,10 +472,10 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append('ImageFile', uploadFiles[0]);
-      formData.append('ProductId', uploadFormData.productId);
-      formData.append('AltText', uploadFormData.altText);
-      formData.append('IsMain', uploadFormData.isMain);
+      formData.append("ImageFile", uploadFiles[0]);
+      formData.append("ProductId", uploadFormData.productId);
+      formData.append("AltText", uploadFormData.altText);
+      formData.append("IsMain", uploadFormData.isMain);
 
       await createProductImage(formData);
       setShowUploadModal(false);
@@ -491,16 +520,16 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   // Utility functions
   const getProductName = (productId) => {
     if (!productId) return translations["No Product Selected"];
-    const product = productsDropdown.find(p => p.Id === productId);
+    const product = productsDropdown.find((p) => p.Id === productId);
     return product?.Name || translations["No Product Selected"];
   };
 
   const formatFileSize = (bytes) => {
     if (!bytes) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDate = (dateString) => {
@@ -510,17 +539,24 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "/placeholder-image.jpg";
-    return imagePath.startsWith('http') ? imagePath : `/uploads/${imagePath}`;
+    return imagePath.startsWith("http") ? imagePath : `/uploads/${imagePath}`;
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, formatter }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    formatter,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {formatter ? formatter(value) : (value || 0)}
+            {formatter ? formatter(value) : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -540,15 +576,15 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
             alt={image.AltText || "Product image"}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
+              e.target.style.display = "none";
+              e.target.nextSibling.style.display = "flex";
             }}
           />
           <Container className="w-full h-full flex items-center justify-center hidden">
             <ImageIcon className="w-12 h-12 text-gray-400" />
           </Container>
         </Container>
-        
+
         <Container className="absolute top-2 left-2">
           <input
             type="checkbox"
@@ -557,13 +593,13 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
         </Container>
-        
+
         {image.IsMain && (
           <Container className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
             {translations["Main"]}
           </Container>
         )}
-        
+
         <Container className="absolute bottom-2 right-2 flex gap-1">
           <button
             onClick={() => handleViewImage(image.Id)}
@@ -581,7 +617,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
           </button>
         </Container>
       </Container>
-      
+
       <Container className="p-4">
         <Container className="flex items-center justify-between mb-2">
           <Span className="text-sm font-medium text-gray-900 truncate">
@@ -591,21 +627,19 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
             {formatFileSize(image.FileSize)}
           </Span>
         </Container>
-        
+
         {image.AltText && (
           <Span className="text-xs text-gray-500 block truncate">
             {image.AltText}
           </Span>
         )}
-        
+
         <Container className="flex items-center justify-between mt-2">
           <Span className="text-xs text-gray-500">
             {formatDate(image.CreatedAt || image.UploadDate)}
           </Span>
           {image.Dimensions && (
-            <Span className="text-xs text-gray-500">
-              {image.Dimensions}
-            </Span>
+            <Span className="text-xs text-gray-500">{image.Dimensions}</Span>
           )}
         </Container>
       </Container>
@@ -625,7 +659,11 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   }
 
   return (
-    <Container className="min-h-screen bg-gray-50" onDrop={handleDrop} onDragOver={handleDragOver}>
+    <Container
+      className="min-h-screen bg-gray-50"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+    >
       {/* Header */}
       <Container className="px-6 py-6">
         <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
@@ -655,15 +693,15 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               </Span>
             )}
           </Container>
-          
+
           <Container className="flex gap-3 flex-wrap">
             {/* View Mode Toggle */}
             <Container className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === "grid" 
-                    ? "bg-white text-gray-900 shadow-sm" 
+                  viewMode === "grid"
+                    ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -673,8 +711,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               <button
                 onClick={() => setViewMode("list")}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === "list" 
-                    ? "bg-white text-gray-900 shadow-sm" 
+                  viewMode === "list"
+                    ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -682,7 +720,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                 {translations["List View"]}
               </button>
             </Container>
-            
+
             <FilledButton
               isIcon={true}
               icon={Filter}
@@ -698,7 +736,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Upload}
@@ -714,7 +752,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               isIconLeft={true}
               onClick={() => setShowMultipleUploadModal(true)}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -802,7 +840,9 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${translations.Search} ${translations.Images.toLowerCase()}...`}
+              placeholder={`${
+                translations.Search
+              } ${translations.Images.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -921,7 +961,10 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {imagesData.map((image) => (
-                        <tr key={image.Id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <tr
+                          key={image.Id}
+                          className="hover:bg-gray-50 transition-colors duration-150"
+                        >
                           <td className="px-6 py-4">
                             <input
                               type="checkbox"
@@ -938,8 +981,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                                   alt={image.AltText || "Product image"}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
+                                    e.target.style.display = "none";
+                                    e.target.nextSibling.style.display = "flex";
                                   }}
                                 />
                                 <Container className="w-full h-full flex items-center justify-center hidden">
@@ -985,7 +1028,9 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                             <Container className="flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-gray-400" />
                               <Span className="text-sm text-gray-900">
-                                {formatDate(image.CreatedAt || image.UploadDate)}
+                                {formatDate(
+                                  image.CreatedAt || image.UploadDate
+                                )}
                               </Span>
                             </Container>
                           </td>
@@ -1043,12 +1088,17 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               </label>
               <select
                 value={uploadFormData.productId || ""}
-                onChange={(e) => setUploadFormData({...uploadFormData, productId: e.target.value ? parseInt(e.target.value) : null})}
+                onChange={(e) =>
+                  setUploadFormData({
+                    ...uploadFormData,
+                    productId: e.target.value ? parseInt(e.target.value) : null,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option value="">{translations["Select Product"]}</option>
-                {productsDropdown.map(product => (
+                {productsDropdown.map((product) => (
                   <option key={product.Id} value={product.Id}>
                     {product.Name}
                   </option>
@@ -1069,19 +1119,26 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               />
               {uploadFiles.length > 0 && (
                 <Container className="mt-2 text-sm text-gray-600">
-                  Selected: {uploadFiles[0].name} ({formatFileSize(uploadFiles[0].size)})
+                  Selected: {uploadFiles[0].name} (
+                  {formatFileSize(uploadFiles[0].size)})
                 </Container>
               )}
             </Container>
 
             <Container>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {translations["Alt Text"]} <span className="text-gray-400">({translations.Optional})</span>
+                {translations["Alt Text"]}{" "}
+                <span className="text-gray-400">({translations.Optional})</span>
               </label>
               <input
                 type="text"
                 value={uploadFormData.altText}
-                onChange={(e) => setUploadFormData({...uploadFormData, altText: e.target.value})}
+                onChange={(e) =>
+                  setUploadFormData({
+                    ...uploadFormData,
+                    altText: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations["Alt Text"]}...`}
               />
@@ -1092,7 +1149,12 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                 <input
                   type="checkbox"
                   checked={uploadFormData.isMain}
-                  onChange={(e) => setUploadFormData({...uploadFormData, isMain: e.target.checked})}
+                  onChange={(e) =>
+                    setUploadFormData({
+                      ...uploadFormData,
+                      isMain: e.target.checked,
+                    })
+                  }
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <Span className="ml-2 text-sm text-gray-700">
@@ -1128,12 +1190,17 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               </label>
               <select
                 value={multipleUploadData.productId || ""}
-                onChange={(e) => setMultipleUploadData({...multipleUploadData, productId: e.target.value ? parseInt(e.target.value) : null})}
+                onChange={(e) =>
+                  setMultipleUploadData({
+                    ...multipleUploadData,
+                    productId: e.target.value ? parseInt(e.target.value) : null,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 <option value="">{translations["Select Product"]}</option>
-                {productsDropdown.map(product => (
+                {productsDropdown.map((product) => (
                   <option key={product.Id} value={product.Id}>
                     {product.Name}
                   </option>
@@ -1149,7 +1216,12 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => setMultipleUploadData({...multipleUploadData, files: Array.from(e.target.files)})}
+                onChange={(e) =>
+                  setMultipleUploadData({
+                    ...multipleUploadData,
+                    files: Array.from(e.target.files),
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -1162,12 +1234,18 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
 
             <Container>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {translations["Alt Text"]} <span className="text-gray-400">({translations.Optional})</span>
+                {translations["Alt Text"]}{" "}
+                <span className="text-gray-400">({translations.Optional})</span>
               </label>
               <input
                 type="text"
                 value={multipleUploadData.altText}
-                onChange={(e) => setMultipleUploadData({...multipleUploadData, altText: e.target.value})}
+                onChange={(e) =>
+                  setMultipleUploadData({
+                    ...multipleUploadData,
+                    altText: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations["Alt Text"]}...`}
               />
@@ -1199,8 +1277,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                   alt={selectedImage.AltText || "Product image"}
                   className="max-w-full max-h-96 mx-auto rounded-lg shadow-md"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "flex";
                   }}
                 />
                 <Container className="w-full h-96 flex items-center justify-center bg-gray-100 rounded-lg hidden">
@@ -1234,10 +1312,16 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                       <Span className="text-sm font-medium text-gray-500">
                         {translations["Main Image"]}
                       </Span>
-                      <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                        selectedImage.IsMain ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
-                      }`}>
-                        {selectedImage.IsMain ? translations.Yes : translations.No}
+                      <Span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                          selectedImage.IsMain
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {selectedImage.IsMain
+                          ? translations.Yes
+                          : translations.No}
                       </Span>
                     </Container>
                   </Container>
@@ -1269,7 +1353,9 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                         {translations["Upload Date"]}
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
-                        {formatDate(selectedImage.CreatedAt || selectedImage.UploadDate)}
+                        {formatDate(
+                          selectedImage.CreatedAt || selectedImage.UploadDate
+                        )}
                       </Span>
                     </Container>
                   </Container>
@@ -1305,7 +1391,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the image and all associated data.
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the image and all associated data.
             </Span>
             {imageToDelete && (
               <Container className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -1357,11 +1444,18 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                   </label>
                   <select
                     value={filterOptions.productId || ""}
-                    onChange={(e) => setFilterOptions({...filterOptions, productId: e.target.value ? parseInt(e.target.value) : null})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        productId: e.target.value
+                          ? parseInt(e.target.value)
+                          : null,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Products</option>
-                    {productsDropdown.map(product => (
+                    {productsDropdown.map((product) => (
                       <option key={product.Id} value={product.Id}>
                         {product.Name}
                       </option>
@@ -1374,8 +1468,20 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                     {translations["Main Image"]}
                   </label>
                   <select
-                    value={filterOptions.isMain === null ? "" : filterOptions.isMain.toString()}
-                    onChange={(e) => setFilterOptions({...filterOptions, isMain: e.target.value === "" ? null : e.target.value === "true"})}
+                    value={
+                      filterOptions.isMain === null
+                        ? ""
+                        : filterOptions.isMain.toString()
+                    }
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        isMain:
+                          e.target.value === ""
+                            ? null
+                            : e.target.value === "true",
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Images</option>
@@ -1390,7 +1496,12 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                   </label>
                   <select
                     value={filterOptions.sortBy}
-                    onChange={(e) => setFilterOptions({...filterOptions, sortBy: e.target.value})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        sortBy: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="uploadDate">Upload Date</option>
@@ -1404,7 +1515,12 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                     <input
                       type="checkbox"
                       checked={filterOptions.sortAscending}
-                      onChange={(e) => setFilterOptions({...filterOptions, sortAscending: e.target.checked})}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          sortAscending: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <Span className="ml-2 text-sm text-gray-700">
