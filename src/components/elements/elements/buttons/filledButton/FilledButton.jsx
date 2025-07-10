@@ -7,7 +7,7 @@ const FilledButton = ({
   isIconLeft,
   isIconRight,
   iconSize = "w-4 h-4",
-  bgColor = "bg-primary",
+  bgColor = "bg-gradient-purple", // <-- using your app.css gradient
   textColor = "text-white",
   rounded = "rounded-md",
   buttonText,
@@ -23,22 +23,22 @@ const FilledButton = ({
   return (
     <button
       disabled={disabled}
-      className={`${bgColor} ${textColor} ${height} ${width} ${fontWeight} ${fontSize} text-center ${rounded} cursor-pointer ${
-        px !== undefined && px
-      } ${
-        disabled ? "opacity-60" : "hover:opacity-90"
+      className={`${bgColor} ${textColor} ${height} ${width} ${fontWeight} ${fontSize} text-center ${rounded} ${px} ${
+        disabled
+          ? "opacity-60 cursor-not-allowed"
+          : "hover:opacity-90 cursor-pointer"
       } flex justify-center items-center transition-opacity duration-200`}
       type={type}
       onClick={onClick}
     >
       {isIconLeft && isIcon && (
-        <Span className={`${buttonText !== "" ? "mr-2" : "mr-0"}`}>
+        <Span className={`${buttonText ? "mr-2" : "mr-0"}`}>
           <Icon className={`${iconSize}`} />
         </Span>
       )}
-      {buttonText !== "" && <Span>{buttonText}</Span>}
+      {buttonText && <Span>{buttonText}</Span>}
       {isIconRight && isIcon && (
-        <Span className={`${buttonText !== "" ? "ml-2" : "ml-0"}`}>
+        <Span className={`${buttonText ? "ml-2" : "ml-0"}`}>
           <Icon className={`${iconSize}`} />
         </Span>
       )}

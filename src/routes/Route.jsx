@@ -31,6 +31,16 @@ import ProductImages from "../pages/Inventories/ProductsManager/ProductImages";
 import ManagePlans from "../pages/SuperAdmin/Plans/ManagePlans";
 import Subscription from "../pages/SuperAdmin/Plans/Subscription";
 import SubscriptionReports from "../pages/SuperAdmin/Plans/SubscriptionReports";
+import PaymentTransactions from "../pages/SuperAdmin/PaymentTransactions/PaymentTransactions";
+import CreateInvoice from "../pages/SuperAdmin/ManageInvoices/CreateInvoice";
+import Refunds from "../pages/SuperAdmin/Refunds/Refunds";
+import ManageInvoices from "../pages/SuperAdmin/ManageInvoices/ManageInvoices";
+import ManageModules from "../pages/SuperAdmin/Modules/ManageModules";
+import ManageTickets from "../pages/SuperAdmin/ManageTickets";
+import SystemLogs from "../pages/SuperAdmin/SystemLogs/SystemLogs";
+import SystemSettings from "../pages/SuperAdmin/Settings/SystemSettings";
+import AccountSettings from "../pages/SuperAdmin/Settings/AccountSettings";
+import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
 import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
 import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
@@ -40,7 +50,6 @@ import InvoiceDashboard from "../pages/Sale/Invoice/InvoiceDashboard";
 import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
 import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
 import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
-
 
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -195,25 +204,25 @@ const getRouteConfig = () => {
     // SuperAdmin Payments & Invoices Routes
     {
       path: "/superadmin/Payment-transactions",
-      component: () => <div>Payment Transactions Page</div>,
+      component: PaymentTransactions,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/manage-invoices",
-      component: () => <div>Manage Invoices Page</div>,
+      component: ManageInvoices,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/create-invoices",
-      component: () => <div>Create Invoice Page</div>,
+      component: CreateInvoice,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/refunds",
-      component: () => <div>Refunds Page</div>,
+      component: Refunds,
       roles: ["SuperAdmin"],
       layout: true,
     },
@@ -221,7 +230,7 @@ const getRouteConfig = () => {
     // SuperAdmin Modules & Permissions Routes
     {
       path: "/superadmin/manage-modules",
-      component: () => <div>Manage Modules Page</div>,
+      component: ManageModules,
       roles: ["SuperAdmin"],
       layout: true,
     },
@@ -229,7 +238,7 @@ const getRouteConfig = () => {
     // SuperAdmin Support / Tickets Routes
     {
       path: "/superadmin/manage-ticket",
-      component: () => <div>Manage Tickets Page</div>,
+      component: ManageTickets,
       roles: ["SuperAdmin"],
       layout: true,
     },
@@ -237,7 +246,7 @@ const getRouteConfig = () => {
     // SuperAdmin Activity Logs Routes
     {
       path: "/superadmin/system-logs",
-      component: () => <div>System Logs Page</div>,
+      component: SystemLogs,
       roles: ["SuperAdmin"],
       layout: true,
     },
@@ -245,19 +254,19 @@ const getRouteConfig = () => {
     // SuperAdmin Settings Routes
     {
       path: "/superadmin/settings/system",
-      component: () => <div>System Settings Page</div>,
+      component: SystemSettings,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/settings/account",
-      component: () => <div>Account Settings Page</div>,
+      component: AccountSettings,
       roles: ["SuperAdmin"],
       layout: true,
     },
     {
       path: "/superadmin/settings/smtp",
-      component: () => <div>SMTP Settings Page</div>,
+      component: SmtpSettings,
       roles: ["SuperAdmin"],
       layout: true,
     },

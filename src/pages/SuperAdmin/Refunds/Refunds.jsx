@@ -1,13 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Container, Row, Col, Card, Table, Button,
-  Form, Modal, Alert, Badge, Spinner, Pagination,
-  InputGroup, Dropdown
-} from 'react-bootstrap';
-import {
-  FiDollarSign, FiRefreshCw, FiSearch, FiEye,
-  FiCheck, FiX, FiClock, FiArrowLeft, FiArrowRight
-} from 'react-icons/fi';
+  FiDollarSign,
+  FiRefreshCw,
+  FiSearch,
+  FiEye,
+  FiCheck,
+  FiX,
+  FiClock,
+  FiArrowLeft,
+  FiArrowRight,
+} from "react-icons/fi";
+import Container from "../../../components/elements/container/Container";
+import Alert from "../../../components/elements/alert/Alert";
+import Card from "../../../components/elements/card/Card";
+import InputField from "../../../components/elements/inputField/InputField";
+import SelectBox from "../../../components/elements/selectBox/SelectBox";
+import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import OutlineButton from "../../../components/elements/elements/buttons/OutlineButton/OutlineButton";
+import Table from "../../../components/elements/table/Table";
+import Thead from "../../../components/elements/thead/Thead";
+import Tbody from "../../../components/elements/tbody/Tbody";
+import TH from "../../../components/elements/th/TH";
+import TR from "../../../components/elements/tr/TR";
+import TD from "../../../components/elements/td/TD";
+import Modall from "../../../components/elements/modal/Modal";
+import Dropdown from "../../../components/elements/dropdown/Dropdown";
+import Skeleton from "../../../components/elements/skeleton/Skeleton";
+import Badge from "../../../components/elements/badge/Badge";
 
 const Refunds = () => {
   // State for refunds data
@@ -15,11 +34,11 @@ const Refunds = () => {
   const [filteredRefunds, setFilteredRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Search and filter state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,6 +48,7 @@ const Refunds = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentRefund, setCurrentRefund] = useState(null);
   const [showProcessModal, setShowProcessModal] = useState(false);
+  const [processNotes, setProcessNotes] = useState("");
 
   // Fetch refunds data (simulated)
   useEffect(() => {
@@ -39,95 +59,95 @@ const Refunds = () => {
         setTimeout(() => {
           const mockRefunds = [
             {
-              id: 'REF-2023-001',
-              transactionId: 'TXN-1001',
-              customer: 'John Doe',
-              email: 'john@example.com',
+              id: "REF-2023-001",
+              transactionId: "TXN-1001",
+              customer: "John Doe",
+              email: "john@example.com",
               amount: 29.99,
-              dateRequested: '2023-06-15',
-              dateProcessed: '2023-06-16',
-              status: 'completed',
-              reason: 'Duplicate charge',
-              paymentMethod: 'Credit Card',
-              originalInvoice: 'INV-2023-001'
+              dateRequested: "2023-06-15",
+              dateProcessed: "2023-06-16",
+              status: "completed",
+              reason: "Duplicate charge",
+              paymentMethod: "Credit Card",
+              originalInvoice: "INV-2023-001",
             },
             {
-              id: 'REF-2023-002',
-              transactionId: 'TXN-1002',
-              customer: 'Jane Smith',
-              email: 'jane@example.com',
+              id: "REF-2023-002",
+              transactionId: "TXN-1002",
+              customer: "Jane Smith",
+              email: "jane@example.com",
               amount: 99.99,
-              dateRequested: '2023-06-14',
-              dateProcessed: '',
-              status: 'pending',
-              reason: 'Service not as described',
-              paymentMethod: 'PayPal',
-              originalInvoice: 'INV-2023-002'
+              dateRequested: "2023-06-14",
+              dateProcessed: "",
+              status: "pending",
+              reason: "Service not as described",
+              paymentMethod: "PayPal",
+              originalInvoice: "INV-2023-002",
             },
             {
-              id: 'REF-2023-003',
-              transactionId: 'TXN-1003',
-              customer: 'Robert Johnson',
-              email: 'robert@example.com',
+              id: "REF-2023-003",
+              transactionId: "TXN-1003",
+              customer: "Robert Johnson",
+              email: "robert@example.com",
               amount: 9.99,
-              dateRequested: '2023-06-13',
-              dateProcessed: '',
-              status: 'rejected',
-              reason: 'Change of mind',
-              paymentMethod: 'Credit Card',
-              originalInvoice: 'INV-2023-003'
+              dateRequested: "2023-06-13",
+              dateProcessed: "",
+              status: "rejected",
+              reason: "Change of mind",
+              paymentMethod: "Credit Card",
+              originalInvoice: "INV-2023-003",
             },
             {
-              id: 'REF-2023-004',
-              transactionId: 'TXN-1004',
-              customer: 'Emily Davis',
-              email: 'emily@example.com',
+              id: "REF-2023-004",
+              transactionId: "TXN-1004",
+              customer: "Emily Davis",
+              email: "emily@example.com",
               amount: 29.99,
-              dateRequested: '2023-06-12',
-              dateProcessed: '2023-06-13',
-              status: 'completed',
-              reason: 'Cancelled subscription',
-              paymentMethod: 'Bank Transfer',
-              originalInvoice: 'INV-2023-004'
+              dateRequested: "2023-06-12",
+              dateProcessed: "2023-06-13",
+              status: "completed",
+              reason: "Cancelled subscription",
+              paymentMethod: "Bank Transfer",
+              originalInvoice: "INV-2023-004",
             },
             {
-              id: 'REF-2023-005',
-              transactionId: 'TXN-1005',
-              customer: 'Michael Wilson',
-              email: 'michael@example.com',
+              id: "REF-2023-005",
+              transactionId: "TXN-1005",
+              customer: "Michael Wilson",
+              email: "michael@example.com",
               amount: 99.99,
-              dateRequested: '2023-06-11',
-              dateProcessed: '',
-              status: 'pending',
-              reason: 'Technical issues',
-              paymentMethod: 'Credit Card',
-              originalInvoice: 'INV-2023-005'
+              dateRequested: "2023-06-11",
+              dateProcessed: "",
+              status: "pending",
+              reason: "Technical issues",
+              paymentMethod: "Credit Card",
+              originalInvoice: "INV-2023-005",
             },
             {
-              id: 'REF-2023-006',
-              transactionId: 'TXN-1006',
-              customer: 'Sarah Brown',
-              email: 'sarah@example.com',
+              id: "REF-2023-006",
+              transactionId: "TXN-1006",
+              customer: "Sarah Brown",
+              email: "sarah@example.com",
               amount: 9.99,
-              dateRequested: '2023-06-10',
-              dateProcessed: '2023-06-11',
-              status: 'completed',
-              reason: 'Duplicate charge',
-              paymentMethod: 'PayPal',
-              originalInvoice: 'INV-2023-006'
+              dateRequested: "2023-06-10",
+              dateProcessed: "2023-06-11",
+              status: "completed",
+              reason: "Duplicate charge",
+              paymentMethod: "PayPal",
+              originalInvoice: "INV-2023-006",
             },
             {
-              id: 'REF-2023-007',
-              transactionId: 'TXN-1007',
-              customer: 'David Taylor',
-              email: 'david@example.com',
+              id: "REF-2023-007",
+              transactionId: "TXN-1007",
+              customer: "David Taylor",
+              email: "david@example.com",
               amount: 29.99,
-              dateRequested: '2023-06-09',
-              dateProcessed: '',
-              status: 'pending',
-              reason: 'Billing error',
-              paymentMethod: 'Credit Card',
-              originalInvoice: 'INV-2023-007'
+              dateRequested: "2023-06-09",
+              dateProcessed: "",
+              status: "pending",
+              reason: "Billing error",
+              paymentMethod: "Credit Card",
+              originalInvoice: "INV-2023-007",
             },
           ];
           setRefunds(mockRefunds);
@@ -135,7 +155,7 @@ const Refunds = () => {
           setLoading(false);
         }, 1000);
       } catch (err) {
-        setError('Failed to fetch refunds. Please try again later.');
+        setError("Failed to fetch refunds. Please try again later.");
         setLoading(false);
       }
     };
@@ -146,31 +166,33 @@ const Refunds = () => {
   // Filter refunds based on search and status
   useEffect(() => {
     let results = refunds;
-    
+
     if (searchTerm) {
-      results = results.filter(refund =>
-        refund.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        refund.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        refund.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        refund.transactionId.toLowerCase().includes(searchTerm.toLowerCase())
+      results = results.filter(
+        (refund) =>
+          refund.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          refund.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          refund.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          refund.transactionId.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    if (statusFilter !== 'all') {
-      results = results.filter(refund => refund.status === statusFilter);
+    if (statusFilter !== "all") {
+      results = results.filter((refund) => refund.status === statusFilter);
     }
 
     setFilteredRefunds(results);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [searchTerm, statusFilter, refunds]);
 
   // Pagination logic
   const indexOfLastRefund = currentPage * refundsPerPage;
   const indexOfFirstRefund = indexOfLastRefund - refundsPerPage;
-  const currentRefunds = filteredRefunds.slice(indexOfFirstRefund, indexOfLastRefund);
+  const currentRefunds = filteredRefunds.slice(
+    indexOfFirstRefund,
+    indexOfLastRefund
+  );
   const totalPages = Math.ceil(filteredRefunds.length / refundsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Handle view details
   const handleViewDetails = (refund) => {
@@ -187,13 +209,21 @@ const Refunds = () => {
   // Confirm process refund
   const confirmProcessRefund = () => {
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
-      setRefunds(refunds.map(r => 
-        r.id === currentRefund.id ? {...r, status: 'completed', dateProcessed: new Date().toISOString().split('T')[0]} : r
-      ));
+      setRefunds(
+        refunds.map((r) =>
+          r.id === currentRefund.id
+            ? {
+                ...r,
+                status: "completed",
+                dateProcessed: new Date().toISOString().split("T")[0],
+              }
+            : r
+        )
+      );
       setShowProcessModal(false);
       setSuccessMessage(`Refund ${currentRefund.id} processed successfully!`);
+      setProcessNotes("");
       setLoading(false);
     }, 1000);
   };
@@ -201,11 +231,12 @@ const Refunds = () => {
   // Handle reject refund
   const handleRejectRefund = (refund) => {
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
-      setRefunds(refunds.map(r => 
-        r.id === refund.id ? {...r, status: 'rejected'} : r
-      ));
+      setRefunds(
+        refunds.map((r) =>
+          r.id === refund.id ? { ...r, status: "rejected" } : r
+        )
+      );
       setSuccessMessage(`Refund ${refund.id} rejected.`);
       setLoading(false);
     }, 1000);
@@ -216,349 +247,458 @@ const Refunds = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      setSuccessMessage('Refunds refreshed successfully!');
+      setSuccessMessage("Refunds refreshed successfully!");
     }, 800);
   };
 
   // Get badge variant based on status
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'completed': return 'success';
-      case 'pending': return 'warning';
-      case 'rejected': return 'danger';
-      default: return 'secondary';
+      case "completed":
+        return "success";
+      case "pending":
+        return "warning";
+      case "rejected":
+        return "danger";
+      default:
+        return "secondary";
     }
   };
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    if (!dateString) return "-";
+    const options = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   // Format amount
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
+  // Status filter options
+  const statusOptions = [
+    { value: "all", label: "All Statuses" },
+    { value: "completed", label: "Completed" },
+    { value: "pending", label: "Pending" },
+    { value: "rejected", label: "Rejected" },
+  ];
+
+  // Dropdown actions
+  const getDropdownActions = (refund) => {
+    const actions = [
+      { label: "View Details", onClick: () => handleViewDetails(refund) },
+    ];
+
+    if (refund.status === "pending") {
+      actions.push(
+        { label: "Process Refund", onClick: () => handleProcessRefund(refund) },
+        { label: "Reject Request", onClick: () => handleRejectRefund(refund) }
+      );
+    }
+
+    return actions;
+  };
+
   return (
-    <Container fluid className="py-4">
-      <Row>
-        <Col>
-          <h2 className="mb-4">
-            <FiArrowLeft className="me-2" />
-            Refund Management
-          </h2>
+    <Container className="py-4 max-w-7xl mx-auto px-4">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+          <FiArrowLeft className="mr-2" />
+          Refund Management
+        </h2>
+      </div>
 
-          {successMessage && (
-            <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
-              {successMessage}
-            </Alert>
-          )}
+      {successMessage && (
+        <Alert
+          variant="success"
+          message={successMessage}
+          onClose={() => setSuccessMessage("")}
+          dismissible
+          className="mb-4"
+        />
+      )}
 
-          {error && (
-            <Alert className='leave-button' onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
+      {error && (
+        <Alert
+          variant="danger"
+          message={error}
+          onClose={() => setError("")}
+          dismissible
+          className="mb-4"
+        />
+      )}
 
-          <Card className="mb-4">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div className="d-flex gap-2">
-                  <Form.Group controlId="search" className="mb-0">
-                    <InputGroup>
-                      <InputGroup.Text>
-                        <FiSearch />
-                      </InputGroup.Text>
-                      <Form.Control
-                        type="text"
-                        placeholder="Search refunds..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </InputGroup>
-                  </Form.Group>
+      <Card className="mb-6">
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <InputField
+                type="text"
+                placeholder="Search refunds..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                icon={FiSearch}
+                width="w-full sm:w-64"
+              />
 
-                  <Form.Group controlId="statusFilter" className="mb-0">
-                    <Form.Select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="completed">Completed</option>
-                      <option value="pending">Pending</option>
-                      <option value="rejected">Rejected</option>
-                    </Form.Select>
-                  </Form.Group>
+              <SelectBox
+                placeholder="Filter by status"
+                value={statusFilter}
+                handleChange={setStatusFilter}
+                optionList={statusOptions}
+                width="w-full sm:w-48"
+              />
+            </div>
+
+            <OutlineButton
+              buttonText="Refresh"
+              isIcon={true}
+              icon={FiRefreshCw}
+              isIconLeft={true}
+              onClick={handleRefresh}
+              borderColor="border-gray-300"
+              borderWidth="border"
+              rounded="rounded-md"
+              bgColor="bg-white"
+              textColor="text-gray-700"
+              height="h-10"
+              fontWeight="font-medium"
+              fontSize="text-sm"
+              px="px-4"
+              hover="hover:bg-gray-50"
+            />
+          </div>
+
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, index) => (
+                <div key={index} className="flex space-x-4">
+                  <Skeleton width="100%" height="40px" />
                 </div>
-
-                <Button variant="outline-secondary" onClick={handleRefresh}>
-                  <FiRefreshCw className="me-2" />
-                  Refresh
-                </Button>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <Table className="w-full">
+                  <Thead className="bg-gray-50">
+                    <TR>
+                      <TH>Refund ID</TH>
+                      <TH>Customer</TH>
+                      <TH>Amount</TH>
+                      <TH>Request Date</TH>
+                      <TH>Processed Date</TH>
+                      <TH>Status</TH>
+                      <TH>Reason</TH>
+                      <TH>Actions</TH>
+                    </TR>
+                  </Thead>
+                  <Tbody>
+                    {currentRefunds.length > 0 ? (
+                      currentRefunds.map((refund) => (
+                        <TR key={refund.id}>
+                          <TD>
+                            <div className="text-sm text-gray-900">
+                              {refund.id}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              TXN: {refund.transactionId}
+                            </div>
+                          </TD>
+                          <TD>
+                            <div className="text-sm text-gray-900">
+                              {refund.customer}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {refund.email}
+                            </div>
+                          </TD>
+                          <TD className="text-sm text-gray-900">
+                            {formatAmount(refund.amount)}
+                          </TD>
+                          <TD className="text-sm text-gray-500">
+                            {formatDate(refund.dateRequested)}
+                          </TD>
+                          <TD className="text-sm text-gray-500">
+                            {formatDate(refund.dateProcessed)}
+                          </TD>
+                          <TD>
+                            <Badge
+                              variant={getStatusBadge(refund.status)}
+                              className="inline-flex items-center"
+                            >
+                              {refund.status === "pending" && (
+                                <FiClock className="mr-1 h-3 w-3" />
+                              )}
+                              {refund.status === "completed" && (
+                                <FiCheck className="mr-1 h-3 w-3" />
+                              )}
+                              {refund.status === "rejected" && (
+                                <FiX className="mr-1 h-3 w-3" />
+                              )}
+                              {refund.status}
+                            </Badge>
+                          </TD>
+                          <TD className="text-sm text-gray-500">
+                            {refund.reason}
+                          </TD>
+                          <TD>
+                            <Dropdown
+                              buttonText="Actions"
+                              items={getDropdownActions(refund)}
+                              onSelect={(item) => item.onClick()}
+                              className="relative"
+                            />
+                          </TD>
+                        </TR>
+                      ))
+                    ) : (
+                      <TR>
+                        <TD
+                          colSpan={8}
+                          className="text-center py-8 text-gray-500"
+                        >
+                          No refunds found
+                        </TD>
+                      </TR>
+                    )}
+                  </Tbody>
+                </Table>
               </div>
 
-              {loading ? (
-                <div className="text-center py-5">
-                  <Spinner animation="border" variant="primary" />
-                  <p className="mt-2">Loading refunds...</p>
+              {filteredRefunds.length > refundsPerPage && (
+                <div className="mt-6">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
-              ) : (
-                <>
-                  <div className="table-responsive">
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Refund ID</th>
-                          <th>Customer</th>
-                          <th>Amount</th>
-                          <th>Request Date</th>
-                          <th>Processed Date</th>
-                          <th>Status</th>
-                          <th>Reason</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentRefunds.length > 0 ? (
-                          currentRefunds.map(refund => (
-                            <tr key={refund.id}>
-                              <td>
-                                <small className="text-muted">{refund.id}</small>
-                                <div className="small text-muted">TXN: {refund.transactionId}</div>
-                              </td>
-                              <td>
-                                <div>{refund.customer}</div>
-                                <small className="text-muted">{refund.email}</small>
-                              </td>
-                              <td>{formatAmount(refund.amount)}</td>
-                              <td>{formatDate(refund.dateRequested)}</td>
-                              <td>{formatDate(refund.dateProcessed)}</td>
-                              <td>
-                                <Badge bg={getStatusBadge(refund.status)}>
-                                  {refund.status === 'pending' && <FiClock className="me-1" />}
-                                  {refund.status === 'completed' && <FiCheck className="me-1" />}
-                                  {refund.status === 'rejected' && <FiX className="me-1" />}
-                                  {refund.status}
-                                </Badge>
-                              </td>
-                              <td>
-                                <small>{refund.reason}</small>
-                              </td>
-                              <td>
-                                <Dropdown>
-                                  <Dropdown.Toggle className='leave-button' size="sm" id="dropdown-actions">
-                                    Actions
-                                  </Dropdown.Toggle>
-                                  <Dropdown.Menu>
-                                    <Dropdown.Item onClick={() => handleViewDetails(refund)}>
-                                      <FiEye className="me-2" /> View Details
-                                    </Dropdown.Item>
-                                    {refund.status === 'pending' && (
-                                      <>
-                                        <Dropdown.Item onClick={() => handleProcessRefund(refund)}>
-                                          <FiArrowRight className="me-2" /> Process Refund
-                                        </Dropdown.Item>
-                                        <Dropdown.Item onClick={() => handleRejectRefund(refund)}>
-                                          <FiX className="me-2" /> Reject Request
-                                        </Dropdown.Item>
-                                      </>
-                                    )}
-                                  </Dropdown.Menu>
-                                </Dropdown>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="8" className="text-center py-4">
-                              No refunds found
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </Table>
-                  </div>
-
-                  {filteredRefunds.length > refundsPerPage && (
-                    <div className="d-flex justify-content-center mt-4">
-                      <Pagination>
-                        <Pagination.Prev
-                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                          disabled={currentPage === 1}
-                        />
-
-                        {Array.from({ length: totalPages }, (_, i) => (
-                          <Pagination.Item
-                            key={i + 1}
-                            active={i + 1 === currentPage}
-                            onClick={() => paginate(i + 1)}
-                          >
-                            {i + 1}
-                          </Pagination.Item>
-                        ))}
-
-                        <Pagination.Next
-                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                          disabled={currentPage === totalPages}
-                        />
-                      </Pagination>
-                    </div>
-                  )}
-                </>
               )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Refund Details Modal */}
-      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Refund Details - {currentRefund?.id}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {currentRefund && (
-            <div>
-              <Row className="mb-3">
-                <Col md={6}>
-                  <h5>Refund Information</h5>
-                  <Table borderless size="sm">
-                    <tbody>
-                      <tr>
-                        <td><strong>Refund ID:</strong></td>
-                        <td>{currentRefund.id}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Transaction ID:</strong></td>
-                        <td>{currentRefund.transactionId}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Invoice:</strong></td>
-                        <td>{currentRefund.originalInvoice}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Request Date:</strong></td>
-                        <td>{formatDate(currentRefund.dateRequested)}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Processed Date:</strong></td>
-                        <td>{formatDate(currentRefund.dateProcessed) || '-'}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Status:</strong></td>
-                        <td>
-                          <Badge bg={getStatusBadge(currentRefund.status)}>
-                            {currentRefund.status}
-                          </Badge>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </Col>
-                <Col md={6}>
-                  <h5>Customer Information</h5>
-                  <Table borderless size="sm">
-                    <tbody>
-                      <tr>
-                        <td><strong>Name:</strong></td>
-                        <td>{currentRefund.customer}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Email:</strong></td>
-                        <td>{currentRefund.email}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Payment Method:</strong></td>
-                        <td>{currentRefund.paymentMethod}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Amount:</strong></td>
-                        <td>{formatAmount(currentRefund.amount)}</td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col>
-                  <h5>Refund Reason</h5>
-                  <div className="bg-light p-3 rounded">
-                    {currentRefund.reason}
-                  </div>
-                </Col>
-              </Row>
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className='leave-button' onClick={() => setShowDetailsModal(false)}>
-            Close
-          </Button>
-          {currentRefund?.status === 'pending' && (
-            <>
-              <Button className='leave-button' onClick={() => handleRejectRefund(currentRefund)}>
-                <FiX className="me-2" /> Reject
-              </Button>
-              <Button className='leave-button' onClick={() => handleProcessRefund(currentRefund)}>
-                <FiCheck className="me-2" /> Process Refund
-              </Button>
             </>
           )}
-        </Modal.Footer>
-      </Modal>
+        </div>
+      </Card>
+
+      {/* Refund Details Modal */}
+      <Modall
+        title={`Refund Details - ${currentRefund?.id}`}
+        modalOpen={showDetailsModal}
+        setModalOpen={setShowDetailsModal}
+        okText="Close"
+        cancelText=""
+        okAction={() => setShowDetailsModal(false)}
+        cancelAction={() => setShowDetailsModal(false)}
+        width={800}
+        body={
+          currentRefund && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Refund Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Refund ID:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {currentRefund.id}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Transaction ID:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {currentRefund.transactionId}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Invoice:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {currentRefund.originalInvoice}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Request Date:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {formatDate(currentRefund.dateRequested)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Processed Date:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {formatDate(currentRefund.dateProcessed) || "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Status:
+                      </span>
+                      <Badge variant={getStatusBadge(currentRefund.status)}>
+                        {currentRefund.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Customer Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Name:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {currentRefund.customer}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Email:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {currentRefund.email}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Payment Method:
+                      </span>
+                      <span className="text-sm text-gray-900">
+                        {currentRefund.paymentMethod}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-500">
+                        Amount:
+                      </span>
+                      <span className="text-sm text-gray-900 font-medium">
+                        {formatAmount(currentRefund.amount)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Refund Reason
+                </h3>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    {currentRefund.reason}
+                  </p>
+                </div>
+              </div>
+
+              {currentRefund.status === "pending" && (
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <OutlineButton
+                    buttonText="Reject"
+                    isIcon={true}
+                    icon={FiX}
+                    isIconLeft={true}
+                    onClick={() => {
+                      handleRejectRefund(currentRefund);
+                      setShowDetailsModal(false);
+                    }}
+                    borderColor="border-red-300"
+                    borderWidth="border"
+                    rounded="rounded-md"
+                    bgColor="bg-white"
+                    textColor="text-red-600"
+                    height="h-10"
+                    fontWeight="font-medium"
+                    fontSize="text-sm"
+                    px="px-4"
+                    hover="hover:bg-red-50"
+                  />
+                  <FilledButton
+                    buttonText="Process Refund"
+                    isIcon={true}
+                    icon={FiCheck}
+                    isIconLeft={true}
+                    onClick={() => {
+                      setShowDetailsModal(false);
+                      handleProcessRefund(currentRefund);
+                    }}
+                    bgColor="bg-green-600"
+                    textColor="text-white"
+                    height="h-10"
+                    fontWeight="font-medium"
+                    fontSize="text-sm"
+                    px="px-4"
+                  />
+                </div>
+              )}
+            </div>
+          )
+        }
+      />
 
       {/* Process Refund Modal */}
-      <Modal show={showProcessModal} onHide={() => setShowProcessModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Process Refund - {currentRefund?.id}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {currentRefund && (
-            <div>
-              <p>You are about to process a refund of {formatAmount(currentRefund.amount)} to {currentRefund.customer}.</p>
-              <p>Payment method: {currentRefund.paymentMethod}</p>
-              
-              <Form.Group className="mb-3">
-                <Form.Label>Additional Notes (Optional)</Form.Label>
-                <Form.Control as="textarea" rows={3} placeholder="Add any notes about this refund..." />
-              </Form.Group>
-              
-              <Alert variant="warning">
-                This action cannot be undone. The refund will be processed immediately.
-              </Alert>
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className='leave-button' onClick={() => setShowProcessModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={confirmProcessRefund} disabled={loading}>
-            {loading ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                  className="me-2"
+      <Modall
+        title={`Process Refund - ${currentRefund?.id}`}
+        modalOpen={showProcessModal}
+        setModalOpen={setShowProcessModal}
+        okText={loading ? "Processing..." : "Confirm Refund"}
+        cancelText="Cancel"
+        okAction={confirmProcessRefund}
+        cancelAction={() => setShowProcessModal(false)}
+        okButtonDisabled={loading}
+        width={600}
+        body={
+          currentRefund && (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-yellow-800">
+                  You are about to process a refund of{" "}
+                  <strong>{formatAmount(currentRefund.amount)}</strong> to{" "}
+                  <strong>{currentRefund.customer}</strong>.
+                </p>
+                <p className="text-sm text-yellow-700 mt-1">
+                  Payment method: {currentRefund.paymentMethod}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Additional Notes (Optional)
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Add any notes about this refund..."
+                  value={processNotes}
+                  onChange={(e) => setProcessNotes(e.target.value)}
                 />
-                Processing...
-              </>
-            ) : (
-              'Confirm Refund'
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+              </div>
+
+              <Alert
+                variant="warning"
+                message="This action cannot be undone. The refund will be processed immediately."
+                dismissible={false}
+              />
+            </div>
+          )
+        }
+      />
     </Container>
   );
 };
