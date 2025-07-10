@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   Plus,
   TrendingUp,
@@ -19,60 +17,81 @@ import {
   Users,
   Target,
 } from "lucide-react";
-import { useInvoice } from "../../../Contexts/InvoiceContext/InvoiceContext";
-import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
-import Container from "../../../components/elements/container/Container";
-import Span from "../../../components/elements/span/Span";
 
 const InvoiceDashboard = () => {
-  const navigate = useNavigate();
-  const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  // Sample data structure based on your API response
+  const [invoicesData, setInvoicesData] = useState([
+    {
+      Id: 11,
+      InvoiceNumber: "INV-20250707-451",
+      InvoiceDate: "2025-07-07T15:14:47.74",
+      DueDate: "2025-07-22T15:14:47.74",
+      Status: "Unpaid",
+      SubTotal: 4000.00,
+      TaxAmount: 20.00,
+      DiscountAmount: 10.00,
+      ShippingAmount: 10.00,
+      TotalAmount: 4020.00,
+      PaidAmount: 10.00,
+      BalanceAmount: 4010.00,
+      Currency: "EUR",
+      BillingName: "Fayyaz",
+      CustomerName: "Fayyaz"
+    },
+    {
+      Id: 15,
+      InvoiceNumber: "INV-20250708-161",
+      InvoiceDate: "2025-07-08T14:10:15.88",
+      DueDate: "2025-07-23T14:10:15.88",
+      Status: "Unpaid",
+      SubTotal: 1000.00,
+      TaxAmount: 10.00,
+      DiscountAmount: 10.00,
+      ShippingAmount: 1000.00,
+      TotalAmount: 2000.00,
+      PaidAmount: 10000.00,
+      BalanceAmount: -8000.00,
+      Currency: "EUR",
+      BillingName: "Fayyaz",
+      CustomerName: "Fayyaz"
+    },
+    {
+      Id: 14,
+      InvoiceNumber: "INV-20250708-854",
+      InvoiceDate: "2025-07-08T08:15:38.619",
+      DueDate: "2025-07-23T08:15:38.619",
+      Status: "Paid",
+      SubTotal: 199329.00,
+      TaxAmount: 70.00,
+      DiscountAmount: 2.00,
+      ShippingAmount: 53.00,
+      TotalAmount: 199450.00,
+      PaidAmount: 100.00,
+      BalanceAmount: 199350.00,
+      Currency: "USD",
+      BillingName: "Moke Dev",
+      CustomerName: "Moke Dev"
+    },
+    {
+      Id: 16,
+      InvoiceNumber: "Sapiente voluptatum",
+      InvoiceDate: "2025-07-10T00:00:00",
+      DueDate: "2025-07-12T00:00:00",
+      Status: "Overdue",
+      SubTotal: 1196.00,
+      TaxAmount: 538.20,
+      DiscountAmount: 0.00,
+      ShippingAmount: 0.00,
+      TotalAmount: 1734.20,
+      PaidAmount: 0.00,
+      BalanceAmount: 0.00,
+      Currency: "USD",
+      BillingName: "Unknown Customer",
+      CustomerName: "Unknown Customer"
+    }
+  ]);
 
-  const { 
-    invoices, 
-    loading, 
-    getInvoices,
-    getInvoice 
-  } = useInvoice();
-
-  const translations = {
-    "Invoice Dashboard": language === "ar" ? "لوحة تحكم الفواتير" : "Invoice Dashboard",
-    "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
-    "View All": language === "ar" ? "عرض الكل" : "View All",
-    "Total Revenue": language === "ar" ? "إجمالي الإيرادات" : "Total Revenue",
-    "Total Invoices": language === "ar" ? "إجمالي الفواتير" : "Total Invoices",
-    "Paid Invoices": language === "ar" ? "الفواتير المدفوعة" : "Paid Invoices",
-    "Outstanding": language === "ar" ? "المستحقة" : "Outstanding",
-    "Overdue": language === "ar" ? "المتأخرة" : "Overdue",
-    "Draft": language === "ar" ? "المسودات" : "Draft",
-    "This Month": language === "ar" ? "هذا الشهر" : "This Month",
-    "Recent Invoices": language === "ar" ? "الفواتير الحديثة" : "Recent Invoices",
-    "Quick Stats": language === "ar" ? "إحصائيات سريعة" : "Quick Stats",
-    "Revenue Trend": language === "ar" ? "اتجاه الإيرادات" : "Revenue Trend",
-    "Invoice Status": language === "ar" ? "حالة الفواتير" : "Invoice Status",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No invoices": language === "ar" ? "لا توجد فواتير" : "No invoices",
-    "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
-    "Customer": language === "ar" ? "العميل" : "Customer",
-    "Amount": language === "ar" ? "المبلغ" : "Amount",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Date": language === "ar" ? "التاريخ" : "Date",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Sent": language === "ar" ? "مرسلة" : "Sent",
-    "Paid": language === "ar" ? "مدفوعة" : "Paid",
-    "Cancelled": language === "ar" ? "ملغاة" : "Cancelled",
-    "Growth": language === "ar" ? "النمو" : "Growth",
-    "vs last month": language === "ar" ? "مقارنة بالشهر الماضي" : "vs last month",
-    "Average Invoice": language === "ar" ? "متوسط الفاتورة" : "Average Invoice",
-    "Collection Rate": language === "ar" ? "معدل التحصيل" : "Collection Rate",
-    "Top Customers": language === "ar" ? "أهم العملاء" : "Top Customers",
-    "Payment Status": language === "ar" ? "حالة الدفع" : "Payment Status",
-  };
-
-  // State management
+  const [language, setLanguage] = useState("en");
   const [dashboardData, setDashboardData] = useState({
     totalRevenue: 0,
     totalInvoices: 0,
@@ -90,47 +109,39 @@ const InvoiceDashboard = () => {
       sent: 0,
       paid: 0,
       overdue: 0,
+      unpaid: 0,
       cancelled: 0
     }
   });
 
-  const [isLoading, setIsLoading] = useState(true);
+  // Translations
+  const translations = {
+    "Invoice Dashboard": language === "ar" ? "لوحة تحكم الفواتير" : "Invoice Dashboard",
+    "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
+    "View All": language === "ar" ? "عرض الكل" : "View All",
+    "Total Revenue": language === "ar" ? "إجمالي الإيرادات" : "Total Revenue",
+    "Total Invoices": language === "ar" ? "إجمالي الفواتير" : "Total Invoices",
+    "Paid Invoices": language === "ar" ? "الفواتير المدفوعة" : "Paid Invoices",
+    "Outstanding": language === "ar" ? "المستحقة" : "Outstanding",
+    "Overdue": language === "ar" ? "المتأخرة" : "Overdue",
+    "Draft": language === "ar" ? "المسودات" : "Draft",
+    "This Month": language === "ar" ? "هذا الشهر" : "This Month",
+    "Recent Invoices": language === "ar" ? "الفواتير الحديثة" : "Recent Invoices",
+    "Invoice Status": language === "ar" ? "حالة الفواتير" : "Invoice Status",
+    "Revenue Trend": language === "ar" ? "اتجاه الإيرادات" : "Revenue Trend",
+    "vs last month": language === "ar" ? "مقارنة بالشهر الماضي" : "vs last month",
+    "Average Invoice": language === "ar" ? "متوسط الفاتورة" : "Average Invoice",
+    "Collection Rate": language === "ar" ? "معدل التحصيل" : "Collection Rate",
+    "Growth": language === "ar" ? "النمو" : "Growth",
+    "Paid": language === "ar" ? "مدفوعة" : "Paid",
+    "Unpaid": language === "ar" ? "غير مدفوعة" : "Unpaid",
+    "Sent": language === "ar" ? "مرسلة" : "Sent",
+    "Cancelled": language === "ar" ? "ملغاة" : "Cancelled",
+    "View": language === "ar" ? "عرض" : "View",
+    "Edit": language === "ar" ? "تعديل" : "Edit"
+  };
 
-  // Process invoices data from API response
-  const invoicesData = invoices?.Data || [];
-
-  // Fetch dashboard data on component mount
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        await getInvoices({ page: 1, pageSize: 100 }); // Get more invoices for better analytics
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (token) {
-      fetchDashboardData();
-    }
-  }, [token, getInvoices]);
-
-  // Calculate dashboard statistics when invoices change
-  useEffect(() => {
-    if (Array.isArray(invoicesData) && invoicesData.length > 0) {
-      calculateDashboardStats();
-    }
-  }, [invoicesData]);
-
-  // Redirect if no token
-  useEffect(() => {
-    if (!token) {
-      navigate("/admin-Login");
-    }
-  }, [token, navigate]);
-
+  // Calculate dashboard statistics
   const calculateDashboardStats = () => {
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -149,6 +160,7 @@ const InvoiceDashboard = () => {
       sent: 0,
       paid: 0,
       overdue: 0,
+      unpaid: 0,
       cancelled: 0
     };
 
@@ -158,43 +170,44 @@ const InvoiceDashboard = () => {
       const invoiceMonth = invoiceDate.getMonth();
       const invoiceYear = invoiceDate.getFullYear();
 
-      // Total revenue (all invoices)
+      // Total revenue calculation
       totalRevenue += amount;
 
       // Status breakdown
       const status = invoice.Status?.toLowerCase() || 'draft';
       if (statusBreakdown.hasOwnProperty(status)) {
         statusBreakdown[status] += 1;
+      } else {
+        statusBreakdown.draft += 1;
       }
 
-      // Paid invoices
+      // Paid invoices count
       if (status === 'paid') {
         paidInvoices += 1;
       }
 
-      // Outstanding (sent but not paid)
-      if (status === 'sent') {
+      // Outstanding amount (unpaid + overdue)
+      if (status === 'unpaid') {
         outstandingAmount += amount;
       }
 
-      // Overdue
+      // Overdue amount
       if (status === 'overdue') {
         overdueAmount += amount;
         outstandingAmount += amount; // Overdue is also outstanding
       }
 
-      // This month revenue
+      // Monthly revenue calculations
       if (invoiceMonth === currentMonth && invoiceYear === currentYear) {
         thisMonthRevenue += amount;
       }
 
-      // Last month revenue
       if (invoiceMonth === lastMonth && invoiceYear === lastMonthYear) {
         lastMonthRevenue += amount;
       }
     });
 
-    // Recent invoices (last 5)
+    // Recent invoices (last 5, sorted by date)
     const recentInvoices = [...invoicesData]
       .sort((a, b) => new Date(b.InvoiceDate) - new Date(a.InvoiceDate))
       .slice(0, 5);
@@ -219,35 +232,27 @@ const InvoiceDashboard = () => {
     });
   };
 
-  // Handle invoice actions
-  const handleViewInvoice = (invoiceId) => {
-    navigate(`/admin/invoice-view/${invoiceId}`);
-  };
-
-  const handleEditInvoice = async (invoiceId) => {
-    try {
-      const invoiceData = await getInvoice(invoiceId);
-      if (invoiceData) {
-        navigate("/admin/new-invoice", {
-          state: {
-            editData: invoiceData,
-            isEditing: true,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching invoice for edit:", error);
-    }
-  };
+  // Calculate dashboard stats when data changes
+  useEffect(() => {
+    calculateDashboardStats();
+  }, [invoicesData]);
 
   // Utility functions
-  const formatCurrency = (value) => {
-    return parseFloat(value || 0).toFixed(2);
+  const formatCurrency = (value, currency = 'USD') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2
+    }).format(value || 0);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   const getStatusColor = (status) => {
@@ -260,8 +265,10 @@ const InvoiceDashboard = () => {
         return 'bg-green-100 text-green-800';
       case 'overdue':
         return 'bg-red-100 text-red-800';
-      case 'cancelled':
+      case 'unpaid':
         return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -274,129 +281,108 @@ const InvoiceDashboard = () => {
 
   // Dashboard Card Component
   const DashboardCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false, growth = null, subtitle = null }) => (
-    <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <Container className="flex items-center justify-between mb-4">
-        <Container className={`${bgColor} p-3 rounded-lg`}>
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`${bgColor} p-3 rounded-lg`}>
           <Icon className={`w-6 h-6 ${iconColor}`} />
-        </Container>
+        </div>
         {growth !== null && (
-          <Container className={`flex items-center gap-1 ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`flex items-center gap-1 ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {growth >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            <Span className="text-sm font-medium">
+            <span className="text-sm font-medium">
               {Math.abs(growth).toFixed(1)}%
-            </Span>
-          </Container>
+            </span>
+          </div>
         )}
-      </Container>
+      </div>
       
-      <Container>
-        <Span className="text-2xl font-bold text-gray-900 block">
-          {isCurrency ? `$${formatCurrency(value)}` : value}
-        </Span>
-        <Span className="text-gray-500 text-sm font-medium">{title}</Span>
+      <div>
+        <span className="text-2xl font-bold text-gray-900 block">
+          {isCurrency ? formatCurrency(value) : value}
+        </span>
+        <span className="text-gray-500 text-sm font-medium">{title}</span>
         {subtitle && (
-          <Span className="text-gray-400 text-xs block mt-1">{subtitle}</Span>
+          <span className="text-gray-400 text-xs block mt-1">{subtitle}</span>
         )}
-      </Container>
-    </Container>
+      </div>
+    </div>
   );
 
   // Quick Action Card Component
   const QuickActionCard = ({ title, description, icon: Icon, bgColor, onClick }) => (
-    <Container 
+    <div 
       className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer hover:border-blue-300"
       onClick={onClick}
     >
-      <Container className="flex items-center gap-4">
-        <Container className={`${bgColor} p-3 rounded-lg`}>
+      <div className="flex items-center gap-4">
+        <div className={`${bgColor} p-3 rounded-lg`}>
           <Icon className="w-6 h-6 text-white" />
-        </Container>
-        <Container>
+        </div>
+        <div>
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <Span className="text-gray-500 text-sm">{description}</Span>
-        </Container>
-      </Container>
-    </Container>
+          <span className="text-gray-500 text-sm">{description}</span>
+        </div>
+      </div>
+    </div>
   );
-
-  // Loading state
-  if (!token) {
-    return (
-      <Container className="flex justify-center items-center min-h-screen">
-        <Span className="text-blue-500 text-lg">{translations.Loading}</Span>
-      </Container>
-    );
-  }
 
   const growth = calculateGrowth();
 
   return (
-    <Container className="min-h-screen bg-gray-50">
-      <Container className="px-6 py-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-6 py-6">
         {/* Header */}
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-          <Container>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+          <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {translations["Invoice Dashboard"]}
             </h1>
-            <Span className="text-gray-500">
+            <span className="text-gray-500">
               Monitor your invoice performance and revenue trends
-            </Span>
-          </Container>
-          <Container className="flex gap-3 mt-4 lg:mt-0">
-            <FilledButton
-              isIcon={true}
-              icon={Eye}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-600 hover:bg-gray-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations["View All"]}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => navigate("/admin/invoices")}
-            />
-            <FilledButton
-              isIcon={true}
-              icon={Plus}
-              iconSize="w-4 h-4"
-              bgColor="bg-blue-600 hover:bg-blue-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations["Create Invoice"]}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => navigate("/admin/new-invoice")}
-            />
-          </Container>
-        </Container>
+            </span>
+          </div>
+          <div className="flex gap-3 mt-4 lg:mt-0">
+            <button className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <Eye className="w-4 h-4" />
+              {translations["View All"]}
+            </button>
+            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <Plus className="w-4 h-4" />
+              {translations["Create Invoice"]}
+            </button>
+          </div>
+        </div>
+
+        {/* Language Toggle */}
+        <div className="mb-6">
+          <button
+            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+            className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
+          >
+            Switch to {language === "en" ? "Arabic" : "English"}
+          </button>
+        </div>
 
         {/* Quick Actions */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <QuickActionCard
             title={translations["Create Invoice"]}
             description="Generate a new invoice for your customers"
             icon={Receipt}
             bgColor="bg-blue-600"
-            onClick={() => navigate("/admin/new-invoice")}
+            onClick={() => console.log("Create invoice clicked")}
           />
           <QuickActionCard
             title="Manage Invoices"
             description="View, edit, and track all your invoices"
             icon={FileText}
             bgColor="bg-green-600"
-            onClick={() => navigate("/admin/invoices")}
+            onClick={() => console.log("Manage invoices clicked")}
           />
-        </Container>
+        </div>
 
         {/* Main Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <DashboardCard
             title={translations["Total Revenue"]}
             value={dashboardData.totalRevenue}
@@ -429,10 +415,10 @@ const InvoiceDashboard = () => {
             iconColor="text-yellow-600"
             isCurrency={true}
           />
-        </Container>
+        </div>
 
         {/* Secondary Statistics */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <DashboardCard
             title={translations.Overdue}
             value={dashboardData.overdueAmount}
@@ -463,167 +449,148 @@ const InvoiceDashboard = () => {
             bgColor="bg-indigo-50"
             iconColor="text-indigo-600"
           />
-        </Container>
+        </div>
 
         {/* Charts and Recent Activity */}
-        <Container className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Status Breakdown */}
-          <Container className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <Container className="flex items-center gap-2 mb-6">
+          <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-6">
               <PieChart className="w-5 h-5 text-blue-600" />
               <h3 className="text-lg font-semibold text-gray-900">
                 {translations["Invoice Status"]}
               </h3>
-            </Container>
+            </div>
             
-            <Container className="space-y-4">
+            <div className="space-y-4">
               {Object.entries(dashboardData.statusBreakdown).map(([status, count]) => (
-                <Container key={status} className="flex items-center justify-between">
-                  <Container className="flex items-center gap-3">
-                    <Container className={`w-3 h-3 rounded-full ${
+                <div key={status} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${
                       status === 'paid' ? 'bg-green-500' :
                       status === 'sent' ? 'bg-blue-500' :
                       status === 'overdue' ? 'bg-red-500' :
+                      status === 'unpaid' ? 'bg-yellow-500' :
                       status === 'draft' ? 'bg-gray-500' :
-                      'bg-yellow-500'
-                    }`}></Container>
-                    <Span className="text-sm font-medium text-gray-700 capitalize">
+                      'bg-gray-400'
+                    }`}></div>
+                    <span className="text-sm font-medium text-gray-700 capitalize">
                       {translations[status.charAt(0).toUpperCase() + status.slice(1)] || status}
-                    </Span>
-                  </Container>
-                  <Span className="text-sm font-bold text-gray-900">{count}</Span>
-                </Container>
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-gray-900">{count}</span>
+                </div>
               ))}
-            </Container>
-          </Container>
+            </div>
+          </div>
 
           {/* Recent Invoices */}
-          <Container className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <Container className="flex items-center justify-between mb-6">
-              <Container className="flex items-center gap-2">
+          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-blue-600" />
                 <h3 className="text-lg font-semibold text-gray-900">
                   {translations["Recent Invoices"]}
                 </h3>
-              </Container>
-              <FilledButton
-                bgColor="bg-blue-100 hover:bg-blue-200"
-                textColor="text-blue-700"
-                rounded="rounded-lg"
-                buttonText={translations["View All"]}
-                height="h-8"
-                px="px-3"
-                fontWeight="font-medium"
-                fontSize="text-sm"
-                onClick={() => navigate("/admin/invoices")}
-              />
-            </Container>
+              </div>
+              <button className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                {translations["View All"]}
+              </button>
+            </div>
 
-            {isLoading ? (
-              <Container className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                <Span className="text-gray-500 text-sm block mt-2">{translations.Loading}</Span>
-              </Container>
-            ) : dashboardData.recentInvoices.length === 0 ? (
-              <Container className="text-center py-8">
-                <Receipt className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <Span className="text-gray-500 text-sm">{translations["No invoices"]}</Span>
-              </Container>
-            ) : (
-              <Container className="space-y-3">
-                {dashboardData.recentInvoices.map((invoice) => (
-                  <Container
-                    key={invoice.Id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <Container className="flex items-center gap-3">
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-900">
-                          {invoice.InvoiceNumber}
-                        </Span>
-                        <Span className="text-xs text-gray-500 block">
-                          {invoice.CustomerName || "Unknown Customer"}
-                        </Span>
-                      </Container>
-                    </Container>
+            <div className="space-y-3">
+              {dashboardData.recentInvoices.map((invoice) => (
+                <div
+                  key={invoice.Id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {invoice.InvoiceNumber}
+                      </span>
+                      <span className="text-xs text-gray-500 block">
+                        {invoice.CustomerName || invoice.BillingName || "Unknown Customer"}
+                      </span>
+                    </div>
+                  </div>
 
-                    <Container className="flex items-center gap-4">
-                      <Container className="text-right">
-                        <Span className="text-sm font-medium text-gray-900">
-                          ${formatCurrency(invoice.TotalAmount)}
-                        </Span>
-                        <Span className="text-xs text-gray-500 block">
-                          {formatDate(invoice.InvoiceDate)}
-                        </Span>
-                      </Container>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <span className="text-sm font-medium text-gray-900">
+                        {formatCurrency(invoice.TotalAmount, invoice.Currency)}
+                      </span>
+                      <span className="text-xs text-gray-500 block">
+                        {formatDate(invoice.InvoiceDate)}
+                      </span>
+                    </div>
 
-                      <Span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.Status)}`}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.Status)}`}
+                    >
+                      {translations[invoice.Status] || invoice.Status}
+                    </span>
+
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => console.log("View invoice:", invoice.Id)}
+                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                        title={translations.View}
                       >
-                        {translations[invoice.Status] || invoice.Status}
-                      </Span>
-
-                      <Container className="flex gap-1">
-                        <button
-                          onClick={() => handleViewInvoice(invoice.Id)}
-                          className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
-                          title={translations.View}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEditInvoice(invoice.Id)}
-                          className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded"
-                          title={translations.Edit}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      </Container>
-                    </Container>
-                  </Container>
-                ))}
-              </Container>
-            )}
-          </Container>
-        </Container>
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => console.log("Edit invoice:", invoice.Id)}
+                        className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+                        title={translations.Edit}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Monthly Revenue Trend */}
-        <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <Container className="flex items-center gap-2 mb-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-5 h-5 text-blue-600" />
             <h3 className="text-lg font-semibold text-gray-900">
               {translations["Revenue Trend"]}
             </h3>
-          </Container>
+          </div>
 
-          <Container className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Container className="text-center">
-              <Span className="text-3xl font-bold text-blue-600 block">
-                ${formatCurrency(dashboardData.thisMonthRevenue)}
-              </Span>
-              <Span className="text-gray-500 text-sm">{translations["This Month"]}</Span>
-            </Container>
-            <Container className="text-center">
-              <Span className="text-3xl font-bold text-gray-600 block">
-                ${formatCurrency(dashboardData.lastMonthRevenue)}
-              </Span>
-              <Span className="text-gray-500 text-sm">Last Month</Span>
-            </Container>
-          </Container>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="text-center">
+              <span className="text-3xl font-bold text-blue-600 block">
+                {formatCurrency(dashboardData.thisMonthRevenue)}
+              </span>
+              <span className="text-gray-500 text-sm">{translations["This Month"]}</span>
+            </div>
+            <div className="text-center">
+              <span className="text-3xl font-bold text-gray-600 block">
+                {formatCurrency(dashboardData.lastMonthRevenue)}
+              </span>
+              <span className="text-gray-500 text-sm">Last Month</span>
+            </div>
+          </div>
 
           {growth !== 0 && (
-            <Container className="mt-4 text-center">
-              <Container className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+            <div className="mt-4 text-center">
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
                 growth >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}>
                 {growth >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                 {Math.abs(growth).toFixed(1)}% {translations.Growth}
-              </Container>
-            </Container>
+              </div>
+            </div>
           )}
-        </Container>
-      </Container>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 };
 
