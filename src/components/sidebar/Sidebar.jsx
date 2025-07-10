@@ -296,7 +296,7 @@ const Sidebar = ({ isOpen }) => {
         },
         {
           label: "Stock Management",
-          path: getRoleBasedPath("/stock"),
+          path: getRoleBasedPath("/stock/movements"),
           icon: Boxes,
         },
       ],

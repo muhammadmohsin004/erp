@@ -54,6 +54,11 @@ import ManageEmployees from "../pages/Employee/ManageEmployees";
 import CreateNewEmployee from "../pages/Employee/CreateNewEmployee";
 import EmployeeSalary from "../pages/Employee/EmployeeSalary";
 import Salary from "../pages/Salary/Salary";
+import CompanyBranchList from "../pages/CompanyManager/CompanyBranchList";
+import CompanyBranchForm from "../pages/CompanyManager/CompanyBranchForm";
+import CompanyBranchDetails from "../pages/CompanyManager/CompanyBranchDetails";
+import StockMovementsList from "../pages/Inventories/StockManager/StockMovementsList";
+import StockTransactionForm from "../pages/Inventories/StockManager/StockTransactionForm";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -289,12 +294,7 @@ const getRouteConfig = () => {
     },
 
     // Admin Company Branches Routes
-    {
-      path: "/admin/company-branches",
-      component: () => <div>Company Branches Page</div>,
-      roles: ["Admin"],
-      layout: true,
-    },
+   
 
     // Manager Dashboard Routes
     {
@@ -497,6 +497,36 @@ const getRouteConfig = () => {
     {
       path: "/admin/invoice-view/:id",
       component: InvoiceView,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/company-branches",
+      component: CompanyBranchList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/company-branches/new",
+      component: CompanyBranchForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/stock/movements",
+      component: StockMovementsList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/stock/transactions/new",
+      component: StockTransactionForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/company-branches/:id",
+      component: CompanyBranchDetails,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
