@@ -1,6 +1,4 @@
-/* eslint-disable react/prop-types */
-import Span from "../../span/Span";
-
+import Span from "../../../span/Span";
 
 const OutlineButton = ({
   isIcon,

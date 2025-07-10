@@ -716,7 +716,7 @@ export const SuperAdminProvider = ({ children }) => {
         dispatch({
           type: SUPERADMIN_ACTIONS.SET_SYSTEM_LOGS,
           payload: {
-            logs: response.data.items,
+            logs: response.data.Items?.$values,
             pagination: {
               totalCount: response.data.totalCount,
               page: response.data.page,
@@ -726,7 +726,7 @@ export const SuperAdminProvider = ({ children }) => {
           },
         });
 
-        return response.data;
+        return response.data.Items?.$values;
       } catch (error) {
         handleApiError(error);
       }

@@ -1,441 +1,588 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-    Container, Row, Col, Table, Button, Form,
-    Modal, Card, Badge, Alert, Spinner, Pagination,
-    Dropdown, InputGroup, FormControl
-} from 'react-bootstrap';
-import {
-    FiFileText, FiSearch, FiFilter, FiRefreshCw,
-    FiChevronUp, FiChevronDown, FiDownload, FiActivity
-} from 'react-icons/fi';
-import { GET_ALL_SYSTEM_LOGS } from '../../../services/apiRoutes';
-import { get } from '../../../services/apiService';
-import AlertDialog from '../../../utitlities/Alert';
+  FiSearch,
+  FiFilter,
+  FiRefreshCw,
+  FiDownload,
+  FiActivity,
+  FiChevronLeft,
+  FiChevronRight,
+  FiChevronsLeft,
+  FiChevronsRight,
+  FiCalendar,
+} from "react-icons/fi";
+import Container from "../../../components/elements/container/Container";
+import Alert from "../../../components/elements/alert/Alert";
+import Card from "../../../components/elements/card/Card";
+import SelectBox from "../../../components/elements/selectBox/SelectBox";
+import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import OutlineButton from "../../../components/elements/elements/buttons/OutlineButton/OutlineButton";
+import Table from "../../../components/elements/table/Table";
+import Thead from "../../../components/elements/thead/Thead";
+import Tbody from "../../../components/elements/tbody/Tbody";
+import TH from "../../../components/elements/th/TH";
+import TR from "../../../components/elements/tr/TR";
+import TD from "../../../components/elements/td/TD";
+import Skeleton from "../../../components/elements/skeleton/Skeleton";
+import Badge from "../../../components/elements/badge/Badge";
+import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import BodyHeader from "../../../components/elements/bodyHeader/BodyHeader";
 
 const SystemLogs = () => {
-    // State for logs data
-    const [filteredLogs, setFilteredLogs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [successMessage, setSuccessMessage] = useState('');
+  const {
+    systemLogs,
+    systemLogsPagination,
+    isLogsLoading,
+    getSystemLogs,
+    error,
+    clearError,
+  } = useSuperAdmin();
+  //   console.log
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [logsPerPage] = useState(10);
+  // State management
+  const [searchTerm, setSearchTerm] = useState("");
+  const [levelFilter, setLevelFilter] = useState("");
+  const [actionFilter, setActionFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(50);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
-    // Search and filter state
-    const [searchTerm, setSearchTerm] = useState('');
-    const [levelFilter, setLevelFilter] = useState('all');
-    const [actionFilter, setActionFilter] = useState('all');
-    const [sortConfig, setSortConfig] = useState({ key: 'CreatedAt', direction: 'desc' });
+  // Filter options
+  const levelOptions = [
+    { value: "", label: "All Levels" },
+    { value: "Info", label: "Info" },
+    { value: "Warning", label: "Warning" },
+    { value: "Error", label: "Error" },
+    { value: "Debug", label: "Debug" },
+  ];
 
-    const token = localStorage.getItem("authToken");
+  const actionOptions = [
+    { value: "", label: "All Actions" },
+    { value: "ImpersonateUser", label: "Impersonate User" },
+    { value: "Login", label: "Login" },
+    { value: "Logout", label: "Logout" },
+    { value: "Create", label: "Create" },
+    { value: "Update", label: "Update" },
+    { value: "Delete", label: "Delete" },
+    { value: "Export", label: "Export" },
+  ];
 
-    // Fetch system logs
-    const { data: logs = [], isLoading, refetch } = useQuery({
-        queryKey: ["systemLogs"],
-        queryFn: async () => {
-            const res = await get(GET_ALL_SYSTEM_LOGS, token);
-            return res.Items.$values || [];
-        },
-        onError: (err) => {
-            console.error("Query Error", err);
-            AlertDialog("Error", err.message || "Failed to load data", "error");
-            setError(err.message || "Failed to load system logs");
-        },
-        onSuccess: () => {
-            setLoading(false);
-        },
-        refetchOnWindowFocus: false,
-    });
+  // Load logs on component mount and when filters change
+  useEffect(() => {
+    loadLogs();
+  }, [currentPage, levelFilter, actionFilter, startDate, endDate]);
 
-    console.log("system logs----------------", logs);
-    
-    // Filter and sort logs
-    useEffect(() => {
-        let result = [...logs];
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm !== "") {
+        setCurrentPage(1);
+        loadLogs();
+      }
+    }, 500);
 
-        // Apply search filter
-        if (searchTerm) {
-            result = result.filter(log =>
-                (log.Message?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (log.UserEmail?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (log.AdminEmail?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (log.CompanyName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (log.IPAddress?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-            );
-        }
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
 
-        // Apply level filter
-        if (levelFilter !== 'all') {
-            result = result.filter(log => log.Level === levelFilter);
-        }
+  const loadLogs = async () => {
+    try {
+      await getSystemLogs(
+        currentPage,
+        pageSize,
+        levelFilter,
+        actionFilter,
+        startDate,
+        endDate
+      );
+    } catch (err) {
+      console.error("Error loading logs:", err);
+    }
+  };
 
-        // Apply action filter
-        if (actionFilter !== 'all') {
-            result = result.filter(log => log.Action === actionFilter);
-        }
+  const handleRefresh = async () => {
+    try {
+      await loadLogs();
+      setSuccessMessage("System logs refreshed successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Error refreshing logs:", err);
+    }
+  };
 
-        // Apply sorting
-        if (sortConfig.key) {
-            result.sort((a, b) => {
-                let aValue = a[sortConfig.key];
-                let bValue = b[sortConfig.key];
-                
-                // Handle null/undefined values
-                if (aValue == null) aValue = '';
-                if (bValue == null) bValue = '';
-                
-                // Handle date sorting
-                if (sortConfig.key === 'CreatedAt') {
-                    aValue = new Date(aValue);
-                    bValue = new Date(bValue);
-                }
-                
-                if (aValue < bValue) {
-                    return sortConfig.direction === 'asc' ? -1 : 1;
-                }
-                if (aValue > bValue) {
-                    return sortConfig.direction === 'asc' ? 1 : -1;
-                }
-                return 0;
-            });
-        }
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
-        setFilteredLogs(result);
-        setCurrentPage(1); // Reset to first page when filters change
-    }, [logs, searchTerm, levelFilter, actionFilter, sortConfig]);
+  const handleLevelChange = (value) => {
+    setLevelFilter(value);
+    setCurrentPage(1);
+  };
 
-    const requestSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
-    };
+  const handleActionChange = (value) => {
+    setActionFilter(value);
+    setCurrentPage(1);
+  };
 
-    // Available levels and actions for filters
-    const levels = ['Info', 'Warning', 'Error', 'Debug'];
-    const actions = ['ImpersonateUser', 'Login', 'Logout', 'Create', 'Update', 'Delete', 'Export'];
+  const handleDateChange = (type, value) => {
+    if (type === "start") {
+      setStartDate(value);
+    } else {
+      setEndDate(value);
+    }
+    setCurrentPage(1);
+  };
 
-    // Pagination logic
-    const indexOfLastLog = currentPage * logsPerPage;
-    const indexOfFirstLog = indexOfLastLog - logsPerPage;
-    const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
-    const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+  const clearFilters = () => {
+    setSearchTerm("");
+    setLevelFilter("");
+    setActionFilter("");
+    setStartDate("");
+    setEndDate("");
+    setCurrentPage(1);
+  };
 
-    const getLevelBadge = (level) => {
-        switch (level) {
-            case 'Error':
-                return 'danger';
-            case 'Warning':
-                return 'warning';
-            case 'Info':
-                return 'info';
-            case 'Debug':
-                return 'secondary';
-            default:
-                return 'primary';
-        }
-    };
+  const getBadgeVariant = (level) => {
+    switch (level) {
+      case "Error":
+        return "danger";
+      case "Warning":
+        return "warning";
+      case "Info":
+        return "info";
+      case "Debug":
+        return "secondary";
+      default:
+        return "primary";
+    }
+  };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    };
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
 
-    // Export data function
-    const exportToCSV = () => {
-        const csvData = filteredLogs.map(log => ({
-            Id: log.Id,
-            Level: log.Level,
-            Action: log.Action,
-            Message: log.Message,
-            CompanyName: log.CompanyName || 'N/A',
-            UserEmail: log.UserEmail || 'N/A',
-            AdminEmail: log.AdminEmail || 'N/A',
-            IPAddress: log.IPAddress || 'N/A',
-            CreatedAt: formatDate(log.CreatedAt)
-        }));
+  const exportToCSV = async () => {
+    setIsExporting(true);
+    try {
+      // Get all logs for export (you might want to implement a separate export endpoint)
+      const exportData = await getSystemLogs(
+        1,
+        10000,
+        levelFilter,
+        actionFilter,
+        startDate,
+        endDate
+      );
 
-        const csvContent = [
-            Object.keys(csvData[0]).join(','),
-            ...csvData.map(row => Object.values(row).map(value => 
-                `"${String(value).replace(/"/g, '""')}"`
-            ).join(','))
-        ].join('\n');
+      const csvData = exportData.items.map((log) => ({
+        Id: log.id,
+        Level: log.level,
+        Action: log.action,
+        Message: log.message,
+        CompanyName: log.companyName || "N/A",
+        UserEmail: log.userEmail || "N/A",
+        AdminEmail: log.adminEmail || "N/A",
+        IPAddress: log.ipAddress || "N/A",
+        CreatedAt: formatDate(log.createdAt),
+      }));
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `system_logs_export_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        setSuccessMessage('Logs exported successfully!');
-        setTimeout(() => setSuccessMessage(''), 3000);
-    };
+      const csvContent = [
+        Object.keys(csvData[0]).join(","),
+        ...csvData.map((row) =>
+          Object.values(row)
+            .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+            .join(",")
+        ),
+      ].join("\n");
 
-    // Refresh logs
-    const handleRefresh = () => {
-        setLoading(true);
-        refetch().then(() => {
-            setSuccessMessage('System logs refreshed successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-        });
-    };
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `system_logs_export_${new Date().toISOString().split("T")[0]}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSuccessMessage("Logs exported successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Error exporting logs:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const renderPagination = () => {
+    if (!systemLogsPagination || systemLogsPagination.totalPages <= 1)
+      return null;
+
+    const { page, totalPages } = systemLogsPagination;
+    const pages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
 
     return (
-        <Container fluid className="py-4">
-            <Row>
-                <Col>
-                    <h2 className="mb-4">
-                        <FiActivity className="me-2" />
-                        System Logs
-                    </h2>
+      <Container className="flex justify-center items-center mt-6">
+        <Container className="flex items-center space-x-2">
+          <OutlineButton
+            isIcon={true}
+            icon={FiChevronsLeft}
+            onClick={() => handlePageChange(1)}
+            disabled={page === 1}
+            borderColor="border-gray-300"
+            textColor="text-gray-500"
+            bgColor="bg-white"
+            height="h-8"
+            width="w-8"
+            px="px-0"
+          />
+          <OutlineButton
+            isIcon={true}
+            icon={FiChevronLeft}
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+            borderColor="border-gray-300"
+            textColor="text-gray-500"
+            bgColor="bg-white"
+            height="h-8"
+            width="w-8"
+            px="px-0"
+          />
 
-                    {successMessage && (
-                        <Alert variant="success" onClose={() => setSuccessMessage('')} dismissible>
-                            {successMessage}
-                        </Alert>
-                    )}
+          {pages.map((pageNum) => (
+            <FilledButton
+              key={pageNum}
+              buttonText={pageNum.toString()}
+              onClick={() => handlePageChange(pageNum)}
+              bgColor={pageNum === page ? "bg-blue-600" : "bg-white"}
+              textColor={pageNum === page ? "text-white" : "text-gray-700"}
+              borderColor={
+                pageNum === page ? "border-blue-600" : "border-gray-300"
+              }
+              height="h-8"
+              width="w-8"
+              px="px-0"
+              fontSize="text-sm"
+            />
+          ))}
 
-                    {error && (
-                        <Alert variant="danger" onClose={() => setError('')} dismissible>
-                            {error}
-                        </Alert>
-                    )}
-
-                    <Card className="mb-4">
-                        <Card.Body>
-                            <Row className="mb-3">
-                                <Col md={6}>
-                                    <Button variant="outline-secondary" onClick={handleRefresh} className="me-2">
-                                        <FiRefreshCw className="me-2" />
-                                        Refresh
-                                    </Button>
-                                    <Button variant="outline-success" onClick={exportToCSV}>
-                                        <FiDownload className="me-2" />
-                                        Export Logs
-                                    </Button>
-                                </Col>
-
-                                <Col md={6}>
-                                    <InputGroup>
-                                        <InputGroup.Text>
-                                            <FiSearch />
-                                        </InputGroup.Text>
-                                        <FormControl
-                                            placeholder="Search logs by message, email, company, or IP..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                        />
-                                    </InputGroup>
-                                </Col>
-                            </Row>
-
-                            <Row className="mb-3">
-                                <Col md={6}>
-                                    <Dropdown className="d-inline me-2">
-                                        <Dropdown.Toggle variant="outline-secondary" id="level-filter">
-                                            <FiFilter className="me-2" />
-                                            Level: {levelFilter === 'all' ? 'All' : levelFilter}
-                                        </Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => setLevelFilter('all')}>All Levels</Dropdown.Item>
-                                            {levels.map(level => (
-                                                <Dropdown.Item key={level} onClick={() => setLevelFilter(level)}>
-                                                    {level}
-                                                </Dropdown.Item>
-                                            ))}
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-
-                                    <Dropdown className="d-inline">
-                                        <Dropdown.Toggle variant="outline-secondary" id="action-filter">
-                                            <FiFilter className="me-2" />
-                                            Action: {actionFilter === 'all' ? 'All' : actionFilter}
-                                        </Dropdown.Toggle>
-                                        <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => setActionFilter('all')}>All Actions</Dropdown.Item>
-                                            {actions.map(action => (
-                                                <Dropdown.Item key={action} onClick={() => setActionFilter(action)}>
-                                                    {action}
-                                                </Dropdown.Item>
-                                            ))}
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                </Col>
-
-                                <Col md={6} className="text-md-end">
-                                    <small className="text-muted">
-                                        Showing {indexOfFirstLog + 1}-{Math.min(indexOfLastLog, filteredLogs.length)} of {filteredLogs.length} logs
-                                    </small>
-                                </Col>
-                            </Row>
-
-                            {isLoading ? (
-                                <div className="text-center py-5">
-                                    <Spinner animation="border" variant="primary" />
-                                    <p className="mt-2">Loading system logs...</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="table-responsive">
-                                        <Table striped bordered hover>
-                                            <thead>
-                                                <tr>
-                                                    <th onClick={() => requestSort('Id')} className="sortable-header" style={{ cursor: 'pointer', width: '80px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            ID
-                                                            {sortConfig.key === 'Id' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th onClick={() => requestSort('Level')} className="sortable-header" style={{ cursor: 'pointer', width: '100px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            Level
-                                                            {sortConfig.key === 'Level' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th onClick={() => requestSort('Action')} className="sortable-header" style={{ cursor: 'pointer', width: '120px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            Action
-                                                            {sortConfig.key === 'Action' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th style={{ width: '300px' }}>Message</th>
-                                                    <th onClick={() => requestSort('CompanyName')} className="sortable-header" style={{ cursor: 'pointer', width: '150px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            Company
-                                                            {sortConfig.key === 'CompanyName' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th onClick={() => requestSort('UserEmail')} className="sortable-header" style={{ cursor: 'pointer', width: '150px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            User Email
-                                                            {sortConfig.key === 'UserEmail' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th onClick={() => requestSort('AdminEmail')} className="sortable-header" style={{ cursor: 'pointer', width: '150px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            Admin Email
-                                                            {sortConfig.key === 'AdminEmail' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th onClick={() => requestSort('IPAddress')} className="sortable-header" style={{ cursor: 'pointer', width: '120px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            IP Address
-                                                            {sortConfig.key === 'IPAddress' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                    <th onClick={() => requestSort('CreatedAt')} className="sortable-header" style={{ cursor: 'pointer', width: '150px' }}>
-                                                        <div className="d-flex align-items-center">
-                                                            Created At
-                                                            {sortConfig.key === 'CreatedAt' && (
-                                                                sortConfig.direction === 'asc' ? <FiChevronUp className="ms-1" /> : <FiChevronDown className="ms-1" />
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {currentLogs.length > 0 ? (
-                                                    currentLogs.map(log => (
-                                                        <tr key={log.Id}>
-                                                            <td>{log.Id}</td>
-                                                            <td>
-                                                                <Badge bg={getLevelBadge(log.Level)}>
-                                                                    {log.Level}
-                                                                </Badge>
-                                                            </td>
-                                                            <td>
-                                                                <Badge bg="secondary">
-                                                                    {log.Action}
-                                                                </Badge>
-                                                            </td>
-                                                            <td>
-                                                                <div style={{ 
-                                                                    maxWidth: '300px', 
-                                                                    overflow: 'hidden', 
-                                                                    textOverflow: 'ellipsis',
-                                                                    whiteSpace: 'nowrap'
-                                                                }} 
-                                                                title={log.Message}>
-                                                                    {log.Message}
-                                                                </div>
-                                                            </td>
-                                                            <td>{log.CompanyName || 'N/A'}</td>
-                                                            <td>{log.UserEmail || 'N/A'}</td>
-                                                            <td>{log.AdminEmail || 'N/A'}</td>
-                                                            <td>{log.IPAddress || 'N/A'}</td>
-                                                            <td>{formatDate(log.CreatedAt)}</td>
-                                                        </tr>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan="9" className="text-center py-4">
-                                                            No system logs found matching your criteria
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </Table>
-                                    </div>
-
-                                    {filteredLogs.length > logsPerPage && (
-                                        <div className="d-flex justify-content-center mt-4">
-                                            <Pagination>
-                                                <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
-                                                <Pagination.Prev
-                                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                                    disabled={currentPage === 1}
-                                                />
-
-                                                {Array.from({ length: totalPages }, (_, i) => (
-                                                    <Pagination.Item
-                                                        key={i + 1}
-                                                        active={i + 1 === currentPage}
-                                                        onClick={() => setCurrentPage(i + 1)}
-                                                    >
-                                                        {i + 1}
-                                                    </Pagination.Item>
-                                                ))}
-
-                                                <Pagination.Next
-                                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                                    disabled={currentPage === totalPages}
-                                                />
-                                                <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
-                                            </Pagination>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
+          <OutlineButton
+            isIcon={true}
+            icon={FiChevronRight}
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+            borderColor="border-gray-300"
+            textColor="text-gray-500"
+            bgColor="bg-white"
+            height="h-8"
+            width="w-8"
+            px="px-0"
+          />
+          <OutlineButton
+            isIcon={true}
+            icon={FiChevronsRight}
+            onClick={() => handlePageChange(totalPages)}
+            disabled={page === totalPages}
+            borderColor="border-gray-300"
+            textColor="text-gray-500"
+            bgColor="bg-white"
+            height="h-8"
+            width="w-8"
+            px="px-0"
+          />
         </Container>
+      </Container>
     );
+  };
+
+  return (
+    <Container className="py-6 px-4 max-w-7xl">
+      {/* Success Message */}
+      {successMessage && (
+        <Container className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
+          {successMessage}
+        </Container>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <Container className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+          <Container className="flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={clearError}
+              className="text-red-700 hover:text-red-900"
+            >
+              ×
+            </button>
+          </Container>
+        </Container>
+      )}
+
+      {/* Header */}
+      <BodyHeader
+        heading="System Logs"
+        subHeading="Monitor and analyze system activities and events"
+        icon={FiActivity}
+      />
+
+      {/* Controls */}
+      <Card className="mb-6 mt-6">
+        <Container className="p-4">
+          {/* Top Row - Search and Actions */}
+          <Container className="flex flex-col lg:flex-row gap-4 mb-4">
+            <Container className="flex-1">
+              <Container className="relative">
+                <input
+                  type="text"
+                  placeholder="Search logs by message, email, company, or IP..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </Container>
+            </Container>
+
+            <Container className="flex gap-2">
+              <FilledButton
+                isIcon={true}
+                icon={FiRefreshCw}
+                isIconLeft={true}
+                buttonText="Refresh"
+                onClick={handleRefresh}
+                bgColor="bg-gray-600"
+                textColor="text-white"
+                height="h-10"
+                px="px-4"
+                disabled={isLogsLoading}
+              />
+              <FilledButton
+                isIcon={true}
+                icon={FiDownload}
+                isIconLeft={true}
+                buttonText="Export"
+                onClick={exportToCSV}
+                bgColor="bg-green-600"
+                textColor="text-white"
+                height="h-10"
+                px="px-4"
+                disabled={isExporting}
+              />
+            </Container>
+          </Container>
+
+          {/* Filters Row */}
+          <Container className="flex flex-col lg:flex-row gap-4 mb-4">
+            <Container className="flex-1">
+              <SelectBox
+                label="Level"
+                name="level"
+                placeholder="Select level"
+                optionList={levelOptions}
+                value={levelFilter}
+                handleChange={handleLevelChange}
+                width="w-full"
+              />
+            </Container>
+
+            <Container className="flex-1">
+              <SelectBox
+                label="Action"
+                name="action"
+                placeholder="Select action"
+                optionList={actionOptions}
+                value={actionFilter}
+                handleChange={handleActionChange}
+                width="w-full"
+              />
+            </Container>
+
+            <Container className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Start Date
+              </label>
+              <Container className="relative">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => handleDateChange("start", e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </Container>
+            </Container>
+
+            <Container className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                End Date
+              </label>
+              <Container className="relative">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => handleDateChange("end", e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </Container>
+            </Container>
+          </Container>
+
+          {/* Clear Filters and Results Count */}
+          <Container className="flex justify-between items-center">
+            <OutlineButton
+              isIcon={true}
+              icon={FiFilter}
+              isIconLeft={true}
+              buttonText="Clear Filters"
+              onClick={clearFilters}
+              borderColor="border-gray-300"
+              textColor="text-gray-600"
+              bgColor="bg-white"
+              height="h-8"
+              px="px-3"
+              fontSize="text-sm"
+            />
+
+            {systemLogsPagination && (
+              <Container className="text-sm text-gray-600">
+                Showing{" "}
+                {(systemLogsPagination.page - 1) *
+                  systemLogsPagination.pageSize +
+                  1}
+                -
+                {Math.min(
+                  systemLogsPagination.page * systemLogsPagination.pageSize,
+                  systemLogsPagination.totalCount
+                )}{" "}
+                of {systemLogsPagination.totalCount} logs
+              </Container>
+            )}
+          </Container>
+        </Container>
+      </Card>
+
+      {/* Table */}
+      <Card className="shadow-sm">
+        <Container className="overflow-x-auto">
+          <Table>
+            <Thead className="bg-gray-50">
+              <TR>
+                <TH className="w-16">ID</TH>
+                <TH className="w-24">Level</TH>
+                <TH className="w-32">Action</TH>
+                <TH className="w-80">Message</TH>
+                <TH className="w-40">Company</TH>
+                <TH className="w-48">User Email</TH>
+                <TH className="w-48">Admin Email</TH>
+                <TH className="w-32">IP Address</TH>
+                <TH className="w-40">Created At</TH>
+              </TR>
+            </Thead>
+            <Tbody>
+              {isLogsLoading ? (
+                // Loading skeletons
+                Array.from({ length: 10 }).map((_, index) => (
+                  <TR key={index}>
+                    <TD>
+                      <Skeleton height="20px" width="40px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="60px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="80px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="200px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="100px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="150px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="150px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="100px" />
+                    </TD>
+                    <TD>
+                      <Skeleton height="20px" width="120px" />
+                    </TD>
+                  </TR>
+                ))
+              ) : systemLogs && systemLogs.length > 0 ? (
+                systemLogs.map((log) => (
+                  <TR key={log.id}>
+                    <TD className="font-medium">{log.Id}</TD>
+                    <TD>
+                      <Badge variant={getBadgeVariant(log.Level)}>
+                        {log.level}
+                      </Badge>
+                    </TD>
+                    <TD>
+                      <Badge variant="secondary">{log.Action}</Badge>
+                    </TD>
+                    <TD>
+                      <Container
+                        className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap"
+                        title={log.Message}
+                      >
+                        {log.Message}
+                      </Container>
+                    </TD>
+                    <TD className="text-gray-600">
+                      {log.companyName || "N/A"}
+                    </TD>
+                    <TD className="text-gray-600">{log.UserEmail || "N/A"}</TD>
+                    <TD className="text-gray-600">{log.AdminEmail || "N/A"}</TD>
+                    <TD className="text-gray-600">{log.IpAddress || "N/A"}</TD>
+                    <TD className="text-gray-600">
+                      {formatDate(log.CreatedAt)}
+                    </TD>
+                  </TR>
+                ))
+              ) : (
+                <TR>
+                  <TD colSpan={9} className="text-center py-8 text-gray-500">
+                    No system logs found matching your criteria
+                  </TD>
+                </TR>
+              )}
+            </Tbody>
+          </Table>
+        </Container>
+      </Card>
+
+      {/* Pagination */}
+      {renderPagination()}
+    </Container>
+  );
 };
 
 export default SystemLogs;
