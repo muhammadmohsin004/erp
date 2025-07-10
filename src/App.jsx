@@ -12,6 +12,7 @@ import { SupplierProvider } from "./Contexts/SupplierContext/SupplierContext";
 import { ServiceProvider } from "./Contexts/ServiceContext/ServiceContext";
 import { ProductsManagerProvider } from "./Contexts/ProductsManagerContext/ProductsManagerContext";
 import { SuperDashboardProvider } from "./Contexts/superAdminDashborad/SuperAdminContext";
+import { HRProvider } from "./Contexts/HrContext/HrContext";
 function App() {
   return (
     <Router>
@@ -24,7 +25,9 @@ function App() {
                   <SupplierProvider>
                     <ServiceProvider>
                       <ProductsManagerProvider>
-                        <Routes />
+                        <HRProvider>
+                          <Routes />
+                        </HRProvider>
                       </ProductsManagerProvider>
                     </ServiceProvider>
                   </SupplierProvider>

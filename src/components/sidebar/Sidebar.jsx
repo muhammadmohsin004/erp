@@ -24,7 +24,7 @@ import {
   ArrowDownLeftFromCircleIcon,
   ShieldUser,
   ServerCrashIcon,
-MessageSquarePlus,
+  MessageSquarePlus,
   Archive,
   Boxes,
 } from "lucide-react";
@@ -267,7 +267,7 @@ const Sidebar = ({ isOpen }) => {
           path: getRoleBasedPath("/Services-Manager"),
           icon: ServerCrashIcon,
         },
-         {
+        {
           label: "Products Manager",
           path: getRoleBasedPath("/Products-Manager"),
           icon: MessageSquarePlus,
@@ -311,8 +311,26 @@ const Sidebar = ({ isOpen }) => {
     {
       icon: Users,
       label: "Employees",
-      path: getRoleBasedPath("/employees"),
-      roles: ["Admin", "Manager"],
+      submenu: true,
+      key: "employee-management",
+      roles: ["Admin", "Manager", "Employee"],
+      submenuItems: [
+        {
+          label: "Manage Employees",
+          path: getRoleBasedPath("/manage-employee"),
+          icon: Archive,
+        },
+        {
+          label: "Add Employee",
+          path: getRoleBasedPath("/add-employee"),
+          icon: Warehouse,
+        },
+        {
+          label: "Employee Salary",
+          path: getRoleBasedPath("/employee-salary"),
+          icon: ArrowDownLeftFromCircleIcon,
+        },
+      ],
     },
     {
       icon: FileText,
@@ -383,7 +401,10 @@ const Sidebar = ({ isOpen }) => {
   // Auto-expand submenu if any of its items are active
   React.useEffect(() => {
     menuItems.forEach((item) => {
-      if (item.submenu && isSubmenuActive(item.submenuItems, location.pathname)) {
+      if (
+        item.submenu &&
+        isSubmenuActive(item.submenuItems, location.pathname)
+      ) {
         setExpandedMenus((prev) => ({
           ...prev,
           [item.key]: true,
@@ -472,7 +493,9 @@ const Sidebar = ({ isOpen }) => {
                   {!isOpen && (
                     <div className="absolute left-16 top-0 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto min-w-48">
                       <div className="p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                        <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          {item.label}
+                        </span>
                       </div>
                       {item.submenuItems.map((subItem, subIndex) => (
                         <NavLink
@@ -487,7 +510,11 @@ const Sidebar = ({ isOpen }) => {
                               isCurrentActive
                                 ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
                                 : "text-gray-600 hover:text-purple-700"
-                            } ${subIndex === item.submenuItems.length - 1 ? 'rounded-b-lg' : ''}`;
+                            } ${
+                              subIndex === item.submenuItems.length - 1
+                                ? "rounded-b-lg"
+                                : ""
+                            }`;
                           }}
                         >
                           {subItem.icon && (
@@ -548,7 +575,7 @@ const Sidebar = ({ isOpen }) => {
               >
                 <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
                 {isOpen && <span className="truncate">{item.label}</span>}
-                
+
                 {/* Tooltip for collapsed sidebar */}
                 {!isOpen && (
                   <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">

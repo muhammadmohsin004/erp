@@ -42,6 +42,9 @@ import SystemSettings from "../pages/SuperAdmin/Settings/SystemSettings";
 import AccountSettings from "../pages/SuperAdmin/Settings/AccountSettings";
 import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
+import ManageEmployees from "../pages/Employee/ManageEmployees";
+import CreateNewEmployee from "../pages/Employee/CreateNewEmployee";
+import EmployeeSalary from "../pages/Employee/EmployeeSalary";
 
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -546,20 +549,20 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
-      path: "/admin/employees",
-      component: () => <div>Employees Page</div>,
+      path: "/admin/manage-employee",
+      component: ManageEmployees,
       roles: ["Admin", "Manager"],
       layout: true,
     },
     {
-      path: "/manager/employees",
-      component: () => <div>Employees Page</div>,
-      roles: ["Manager"],
+      path: "/admin/add-employee",
+      component: CreateNewEmployee,
+      roles: ["Admin", "Manager"],
       layout: true,
     },
     {
-      path: "/employees", // Legacy support
-      component: () => <div>Employees Page</div>,
+      path: "/admin/employee-salary", // Legacy support
+      component: EmployeeSalary,
       roles: ["Admin", "Manager"],
       layout: true,
     },
