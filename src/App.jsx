@@ -28,6 +28,7 @@ function App() {
                   <SupplierProvider>
                     <ServiceProvider>
                       <ProductsManagerProvider>
+                        <HRProvider>
                         <RequisitionProvider>
                           <PriceListProvider>
                             <InvoiceProvider>
@@ -35,6 +36,7 @@ function App() {
                             </InvoiceProvider>
                           </PriceListProvider>
                         </RequisitionProvider>
+                        </HRProvider>
                       </ProductsManagerProvider>
                     </ServiceProvider>
                   </SupplierProvider>

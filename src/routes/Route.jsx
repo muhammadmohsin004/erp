@@ -42,7 +42,17 @@ import SystemSettings from "../pages/SuperAdmin/Settings/SystemSettings";
 import AccountSettings from "../pages/SuperAdmin/Settings/AccountSettings";
 import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
-
+import InvoiceDashboard from "../pages/Sale/Invoice/InvoiceDashboard";
+import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
+import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
+import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
+import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
+import NewPriceList from '../pages/Inventories/PriceList/NewPriceList';
+import PriceListList from '../pages/Inventories/PriceList/PriceListList';
+import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
+import ManageEmployees from '../pages/Employee/ManageEmployees';
+import CreateNewEmployee from '../pages/Employee/CreateNewEmployee';
+import EmployeeSalary from '../pages/Employee/EmployeeSalary';
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
