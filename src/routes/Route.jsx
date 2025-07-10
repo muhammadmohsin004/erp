@@ -47,12 +47,13 @@ import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
 import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
 import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
 import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
-import NewPriceList from '../pages/Inventories/PriceList/NewPriceList';
-import PriceListList from '../pages/Inventories/PriceList/PriceListList';
+import NewPriceList from "../pages/Inventories/PriceList/NewPriceList";
+import PriceListList from "../pages/Inventories/PriceList/PriceListList";
 import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
-import ManageEmployees from '../pages/Employee/ManageEmployees';
-import CreateNewEmployee from '../pages/Employee/CreateNewEmployee';
-import EmployeeSalary from '../pages/Employee/EmployeeSalary';
+import ManageEmployees from "../pages/Employee/ManageEmployees";
+import CreateNewEmployee from "../pages/Employee/CreateNewEmployee";
+import EmployeeSalary from "../pages/Employee/EmployeeSalary";
+import Salary from "../pages/Salary/Salary";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -676,8 +677,8 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
-      path: "/admin/salary-components",
-      component: () => <div>Salary Components Page</div>,
+      path: "/admin/salary",
+      component: Salary,
       roles: ["Admin", "Manager"],
       layout: true,
     },

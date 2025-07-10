@@ -399,7 +399,7 @@ const Sidebar = ({ isOpen }) => {
         },
         {
           label: "Salary Components",
-          path: getRoleBasedPath("/salary-componenets"),
+          path: getRoleBasedPath("/salary-components"),
           icon: FileText,
         },
         {
@@ -502,54 +502,88 @@ const Sidebar = ({ isOpen }) => {
       </div>
 
       {/* Menu Items */}
-      <nav className="mt-4 flex-1 overflow-y-auto">
-        {menuItems.map((item, index) => {
-          if (item.submenu) {
-            const isExpanded = expandedMenus[item.key];
-            const hasActiveSubmenu = isSubmenuActive(
-              item.submenuItems,
-              location.pathname
-            );
+      <div className="mt-4 flex-1 overflow-y-auto h-[calc(100vh-160px)] scrollbar-hide">
+        <nav className="mt-4 flex-1 overflow-y-auto">
+          {menuItems.map((item, index) => {
+            if (item.submenu) {
+              const isExpanded = expandedMenus[item.key];
+              const hasActiveSubmenu = isSubmenuActive(
+                item.submenuItems,
+                location.pathname
+              );
 
-            return (
-              <div key={index}>
-                {/* Main menu item with submenu */}
-                <div
-                  className={`flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${
-                    hasActiveSubmenu
-                      ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
-                      : "text-gray-700 hover:text-purple-700"
-                  }`}
-                  onClick={() => toggleSubmenu(item.key)}
-                >
-                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                  {isOpen && (
-                    <>
-                      <span className="truncate flex-1">{item.label}</span>
-                      {isExpanded ? (
-                        <ChevronDown className="w-4 h-4 ml-2" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      )}
-                    </>
-                  )}
+              return (
+                <div key={index}>
+                  {/* Main menu item with submenu */}
+                  <div
+                    className={`flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${
+                      hasActiveSubmenu
+                        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
+                        : "text-gray-700 hover:text-purple-700"
+                    }`}
+                    onClick={() => toggleSubmenu(item.key)}
+                  >
+                    <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                    {isOpen && (
+                      <>
+                        <span className="truncate flex-1">{item.label}</span>
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 ml-2" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 ml-2" />
+                        )}
+                      </>
+                    )}
 
-                  {/* Tooltip for collapsed sidebar */}
-                  {!isOpen && (
-                    <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">
-                      {item.label}
-                      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
-                    </div>
-                  )}
-
-                  {/* Submenu for collapsed sidebar */}
-                  {!isOpen && (
-                    <div className="absolute left-16 top-0 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto min-w-48">
-                      <div className="p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                        <span className="text-sm font-medium text-gray-700">
-                          {item.label}
-                        </span>
+                    {/* Tooltip for collapsed sidebar */}
+                    {!isOpen && (
+                      <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">
+                        {item.label}
+                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
                       </div>
+                    )}
+
+                    {/* Submenu for collapsed sidebar */}
+                    {!isOpen && (
+                      <div className="absolute left-16 top-0 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto min-w-48">
+                        <div className="p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                          <span className="text-sm font-medium text-gray-700">
+                            {item.label}
+                          </span>
+                        </div>
+                        {item.submenuItems.map((subItem, subIndex) => (
+                          <NavLink
+                            key={subIndex}
+                            to={subItem.path}
+                            className={({ isActive }) => {
+                              const isCurrentActive =
+                                isActive ||
+                                isPathActive(subItem.path, location.pathname);
+
+                              return `flex items-center px-3 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transition-all duration-200 ${
+                                isCurrentActive
+                                  ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
+                                  : "text-gray-600 hover:text-purple-700"
+                              } ${
+                                subIndex === item.submenuItems.length - 1
+                                  ? "rounded-b-lg"
+                                  : ""
+                              }`;
+                            }}
+                          >
+                            {subItem.icon && (
+                              <subItem.icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                            )}
+                            <span className="truncate">{subItem.label}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submenu items for expanded sidebar */}
+                  {isOpen && isExpanded && (
+                    <div className="bg-gray-50">
                       {item.submenuItems.map((subItem, subIndex) => (
                         <NavLink
                           key={subIndex}
@@ -559,14 +593,10 @@ const Sidebar = ({ isOpen }) => {
                               isActive ||
                               isPathActive(subItem.path, location.pathname);
 
-                            return `flex items-center px-3 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transition-all duration-200 ${
+                            return `flex items-center px-8 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transition-all duration-200 ${
                               isCurrentActive
-                                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
+                                ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md"
                                 : "text-gray-600 hover:text-purple-700"
-                            } ${
-                              subIndex === item.submenuItems.length - 1
-                                ? "rounded-b-lg"
-                                : ""
                             }`;
                           }}
                         >
@@ -579,68 +609,40 @@ const Sidebar = ({ isOpen }) => {
                     </div>
                   )}
                 </div>
+              );
+            } else {
+              // Regular menu item without submenu
+              return (
+                <NavLink
+                  key={index}
+                  to={item.path}
+                  className={({ isActive }) => {
+                    const isCurrentActive =
+                      isActive || isPathActive(item.path, location.pathname);
 
-                {/* Submenu items for expanded sidebar */}
-                {isOpen && isExpanded && (
-                  <div className="bg-gray-50">
-                    {item.submenuItems.map((subItem, subIndex) => (
-                      <NavLink
-                        key={subIndex}
-                        to={subItem.path}
-                        className={({ isActive }) => {
-                          const isCurrentActive =
-                            isActive ||
-                            isPathActive(subItem.path, location.pathname);
+                    return `flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${
+                      isCurrentActive
+                        ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
+                        : "text-gray-700 hover:text-purple-700"
+                    }`;
+                  }}
+                >
+                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                  {isOpen && <span className="truncate">{item.label}</span>}
 
-                          return `flex items-center px-8 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transition-all duration-200 ${
-                            isCurrentActive
-                              ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md"
-                              : "text-gray-600 hover:text-purple-700"
-                          }`;
-                        }}
-                      >
-                        {subItem.icon && (
-                          <subItem.icon className="w-4 h-4 mr-2 flex-shrink-0" />
-                        )}
-                        <span className="truncate">{subItem.label}</span>
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          } else {
-            // Regular menu item without submenu
-            return (
-              <NavLink
-                key={index}
-                to={item.path}
-                className={({ isActive }) => {
-                  const isCurrentActive =
-                    isActive || isPathActive(item.path, location.pathname);
-
-                  return `flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${
-                    isCurrentActive
-                      ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
-                      : "text-gray-700 hover:text-purple-700"
-                  }`;
-                }}
-              >
-                <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                {isOpen && <span className="truncate">{item.label}</span>}
-
-                {/* Tooltip for collapsed sidebar */}
-                {!isOpen && (
-                  <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">
-                    {item.label}
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
-                  </div>
-                )}
-              </NavLink>
-            );
-          }
-        })}
-      </nav>
+                  {/* Tooltip for collapsed sidebar */}
+                  {!isOpen && (
+                    <div className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none">
+                      {item.label}
+                      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 rotate-45"></div>
+                    </div>
+                  )}
+                </NavLink>
+              );
+            }
+          })}
+        </nav>
+      </div>
 
       {/* Bottom Section - Role indicator */}
       {isOpen && (

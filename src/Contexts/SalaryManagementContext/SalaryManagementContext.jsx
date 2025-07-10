@@ -282,9 +282,7 @@ const salaryReducer = (state, action) => {
           (salary) => salary.id !== action.payload
         ),
         salaryDetail:
-          state.salaryDetail?.id === action.payload
-            ? null
-            : state.salaryDetail,
+          state.salaryDetail?.id === action.payload ? null : state.salaryDetail,
         isLoading: false,
         error: null,
       };
@@ -598,7 +596,7 @@ export const SalaryProvider = ({ children }) => {
         dispatch({
           type: SALARY_ACTIONS.SET_SALARIES,
           payload: {
-            salaries: response.data.data || [],
+            salaries: response.data.Data?.$values || [],
             pagination: {
               totalItems: response.data.totalItems || 0,
               page: response.data.page || page,
@@ -917,7 +915,9 @@ export const SalaryProvider = ({ children }) => {
         });
         dispatch({ type: SALARY_ACTIONS.CLEAR_ERROR });
 
-        const response = await salaryApiClient.get("/Overtime/pending-approvals");
+        const response = await salaryApiClient.get(
+          "/Overtime/pending-approvals"
+        );
 
         dispatch({
           type: SALARY_ACTIONS.SET_PENDING_OVERTIME_APPROVALS,
