@@ -31,6 +31,8 @@ import ProductImages from "../pages/Inventories/ProductsManager/ProductImages";
 import ManagePlans from "../pages/SuperAdmin/Plans/ManagePlans";
 import Subscription from "../pages/SuperAdmin/Plans/Subscription";
 import SubscriptionReports from "../pages/SuperAdmin/Plans/SubscriptionReports";
+import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
+
 
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -397,6 +399,12 @@ const getRouteConfig = () => {
     {
       path: "/admin/Products-Manager",
       component: ProductsList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/new-product",
+      component: NewProduct,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

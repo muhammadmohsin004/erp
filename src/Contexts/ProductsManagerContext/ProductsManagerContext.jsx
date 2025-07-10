@@ -1134,7 +1134,7 @@ export const ProductsManagerProvider = ({ children }) => {
       const response = await makeApiCall(`${API_BASE_URLS.products}/dropdown`);
       
       if (response.Success) {
-        dispatch({ type: actionTypes.SET_DROPDOWNS, payload: { products: response.Data } });
+      dispatch({ type: actionTypes.SET_DROPDOWNS, payload: { products: response.Data.$values } });
         return response.Data;
       } else {
         throw new Error(response.Message || 'Failed to fetch products dropdown');
@@ -1150,7 +1150,7 @@ export const ProductsManagerProvider = ({ children }) => {
       const response = await makeApiCall(`${API_BASE_URLS.productCategories}/dropdown`);
       
       if (response.Success) {
-        dispatch({ type: actionTypes.SET_DROPDOWNS, payload: { categories: response.Data } });
+      dispatch({ type: actionTypes.SET_DROPDOWNS, payload: { categories: response.Data.$values } });
         return response.Data;
       } else {
         throw new Error(response.Message || 'Failed to fetch categories dropdown');
@@ -1166,7 +1166,7 @@ export const ProductsManagerProvider = ({ children }) => {
       const response = await makeApiCall(`${API_BASE_URLS.productBrands}/dropdown`);
       
       if (response.Success) {
-        dispatch({ type: actionTypes.SET_DROPDOWNS, payload: { brands: response.Data } });
+      dispatch({ type: actionTypes.SET_DROPDOWNS, payload: { brands: response.Data.$values } });
         return response.Data;
       } else {
         throw new Error(response.Message || 'Failed to fetch brands dropdown');
