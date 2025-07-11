@@ -401,10 +401,10 @@ export const LeaveAttendanceProvider = ({ children }) => {
 
         dispatch({
           type: LEAVE_ATTENDANCE_ACTIONS.SET_LEAVE_TYPES,
-          payload: response.data.data || response.data,
+          payload: response.data.Data.$values || response.data,
         });
 
-        return response.data;
+        return response.data.Data.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -460,10 +460,10 @@ export const LeaveAttendanceProvider = ({ children }) => {
 
         dispatch({
           type: LEAVE_ATTENDANCE_ACTIONS.SET_LEAVE_REQUESTS,
-          payload: response.data.data || response.data,
+          payload: response.data.Data.$values || response.data,
         });
 
-        return response.data;
+        return response.data.Data.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -741,10 +741,10 @@ export const LeaveAttendanceProvider = ({ children }) => {
 
         dispatch({
           type: LEAVE_ATTENDANCE_ACTIONS.SET_ATTENDANCE_POLICIES,
-          payload: response.data,
+          payload: response.data.$values,
         });
 
-        return response.data;
+        return response.data.$values;
       } catch (error) {
         handleApiError(error);
       }

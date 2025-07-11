@@ -429,6 +429,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             path: getRoleBasedPath("/attendance-policy"),
             icon: Plus,
           },
+          {
+            label: "Leave Mangement",
+            path: getRoleBasedPath("/leave-management"),
+            icon: Plus,
+          },
         ],
       },
       {

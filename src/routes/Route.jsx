@@ -70,6 +70,9 @@ import NewIncome from "../pages/FinanceManager/NewIncome";
 import SalaryComponent from "../pages/Salary/SalaryComponent";
 import Overtime from "../pages/Salary/Overtime";
 import AttendanceModule from "../pages/HRModule/Attendance/AttendanceModule";
+import AttendancePolicyPage from "../pages/HRModule/AttendancePolicy/AttendancePolicyPage";
+import AdminLeaveManagement from "../pages/HRModule/LeaveMangement/AdminLeaveManagement";
+import EmployeeLeaveManagement from "../pages/HRModule/LeaveMangement/EmployeeLeaveManagement";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -771,6 +774,24 @@ const getRouteConfig = () => {
       path: "/admin/attendance",
       component: AttendanceModule,
       roles: ["Admin"],
+      layout: true,
+    },
+    {
+      path: "/admin/attendance-policy",
+      component: AttendancePolicyPage,
+      roles: ["Admin"],
+      layout: true,
+    },
+    {
+      path: "/admin/leave-management",
+      component: AdminLeaveManagement,
+      roles: ["Admin"],
+      layout: true,
+    },
+    {
+      path: "/employee/leave-management",
+      component: EmployeeLeaveManagement,
+      roles: ["Employee"],
       layout: true,
     },
     {
