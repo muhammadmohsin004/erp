@@ -1,32 +1,72 @@
-// store/slices/authSlice.js
+// store/slices/languageSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
-  token: localStorage.getItem('token') || null,
-  user: JSON.parse(localStorage.getItem('user')) || null,
-  isAuthenticated: !!localStorage.getItem('token'),
+// Get saved language from localStorage or default to English
+const getInitialLanguage = () => {
+  const savedLanguage = localStorage.getItem('language');
+  return savedLanguage || 'en';
 };
 
-const authSlice = createSlice({
-  name: 'auth',
+// Set initial document direction
+const setDocumentDirection = (language) => {
+  const direction = language === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.dir = direction;
+  document.documentElement.lang = language;
+  
+  // Add/remove RTL class to body for additional styling if needed
+  if (language === 'ar') {
+    document.body.classList.add('rtl');
+    document.body.classList.remove('ltr');
+  } else {
+    document.body.classList.add('ltr');
+    document.body.classList.remove('rtl');
+  }
+};
+
+const initialLanguage = getInitialLanguage();
+
+// Set initial direction on load
+if (typeof document !== 'undefined') {
+  setDocumentDirection(initialLanguage);
+}
+
+const initialState = {
+  language: initialLanguage,
+  direction: initialLanguage === 'ar' ? 'rtl' : 'ltr',
+};
+
+const languageSlice = createSlice({
+  name: 'language',
   initialState,
   reducers: {
-    setAuth: (state, action) => {
-      state.token = action.payload.token;
-      state.user = action.payload.user;
-      state.isAuthenticated = true;
-      localStorage.setItem('token', action.payload.token);
-      localStorage.setItem('user', JSON.stringify(action.payload.user));
+    setLanguage: (state, action) => {
+      const newLanguage = action.payload;
+      state.language = newLanguage;
+      state.direction = newLanguage === 'ar' ? 'rtl' : 'ltr';
+      
+      // Save to localStorage
+      localStorage.setItem('language', newLanguage);
+      
+      // Update document direction
+      if (typeof document !== 'undefined') {
+        setDocumentDirection(newLanguage);
+      }
     },
-    logout: (state) => {
-      state.token = null;
-      state.user = null;
-      state.isAuthenticated = false;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    },
+    toggleLanguage: (state) => {
+      const newLanguage = state.language === 'en' ? 'ar' : 'en';
+      state.language = newLanguage;
+      state.direction = newLanguage === 'ar' ? 'rtl' : 'ltr';
+      
+      // Save to localStorage
+      localStorage.setItem('language', newLanguage);
+      
+      // Update document direction
+      if (typeof document !== 'undefined') {
+        setDocumentDirection(newLanguage);
+      }
+    }
   },
 });
 
-export const { setAuth, logout } = authSlice.actions;
-export default authSlice.reducer;
+export const { setLanguage, toggleLanguage } = languageSlice.actions;
+export default languageSlice.reducer;
