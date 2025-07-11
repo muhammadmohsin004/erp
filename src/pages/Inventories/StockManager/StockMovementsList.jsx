@@ -19,6 +19,8 @@ import {
   Warehouse,
   Eye,
   Activity,
+  FileText,
+  Edit,
 } from "lucide-react";
 import { useStock } from "../../../Contexts/StockContext/StockContext";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -61,8 +63,10 @@ const StockMovementsList = () => {
     "Stock Value": language === "ar" ? "قيمة المخزون" : "Stock Value",
     View: language === "ar" ? "عرض" : "View",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
-    "Movement Details": language === "ar" ? "تفاصيل الحركة" : "Movement Details",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "Movement Details":
+      language === "ar" ? "تفاصيل الحركة" : "Movement Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Date From": language === "ar" ? "من تاريخ" : "Date From",
     "Date To": language === "ar" ? "إلى تاريخ" : "Date To",
@@ -91,7 +95,7 @@ const StockMovementsList = () => {
   } = useStock();
 
   // Process movements data from API response
-  const movementsData = stockMovements?.Data || [];
+  const movementsData = stockMovements?.Data?.$values || [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
@@ -112,10 +116,7 @@ const StockMovementsList = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        await Promise.all([
-          getStockMovements(),
-          getStockSummary()
-        ]);
+        await Promise.all([getStockMovements(), getStockSummary()]);
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -189,6 +190,7 @@ const StockMovementsList = () => {
   const handleViewMovement = (movement) => {
     setSelectedMovement(movement);
     setShowViewModal(true);
+    // navigate(`/admin/stock/movements/${movement.Id}`);
   };
 
   // Pagination
@@ -253,46 +255,61 @@ const StockMovementsList = () => {
   // Get movement type icon and color
   const getMovementTypeStyle = (type) => {
     const lowerType = type?.toLowerCase() || "";
-    
-    if (lowerType.includes("in") || lowerType.includes("purchase") || lowerType.includes("adjustment +")) {
+
+    if (
+      lowerType.includes("in") ||
+      lowerType.includes("purchase") ||
+      lowerType.includes("adjustment +")
+    ) {
       return {
         icon: TrendingUp,
         bgColor: "bg-green-100",
         textColor: "text-green-800",
-        iconColor: "text-green-600"
+        iconColor: "text-green-600",
       };
-    } else if (lowerType.includes("out") || lowerType.includes("sale") || lowerType.includes("adjustment -")) {
+    } else if (
+      lowerType.includes("out") ||
+      lowerType.includes("sale") ||
+      lowerType.includes("adjustment -")
+    ) {
       return {
         icon: TrendingDown,
         bgColor: "bg-red-100",
         textColor: "text-red-800",
-        iconColor: "text-red-600"
+        iconColor: "text-red-600",
       };
     } else if (lowerType.includes("transfer")) {
       return {
         icon: ArrowUpDown,
         bgColor: "bg-blue-100",
         textColor: "text-blue-800",
-        iconColor: "text-blue-600"
+        iconColor: "text-blue-600",
       };
     } else {
       return {
         icon: Activity,
         bgColor: "bg-gray-100",
         textColor: "text-gray-800",
-        iconColor: "text-gray-600"
+        iconColor: "text-gray-600",
       };
     }
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {isCurrency ? `${formatCurrency(value)}` : (value || 0)}
+            {isCurrency ? `${formatCurrency(value)}` : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -372,6 +389,22 @@ const StockMovementsList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/stock/transactions/new")}
             />
+
+            <FilledButton
+              isIcon={true}
+              icon={FileText}
+              iconSize="w-4 h-4"
+              bgColor="bg-purple-600 hover:bg-purple-700"
+              textColor="text-white"
+              rounded="rounded-lg"
+              buttonText="View Report"
+              height="h-10"
+              px="px-4"
+              fontWeight="font-medium"
+              fontSize="text-sm"
+              isIconLeft={true}
+              onClick={() => navigate("/admin/stock/movements/report")}
+            />
           </Container>
         </Container>
 
@@ -449,11 +482,11 @@ const StockMovementsList = () => {
             <Container className="text-center py-12">
               <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm || Object.values(filterOptions).some(v => v)
+                {searchTerm || Object.values(filterOptions).some((v) => v)
                   ? translations["No results found"]
                   : translations["No Movements"]}
               </h3>
-              {(searchTerm || Object.values(filterOptions).some(v => v)) && (
+              {(searchTerm || Object.values(filterOptions).some((v) => v)) && (
                 <FilledButton
                   bgColor="bg-blue-600 hover:bg-blue-700"
                   textColor="text-white"
@@ -503,16 +536,20 @@ const StockMovementsList = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {movementsData.map((movement) => {
-                      const typeStyle = getMovementTypeStyle(movement.MovementType);
+                      const typeStyle = getMovementTypeStyle(
+                        movement.MovementType
+                      );
                       const TypeIcon = typeStyle.icon;
-                      
+
                       return (
                         <tr key={movement.Id} className="hover:bg-gray-50">
                           <td className="px-6 py-4">
                             <input
                               type="checkbox"
                               checked={selectedMovements.includes(movement.Id)}
-                              onChange={() => handleMovementSelection(movement.Id)}
+                              onChange={() =>
+                                handleMovementSelection(movement.Id)
+                              }
                               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                           </td>
@@ -541,11 +578,17 @@ const StockMovementsList = () => {
                           </td>
                           <td className="px-6 py-4">
                             <Container className="flex items-center gap-2">
-                              <Container className={`${typeStyle.bgColor} p-2 rounded-md`}>
-                                <TypeIcon className={`w-4 h-4 ${typeStyle.iconColor}`} />
+                              <Container
+                                className={`${typeStyle.bgColor} p-2 rounded-md`}
+                              >
+                                <TypeIcon
+                                  className={`w-4 h-4 ${typeStyle.iconColor}`}
+                                />
                               </Container>
                               <Container>
-                                <Span className={`text-sm font-medium ${typeStyle.textColor}`}>
+                                <Span
+                                  className={`text-sm font-medium ${typeStyle.textColor}`}
+                                >
                                   {movement.MovementType || "N/A"}
                                 </Span>
                                 {movement.Notes && (
@@ -557,10 +600,15 @@ const StockMovementsList = () => {
                             </Container>
                           </td>
                           <td className="px-6 py-4 hidden lg:table-cell">
-                            <Span className={`text-sm font-medium ${
-                              movement.QuantityChange > 0 ? "text-green-600" : "text-red-600"
-                            }`}>
-                              {movement.QuantityChange > 0 ? "+" : ""}{movement.QuantityChange}
+                            <Span
+                              className={`text-sm font-medium ${
+                                movement.QuantityChange > 0
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }`}
+                            >
+                              {movement.QuantityChange > 0 ? "+" : ""}
+                              {movement.QuantityChange}
                             </Span>
                           </td>
                           <td className="px-6 py-4 hidden xl:table-cell">
@@ -581,6 +629,17 @@ const StockMovementsList = () => {
                               >
                                 <Eye className="w-3 h-3" />
                               </button>
+                              <button
+                                onClick={() =>
+                                  navigate(
+                                    `/admin/stock/movements/${movement.Id}/edit`
+                                  )
+                                }
+                                className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 ml-1"
+                                title="Edit"
+                              >
+                                <Edit className="w-3 h-3" />
+                              </button>
                             </Container>
                           </td>
                         </tr>
@@ -591,77 +650,83 @@ const StockMovementsList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.PageNumber * pagination.PageSize,
-                      pagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {pagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.PageNumber} / {pagination.TotalPages}
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
+                      {Math.min(
+                        pagination.PageNumber * pagination.PageSize,
+                        pagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {pagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {pagination.PageNumber} / {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -686,8 +751,10 @@ const StockMovementsList = () => {
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Movement Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Movement Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Movement Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Product}
@@ -719,18 +786,25 @@ const StockMovementsList = () => {
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Quantity}
                     </Span>
-                    <Span className={`text-sm font-medium block mt-1 ${
-                      selectedMovement.QuantityChange > 0 ? "text-green-600" : "text-red-600"
-                    }`}>
-                      {selectedMovement.QuantityChange > 0 ? "+" : ""}{selectedMovement.QuantityChange}
+                    <Span
+                      className={`text-sm font-medium block mt-1 ${
+                        selectedMovement.QuantityChange > 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {selectedMovement.QuantityChange > 0 ? "+" : ""}
+                      {selectedMovement.QuantityChange}
                     </Span>
                   </Container>
                 </Container>
 
                 {/* Additional Details */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Additional Details</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Additional Details
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Reference}
@@ -854,8 +928,12 @@ const StockMovementsList = () => {
                     <option value="Sale">Sale</option>
                     <option value="Transfer In">Transfer In</option>
                     <option value="Transfer Out">Transfer Out</option>
-                    <option value="Stock Adjustment +">Stock Adjustment +</option>
-                    <option value="Stock Adjustment -">Stock Adjustment -</option>
+                    <option value="Stock Adjustment +">
+                      Stock Adjustment +
+                    </option>
+                    <option value="Stock Adjustment -">
+                      Stock Adjustment -
+                    </option>
                   </select>
                 </Container>
 
@@ -868,7 +946,9 @@ const StockMovementsList = () => {
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
-                        warehouseId: e.target.value ? parseInt(e.target.value) : null,
+                        warehouseId: e.target.value
+                          ? parseInt(e.target.value)
+                          : null,
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"

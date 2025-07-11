@@ -59,6 +59,7 @@ import CompanyBranchForm from "../pages/CompanyManager/CompanyBranchForm";
 import CompanyBranchDetails from "../pages/CompanyManager/CompanyBranchDetails";
 import StockMovementsList from "../pages/Inventories/StockManager/StockMovementsList";
 import StockTransactionForm from "../pages/Inventories/StockManager/StockTransactionForm";
+import StockMovementsReportView from "../pages/Inventories/StockManager/StockMovementsReportView";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -519,11 +520,18 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
+      path: "/admin/stock/movements/report",
+      component: StockMovementsReportView,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
       path: "/admin/stock/transactions/new",
       component: StockTransactionForm,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
+    
     {
       path: "/admin/company-branches/:id",
       component: CompanyBranchDetails,

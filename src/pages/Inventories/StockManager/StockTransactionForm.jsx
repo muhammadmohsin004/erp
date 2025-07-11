@@ -15,9 +15,12 @@ import {
   Hash,
 } from "lucide-react";
 import { useStock } from "../../../Contexts/StockContext/StockContext";
+import { useWarehouse } from "../../../Contexts/WarehouseContext/WarehouseContext";
+
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../../components/elements/container/Container";
 import Span from "../../../components/elements/span/Span";
+import { useProductsManager } from "../../../Contexts/ProductsManagerContext/ProductsManagerContext";
 
 const StockTransactionForm = () => {
   const navigate = useNavigate();
@@ -26,10 +29,12 @@ const StockTransactionForm = () => {
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Add Stock Transaction": language === "ar" ? "إضافة معاملة مخزون" : "Add Stock Transaction",
+    "Add Stock Transaction":
+      language === "ar" ? "إضافة معاملة مخزون" : "Add Stock Transaction",
     "Adjust Stock": language === "ar" ? "تعديل المخزون" : "Adjust Stock",
     "Transfer Stock": language === "ar" ? "نقل المخزون" : "Transfer Stock",
-    "Stock Management": language === "ar" ? "إدارة المخزون" : "Stock Management",
+    "Stock Management":
+      language === "ar" ? "إدارة المخزون" : "Stock Management",
     Product: language === "ar" ? "المنتج" : "Product",
     "Transaction Type": language === "ar" ? "نوع المعاملة" : "Transaction Type",
     Quantity: language === "ar" ? "الكمية" : "Quantity",
@@ -45,29 +50,43 @@ const StockTransactionForm = () => {
     Save: language === "ar" ? "حفظ" : "Save",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Back to List": language === "ar" ? "العودة للقائمة" : "Back to List",
-    "Transaction Information": language === "ar" ? "معلومات المعاملة" : "Transaction Information",
-    "Product Information": language === "ar" ? "معلومات المنتج" : "Product Information",
-    "Additional Details": language === "ar" ? "تفاصيل إضافية" : "Additional Details",
+    "Transaction Information":
+      language === "ar" ? "معلومات المعاملة" : "Transaction Information",
+    "Product Information":
+      language === "ar" ? "معلومات المنتج" : "Product Information",
+    "Additional Details":
+      language === "ar" ? "تفاصيل إضافية" : "Additional Details",
     "Select product": language === "ar" ? "اختر المنتج" : "Select product",
-    "Select transaction type": language === "ar" ? "اختر نوع المعاملة" : "Select transaction type",
-    "Select warehouse": language === "ar" ? "اختر المستودع" : "Select warehouse",
+    "Select transaction type":
+      language === "ar" ? "اختر نوع المعاملة" : "Select transaction type",
+    "Select warehouse":
+      language === "ar" ? "اختر المستودع" : "Select warehouse",
     "Enter quantity": language === "ar" ? "أدخل الكمية" : "Enter quantity",
     "Enter price": language === "ar" ? "أدخل السعر" : "Enter price",
     "Enter notes": language === "ar" ? "أدخل الملاحظات" : "Enter notes",
     "Enter reference": language === "ar" ? "أدخل المرجع" : "Enter reference",
     "Enter reason": language === "ar" ? "أدخل السبب" : "Enter reason",
-    "This field is required": language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
-    "Quantity must be greater than 0": language === "ar" ? "يجب أن تكون الكمية أكبر من 0" : "Quantity must be greater than 0",
-    "Price must be greater than 0": language === "ar" ? "يجب أن يكون السعر أكبر من 0" : "Price must be greater than 0",
+    "This field is required":
+      language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
+    "Quantity must be greater than 0":
+      language === "ar"
+        ? "يجب أن تكون الكمية أكبر من 0"
+        : "Quantity must be greater than 0",
+    "Price must be greater than 0":
+      language === "ar"
+        ? "يجب أن يكون السعر أكبر من 0"
+        : "Price must be greater than 0",
     "Saving...": language === "ar" ? "جارٍ الحفظ..." : "Saving...",
     "Creating...": language === "ar" ? "جارٍ الإنشاء..." : "Creating...",
     "Processing...": language === "ar" ? "جارٍ المعالجة..." : "Processing...",
-    "Success": language === "ar" ? "نجح" : "Success",
-    "Error": language === "ar" ? "خطأ" : "Error",
-    "Purchase": language === "ar" ? "شراء" : "Purchase",
-    "Sale": language === "ar" ? "بيع" : "Sale",
-    "Stock Adjustment +": language === "ar" ? "تعديل مخزون +" : "Stock Adjustment +",
-    "Stock Adjustment -": language === "ar" ? "تعديل مخزون -" : "Stock Adjustment -",
+    Success: language === "ar" ? "نجح" : "Success",
+    Error: language === "ar" ? "خطأ" : "Error",
+    Purchase: language === "ar" ? "شراء" : "Purchase",
+    Sale: language === "ar" ? "بيع" : "Sale",
+    "Stock Adjustment +":
+      language === "ar" ? "تعديل مخزون +" : "Stock Adjustment +",
+    "Stock Adjustment -":
+      language === "ar" ? "تعديل مخزون -" : "Stock Adjustment -",
     "Transfer In": language === "ar" ? "نقل داخل" : "Transfer In",
     "Transfer Out": language === "ar" ? "نقل خارج" : "Transfer Out",
   };
@@ -82,10 +101,69 @@ const StockTransactionForm = () => {
     clearError,
   } = useStock();
 
+  const { getProductsDropdown } = useProductsManager();
+
+  const { getWarehousesDropdown } = useWarehouse();
+
   // Determine form type based on location state or path
   const { formType, productId } = location.state || {};
   const currentFormType = formType || "transaction"; // transaction, adjust, transfer
+  const [productsDropdown, setProductsDropdown] = useState([]);
+  const [warehousesDropdown, setWarehousesDropdown] = useState([]);
+  const [dropdownsLoading, setDropdownsLoading] = useState(true);
 
+  useEffect(() => {
+  const fetchDropdownData = async () => {
+    try {
+      setDropdownsLoading(true);
+      
+      // Fetch products dropdown
+      const productsData = await getProductsDropdown();
+      console.log('Products raw response:', productsData);
+      
+      // Extract products array regardless of response structure
+      let productsArray = [];
+      if (productsData?.$values) {
+        productsArray = productsData.$values;
+      } else if (productsData?.Data?.$values) {
+        productsArray = productsData.Data.$values;
+      } else if (Array.isArray(productsData)) {
+        productsArray = productsData;
+      }
+      
+      setProductsDropdown(productsArray);
+      console.log('Products dropdown set to:', productsArray);
+
+      // Fetch warehouses dropdown  
+      const warehousesData = await getWarehousesDropdown();
+      console.log('Warehouses raw response:', warehousesData);
+      
+      // Extract warehouses array regardless of response structure
+      let warehousesArray = [];
+      if (warehousesData?.$values) {
+        warehousesArray = warehousesData.$values;
+      } else if (warehousesData?.Data?.$values) {
+        warehousesArray = warehousesData.Data.$values;
+      } else if (Array.isArray(warehousesData)) {
+        warehousesArray = warehousesData;
+      }
+      
+      setWarehousesDropdown(warehousesArray);
+      console.log('Warehouses dropdown set to:', warehousesArray);
+      
+    } catch (error) {
+      console.error("Error fetching dropdown data:", error);
+      setProductsDropdown([]);
+      setWarehousesDropdown([]);
+    } finally {
+      setDropdownsLoading(false);
+    }
+  };
+
+  fetchDropdownData();
+}, [getProductsDropdown, getWarehousesDropdown]);
+
+  
   // Form state
   const [formData, setFormData] = useState({
     productId: productId || "",
@@ -96,7 +174,7 @@ const StockTransactionForm = () => {
     fromWarehouseId: "",
     toWarehouseId: "",
     newQuantity: "",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     notes: "",
     referenceNumber: "",
     reason: "",
@@ -105,37 +183,34 @@ const StockTransactionForm = () => {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mock data - In real app, fetch from API
-  const [products] = useState([
-    { id: 1, name: "Product 1", currentStock: 100 },
-    { id: 2, name: "Product 2", currentStock: 50 },
-    { id: 3, name: "Product 3", currentStock: 0 },
-  ]);
-
-  const [warehouses] = useState([
-    { id: 1, name: "Main Warehouse" },
-    { id: 2, name: "Secondary Warehouse" },
-    { id: 3, name: "Retail Store" },
-  ]);
-
   // Transaction types based on form type
   const getTransactionTypes = () => {
     switch (currentFormType) {
       case "adjust":
         return [
-          { value: "Stock Adjustment +", label: translations["Stock Adjustment +"] },
-          { value: "Stock Adjustment -", label: translations["Stock Adjustment -"] },
+          {
+            value: "Stock Adjustment +",
+            label: translations["Stock Adjustment +"],
+          },
+          {
+            value: "Stock Adjustment -",
+            label: translations["Stock Adjustment -"],
+          },
         ];
       case "transfer":
-        return [
-          { value: "Transfer", label: "Transfer" },
-        ];
+        return [{ value: "Transfer", label: "Transfer" }];
       default:
         return [
           { value: "Purchase", label: translations.Purchase },
           { value: "Sale", label: translations.Sale },
-          { value: "Stock Adjustment +", label: translations["Stock Adjustment +"] },
-          { value: "Stock Adjustment -", label: translations["Stock Adjustment -"] },
+          {
+            value: "Stock Adjustment +",
+            label: translations["Stock Adjustment +"],
+          },
+          {
+            value: "Stock Adjustment -",
+            label: translations["Stock Adjustment -"],
+          },
           { value: "Transfer In", label: translations["Transfer In"] },
           { value: "Transfer Out", label: translations["Transfer Out"] },
         ];
@@ -159,19 +234,19 @@ const StockTransactionForm = () => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     console.log("Input change:", { name, value });
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear error for this field
     if (formErrors[name]) {
-      setFormErrors(prev => ({
+      setFormErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
@@ -235,7 +310,7 @@ const StockTransactionForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     console.log("handleSubmit called");
-    
+
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -256,7 +331,7 @@ const StockTransactionForm = () => {
 
     try {
       let result;
-      
+
       if (currentFormType === "transfer") {
         const transferData = {
           FromWarehouseId: parseInt(formData.fromWarehouseId),
@@ -266,20 +341,21 @@ const StockTransactionForm = () => {
           Notes: formData.notes,
           ReferenceNumber: formData.referenceNumber,
         };
-        
+
         console.log("Transferring stock with data:", transferData);
-        result = await transferStock(parseInt(formData.productId), transferData);
-        
+        result = await transferStock(
+          parseInt(formData.productId),
+          transferData
+        );
       } else if (currentFormType === "adjust") {
         const adjustData = {
           WarehouseId: parseInt(formData.warehouseId),
           NewQuantity: parseInt(formData.newQuantity),
           Reason: formData.reason,
         };
-        
+
         console.log("Adjusting stock with data:", adjustData);
         result = await adjustStock(parseInt(formData.productId), adjustData);
-        
       } else {
         const transactionData = {
           TransactionType: formData.transactionType,
@@ -290,9 +366,12 @@ const StockTransactionForm = () => {
           Notes: formData.notes,
           ReferenceNumber: formData.referenceNumber,
         };
-        
+
         console.log("Adding transaction with data:", transactionData);
-        result = await addStockTransaction(parseInt(formData.productId), transactionData);
+        result = await addStockTransaction(
+          parseInt(formData.productId),
+          transactionData
+        );
       }
 
       console.log("API result:", result);
@@ -302,8 +381,8 @@ const StockTransactionForm = () => {
         navigate("/admin/stock/movements", {
           state: {
             message: getSuccessMessage(),
-            type: "success"
-          }
+            type: "success",
+          },
         });
       } else {
         console.log("No result returned from API");
@@ -412,7 +491,7 @@ const StockTransactionForm = () => {
               onClick={handleCancel}
               disabled={isSubmitting}
             />
-            
+
             <button
               type="button"
               onClick={handleSubmit}
@@ -420,9 +499,24 @@ const StockTransactionForm = () => {
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
             >
               {isSubmitting && (
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
               )}
               <Save className="w-4 h-4 mr-2" />
@@ -449,7 +543,8 @@ const StockTransactionForm = () => {
                     <Package className="w-5 h-5" />
                     {translations["Product Information"]}
                   </h3>
-                  
+
+                  {/* Product Selection */}
                   {/* Product Selection */}
                   <Container className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -460,16 +555,23 @@ const StockTransactionForm = () => {
                       value={formData.productId}
                       onChange={handleInputChange}
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.productId ? "border-red-300" : "border-gray-300"
+                        formErrors.productId
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || dropdownsLoading}
                     >
-                      <option value="">{translations["Select product"]}</option>
-                      {products.map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.name} (Stock: {product.currentStock})
-                        </option>
-                      ))}
+                      <option value="">
+                        {dropdownsLoading
+                          ? "Loading products..."
+                          : translations["Select product"]}
+                      </option>
+                      {!dropdownsLoading &&
+                        productsDropdown.map((product) => (
+                          <option key={product.Id} value={product.Id}>
+                            {product.Name} ({product.ItemCode})
+                          </option>
+                        ))}
                     </select>
                     {formErrors.productId && (
                       <Span className="text-red-500 text-sm mt-1 block">
@@ -489,11 +591,15 @@ const StockTransactionForm = () => {
                         value={formData.transactionType}
                         onChange={handleInputChange}
                         className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          formErrors.transactionType ? "border-red-300" : "border-gray-300"
+                          formErrors.transactionType
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         disabled={isSubmitting}
                       >
-                        <option value="">{translations["Select transaction type"]}</option>
+                        <option value="">
+                          {translations["Select transaction type"]}
+                        </option>
                         {getTransactionTypes().map((type) => (
                           <option key={type.value} value={type.value}>
                             {type.label}
@@ -509,6 +615,7 @@ const StockTransactionForm = () => {
                   )}
 
                   {/* Warehouse Selection (for transaction and adjust) */}
+                  {/* Warehouse Selection (for transaction and adjust) */}
                   {currentFormType !== "transfer" && (
                     <Container className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -521,16 +628,23 @@ const StockTransactionForm = () => {
                           value={formData.warehouseId}
                           onChange={handleInputChange}
                           className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                            formErrors.warehouseId ? "border-red-300" : "border-gray-300"
+                            formErrors.warehouseId
+                              ? "border-red-300"
+                              : "border-gray-300"
                           }`}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || dropdownsLoading}
                         >
-                          <option value="">{translations["Select warehouse"]}</option>
-                          {warehouses.map((warehouse) => (
-                            <option key={warehouse.id} value={warehouse.id}>
-                              {warehouse.name}
-                            </option>
-                          ))}
+                          <option value="">
+                            {dropdownsLoading
+                              ? "Loading warehouses..."
+                              : translations["Select warehouse"]}
+                          </option>
+                          {!dropdownsLoading &&
+                            warehousesDropdown.map((warehouse) => (
+                              <option key={warehouse.Id} value={warehouse.Id}>
+                                {warehouse.Name}
+                              </option>
+                            ))}
                         </select>
                       </Container>
                       {formErrors.warehouseId && (
@@ -540,7 +654,6 @@ const StockTransactionForm = () => {
                       )}
                     </Container>
                   )}
-
                   {/* Transfer Warehouses */}
                   {currentFormType === "transfer" && (
                     <>
@@ -555,16 +668,23 @@ const StockTransactionForm = () => {
                             value={formData.fromWarehouseId}
                             onChange={handleInputChange}
                             className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                              formErrors.fromWarehouseId ? "border-red-300" : "border-gray-300"
+                              formErrors.fromWarehouseId
+                                ? "border-red-300"
+                                : "border-gray-300"
                             }`}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || dropdownsLoading}
                           >
-                            <option value="">{translations["Select warehouse"]}</option>
-                            {warehouses.map((warehouse) => (
-                              <option key={warehouse.id} value={warehouse.id}>
-                                {warehouse.name}
-                              </option>
-                            ))}
+                            <option value="">
+                              {dropdownsLoading
+                                ? "Loading warehouses..."
+                                : translations["Select warehouse"]}
+                            </option>
+                            {!dropdownsLoading &&
+                              warehousesDropdown.map((warehouse) => (
+                                <option key={warehouse.Id} value={warehouse.Id}>
+                                  {warehouse.Name}
+                                </option>
+                              ))}
                           </select>
                         </Container>
                         {formErrors.fromWarehouseId && (
@@ -585,16 +705,23 @@ const StockTransactionForm = () => {
                             value={formData.toWarehouseId}
                             onChange={handleInputChange}
                             className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                              formErrors.toWarehouseId ? "border-red-300" : "border-gray-300"
+                              formErrors.toWarehouseId
+                                ? "border-red-300"
+                                : "border-gray-300"
                             }`}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || dropdownsLoading}
                           >
-                            <option value="">{translations["Select warehouse"]}</option>
-                            {warehouses.map((warehouse) => (
-                              <option key={warehouse.id} value={warehouse.id}>
-                                {warehouse.name}
-                              </option>
-                            ))}
+                            <option value="">
+                              {dropdownsLoading
+                                ? "Loading warehouses..."
+                                : translations["Select warehouse"]}
+                            </option>
+                            {!dropdownsLoading &&
+                              warehousesDropdown.map((warehouse) => (
+                                <option key={warehouse.Id} value={warehouse.Id}>
+                                  {warehouse.Name}
+                                </option>
+                              ))}
                           </select>
                         </Container>
                         {formErrors.toWarehouseId && (
@@ -630,7 +757,9 @@ const StockTransactionForm = () => {
                         placeholder={translations["Enter quantity"]}
                         min="1"
                         className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          formErrors.quantity ? "border-red-300" : "border-gray-300"
+                          formErrors.quantity
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         disabled={isSubmitting}
                       />
@@ -656,7 +785,9 @@ const StockTransactionForm = () => {
                         placeholder={translations["Enter quantity"]}
                         min="0"
                         className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          formErrors.newQuantity ? "border-red-300" : "border-gray-300"
+                          formErrors.newQuantity
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         disabled={isSubmitting}
                       />
@@ -685,7 +816,9 @@ const StockTransactionForm = () => {
                           step="0.01"
                           min="0.01"
                           className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                            formErrors.unitPrice ? "border-red-300" : "border-gray-300"
+                            formErrors.unitPrice
+                              ? "border-red-300"
+                              : "border-gray-300"
                           }`}
                           disabled={isSubmitting}
                         />
@@ -737,17 +870,29 @@ const StockTransactionForm = () => {
                   {/* Notes or Reason */}
                   <Container className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {currentFormType === "adjust" ? translations.Reason : translations.Notes}
+                      {currentFormType === "adjust"
+                        ? translations.Reason
+                        : translations.Notes}
                       {currentFormType === "adjust" && " *"}
                     </label>
                     <textarea
                       name={currentFormType === "adjust" ? "reason" : "notes"}
-                      value={currentFormType === "adjust" ? formData.reason : formData.notes}
+                      value={
+                        currentFormType === "adjust"
+                          ? formData.reason
+                          : formData.notes
+                      }
                       onChange={handleInputChange}
-                      placeholder={currentFormType === "adjust" ? translations["Enter reason"] : translations["Enter notes"]}
+                      placeholder={
+                        currentFormType === "adjust"
+                          ? translations["Enter reason"]
+                          : translations["Enter notes"]
+                      }
                       rows={3}
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.reason || formErrors.notes ? "border-red-300" : "border-gray-300"
+                        formErrors.reason || formErrors.notes
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       disabled={isSubmitting}
                     />
@@ -778,13 +923,30 @@ const StockTransactionForm = () => {
                   className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
                 >
                   {isSubmitting && (
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                   )}
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? translations["Processing..."] : translations.Save}
+                  {isSubmitting
+                    ? translations["Processing..."]
+                    : translations.Save}
                 </button>
               </Container>
             </Container>
