@@ -506,30 +506,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         path: getRoleBasedPath("/accounting"),
         roles: ["Admin", "Manager"],
       },
-      {
-        icon: Users,
-        label: "Employees",
-        submenu: true,
-        key: "employee-management",
-        roles: ["Admin", "Manager", "Employee"],
-        submenuItems: [
-          {
-            label: "Manage Employees",
-            path: getRoleBasedPath("/manage-employee"),
-            icon: Users,
-          },
-          {
-            label: "Add Employee",
-            path: getRoleBasedPath("/add-employee"),
-            icon: Plus,
-          },
-          {
-            label: "Employee Salary",
-            path: getRoleBasedPath("/employee-salary"),
-            icon: DollarSign,
-          },
-        ],
-      },
+
       {
         icon: FileText,
         label: "Reports",

@@ -49,7 +49,7 @@ const AdminLeaveManagement = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     employeeId: "",
@@ -89,34 +89,34 @@ const AdminLeaveManagement = () => {
   };
 
   // Filter leave requests based on search
-  const filteredRequests = leaveRequests.filter((request) =>
-    request.employeeName?.toLowerCase().includes(searchValue.toLowerCase()) ||
-    request.leaveType?.toLowerCase().includes(searchValue.toLowerCase()) ||
-    request.reason?.toLowerCase().includes(searchValue.toLowerCase())
+  const filteredRequests = leaveRequests.filter(
+    (request) =>
+      request.LeaveType?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      request.Reason?.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   // Handle filter change
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Handle input changes for approval/rejection
   const handleApprovalChange = (e) => {
     const { name, value } = e.target;
-    setApprovalData(prev => ({
+    setApprovalData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleRejectionChange = (e) => {
     const { name, value } = e.target;
-    setRejectionData(prev => ({
+    setRejectionData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -145,16 +145,16 @@ const AdminLeaveManagement = () => {
 
   // Handle approve leave request
   const handleApproveRequest = async () => {
-    const errors = {};
-    if (!approvalData.remarks.trim()) {
-      errors.remarks = { message: "Approval remarks are required" };
-    }
-    
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    // const errors = {};
+    // if (!approvalData.remarks.trim()) {
+    //   errors.remarks = { message: "Approval remarks are required" };
+    // }
+
+    // setFormErrors(errors);
+    // if (Object.keys(errors).length > 0) return;
 
     try {
-      await approveLeaveRequest(selectedRequest.id, approvalData);
+      await approveLeaveRequest(selectedRequest.Id, approvalData);
       setShowApproveModal(false);
       setApprovalData({ remarks: "" });
       setSelectedRequest(null);
@@ -173,12 +173,12 @@ const AdminLeaveManagement = () => {
     if (!rejectionData.remarks.trim()) {
       errors.remarks = { message: "Rejection remarks are required" };
     }
-    
+
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
     try {
-      await rejectLeaveRequest(selectedRequest.id, rejectionData);
+      await rejectLeaveRequest(selectedRequest.Id, rejectionData);
       setShowRejectModal(false);
       setRejectionData({ remarks: "", reason: "" });
       setSelectedRequest(null);
@@ -191,10 +191,14 @@ const AdminLeaveManagement = () => {
   // Get status badge variant
   const getStatusBadgeVariant = (status) => {
     switch (status?.toLowerCase()) {
-      case 'approved': return 'success';
-      case 'rejected': return 'danger';
-      case 'pending': return 'warning';
-      default: return 'secondary';
+      case "approved":
+        return "success";
+      case "rejected":
+        return "danger";
+      case "pending":
+        return "warning";
+      default:
+        return "secondary";
     }
   };
 
@@ -209,10 +213,10 @@ const AdminLeaveManagement = () => {
   // Leave type options for filter
   const leaveTypeOptions = [
     { label: "All Types", value: "" },
-    ...leaveTypes.map(type => ({
+    ...leaveTypes.map((type) => ({
       label: type.name || type.typeName,
-      value: type.id || type.name
-    }))
+      value: type.Id || type.name,
+    })),
   ];
 
   // Year options
@@ -236,13 +240,13 @@ const AdminLeaveManagement = () => {
     const end = new Date(endDate);
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+    return `${diffDays} day${diffDays > 1 ? "s" : ""}`;
   };
 
   return (
     <Container className="p-6">
-      <BodyHeader 
-        heading="Leave Management (Admin)" 
+      <BodyHeader
+        heading="Leave Management (Admin)"
         subHeading="Manage employee leave requests and approvals"
       />
 
@@ -316,7 +320,9 @@ const AdminLeaveManagement = () => {
                 isIcon={true}
                 icon={FiDownload}
                 isIconLeft={true}
-                onClick={() => {/* Handle export */}}
+                onClick={() => {
+                  /* Handle export */
+                }}
                 borderColor="border-gray-300"
                 borderWidth="border"
                 rounded="rounded-md"
@@ -371,23 +377,27 @@ const AdminLeaveManagement = () => {
               <Tbody>
                 {filteredRequests.length > 0 ? (
                   filteredRequests.map((request) => (
-                    <TR key={request.id}>
+                    <TR key={request.Id}>
                       <TD className="font-medium text-gray-900">
-                        {request.employeeName || request.employeeId || "N/A"}
+                        {request.employeeName || request.EmployeeId || "N/A"}
                       </TD>
-                      <TD>{request.leaveType || "N/A"}</TD>
-                      <TD>{formatDate(request.startDate)}</TD>
-                      <TD>{formatDate(request.endDate)}</TD>
-                      <TD>{calculateDuration(request.startDate, request.endDate)}</TD>
+                      <TD>{request.LeaveType || "N/A"}</TD>
+                      <TD>{formatDate(request.StartDate)}</TD>
+                      <TD>{formatDate(request.EndDate)}</TD>
+                      <TD>
+                        {calculateDuration(request.StartDate, request.EndDate)}
+                      </TD>
                       <TD className="max-w-xs truncate">
-                        {request.reason || "N/A"}
+                        {request.Reason || "N/A"}
                       </TD>
                       <TD>
-                        <Badge variant={getStatusBadgeVariant(request.status)}>
-                          {request.status || "Pending"}
+                        <Badge variant={getStatusBadgeVariant(request.Status)}>
+                          {request.Status || "Pending"}
                         </Badge>
                       </TD>
-                      <TD>{formatDate(request.appliedDate || request.createdAt)}</TD>
+                      <TD>
+                        {formatDate(request.appliedDate || request.CreatedAt)}
+                      </TD>
                       <TD>
                         <div className="flex space-x-1">
                           <button
@@ -397,7 +407,7 @@ const AdminLeaveManagement = () => {
                           >
                             <FiEye className="h-4 w-4" />
                           </button>
-                          {request.status?.toLowerCase() === 'pending' && (
+                          {request.Status?.toLowerCase() === "pending" && (
                             <>
                               <button
                                 onClick={() => openApproveModal(request)}
@@ -422,7 +432,9 @@ const AdminLeaveManagement = () => {
                 ) : (
                   <TR>
                     <TD colSpan={9} className="text-center py-8 text-gray-500">
-                      {searchValue ? "No leave requests found matching your search." : "No leave requests found."}
+                      {searchValue
+                        ? "No leave requests found matching your search."
+                        : "No leave requests found."}
                     </TD>
                   </TR>
                 )}
@@ -457,44 +469,77 @@ const AdminLeaveManagement = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Employee</label>
-                  <p className="mt-1 text-sm text-gray-900">{leaveRequestDetail.employeeName || "N/A"}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Leave Type</label>
-                  <p className="mt-1 text-sm text-gray-900">{leaveRequestDetail.leaveType || "N/A"}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                  <p className="mt-1 text-sm text-gray-900">{formatDate(leaveRequestDetail.startDate)}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">End Date</label>
-                  <p className="mt-1 text-sm text-gray-900">{formatDate(leaveRequestDetail.endDate)}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Duration</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Employee
+                  </label>
                   <p className="mt-1 text-sm text-gray-900">
-                    {calculateDuration(leaveRequestDetail.startDate, leaveRequestDetail.endDate)}
+                    {leaveRequestDetail.employeeName || "N/A"}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Leave Type
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {leaveRequestDetail.leaveType || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Start Date
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {formatDate(leaveRequestDetail.startDate)}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    End Date
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {formatDate(leaveRequestDetail.endDate)}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Duration
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {calculateDuration(
+                      leaveRequestDetail.startDate,
+                      leaveRequestDetail.endDate
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Status
+                  </label>
                   <div className="mt-1">
-                    <Badge variant={getStatusBadgeVariant(leaveRequestDetail.status)}>
+                    <Badge
+                      variant={getStatusBadgeVariant(leaveRequestDetail.status)}
+                    >
                       {leaveRequestDetail.status || "Pending"}
                     </Badge>
                   </div>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Reason</label>
-                <p className="mt-1 text-sm text-gray-900">{leaveRequestDetail.reason || "N/A"}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Reason
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {leaveRequestDetail.reason || "N/A"}
+                </p>
               </div>
               {leaveRequestDetail.remarks && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Remarks</label>
-                  <p className="mt-1 text-sm text-gray-900">{leaveRequestDetail.remarks}</p>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Remarks
+                  </label>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {leaveRequestDetail.remarks}
+                  </p>
                 </div>
               )}
             </div>
@@ -521,7 +566,10 @@ const AdminLeaveManagement = () => {
             <div>
               <p className="text-sm text-gray-600 mb-4">
                 Are you sure you want to approve the leave request for{" "}
-                <span className="font-medium">{selectedRequest?.employeeName}</span>?
+                <span className="font-medium">
+                  {selectedRequest?.employeeName}
+                </span>
+                ?
               </p>
             </div>
             <InputField
@@ -537,7 +585,7 @@ const AdminLeaveManagement = () => {
           </div>
         }
         width={500}
-        okButtonDisabled={isProcessing}
+        // okButtonDisabled={isProcessing}
       />
 
       {/* Reject Request Modal */}
@@ -558,7 +606,10 @@ const AdminLeaveManagement = () => {
             <div>
               <p className="text-sm text-gray-600 mb-4">
                 Are you sure you want to reject the leave request for{" "}
-                <span className="font-medium">{selectedRequest?.employeeName}</span>?
+                <span className="font-medium">
+                  {selectedRequest?.employeeName}
+                </span>
+                ?
               </p>
             </div>
             <InputField

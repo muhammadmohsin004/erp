@@ -74,7 +74,7 @@ const AttendancePolicyPage = () => {
     AnnualLeaveEntitlement: 0,
     SickLeaveEntitlement: 0,
     CasualLeaveEntitlement: 0,
-    IsActive: true
+    IsActive: true,
   });
   const [formErrors, setFormErrors] = useState({});
 
@@ -84,44 +84,47 @@ const AttendancePolicyPage = () => {
   }, []);
 
   // Filter policies based on search
-  const filteredPolicies = attendancePolicies.filter((policy) =>
-    policy.Name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-    policy.Description?.toLowerCase().includes(searchValue.toLowerCase())
+  const filteredPolicies = attendancePolicies.filter(
+    (policy) =>
+      policy.Name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      policy.Description?.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   // Handle select changes
   const handleSelectChange = (name, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Validate form
   const validateForm = () => {
     const errors = {};
-    
+
     if (!formData.Name.trim()) {
       errors.Name = { message: "Policy name is required" };
     }
-    
+
     if (!formData.StandardWorkingHours) {
-      errors.StandardWorkingHours = { message: "Standard working hours is required" };
+      errors.StandardWorkingHours = {
+        message: "Standard working hours is required",
+      };
     }
-    
+
     if (!formData.StartTime) {
       errors.StartTime = { message: "Start time is required" };
     }
-    
+
     if (!formData.EndTime) {
       errors.EndTime = { message: "End time is required" };
     }
@@ -165,7 +168,7 @@ const AttendancePolicyPage = () => {
       AnnualLeaveEntitlement: 0,
       SickLeaveEntitlement: 0,
       CasualLeaveEntitlement: 0,
-      IsActive: true
+      IsActive: true,
     });
     setFormErrors({});
   };
@@ -330,7 +333,9 @@ const AttendancePolicyPage = () => {
             placeholder="Select hours"
             optionList={workingHoursOptions}
             value={formData.StandardWorkingHours}
-            handleChange={(value) => handleSelectChange("StandardWorkingHours", value)}
+            handleChange={(value) =>
+              handleSelectChange("StandardWorkingHours", value)
+            }
             errors={formErrors}
             width="w-full"
           />
@@ -461,7 +466,7 @@ const AttendancePolicyPage = () => {
             onChange={handleInputChange}
             errors={formErrors}
           />
-          
+
           {formData.AllowOvertime && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
@@ -512,7 +517,9 @@ const AttendancePolicyPage = () => {
 
       {/* Check-in/Check-out Settings */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Check-in/Check-out Settings</h3>
+        <h3 className="text-lg font-medium text-gray-900">
+          Check-in/Check-out Settings
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <CheckboxField
             name="RequireCheckIn"
@@ -543,7 +550,7 @@ const AttendancePolicyPage = () => {
             errors={formErrors}
           />
         </div>
-        
+
         {formData.RequireLocationTracking && (
           <InputField
             label="Allowed Location Radius (meters)"
@@ -560,7 +567,9 @@ const AttendancePolicyPage = () => {
 
       {/* Leave Entitlements */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Leave Entitlements</h3>
+        <h3 className="text-lg font-medium text-gray-900">
+          Leave Entitlements
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <InputField
             label="Annual Leave (days)"
@@ -611,8 +620,8 @@ const AttendancePolicyPage = () => {
 
   return (
     <Container className="p-6">
-      <BodyHeader 
-        heading="Attendance Policies" 
+      <BodyHeader
+        heading="Attendance Policies"
         subHeading="Manage your organization's attendance policies"
       />
 
@@ -641,6 +650,17 @@ const AttendancePolicyPage = () => {
               isIconLeft={true}
               onClick={openCreateModal}
               disabled={isProcessing}
+              isIconRight={false}
+              iconSize={`text-lg`}
+              bgColor={`bg-purple-500`}
+              textColor={`text-white`}
+              height={`h-[36px]`}
+              width={`w-[150px]`}
+              rounded={`rounded-md`}
+              fontWeight={`font-semibold`}
+              fontSize={`text-sm`}
+              type={`button`}
+              px="px-4"
             />
           </div>
         </div>
@@ -682,13 +702,15 @@ const AttendancePolicyPage = () => {
                         {policy.Description || "N/A"}
                       </TD>
                       <TD>
-                        {policy.StandardWorkingHours ? `${policy.StandardWorkingHours}` : "N/A"}
+                        {policy.StandardWorkingHours
+                          ? `${policy.StandardWorkingHours}`
+                          : "N/A"}
                       </TD>
+                      <TD>{policy.BreakDuration || "N/A"}</TD>
                       <TD>
-                        {policy.BreakDuration || "N/A"}
-                      </TD>
-                      <TD>
-                        {policy.EarlyGracePeriodMinutes ? `${policy.EarlyGracePeriodMinutes} min` : "N/A"}
+                        {policy.EarlyGracePeriodMinutes
+                          ? `${policy.EarlyGracePeriodMinutes} min`
+                          : "N/A"}
                       </TD>
                       <TD>
                         <Badge variant={policy.IsActive ? "success" : "danger"}>
@@ -709,7 +731,9 @@ const AttendancePolicyPage = () => {
                 ) : (
                   <TR>
                     <TD colSpan={7} className="text-center py-8 text-gray-500">
-                      {searchValue ? "No policies found matching your search." : "No attendance policies found."}
+                      {searchValue
+                        ? "No policies found matching your search."
+                        : "No attendance policies found."}
                     </TD>
                   </TR>
                 )}
@@ -769,8 +793,8 @@ const AttendancePolicyPage = () => {
         body={
           <div className="py-4">
             <p className="text-gray-600">
-              Are you sure you want to delete the policy "{selectedPolicy?.Name}"? 
-              This action cannot be undone.
+              Are you sure you want to delete the policy "{selectedPolicy?.Name}
+              "? This action cannot be undone.
             </p>
           </div>
         }

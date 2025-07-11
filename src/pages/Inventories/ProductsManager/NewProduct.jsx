@@ -655,23 +655,27 @@ const NewProduct = () => {
       try {
         // FIXED: Structure the data to match your backend's CreateProductDto expectations
         const submitData = {
-          // Basic Information - match backend exactly
-          Name: formData.Name?.trim() || "",
-          ItemCode: formData.ItemCode?.trim() || "",
-          Barcode: formData.Barcode?.trim() || "",
-          Description: formData.Description?.trim() || "",
-          ShortDescription: formData.ShortDescription?.trim() || "",
-          Status: formData.Status || "Active",
-          InternalNotes: formData.InternalNotes?.trim() || "",
-
-          // Pricing - send as strings (your backend parses them)
-          PurchasePrice: formData.PurchasePrice || "0",
-          UnitPrice: formData.UnitPrice || "0",
-          MinimumPrice: formData.MinimumPrice || "0",
+          Name: formData.Name,
+          ItemCode: formData.ItemCode || "",
+          Description: formData.Description || "",
+          Barcode: formData.Barcode || "",
+          PurchasePrice: formData.PurchasePrice || "0.00",
+          UnitPrice: formData.UnitPrice || "0.00",
+          MinimumPrice: formData.MinimumPrice || "0.00",
           Discount: formData.Discount || "0",
           DiscountType: formData.DiscountType || "percentage",
-
-          // Stock - send as numbers for InitialStock
+          InternalNotes: formData.InternalNotes || "",
+          Status: formData.Status || "Active",
+          PriceListId: null, // or your actual value
+          CategoryId: formData.CategoryId
+            ? parseInt(formData.CategoryId)
+            : null,
+          Cost: formData.CostPrice ? parseFloat(formData.CostPrice) : 0,
+          Categories: [],
+          Brands: [],
+          Taxes: [],
+          Tags: [],
+          AllowNegativeStock: Boolean(formData.AllowBackorders),
           InitialStock: formData.CurrentStock
             ? parseInt(formData.CurrentStock)
             : 0,
@@ -681,51 +685,13 @@ const NewProduct = () => {
           MaximumStock: formData.MaximumStock
             ? parseInt(formData.MaximumStock)
             : null,
-
-          // Inventory settings
           TrackingType: formData.TrackingType || "Simple",
-          AllowNegativeStock: Boolean(formData.AllowBackorders),
-
-          // Foreign Keys - convert to integers or null
-          CategoryId: formData.CategoryId
-            ? parseInt(formData.CategoryId)
-            : null,
           SupplierId: formData.SupplierId
             ? parseInt(formData.SupplierId)
             : null,
-          ManufacturerId: null, // Add if you have manufacturer dropdown
-
-          // Cost field (your backend expects this as number)
-          Cost: formData.CostPrice ? parseFloat(formData.CostPrice) : 0,
-
-          // Price List ID (if you have it)
-          PriceListId: null,
-
-          // Tags - convert to the format your backend expects
-          Tags: formData.Tags
-            ? formData.Tags.split(",")
-                .map((tag) => ({ Name: tag.trim() }))
-                .filter((tag) => tag.Name)
-            : [],
-
-          // Brands - if your backend expects this structure
-          Brands: formData.BrandId
-            ? [
-                {
-                  BrandId: parseInt(formData.BrandId),
-                  Name: getBrandName(formData.BrandId),
-                },
-              ]
-            : [],
-          Taxes:
-            formData.TaxRate && parseFloat(formData.TaxRate) > 0
-              ? [
-                  {
-                    TaxName: "VAT", // Backend expects TaxName
-                    TaxValue: formData.TaxRate.toString(), // Backend expects TaxValue as string
-                  },
-                ]
-              : [],
+          ManufacturerId: formData.ManufacturerId
+            ? parseInt(formData.ManufacturerId)
+            : null,
         };
 
         console.log("=== SUBMITTING PRODUCT DATA ===");
@@ -755,20 +721,18 @@ const NewProduct = () => {
         // Navigate back to products list
         navigate("/admin/Products-Manager");
       } catch (error) {
-        console.error("Error saving product:", error);
-        let errorMessage = `Failed to ${
-          isEditing ? "update" : "create"
-        } product: `;
+        console.log("Error saving product:", error);
+        navigate;
+        // let errorMessage = `Failed to ${
+        //   isEditing ? "update" : "create"
+        // } product: `;
 
-        if (error.message) {
-          errorMessage += error.message;
-        } else if (typeof error === "string") {
-          errorMessage += error;
-        } else {
-          errorMessage += "Unknown error occurred";
-        }
-
-        alert(errorMessage);
+        // if (error.message) {
+        //   errorMessage += error.message;
+        // } else if (typeof error === "string") {
+        //   errorMessage += error;
+        // }
+        // alert(errorMessage);
       } finally {
         setIsSaving(false);
       }
