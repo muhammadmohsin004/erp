@@ -47,9 +47,10 @@ const SelectBox = ({
         value={value || undefined} // Handle empty string as undefined
         optionFilterProp="children"
         filterOption={(input, option) => {
-          return (option?.label ?? "")
-            .toLowerCase()
-            .includes(input.toLowerCase());
+          // Ensure we have a string to work with
+          const label = option?.label || option?.children || "";
+          const searchText = typeof label === "string" ? label : String(label);
+          return searchText.toLowerCase().includes(input.toLowerCase());
         }}
         onChange={handleSelectChange}
         options={optionList}

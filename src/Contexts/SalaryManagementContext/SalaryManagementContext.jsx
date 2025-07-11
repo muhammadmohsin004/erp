@@ -433,7 +433,7 @@ export const SalaryProvider = ({ children }) => {
         dispatch({
           type: SALARY_ACTIONS.SET_SALARY_COMPONENTS,
           payload: {
-            components: response.data.data?.items || [],
+            components: response.data.Data?.Items?.$values || [],
             pagination: {
               totalItems: response.data.data?.totalItems || 0,
               page: response.data.data?.page || page,
@@ -443,7 +443,7 @@ export const SalaryProvider = ({ children }) => {
           },
         });
 
-        return response.data;
+        return response.data?.Data?.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -461,7 +461,7 @@ export const SalaryProvider = ({ children }) => {
           payload: response.data.data,
         });
 
-        return response.data;
+        return response.data?.Data?.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -556,10 +556,10 @@ export const SalaryProvider = ({ children }) => {
 
         dispatch({
           type: SALARY_ACTIONS.SET_CALCULATION_TYPES,
-          payload: response.data.data,
+          payload: response.data.Data?.$values,
         });
 
-        return response.data;
+        return response.data.Data?.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -774,7 +774,7 @@ export const SalaryProvider = ({ children }) => {
         dispatch({
           type: SALARY_ACTIONS.SET_OVERTIME_RECORDS,
           payload: {
-            records: response.data.data || [],
+            records: response.data.Data?.$values || [],
             pagination: {
               totalItems: response.data.totalItems || 0,
               page: response.data.page || page,
@@ -802,7 +802,7 @@ export const SalaryProvider = ({ children }) => {
           payload: response.data,
         });
 
-        return response.data;
+        return response.data.Data.$values;
       } catch (error) {
         handleApiError(error);
       }
@@ -921,10 +921,10 @@ export const SalaryProvider = ({ children }) => {
 
         dispatch({
           type: SALARY_ACTIONS.SET_PENDING_OVERTIME_APPROVALS,
-          payload: response.data,
+          payload: response.data?.$values,
         });
 
-        return response.data;
+        return response.data?.$values;
       } catch (error) {
         handleApiError(error);
       }

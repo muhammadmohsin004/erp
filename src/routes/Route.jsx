@@ -54,6 +54,10 @@ import ManageEmployees from "../pages/Employee/ManageEmployees";
 import CreateNewEmployee from "../pages/Employee/CreateNewEmployee";
 import EmployeeSalary from "../pages/Employee/EmployeeSalary";
 import Salary from "../pages/Salary/Salary";
+import SalaryComponent from "../pages/Salary/SalaryComponent";
+import { SalaryContext } from "../Contexts/SalaryManagementContext/SalaryManagementContext";
+import Overtime from "../pages/Salary/Overtime";
+import AttendanceModule from "../pages/HRModule/Attendance/AttendanceModule";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -683,22 +687,22 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
-      path: "/manager/salary-components",
-      component: () => <div>Salary Components Page</div>,
-      roles: ["Manager"],
+      path: "/admin/salary-components", // Legacy support
+      component: SalaryComponent,
+      roles: ["Admin", "Manager"],
       layout: true,
     },
     {
-      path: "/salary-components", // Legacy support
-      component: () => <div>Salary Components Page</div>,
+      path: "/admin/overtime", // Legacy support
+      component: Overtime,
       roles: ["Admin", "Manager"],
       layout: true,
     },
 
     // Admin+ only routes
     {
-      path: "/admin/permissions",
-      component: () => <div>Permission Settings Page</div>,
+      path: "/admin/attendance",
+      component: AttendanceModule,
       roles: ["Admin"],
       layout: true,
     },

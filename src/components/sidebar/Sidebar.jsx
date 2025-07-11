@@ -302,6 +302,55 @@ const Sidebar = ({ isOpen }) => {
       ],
     },
     {
+      icon: Users,
+      label: "HR Module",
+      submenu: true,
+      key: "hr-module",
+      roles: ["Admin", "Manager", "Employee"],
+      submenuItems: [
+        {
+          label: "Manage Employees",
+          path: getRoleBasedPath("/manage-employee"),
+          icon: Archive,
+        },
+        {
+          label: "Add Employee",
+          path: getRoleBasedPath("/add-employee"),
+          icon: Warehouse,
+        },
+        {
+          label: "Employee Salary",
+          path: getRoleBasedPath("/employee-salary"),
+          icon: ArrowDownLeftFromCircleIcon,
+        },
+        {
+          label: "Salary",
+          path: getRoleBasedPath("/salary"),
+          icon: Receipt,
+        },
+        {
+          label: "Salary Components",
+          path: getRoleBasedPath("/salary-components"),
+          icon: FileText,
+        },
+        {
+          label: "Overtime",
+          path: getRoleBasedPath("/overtime"),
+          icon: Plus,
+        },
+        {
+          label: "Attendance",
+          path: getRoleBasedPath("/attendance"),
+          icon: Plus,
+        },
+        {
+          label: "Attendance policy",
+          path: getRoleBasedPath("/attendance-policy"),
+          icon: Plus,
+        },
+      ],
+    },
+    {
       icon: DollarSign,
       label: "Sales",
       submenu: true,
@@ -344,30 +393,6 @@ const Sidebar = ({ isOpen }) => {
       roles: ["Admin", "Manager"],
     },
     {
-      icon: Users,
-      label: "Employees",
-      submenu: true,
-      key: "employee-management",
-      roles: ["Admin", "Manager", "Employee"],
-      submenuItems: [
-        {
-          label: "Manage Employees",
-          path: getRoleBasedPath("/manage-employee"),
-          icon: Archive,
-        },
-        {
-          label: "Add Employee",
-          path: getRoleBasedPath("/add-employee"),
-          icon: Warehouse,
-        },
-        {
-          label: "Employee Salary",
-          path: getRoleBasedPath("/employee-salary"),
-          icon: ArrowDownLeftFromCircleIcon,
-        },
-      ],
-    },
-    {
       icon: FileText,
       label: "Reports",
       path: getRoleBasedPath("/reports"),
@@ -385,30 +410,16 @@ const Sidebar = ({ isOpen }) => {
       path: getRoleBasedPath("/settings"),
       roles: ["Admin", "Manager"],
     },
-    {
-      icon: DollarSign,
-      label: "Salary Management",
-      submenu: true,
-      key: "salary-management",
-      roles: ["Admin", "Manager", "Employee"],
-      submenuItems: [
-        {
-          label: "Salary",
-          path: getRoleBasedPath("/salary"),
-          icon: Receipt,
-        },
-        {
-          label: "Salary Components",
-          path: getRoleBasedPath("/salary-components"),
-          icon: FileText,
-        },
-        {
-          label: "Overtime",
-          path: getRoleBasedPath("/overtime"),
-          icon: Plus,
-        },
-      ],
-    },
+    // {
+    //   icon: DollarSign,
+    //   label: "Salary Management",
+    //   submenu: true,
+    //   key: "salary-management",
+    //   roles: ["Admin", "Manager", "Employee"],
+    //   submenuItems: [
+
+    //   ],
+    // },
     {
       icon: Key,
       label: "Permissions",
