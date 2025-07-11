@@ -25,3 +25,332 @@
     color: transparent;
   }
 }
+
+
+/* Scrollbar styles for sidebar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+.scrollbar-track-gray-100::-webkit-scrollbar-track {
+  background-color: #f3f4f6;
+}
+
+/* Smooth transitions for sidebar */
+.sidebar-transition {
+  transition: margin-left 300ms ease-in-out, transform 300ms ease-in-out;
+}
+
+/* Ensure proper z-index layering */
+.sidebar-overlay {
+  z-index: 40;
+}
+
+.sidebar-container {
+  z-index: 50;
+}
+
+.header-container {
+  z-index: 30;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 767px) {
+  .mobile-sidebar-closed {
+    transform: translateX(-100%);
+  }
+  
+  .mobile-sidebar-open {
+    transform: translateX(0);
+  }
+}
+
+/* Focus styles for accessibility */
+.sidebar-link:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Improved hover effects */
+.sidebar-item-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-item-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+  transition: left 0.5s ease-in-out;
+}
+
+.sidebar-item-hover:hover::before {
+  left: 100%;
+}
+
+/* Custom animation for expanding submenus */
+.submenu-enter {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.submenu-enter-active {
+  max-height: 500px;
+}
+
+.submenu-exit {
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.submenu-exit-active {
+  max-height: 0;
+}
+
+
+/* Add to your global CSS file (e.g., globals.css or index.css) */
+
+/* RTL Support Styles */
+html[dir="rtl"] {
+  text-align: right;
+}
+
+html[dir="ltr"] {
+  text-align: left;
+}
+
+/* RTL-specific spacing utilities */
+.rtl .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* RTL margins and padding */
+html[dir="rtl"] .mr-4 {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+html[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+html[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* RTL positioning */
+html[dir="rtl"] .left-0 {
+  left: auto;
+  right: 0;
+}
+
+html[dir="rtl"] .right-0 {
+  right: auto;
+  left: 0;
+}
+
+/* RTL text alignment */
+html[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+html[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Custom scrollbar for RTL */
+html[dir="rtl"] ::-webkit-scrollbar {
+  width: 6px;
+}
+
+html[dir="rtl"] ::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+html[dir="rtl"] ::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+/* Dropdown animations for RTL */
+html[dir="rtl"] .dropdown-enter {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+html[dir="ltr"] .dropdown-enter {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Arabic font support */
+html[dir="rtl"] {
+  font-family: 'Tajawal', 'Cairo', 'Amiri', 'Noto Sans Arabic', Arial, sans-serif;
+}
+
+/* Better Arabic number display */
+html[dir="rtl"] .numbers {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* RTL-specific button styles */
+html[dir="rtl"] .btn-icon-left {
+  flex-direction: row-reverse;
+}
+
+/* Notification badge positioning for RTL */
+html[dir="rtl"] .notification-badge {
+  left: -4px;
+  right: auto;
+}
+
+html[dir="ltr"] .notification-badge {
+  right: -4px;
+  left: auto;
+}
+
+/* Sidebar positioning for RTL */
+html[dir="rtl"] .sidebar {
+  right: 0;
+  left: auto;
+}
+
+html[dir="rtl"] .sidebar-collapsed {
+  transform: translateX(100%);
+}
+
+html[dir="ltr"] .sidebar-collapsed {
+  transform: translateX(-100%);
+}
+
+/* Form inputs RTL support */
+html[dir="rtl"] input[type="text"],
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="password"],
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+  text-align: right;
+}
+
+html[dir="rtl"] input::placeholder,
+html[dir="rtl"] textarea::placeholder {
+  text-align: right;
+}
+
+/* Animation for language switch */
+.language-switch-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.language-switch-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.language-switch-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.language-switch-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Custom utility classes for RTL */
+.rtl-flip {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .rtl-flip {
+  transform: scaleX(1);
+}
+
+/* Tooltip positioning for RTL */
+html[dir="rtl"] .tooltip {
+  direction: rtl;
+}
+
+/* Loading spinner RTL support */
+html[dir="rtl"] .spinner {
+  animation: spin-rtl 1s linear infinite;
+}
+
+@keyframes spin-rtl {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+/* Search input RTL enhancement */
+html[dir="rtl"] .search-input {
+  padding-left: 2.5rem;
+  padding-right: 0.75rem;
+}
+
+html[dir="ltr"] .search-input {
+  padding-right: 2.5rem;
+  padding-left: 0.75rem;
+}
+
+/* Mobile responsive RTL adjustments */
+@media (max-width: 768px) {
+  html[dir="rtl"] .mobile-menu {
+    right: 0;
+    left: auto;
+    transform: translateX(100%);
+  }
+  
+  html[dir="rtl"] .mobile-menu.open {
+    transform: translateX(0);
+  }
+  
+  html[dir="ltr"] .mobile-menu {
+    left: 0;
+    right: auto;
+    transform: translateX(-100%);
+  }
+  
+  html[dir="ltr"] .mobile-menu.open {
+    transform: translateX(0);
+  }
+}

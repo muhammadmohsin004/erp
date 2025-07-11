@@ -18,6 +18,10 @@ import { PriceListProvider } from "./Contexts/PriceListContext/PriceListContext"
 import { InvoiceProvider } from "./Contexts/InvoiceContext/InvoiceContext";
 import { SalaryProvider } from "./Contexts/SalaryManagementContext/SalaryManagementContext";
 import { LeaveAttendanceProvider } from "./Contexts/LeaveContext/LeaveContext";
+import { CompanyBranchProvider } from "./Contexts/CompanyBranchContext/CompanyBranchContext";
+import { StockProvider } from "./Contexts/StockContext/StockContext";
+import { FinanceProvider } from "./Contexts/FinanceContext/FinanceContext";
+import { DashboardProvider } from "./Contexts/DashboardContext/DashboardContext";
 function App() {
   return (
     <Router>
@@ -35,9 +39,17 @@ function App() {
                             <PriceListProvider>
                               <InvoiceProvider>
                                 <SalaryProvider>
-                                  <LeaveAttendanceProvider>
-                                    <Routes />
-                                  </LeaveAttendanceProvider>
+                                  <CompanyBranchProvider>
+                                    <StockProvider>
+                                      <FinanceProvider>
+                                        <DashboardProvider>
+                                          <LeaveAttendanceProvider>
+                                            <Routes />
+                                          </LeaveAttendanceProvider>
+                                        </DashboardProvider>
+                                      </FinanceProvider>
+                                    </StockProvider>
+                                  </CompanyBranchProvider>
                                 </SalaryProvider>
                               </InvoiceProvider>
                             </PriceListProvider>

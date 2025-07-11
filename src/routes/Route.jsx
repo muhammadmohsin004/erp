@@ -54,8 +54,20 @@ import ManageEmployees from "../pages/Employee/ManageEmployees";
 import CreateNewEmployee from "../pages/Employee/CreateNewEmployee";
 import EmployeeSalary from "../pages/Employee/EmployeeSalary";
 import Salary from "../pages/Salary/Salary";
+import CompanyBranchList from "../pages/CompanyManager/CompanyBranchList";
+import CompanyBranchForm from "../pages/CompanyManager/CompanyBranchForm";
+import CompanyBranchDetails from "../pages/CompanyManager/CompanyBranchDetails";
+import StockMovementsList from "../pages/Inventories/StockManager/StockMovementsList";
+import StockTransactionForm from "../pages/Inventories/StockManager/StockTransactionForm";
+import StockMovementsReportView from "../pages/Inventories/StockManager/StockMovementsReportView";
+import FinanceDashboard from "../pages/FinanceManager/FinanceDashboard";
+import IncomeList from "../pages/FinanceManager/IncomeList";
+import ExpenseList from "../pages/FinanceManager/ExpenseList";
+import FinancialReports from "../pages/FinanceManager/FinancialReports";
+import BalanceSheet from "../pages/FinanceManager/BalanceSheet";
+import NewExpense from "../pages/FinanceManager/NewExpense";
+import NewIncome from "../pages/FinanceManager/NewIncome";
 import SalaryComponent from "../pages/Salary/SalaryComponent";
-import { SalaryContext } from "../Contexts/SalaryManagementContext/SalaryManagementContext";
 import Overtime from "../pages/Salary/Overtime";
 import AttendanceModule from "../pages/HRModule/Attendance/AttendanceModule";
 // Helper function to get role-based dashboard path
@@ -293,12 +305,6 @@ const getRouteConfig = () => {
     },
 
     // Admin Company Branches Routes
-    {
-      path: "/admin/company-branches",
-      component: () => <div>Company Branches Page</div>,
-      roles: ["Admin"],
-      layout: true,
-    },
 
     // Manager Dashboard Routes
     {
@@ -505,6 +511,43 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
+      path: "/admin/company-branches",
+      component: CompanyBranchList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/company-branches/new",
+      component: CompanyBranchForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/stock/movements",
+      component: StockMovementsList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/stock/movements/report",
+      component: StockMovementsReportView,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/stock/transactions/new",
+      component: StockTransactionForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+
+    {
+      path: "/admin/company-branches/:id",
+      component: CompanyBranchDetails,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
       path: "/manager/inventory",
       component: () => <div>Inventory Page</div>,
       roles: ["Manager", "Employee"],
@@ -574,20 +617,44 @@ const getRouteConfig = () => {
     // Manager+ only routes
     {
       path: "/admin/finance",
-      component: () => <div>Finance Page</div>,
-      roles: ["Admin", "Manager"],
+      component: FinanceDashboard,
+      roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
     {
-      path: "/manager/finance",
-      component: () => <div>Finance Page</div>,
-      roles: ["Manager"],
+      path: "/admin/finance/incomes",
+      component: IncomeList,
+      roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
     {
-      path: "/finance", // Legacy support
-      component: () => <div>Finance Page</div>,
-      roles: ["Admin", "Manager"],
+      path: "/admin/finance/income/new",
+      component: NewIncome,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/expenses",
+      component: ExpenseList,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/expense/new",
+      component: NewExpense,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/balance",
+      component: BalanceSheet,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/reports",
+      component: FinancialReports,
+      roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
     {
