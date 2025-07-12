@@ -663,7 +663,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           <div key={index}>
             {/* Main menu item with submenu */}
             <div
-              className={`flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${
+              className={`flex items-center px-4 py-3 text-sm  hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${
                 hasActiveSubmenu
                   ? "bg-gradient-to-r from-purple-500 to-purple-600 border-r-4 border-purple-400 shadow-lg"
                   : "text-gray-700"
@@ -784,7 +784,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
                       const isCurrentActive =
                         isActive ||
                         isPathActive(subItem.path, location.pathname);
-                      return `flex items-center px-8 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 ${
+                      return `flex items-center px-8 py-2 text-sm  hover:border-r-2 hover:border-purple-300 transition-all duration-200 ${
                         isCurrentActive
                           ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                           : "text-gray-600 hover:text-black"
@@ -888,9 +888,9 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
       {/* Sidebar */}
       <div
         className={`fixed ${
-          currentLanguage === "ar" ? "right-0" : "left-0"
+          currentLanguage === "ar" ? "right-0" : "left-0 add-scroll"
         } top-0 h-full bg-white shadow-2xl border-r border-gray-200 z-50 transition-all duration-300 ease-in-out ${
-          isOpen ? "w-72" : "w-16"
+          isOpen ? "w-60" : "w-16"
         } ${
           isMobile
             ? isOpen
