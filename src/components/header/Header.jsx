@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { 
+import React, { useState, useRef, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
   ChevronDown,
   Menu,
   Bell,
@@ -18,10 +18,10 @@ import {
   UserCircle,
   Shield,
   Users,
-  Briefcase
-} from 'lucide-react';
-import { logout } from '../../store/slices/authSlice';
-import { setLanguage } from '../../store/slices/languageSlice';
+  Briefcase,
+} from "lucide-react";
+import { logout } from "../../store/slices/authSlice";
+import { setLanguage } from "../../store/slices/languageSlice";
 
 // Translation data for English and Arabic
 const translations = {
@@ -52,7 +52,7 @@ const translations = {
     totalEmployees: "Total Employees",
     subscriptionPlan: "Subscription Plan",
     switchAccount: "Switch Account",
-    help: "Help & Support"
+    help: "Help & Support",
   },
   ar: {
     search: "بحث...",
@@ -81,13 +81,19 @@ const translations = {
     totalEmployees: "إجمالي الموظفين",
     subscriptionPlan: "خطة الاشتراك",
     switchAccount: "تبديل الحساب",
-    help: "المساعدة والدعم"
-  }
+    help: "المساعدة والدعم",
+  },
 };
 
 const languages = [
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', dir: 'ltr' },
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', dir: 'rtl' }
+  {
+    code: "en",
+    name: "English",
+    nativeName: "English",
+    flag: "🇺🇸",
+    dir: "ltr",
+  },
+  { code: "ar", name: "Arabic", nativeName: "العربية", flag: "🇸🇦", dir: "rtl" },
 ];
 
 // Mock notifications data
@@ -101,7 +107,7 @@ const mockNotifications = [
     time: "2 minutes ago",
     timeAr: "منذ دقيقتين",
     read: false,
-    type: "order"
+    type: "order",
   },
   {
     id: 2,
@@ -112,7 +118,7 @@ const mockNotifications = [
     time: "1 hour ago",
     timeAr: "منذ ساعة",
     read: false,
-    type: "inventory"
+    type: "inventory",
   },
   {
     id: 3,
@@ -123,12 +129,18 @@ const mockNotifications = [
     time: "3 hours ago",
     timeAr: "منذ 3 ساعات",
     read: true,
-    type: "system"
-  }
+    type: "system",
+  },
 ];
 
 // Dropdown Component with RTL support
-const Dropdown = ({ children, isOpen, onClose, className = "", isRTL = false }) => {
+const Dropdown = ({
+  children,
+  isOpen,
+  onClose,
+  className = "",
+  isRTL = false,
+}) => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -139,21 +151,23 @@ const Dropdown = ({ children, isOpen, onClose, className = "", isRTL = false }) 
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       ref={dropdownRef}
-      className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 ${className}`}
-      dir={isRTL ? 'rtl' : 'ltr'}
+      className={`absolute ${
+        isRTL ? "left-0" : "right-0"
+      } mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 ${className}`}
+      dir={isRTL ? "rtl" : "ltr"}
     >
       {children}
     </div>
@@ -161,27 +175,36 @@ const Dropdown = ({ children, isOpen, onClose, className = "", isRTL = false }) 
 };
 
 // Notifications Dropdown
-const NotificationsDropdown = ({ isOpen, onClose, notifications, t, isRTL, currentLanguage }) => {
+const NotificationsDropdown = ({
+  isOpen,
+  onClose,
+  notifications,
+  t,
+  isRTL,
+  currentLanguage,
+}) => {
   const [notificationList, setNotificationList] = useState(notifications);
 
   const markAllAsRead = () => {
-    setNotificationList(prev => prev.map(notif => ({ ...notif, read: true })));
-  };
-
-  const markAsRead = (id) => {
-    setNotificationList(prev => 
-      prev.map(notif => notif.id === id ? { ...notif, read: true } : notif)
+    setNotificationList((prev) =>
+      prev.map((notif) => ({ ...notif, read: true }))
     );
   };
 
-  const unreadCount = notificationList.filter(n => !n.read).length;
+  const markAsRead = (id) => {
+    setNotificationList((prev) =>
+      prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif))
+    );
+  };
+
+  const unreadCount = notificationList.filter((n) => !n.read).length;
 
   return (
     <Dropdown isOpen={isOpen} onClose={onClose} className="w-80" isRTL={isRTL}>
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-900">{t.notifications}</h3>
-          <button 
+          <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full"
           >
@@ -189,7 +212,7 @@ const NotificationsDropdown = ({ isOpen, onClose, notifications, t, isRTL, curre
           </button>
         </div>
         {unreadCount > 0 && (
-          <button 
+          <button
             onClick={markAllAsRead}
             className="text-sm text-blue-600 hover:text-blue-700 mt-1"
           >
@@ -197,30 +220,42 @@ const NotificationsDropdown = ({ isOpen, onClose, notifications, t, isRTL, curre
           </button>
         )}
       </div>
-      
+
       <div className="max-h-96 overflow-y-auto">
         {notificationList.length > 0 ? (
           notificationList.map((notification) => (
-            <div 
+            <div
               key={notification.id}
               className={`p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${
-                !notification.read ? 'bg-blue-50' : ''
+                !notification.read ? "bg-blue-50" : ""
               }`}
               onClick={() => markAsRead(notification.id)}
             >
-              <div className={`flex items-start space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  !notification.read ? 'bg-blue-500' : 'bg-gray-300'
-                }`} />
+              <div
+                className={`flex items-start space-x-3 ${
+                  isRTL ? "space-x-reverse" : ""
+                }`}
+              >
+                <div
+                  className={`w-2 h-2 rounded-full mt-2 ${
+                    !notification.read ? "bg-blue-500" : "bg-gray-300"
+                  }`}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 text-sm">
-                    {currentLanguage === 'ar' ? notification.titleAr : notification.title}
+                    {currentLanguage === "ar"
+                      ? notification.titleAr
+                      : notification.title}
                   </p>
                   <p className="text-gray-600 text-sm mt-1">
-                    {currentLanguage === 'ar' ? notification.messageAr : notification.message}
+                    {currentLanguage === "ar"
+                      ? notification.messageAr
+                      : notification.message}
                   </p>
                   <p className="text-gray-400 text-xs mt-1">
-                    {currentLanguage === 'ar' ? notification.timeAr : notification.time}
+                    {currentLanguage === "ar"
+                      ? notification.timeAr
+                      : notification.time}
                   </p>
                 </div>
               </div>
@@ -238,7 +273,14 @@ const NotificationsDropdown = ({ isOpen, onClose, notifications, t, isRTL, curre
 };
 
 // Language Dropdown
-const LanguageDropdown = ({ isOpen, onClose, currentLanguage, onLanguageChange, t, isRTL }) => {
+const LanguageDropdown = ({
+  isOpen,
+  onClose,
+  currentLanguage,
+  onLanguageChange,
+  t,
+  isRTL,
+}) => {
   return (
     <Dropdown isOpen={isOpen} onClose={onClose} className="w-48" isRTL={isRTL}>
       <div className="p-2">
@@ -252,14 +294,22 @@ const LanguageDropdown = ({ isOpen, onClose, currentLanguage, onLanguageChange, 
               onLanguageChange(lang.code);
               onClose();
             }}
-            className={`w-full flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3 px-3 py-2 text-sm text-left hover:bg-gray-100 rounded-md ${
-              currentLanguage === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+            className={`w-full flex items-center ${
+              isRTL ? "space-x-reverse" : ""
+            } space-x-3 px-3 py-2 text-sm text-left hover:bg-gray-100 rounded-md ${
+              currentLanguage === lang.code
+                ? "bg-blue-50 text-blue-700"
+                : "text-gray-700"
             }`}
           >
             <span className="text-lg">{lang.flag}</span>
             <span>{lang.nativeName}</span>
             {currentLanguage === lang.code && (
-              <div className={`${isRTL ? 'mr-auto' : 'ml-auto'} w-2 h-2 bg-blue-500 rounded-full`} />
+              <div
+                className={`${
+                  isRTL ? "mr-auto" : "ml-auto"
+                } w-2 h-2 bg-blue-500 rounded-full`}
+              />
             )}
           </button>
         ))}
@@ -269,31 +319,47 @@ const LanguageDropdown = ({ isOpen, onClose, currentLanguage, onLanguageChange, 
 };
 
 // User Profile Dropdown
-const UserProfileDropdown = ({ isOpen, onClose, user, company, t, isRTL, onLogout }) => {
+const UserProfileDropdown = ({
+  isOpen,
+  onClose,
+  user,
+  company,
+  t,
+  isRTL,
+  onLogout,
+}) => {
   const getRoleIcon = (role) => {
     switch (role?.toLowerCase()) {
-      case 'admin': return <Shield className="w-4 h-4 text-red-500" />;
-      case 'manager': return <Users className="w-4 h-4 text-blue-500" />;
-      case 'employee': return <Briefcase className="w-4 h-4 text-green-500" />;
-      default: return <User className="w-4 h-4 text-gray-500" />;
+      case "admin":
+        return <Shield className="w-4 h-4 text-red-500" />;
+      case "manager":
+        return <Users className="w-4 h-4 text-blue-500" />;
+      case "employee":
+        return <Briefcase className="w-4 h-4 text-green-500" />;
+      default:
+        return <User className="w-4 h-4 text-gray-500" />;
     }
   };
 
   const getRoleText = (role) => {
     switch (role?.toLowerCase()) {
-      case 'admin': return t.admin;
-      case 'manager': return t.manager;
-      case 'employee': return t.employee;
-      default: return role;
+      case "admin":
+        return t.admin;
+      case "manager":
+        return t.manager;
+      case "employee":
+        return t.employee;
+      default:
+        return role;
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', {
-      year: 'numeric',
-      month: 'long'
+    return date.toLocaleDateString(isRTL ? "ar-SA" : "en-US", {
+      year: "numeric",
+      month: "long",
     });
   };
 
@@ -301,39 +367,64 @@ const UserProfileDropdown = ({ isOpen, onClose, user, company, t, isRTL, onLogou
     <Dropdown isOpen={isOpen} onClose={onClose} className="w-80" isRTL={isRTL}>
       {/* User Info Section */}
       <div className="p-4 border-b border-gray-100">
-        <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
+        <div
+          className={`flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-3`}
+        >
           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
             <span className="text-white text-lg font-bold">
-              {user?.F_Name?.charAt(0)}{user?.L_Name?.charAt(0)}
+              {user?.F_Name?.charAt(0)}
+              {user?.L_Name?.charAt(0)}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 truncate">
               {user?.F_Name} {user?.L_Name}
             </h3>
-            <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mt-1`}>
+            <div
+              className={`flex items-center ${
+                isRTL ? "space-x-reverse" : ""
+              } space-x-2 mt-1`}
+            >
               {getRoleIcon(user?.Role)}
-              <span className="text-sm text-gray-600">{getRoleText(user?.Role)}</span>
+              <span className="text-sm text-gray-600">
+                {getRoleText(user?.Role)}
+              </span>
             </div>
             <p className="text-xs text-gray-500 mt-1">{user?.Email}</p>
           </div>
         </div>
-        
+
         {/* Status and Company Info */}
         <div className="mt-3 pt-3 border-t border-gray-100">
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 text-xs text-gray-600`}>
+          <div
+            className={`flex items-center ${
+              isRTL ? "space-x-reverse" : ""
+            } space-x-2 text-xs text-gray-600`}
+          >
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span>{t.online}</span>
           </div>
           <div className="mt-2">
-            <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 text-xs text-gray-600`}>
+            <div
+              className={`flex items-center ${
+                isRTL ? "space-x-reverse" : ""
+              } space-x-2 text-xs text-gray-600`}
+            >
               <Building2 className="w-3 h-3" />
               <span>{company?.Name}</span>
             </div>
             {user?.CreatedAt && (
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 text-xs text-gray-600 mt-1`}>
+              <div
+                className={`flex items-center ${
+                  isRTL ? "space-x-reverse" : ""
+                } space-x-2 text-xs text-gray-600 mt-1`}
+              >
                 <Calendar className="w-3 h-3" />
-                <span>{t.memberSince} {formatDate(user.CreatedAt)}</span>
+                <span>
+                  {t.memberSince} {formatDate(user.CreatedAt)}
+                </span>
               </div>
             )}
           </div>
@@ -343,15 +434,21 @@ const UserProfileDropdown = ({ isOpen, onClose, user, company, t, isRTL, onLogou
       {/* Company Stats */}
       {company && (
         <div className="p-4 border-b border-gray-100 bg-gray-50">
-          <h4 className="text-xs font-semibold text-gray-700 mb-2">{t.companyInfo}</h4>
+          <h4 className="text-xs font-semibold text-gray-700 mb-2">
+            {t.companyInfo}
+          </h4>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-gray-500">{t.totalEmployees}</span>
-              <p className="font-medium text-gray-900">{company.TotalEmployees || 0}</p>
+              <p className="font-medium text-gray-900">
+                {company.TotalEmployees || 0}
+              </p>
             </div>
             <div>
               <span className="text-gray-500">{t.subscriptionPlan}</span>
-              <p className="font-medium text-gray-900">{company.SubscriptionPlan || 'Basic'}</p>
+              <p className="font-medium text-gray-900">
+                {company.SubscriptionPlan || "Basic"}
+              </p>
             </div>
           </div>
         </div>
@@ -359,31 +456,59 @@ const UserProfileDropdown = ({ isOpen, onClose, user, company, t, isRTL, onLogou
 
       {/* Menu Items */}
       <div className="p-2">
-        <button className={`w-full flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${isRTL ? 'right' : 'left'}`}>
+        <button
+          className={`w-full flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${
+            isRTL ? "right" : "left"
+          }`}
+        >
           <UserCircle className="w-4 h-4" />
           <span>{t.viewProfile}</span>
         </button>
-        
-        <button className={`w-full flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${isRTL ? 'right' : 'left'}`}>
+
+        <button
+          className={`w-full flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${
+            isRTL ? "right" : "left"
+          }`}
+        >
           <Settings className="w-4 h-4" />
           <span>{t.accountSettings}</span>
         </button>
-        
-        <button className={`w-full flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${isRTL ? 'right' : 'left'}`}>
+
+        <button
+          className={`w-full flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${
+            isRTL ? "right" : "left"
+          }`}
+        >
           <Building2 className="w-4 h-4" />
           <span>{t.companySettings}</span>
         </button>
-        
-        <button className={`w-full flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${isRTL ? 'right' : 'left'}`}>
+
+        <button
+          className={`w-full flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md text-${
+            isRTL ? "right" : "left"
+          }`}
+        >
           <MessageSquare className="w-4 h-4" />
           <span>{t.help}</span>
         </button>
-        
+
         <hr className="my-2 border-gray-200" />
-        
-        <button 
+
+        <button
           onClick={onLogout}
-          className={`w-full flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md text-${isRTL ? 'right' : 'left'}`}
+          className={`w-full flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md text-${
+            isRTL ? "right" : "left"
+          }`}
         >
           <LogOut className="w-4 h-4" />
           <span>{t.logout}</span>
@@ -398,43 +523,47 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { language: currentLanguage } = useSelector((state) => state.language);
-  
+
   // State for dropdowns
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLanguage, setShowLanguage] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Language and RTL support
-  const isRTL = currentLanguage === 'ar';
+  const isRTL = currentLanguage === "ar";
   const t = translations[currentLanguage] || translations.en;
 
   // Mock company data (you can get this from Redux store if available)
   const company = {
     Name: "codesinc",
     TotalEmployees: 25,
-    SubscriptionPlan: "Premium"
+    SubscriptionPlan: "Premium",
   };
 
- const handleLanguageChange = (langCode) => {
-  dispatch(setLanguage(langCode));
-};
+  const handleLanguageChange = (langCode) => {
+    dispatch(setLanguage(langCode));
+  };
 
   const handleLogout = () => {
     dispatch(logout());
     setShowProfile(false);
   };
 
-  const unreadNotificationCount = mockNotifications.filter(n => !n.read).length;
+  const unreadNotificationCount = mockNotifications.filter(
+    (n) => !n.read
+  ).length;
 
   return (
-    <header 
-      className={`fixed top-0 ${isRTL ? 'left-0' : 'right-0'} ${isRTL ? 'right-0' : 'left-0'} bg-white border-b border-gray-200 z-40 transition-all duration-300 ${
-        sidebarOpen ? (isRTL ? 'mr-64' : 'ml-64') : (isRTL ? 'mr-16' : 'ml-16')
+    <header
+      className={`fixed top-0 ${isRTL ? "left-0" : "right-0"} ${
+        isRTL ? "right-0" : "left-0"
+      } bg-white border-b border-gray-200 z-40 transition-all duration-300 ${
+        sidebarOpen ? (isRTL ? "mr-64" : "ml-64") : isRTL ? "mr-16" : "ml-16"
       }`}
-      dir={isRTL ? 'rtl' : 'ltr'}
+      dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-8 py-1">
         {/* Left Section */}
         <div className="flex items-center">
           <button
@@ -443,7 +572,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
           >
             <Menu className="w-5 h-5" />
           </button>
-          
+
           {/* Search Bar - Hidden on mobile */}
           <div className="hidden md:flex items-center bg-gray-50 rounded-lg px-3 py-2 w-64">
             <Search className="w-4 h-4 text-gray-400 mr-2" />
@@ -456,28 +585,32 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
             />
           </div>
         </div>
-        
+
         {/* Right Section */}
-        <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-4`}>
+        <div
+          className={`flex items-center ${
+            isRTL ? "space-x-reverse" : ""
+          } space-x-4`}
+        >
           {/* Mobile Search Button */}
           <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg">
             <Search className="w-5 h-5" />
           </button>
-          
+
           {/* Notifications */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2 hover:bg-gray-100 rounded-lg"
             >
               <Bell className="w-5 h-5" />
               {unreadNotificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                  {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
                 </span>
               )}
             </button>
-            <NotificationsDropdown 
+            <NotificationsDropdown
               isOpen={showNotifications}
               onClose={() => setShowNotifications(false)}
               notifications={mockNotifications}
@@ -486,20 +619,24 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
               currentLanguage={currentLanguage}
             />
           </div>
-          
+
           {/* Language Selector */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowLanguage(!showLanguage)}
-              className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 p-2 hover:bg-gray-100 rounded-lg`}
+              className={`flex items-center ${
+                isRTL ? "space-x-reverse" : ""
+              } space-x-2 p-2 hover:bg-gray-100 rounded-lg`}
             >
               <Globe className="w-4 h-4" />
               <span className="text-sm hidden sm:inline">
-                {languages.find(lang => lang.code === currentLanguage)?.code.toUpperCase()}
+                {languages
+                  .find((lang) => lang.code === currentLanguage)
+                  ?.code.toUpperCase()}
               </span>
               <ChevronDown className="w-3 h-3" />
             </button>
-            <LanguageDropdown 
+            <LanguageDropdown
               isOpen={showLanguage}
               onClose={() => setShowLanguage(false)}
               currentLanguage={currentLanguage}
@@ -508,16 +645,19 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
               isRTL={isRTL}
             />
           </div>
-          
+
           {/* User Profile */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowProfile(!showProfile)}
-              className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 p-2 hover:bg-gray-100 rounded-lg`}
+              className={`flex items-center ${
+                isRTL ? "space-x-reverse" : ""
+              } space-x-2 p-2 hover:bg-gray-100 rounded-lg`}
             >
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">
-                  {user?.F_Name?.charAt(0)}{user?.L_Name?.charAt(0)}
+                  {user?.F_Name?.charAt(0)}
+                  {user?.L_Name?.charAt(0)}
                 </span>
               </div>
               <div className="hidden lg:block text-left">
@@ -530,7 +670,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
               </div>
               <ChevronDown className="w-4 h-4 hidden lg:block" />
             </button>
-            <UserProfileDropdown 
+            <UserProfileDropdown
               isOpen={showProfile}
               onClose={() => setShowProfile(false)}
               user={user}
