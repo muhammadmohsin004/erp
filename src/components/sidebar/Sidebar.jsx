@@ -747,7 +747,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
                         const isCurrentActive =
                           isActive ||
                           isPathActive(subItem.path, location.pathname);
-                        return `flex items-center px-3 py-2 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 transition-all duration-200 ${
+                        return `flex items-center px-3 py-2 text-sm  transition-all duration-200 ${
                           isCurrentActive
                             ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
                             : "text-gray-600 hover:text-black"
@@ -814,7 +814,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           className={({ isActive }) => {
             const isCurrentActive =
               isActive || isPathActive(item.path, location.pathname);
-            return `flex items-center px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-50 hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${
+            return `flex items-center px-4 py-3 text-sm  hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${
               isCurrentActive
                 ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                 : "text-gray-700 hover:text-black"
