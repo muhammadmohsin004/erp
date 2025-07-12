@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 import { Mail, Server, Shield, Key, User, TestTube } from "lucide-react";
 import Container from "../../../components/elements/container/Container";
@@ -8,8 +9,16 @@ import InputField from "../../../components/elements/inputField/InputField";
 import SelectBox from "../../../components/elements/selectBox/SelectBox";
 import OutlineButton from "../../../components/elements/elements/buttons/OutlineButton/OutlineButton";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import { translations } from "../../../translations/SmtpSettingstranslation";
 
 const SmtpSettings = () => {
+  // Get current language from Redux
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get translations for current language
+  const t = translations[currentLanguage] || translations.en;
+  const isArabic = currentLanguage === "ar";
+
   const [formData, setFormData] = useState({
     smtpHost: "smtp.example.com",
     smtpPort: "587",
@@ -30,9 +39,9 @@ const SmtpSettings = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const encryptionOptions = [
-    { value: "tls", label: "TLS" },
-    { value: "ssl", label: "SSL" },
-    { value: "none", label: "None" },
+    { value: "tls", label: t.smtpSettings.encryptionTLS },
+    { value: "ssl", label: t.smtpSettings.encryptionSSL },
+    { value: "none", label: t.smtpSettings.encryptionNone },
   ];
 
   const handleChange = (e) => {
@@ -62,29 +71,29 @@ const SmtpSettings = () => {
     const newErrors = {};
 
     if (!formData.smtpHost.trim()) {
-      newErrors.smtpHost = { message: "SMTP Host is required" };
+      newErrors.smtpHost = { message: t.smtpSettings.smtpHostRequired };
     }
 
     if (!formData.smtpPort.trim()) {
-      newErrors.smtpPort = { message: "SMTP Port is required" };
+      newErrors.smtpPort = { message: t.smtpSettings.smtpPortRequired };
     } else if (isNaN(formData.smtpPort) || parseInt(formData.smtpPort) <= 0) {
-      newErrors.smtpPort = { message: "Port must be a valid number" };
+      newErrors.smtpPort = { message: t.smtpSettings.portMustBeNumber };
     }
 
     if (!formData.smtpUsername.trim()) {
-      newErrors.smtpUsername = { message: "Username is required" };
+      newErrors.smtpUsername = { message: t.smtpSettings.usernameRequired };
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.smtpUsername)) {
       newErrors.smtpUsername = {
-        message: "Please enter a valid email address",
+        message: t.smtpSettings.validEmailRequired,
       };
     }
 
     if (!formData.smtpPassword.trim()) {
-      newErrors.smtpPassword = { message: "Password is required" };
+      newErrors.smtpPassword = { message: t.smtpSettings.passwordRequired };
     }
 
     if (!formData.encryption) {
-      newErrors.encryption = { message: "Encryption method is required" };
+      newErrors.encryption = { message: t.smtpSettings.encryptionRequired };
     }
 
     setErrors(newErrors);
@@ -95,7 +104,7 @@ const SmtpSettings = () => {
     if (!validateForm()) {
       setAlert({
         show: true,
-        message: "Please fill in all required fields correctly before testing",
+        message: t.smtpSettings.fillRequiredFields,
         variant: "danger",
       });
       return;
@@ -110,8 +119,8 @@ const SmtpSettings = () => {
       setTestResult({
         success: success,
         message: success
-          ? "SMTP connection successful! Email configuration is working properly."
-          : "SMTP connection failed. Please check your settings and try again.",
+          ? t.smtpSettings.smtpConnectionSuccess
+          : t.smtpSettings.smtpConnectionFailed,
       });
       setIsTestingConnection(false);
     }, 2000);
@@ -124,7 +133,7 @@ const SmtpSettings = () => {
       console.log("SMTP settings saved:", formData);
       setAlert({
         show: true,
-        message: "SMTP settings updated successfully!",
+        message: t.smtpSettings.settingsUpdated,
         variant: "success",
       });
 
@@ -135,7 +144,7 @@ const SmtpSettings = () => {
     } else {
       setAlert({
         show: true,
-        message: "Please fix the errors below",
+        message: t.smtpSettings.fixErrors,
         variant: "danger",
       });
     }
@@ -155,7 +164,7 @@ const SmtpSettings = () => {
   };
 
   return (
-    <Container className="max-w-2xl mx-auto p-6">
+    <Container className={`max-w-2xl mx-auto p-6 ${isArabic ? 'rtl' : 'ltr'}`}>
       {alert.show && (
         <Alert
           variant={alert.variant}
@@ -169,20 +178,21 @@ const SmtpSettings = () => {
 
       <Card className="p-6">
         <Container className="flex items-center mb-6">
-          <Mail className="h-6 w-6 text-blue-600 mr-3" />
-          <h2 className="text-xl font-semibold text-gray-900">SMTP Settings</h2>
+          <Mail className={`h-6 w-6 text-blue-600 ${isArabic ? 'ml-3' : 'mr-3'}`} />
+          <h2 className="text-xl font-semibold text-gray-900">
+            {t.smtpSettings.title}
+          </h2>
         </Container>
 
         <Container className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
           <div className="flex items-center">
-            <Server className="h-5 w-5 text-blue-600 mr-3" />
+            <Server className={`h-5 w-5 text-blue-600 ${isArabic ? 'ml-3' : 'mr-3'}`} />
             <div>
               <p className="text-sm text-blue-700 font-medium">
-                Email Server Configuration
+                {t.smtpSettings.emailServerConfig}
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                Configure your SMTP server settings to enable email
-                notifications and communications.
+                {t.smtpSettings.emailServerConfigDesc}
               </p>
             </div>
           </div>
@@ -202,8 +212,8 @@ const SmtpSettings = () => {
         <div className="space-y-6">
           <InputField
             name="smtpHost"
-            label="SMTP Host"
-            placeholder="e.g., smtp.gmail.com"
+            label={t.smtpSettings.smtpHost}
+            placeholder={t.smtpSettings.smtpHostPlaceholder}
             type="text"
             value={formData.smtpHost}
             onChange={handleChange}
@@ -215,8 +225,8 @@ const SmtpSettings = () => {
 
           <InputField
             name="smtpPort"
-            label="SMTP Port"
-            placeholder="e.g., 587, 465, 25"
+            label={t.smtpSettings.smtpPort}
+            placeholder={t.smtpSettings.smtpPortPlaceholder}
             type="number"
             value={formData.smtpPort}
             onChange={handleChange}
@@ -228,8 +238,8 @@ const SmtpSettings = () => {
 
           <InputField
             name="smtpUsername"
-            label="Username (Email Address)"
-            placeholder="your-email@example.com"
+            label={t.smtpSettings.username}
+            placeholder={t.smtpSettings.usernamePlaceholder}
             type="email"
             value={formData.smtpUsername}
             onChange={handleChange}
@@ -241,8 +251,8 @@ const SmtpSettings = () => {
 
           <InputField
             name="smtpPassword"
-            label="Password"
-            placeholder="Enter your email password or app password"
+            label={t.smtpSettings.password}
+            placeholder={t.smtpSettings.passwordPlaceholder}
             type="password"
             value={formData.smtpPassword}
             onChange={handleChange}
@@ -256,8 +266,8 @@ const SmtpSettings = () => {
 
           <SelectBox
             name="encryption"
-            label="Encryption Method"
-            placeholder="Select encryption method"
+            label={t.smtpSettings.encryptionMethod}
+            placeholder={t.smtpSettings.encryptionPlaceholder}
             value={formData.encryption}
             handleChange={handleSelectChange}
             optionList={encryptionOptions}
@@ -268,18 +278,15 @@ const SmtpSettings = () => {
 
           <Container className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
             <div className="flex items-center">
-              <Shield className="h-5 w-5 text-yellow-600 mr-3" />
+              <Shield className={`h-5 w-5 text-yellow-600 ${isArabic ? 'ml-3' : 'mr-3'}`} />
               <div>
                 <p className="text-sm text-yellow-700 font-medium">
-                  Security Recommendations
+                  {t.smtpSettings.securityRecommendations}
                 </p>
                 <ul className="text-xs text-yellow-600 mt-1 space-y-1">
-                  <li>• Use TLS encryption for secure email transmission</li>
-                  <li>
-                    • For Gmail, use App Passwords instead of your regular
-                    password
-                  </li>
-                  <li>• Port 587 is recommended for most SMTP servers</li>
+                  <li>{t.smtpSettings.securityTip1}</li>
+                  <li>{t.smtpSettings.securityTip2}</li>
+                  <li>{t.smtpSettings.securityTip3}</li>
                 </ul>
               </div>
             </div>
@@ -291,13 +298,13 @@ const SmtpSettings = () => {
               onClick={resetForm}
               className="text-gray-600 hover:text-gray-800 text-sm font-medium"
             >
-              Reset Form
+              {t.smtpSettings.resetForm}
             </button>
 
             <Container className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <OutlineButton
                 buttonText={
-                  isTestingConnection ? "Testing..." : "Test Connection"
+                  isTestingConnection ? t.smtpSettings.testing : t.smtpSettings.testConnection
                 }
                 type="button"
                 onClick={handleTest}
@@ -318,7 +325,7 @@ const SmtpSettings = () => {
               />
 
               <FilledButton
-                buttonText="Save Settings"
+                buttonText={t.smtpSettings.saveSettings}
                 type="submit"
                 bgColor="bg-blue-600"
                 textColor="text-white"

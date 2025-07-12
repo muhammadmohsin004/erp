@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-
+import { useSelector } from "react-redux";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import Container from "../../../components/elements/container/Container";
 import Alert from "../../../components/elements/alert/Alert";
 import Card from "../../../components/elements/card/Card";
 import InputField from "../../../components/elements/inputField/InputField";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import { translations } from "../../../translations/AccountSettingtranslation";
 
 const AccountSettings = () => {
+  // Get current language from Redux
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get translations for current language
+  const t = translations[currentLanguage] || translations.en;
+  const isArabic = currentLanguage === "ar";
+
   const [formData, setFormData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -64,20 +72,20 @@ const AccountSettings = () => {
     const newErrors = {};
 
     if (!formData.oldPassword.trim()) {
-      newErrors.oldPassword = { message: "Current password is required" };
+      newErrors.oldPassword = { message: t.accountSettings.currentPasswordRequired };
     }
 
     if (!formData.newPassword.trim()) {
-      newErrors.newPassword = { message: "New password is required" };
+      newErrors.newPassword = { message: t.accountSettings.newPasswordRequired };
     } else if (formData.newPassword.length < 6) {
       newErrors.newPassword = {
-        message: "New password must be at least 6 characters",
+        message: t.accountSettings.newPasswordMinLength,
       };
     }
 
     if (!formData.confirmPassword.trim()) {
       newErrors.confirmPassword = {
-        message: "Please confirm your new password",
+        message: t.accountSettings.confirmPasswordRequired,
       };
     }
 
@@ -86,7 +94,7 @@ const AccountSettings = () => {
       formData.confirmPassword &&
       formData.newPassword !== formData.confirmPassword
     ) {
-      newErrors.passwordMatch = { message: "Passwords do not match!" };
+      newErrors.passwordMatch = { message: t.accountSettings.passwordsDoNotMatch };
     }
 
     if (
@@ -95,7 +103,7 @@ const AccountSettings = () => {
       formData.oldPassword === formData.newPassword
     ) {
       newErrors.samePassword = {
-        message: "New password must be different from current password",
+        message: t.accountSettings.newPasswordMustBeDifferent,
       };
     }
 
@@ -110,7 +118,7 @@ const AccountSettings = () => {
       console.log("Password changed:", formData);
       setAlert({
         show: true,
-        message: "Password updated successfully!",
+        message: t.accountSettings.passwordUpdatedSuccess,
         variant: "success",
       });
 
@@ -128,7 +136,7 @@ const AccountSettings = () => {
     } else {
       setAlert({
         show: true,
-        message: "Please fix the errors below",
+        message: t.accountSettings.fixErrorsBelow,
         variant: "danger",
       });
     }
@@ -145,7 +153,7 @@ const AccountSettings = () => {
   };
 
   return (
-    <Container className="max-w-2xl mx-auto p-6">
+    <Container className={`max-w-2xl mx-auto p-6 ${isArabic ? 'rtl' : 'ltr'}`}>
       {alert.show && (
         <Alert
           variant={alert.variant}
@@ -158,21 +166,20 @@ const AccountSettings = () => {
       )}
 
       <Card className="p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
-          Account Settings
+        <h2 className={`text-xl font-semibold text-gray-900 mb-6 ${isArabic ? 'text-right' : 'text-left'}`}>
+          {t.accountSettings.title}
         </h2>
 
         <div className="space-y-6">
-          <Container className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-            <div className="flex items-center">
-              <Lock className="h-5 w-5 text-blue-600 mr-3" />
-              <div>
+          <Container className={`bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 ${isArabic ? 'border-r-4 border-l-0' : ''}`}>
+            <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <Lock className={`h-5 w-5 text-blue-600 ${isArabic ? 'ml-3' : 'mr-3'}`} />
+              <div className={isArabic ? 'text-right' : 'text-left'}>
                 <p className="text-sm text-blue-700 font-medium">
-                  Password Security
+                  {t.accountSettings.passwordSecurity}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Use a strong password with at least 6 characters, including
-                  letters, numbers, and special characters.
+                  {t.accountSettings.passwordSecurityDesc}
                 </p>
               </div>
             </div>
@@ -180,8 +187,8 @@ const AccountSettings = () => {
 
           <InputField
             name="oldPassword"
-            label="Current Password"
-            placeholder="Enter your current password"
+            label={t.accountSettings.currentPassword}
+            placeholder={t.accountSettings.currentPasswordPlaceholder}
             type="password"
             value={formData.oldPassword}
             onChange={handleChange}
@@ -195,8 +202,8 @@ const AccountSettings = () => {
 
           <InputField
             name="newPassword"
-            label="New Password"
-            placeholder="Enter your new password"
+            label={t.accountSettings.newPassword}
+            placeholder={t.accountSettings.newPasswordPlaceholder}
             type="password"
             value={formData.newPassword}
             onChange={handleChange}
@@ -210,8 +217,8 @@ const AccountSettings = () => {
 
           <InputField
             name="confirmPassword"
-            label="Confirm New Password"
-            placeholder="Confirm your new password"
+            label={t.accountSettings.confirmPassword}
+            placeholder={t.accountSettings.confirmPasswordPlaceholder}
             type="password"
             value={formData.confirmPassword}
             onChange={handleChange}
@@ -225,7 +232,7 @@ const AccountSettings = () => {
 
           {/* Display password match error */}
           {errors.passwordMatch && (
-            <Container className="bg-red-50 border-l-4 border-red-400 p-3 mb-4">
+            <Container className={`bg-red-50 border-l-4 border-red-400 p-3 mb-4 ${isArabic ? 'border-r-4 border-l-0 text-right' : ''}`}>
               <p className="text-sm text-red-700">
                 {errors.passwordMatch.message}
               </p>
@@ -234,25 +241,25 @@ const AccountSettings = () => {
 
           {/* Display same password error */}
           {errors.samePassword && (
-            <Container className="bg-red-50 border-l-4 border-red-400 p-3 mb-4">
+            <Container className={`bg-red-50 border-l-4 border-red-400 p-3 mb-4 ${isArabic ? 'border-r-4 border-l-0 text-right' : ''}`}>
               <p className="text-sm text-red-700">
                 {errors.samePassword.message}
               </p>
             </Container>
           )}
 
-          <Container className="flex justify-between items-center pt-4">
+          <Container className={`flex justify-between items-center pt-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
             <button
               type="button"
               onClick={resetForm}
               className="text-gray-600 hover:text-gray-800 text-sm font-medium"
             >
-              Reset Form
+              {t.accountSettings.resetForm}
             </button>
 
-            <Container className="flex space-x-3">
+            <Container className={`flex space-x-3 ${isArabic ? 'space-x-reverse' : ''}`}>
               <FilledButton
-                buttonText="Change Password"
+                buttonText={t.accountSettings.changePassword}
                 type="submit"
                 bgColor="bg-blue-600"
                 textColor="text-white"
@@ -264,7 +271,7 @@ const AccountSettings = () => {
                 onClick={handleSubmit}
                 icon={Lock}
                 isIcon={true}
-                isIconLeft={true}
+                isIconLeft={!isArabic} // For Arabic, put icon on the right
               />
             </Container>
           </Container>

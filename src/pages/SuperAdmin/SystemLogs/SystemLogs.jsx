@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   FiSearch,
   FiFilter,
@@ -27,6 +28,7 @@ import Skeleton from "../../../components/elements/skeleton/Skeleton";
 import Badge from "../../../components/elements/badge/Badge";
 import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
 import BodyHeader from "../../../components/elements/bodyHeader/BodyHeader";
+import systemLogsTranslations from "../../../translations/SystemLogstranslation";
 
 const SystemLogs = () => {
   const {
@@ -37,7 +39,11 @@ const SystemLogs = () => {
     error,
     clearError,
   } = useSuperAdmin();
-  //   console.log
+
+  // Get current language from Redux
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  const t = systemLogsTranslations[currentLanguage] || systemLogsTranslations.en;
 
   // State management
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,24 +56,24 @@ const SystemLogs = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
 
-  // Filter options
+  // Filter options with translations
   const levelOptions = [
-    { value: "", label: "All Levels" },
-    { value: "Info", label: "Info" },
-    { value: "Warning", label: "Warning" },
-    { value: "Error", label: "Error" },
-    { value: "Debug", label: "Debug" },
+    { value: "", label: t.allLevels },
+    { value: "Info", label: t.info },
+    { value: "Warning", label: t.warning },
+    { value: "Error", label: t.error },
+    { value: "Debug", label: t.debug },
   ];
 
   const actionOptions = [
-    { value: "", label: "All Actions" },
-    { value: "ImpersonateUser", label: "Impersonate User" },
-    { value: "Login", label: "Login" },
-    { value: "Logout", label: "Logout" },
-    { value: "Create", label: "Create" },
-    { value: "Update", label: "Update" },
-    { value: "Delete", label: "Delete" },
-    { value: "Export", label: "Export" },
+    { value: "", label: t.allActions },
+    { value: "ImpersonateUser", label: t.impersonateUser },
+    { value: "Login", label: t.login },
+    { value: "Logout", label: t.logout },
+    { value: "Create", label: t.create },
+    { value: "Update", label: t.update },
+    { value: "Delete", label: t.delete },
+    { value: "Export", label: t.export },
   ];
 
   // Load logs on component mount and when filters change
@@ -105,7 +111,7 @@ const SystemLogs = () => {
   const handleRefresh = async () => {
     try {
       await loadLogs();
-      setSuccessMessage("System logs refreshed successfully!");
+      setSuccessMessage(t.successRefresh);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error refreshing logs:", err);
@@ -160,15 +166,15 @@ const SystemLogs = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return t.notAvailable;
     const date = new Date(dateString);
-    return date.toLocaleString();
+    return date.toLocaleString(isArabic ? "ar-SA" : "en-US");
   };
 
   const exportToCSV = async () => {
     setIsExporting(true);
     try {
-      // Get all logs for export (you might want to implement a separate export endpoint)
+      // Get all logs for export
       const exportData = await getSystemLogs(
         1,
         10000,
@@ -179,15 +185,15 @@ const SystemLogs = () => {
       );
 
       const csvData = exportData.items.map((log) => ({
-        Id: log.id,
-        Level: log.level,
-        Action: log.action,
-        Message: log.message,
-        CompanyName: log.companyName || "N/A",
-        UserEmail: log.userEmail || "N/A",
-        AdminEmail: log.adminEmail || "N/A",
-        IPAddress: log.ipAddress || "N/A",
-        CreatedAt: formatDate(log.createdAt),
+        [t.id]: log.id,
+        [t.level]: log.level,
+        [t.action]: log.action,
+        [t.message]: log.message,
+        [t.company]: log.companyName || t.notAvailable,
+        [t.userEmail]: log.userEmail || t.notAvailable,
+        [t.adminEmail]: log.adminEmail || t.notAvailable,
+        [t.ipAddress]: log.ipAddress || t.notAvailable,
+        [t.createdAt]: formatDate(log.createdAt),
       }));
 
       const csvContent = [
@@ -212,7 +218,7 @@ const SystemLogs = () => {
       link.click();
       document.body.removeChild(link);
 
-      setSuccessMessage("Logs exported successfully!");
+      setSuccessMessage(t.exportSuccess);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error exporting logs:", err);
@@ -318,7 +324,7 @@ const SystemLogs = () => {
   };
 
   return (
-    <Container className="py-6 px-4 max-w-7xl">
+    <Container className={`py-6 px-4 max-w-7xl ${isArabic ? 'rtl' : 'ltr'}`}>
       {/* Success Message */}
       {successMessage && (
         <Container className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
@@ -343,8 +349,8 @@ const SystemLogs = () => {
 
       {/* Header */}
       <BodyHeader
-        heading="System Logs"
-        subHeading="Monitor and analyze system activities and events"
+        heading={t.systemLogs}
+        subHeading={t.subHeading}
         icon={FiActivity}
       />
 
@@ -357,12 +363,15 @@ const SystemLogs = () => {
               <Container className="relative">
                 <input
                   type="text"
-                  placeholder="Search logs by message, email, company, or IP..."
+                  placeholder={t.searchPlaceholder}
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full pr-10 pl-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isArabic ? 'text-right' : 'text-left'
+                  }`}
+                  dir={isArabic ? 'rtl' : 'ltr'}
                 />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FiSearch className={`absolute ${isArabic ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400`} />
               </Container>
             </Container>
 
@@ -370,8 +379,8 @@ const SystemLogs = () => {
               <FilledButton
                 isIcon={true}
                 icon={FiRefreshCw}
-                isIconLeft={true}
-                buttonText="Refresh"
+                isIconLeft={!isArabic}
+                buttonText={t.refresh}
                 onClick={handleRefresh}
                 bgColor="bg-gray-600"
                 textColor="text-white"
@@ -382,8 +391,8 @@ const SystemLogs = () => {
               <FilledButton
                 isIcon={true}
                 icon={FiDownload}
-                isIconLeft={true}
-                buttonText="Export"
+                isIconLeft={!isArabic}
+                buttonText={t.export}
                 onClick={exportToCSV}
                 bgColor="bg-green-600"
                 textColor="text-white"
@@ -398,9 +407,9 @@ const SystemLogs = () => {
           <Container className="flex flex-col lg:flex-row gap-4 mb-4">
             <Container className="flex-1">
               <SelectBox
-                label="Level"
+                label={t.level}
                 name="level"
-                placeholder="Select level"
+                placeholder={t.selectLevel}
                 optionList={levelOptions}
                 value={levelFilter}
                 handleChange={handleLevelChange}
@@ -410,9 +419,9 @@ const SystemLogs = () => {
 
             <Container className="flex-1">
               <SelectBox
-                label="Action"
+                label={t.action}
                 name="action"
-                placeholder="Select action"
+                placeholder={t.selectAction}
                 optionList={actionOptions}
                 value={actionFilter}
                 handleChange={handleActionChange}
@@ -422,31 +431,37 @@ const SystemLogs = () => {
 
             <Container className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date
+                {t.startDate}
               </label>
               <Container className="relative">
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => handleDateChange("start", e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full pr-10 pl-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isArabic ? 'text-right' : 'text-left'
+                  }`}
+                  dir={isArabic ? 'rtl' : 'ltr'}
                 />
-                <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FiCalendar className={`absolute ${isArabic ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400`} />
               </Container>
             </Container>
 
             <Container className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date
+                {t.endDate}
               </label>
               <Container className="relative">
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => handleDateChange("end", e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full pr-10 pl-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isArabic ? 'text-right' : 'text-left'
+                  }`}
+                  dir={isArabic ? 'rtl' : 'ltr'}
                 />
-                <FiCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FiCalendar className={`absolute ${isArabic ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400`} />
               </Container>
             </Container>
           </Container>
@@ -456,8 +471,8 @@ const SystemLogs = () => {
             <OutlineButton
               isIcon={true}
               icon={FiFilter}
-              isIconLeft={true}
-              buttonText="Clear Filters"
+              isIconLeft={!isArabic}
+              buttonText={t.clearFilters}
               onClick={clearFilters}
               borderColor="border-gray-300"
               textColor="text-gray-600"
@@ -469,7 +484,7 @@ const SystemLogs = () => {
 
             {systemLogsPagination && (
               <Container className="text-sm text-gray-600">
-                Showing{" "}
+                {t.showing}{" "}
                 {(systemLogsPagination.page - 1) *
                   systemLogsPagination.pageSize +
                   1}
@@ -478,7 +493,7 @@ const SystemLogs = () => {
                   systemLogsPagination.page * systemLogsPagination.pageSize,
                   systemLogsPagination.totalCount
                 )}{" "}
-                of {systemLogsPagination.totalCount} logs
+                {t.of} {systemLogsPagination.totalCount} {t.logs}
               </Container>
             )}
           </Container>
@@ -491,15 +506,15 @@ const SystemLogs = () => {
           <Table>
             <Thead className="bg-gray-50">
               <TR>
-                <TH className="w-16">ID</TH>
-                <TH className="w-24">Level</TH>
-                <TH className="w-32">Action</TH>
-                <TH className="w-80">Message</TH>
-                <TH className="w-40">Company</TH>
-                <TH className="w-48">User Email</TH>
-                <TH className="w-48">Admin Email</TH>
-                <TH className="w-32">IP Address</TH>
-                <TH className="w-40">Created At</TH>
+                <TH className="w-16">{t.id}</TH>
+                <TH className="w-24">{t.level}</TH>
+                <TH className="w-32">{t.action}</TH>
+                <TH className="w-80">{t.message}</TH>
+                <TH className="w-40">{t.company}</TH>
+                <TH className="w-48">{t.userEmail}</TH>
+                <TH className="w-48">{t.adminEmail}</TH>
+                <TH className="w-32">{t.ipAddress}</TH>
+                <TH className="w-40">{t.createdAt}</TH>
               </TR>
             </Thead>
             <Tbody>
@@ -557,11 +572,11 @@ const SystemLogs = () => {
                       </Container>
                     </TD>
                     <TD className="text-gray-600">
-                      {log.companyName || "N/A"}
+                      {log.companyName || t.notAvailable}
                     </TD>
-                    <TD className="text-gray-600">{log.UserEmail || "N/A"}</TD>
-                    <TD className="text-gray-600">{log.AdminEmail || "N/A"}</TD>
-                    <TD className="text-gray-600">{log.IpAddress || "N/A"}</TD>
+                    <TD className="text-gray-600">{log.UserEmail || t.notAvailable}</TD>
+                    <TD className="text-gray-600">{log.AdminEmail || t.notAvailable}</TD>
+                    <TD className="text-gray-600">{log.IpAddress || t.notAvailable}</TD>
                     <TD className="text-gray-600">
                       {formatDate(log.CreatedAt)}
                     </TD>
@@ -570,7 +585,7 @@ const SystemLogs = () => {
               ) : (
                 <TR>
                   <TD colSpan={9} className="text-center py-8 text-gray-500">
-                    No system logs found matching your criteria
+                    {t.noLogsFound}
                   </TD>
                 </TR>
               )}

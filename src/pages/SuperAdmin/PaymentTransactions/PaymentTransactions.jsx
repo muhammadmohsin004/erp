@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   FiDollarSign,
   FiRefreshCw,
@@ -9,6 +10,7 @@ import {
   FiClock,
   FiDownload,
 } from "react-icons/fi";
+
 
 // Import reusable components
 import Container from "../../../components/elements/container/Container";
@@ -29,8 +31,16 @@ import Pagination from "../../../components/elements/pagination/Pagination";
 import Modall from "../../../components/elements/modal/Modal";
 import Skeleton from "../../../components/elements/skeleton/Skeleton";
 import Span from "../../../components/elements/span/Span";
+import { paymentTransactionsTranslations } from "../../../translations/PaymentTransactiontranslation";
 
 const PaymentTransactions = () => {
+  // Get current language from Redux store
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  
+  // Get translations based on current language
+  const t = paymentTransactionsTranslations[currentLanguage] || paymentTransactionsTranslations.en;
+
   // State for transactions data
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -50,14 +60,56 @@ const PaymentTransactions = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState(null);
 
-  // Status filter options
+  // Status filter options with translations
   const statusOptions = [
-    { value: "all", label: "All Statuses" },
-    { value: "completed", label: "Completed" },
-    { value: "pending", label: "Pending" },
-    { value: "failed", label: "Failed" },
-    { value: "refunded", label: "Refunded" },
+    { value: "all", label: t.allStatuses },
+    { value: "completed", label: t.completed },
+    { value: "pending", label: t.pending },
+    { value: "failed", label: t.failed },
+    { value: "refunded", label: t.refunded },
   ];
+
+  // Translation function for dynamic content
+  const translatePaymentMethod = (method) => {
+    switch (method) {
+      case "Credit Card":
+        return t.creditCard;
+      case "PayPal":
+        return t.paypal;
+      case "Bank Transfer":
+        return t.bankTransfer;
+      default:
+        return method;
+    }
+  };
+
+  const translatePlan = (plan) => {
+    switch (plan) {
+      case "Starter":
+        return t.starter;
+      case "Professional":
+        return t.professional;
+      case "Enterprise":
+        return t.enterprise;
+      default:
+        return plan;
+    }
+  };
+
+  const translateStatus = (status) => {
+    switch (status) {
+      case "completed":
+        return t.completed;
+      case "pending":
+        return t.pending;
+      case "failed":
+        return t.failed;
+      case "refunded":
+        return t.refunded;
+      default:
+        return status;
+    }
+  };
 
   // Mock data
   const mockTransactions = [
@@ -152,13 +204,13 @@ const PaymentTransactions = () => {
           setLoading(false);
         }, 1000);
       } catch (err) {
-        setError("Failed to fetch transactions. Please try again later.");
+        setError(t.fetchError);
         setLoading(false);
       }
     };
 
     fetchTransactions();
-  }, []);
+  }, [t.fetchError]);
 
   // Filter transactions based on search and status
   useEffect(() => {
@@ -206,13 +258,13 @@ const PaymentTransactions = () => {
       setTransactions(mockTransactions);
       setFilteredTransactions(mockTransactions);
       setLoading(false);
-      setSuccessMessage("Transactions refreshed successfully!");
+      setSuccessMessage(t.refreshedSuccessfully);
     }, 800);
   };
 
   // Export transactions
   const handleExport = () => {
-    setSuccessMessage("Export started. You will receive an email shortly.");
+    setSuccessMessage(t.exportStarted);
   };
 
   // Get badge variant based on status
@@ -248,12 +300,12 @@ const PaymentTransactions = () => {
   // Format date
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return new Date(dateString).toLocaleDateString(isArabic ? "ar-SA" : "en-US", options);
   };
 
   // Format amount
   const formatAmount = (amount) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(isArabic ? "ar-SA" : "en-US", {
       style: "currency",
       currency: "USD",
     }).format(amount);
@@ -286,46 +338,46 @@ const PaymentTransactions = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-3">
-              Transaction Information
+              {t.transactionInformation}
             </h3>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="font-medium">Transaction ID:</span>
+                <span className="font-medium">{t.transactionId}:</span>
                 <span className="text-gray-600">{currentTransaction.id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Invoice ID:</span>
+                <span className="font-medium">{t.invoiceId}:</span>
                 <span className="text-gray-600">
                   {currentTransaction.invoiceId}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Date:</span>
+                <span className="font-medium">{t.date}:</span>
                 <span className="text-gray-600">
                   {formatDate(currentTransaction.date)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Status:</span>
+                <span className="font-medium">{t.status}:</span>
                 <Badge variant={getStatusBadge(currentTransaction.status)}>
                   {getStatusIcon(currentTransaction.status)}
-                  {currentTransaction.status}
+                  {translateStatus(currentTransaction.status)}
                 </Badge>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-3">Customer Information</h3>
+            <h3 className="text-lg font-semibold mb-3">{t.customerInformation}</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="font-medium">Name:</span>
+                <span className="font-medium">{t.name}:</span>
                 <span className="text-gray-600">
                   {currentTransaction.customer}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Email:</span>
+                <span className="font-medium">{t.email}:</span>
                 <span className="text-gray-600">
                   {currentTransaction.email}
                 </span>
@@ -335,23 +387,23 @@ const PaymentTransactions = () => {
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold mb-3">Payment Details</h3>
+          <h3 className="text-lg font-semibold mb-3">{t.paymentDetails}</h3>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="font-medium">Amount:</span>
+              <span className="font-medium">{t.amount}:</span>
               <span className="text-gray-600 font-semibold">
                 {formatAmount(currentTransaction.amount)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Payment Method:</span>
+              <span className="font-medium">{t.paymentMethod}:</span>
               <span className="text-gray-600">
-                {currentTransaction.paymentMethod}
+                {translatePaymentMethod(currentTransaction.paymentMethod)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Plan:</span>
-              <span className="text-gray-600">{currentTransaction.plan}</span>
+              <span className="font-medium">{t.plan}:</span>
+              <span className="text-gray-600">{translatePlan(currentTransaction.plan)}</span>
             </div>
           </div>
         </div>
@@ -360,11 +412,11 @@ const PaymentTransactions = () => {
   };
 
   return (
-    <Container className="py-8 px-4">
+    <Container className={`py-8 px-4 ${isArabic ? 'rtl' : 'ltr'}`}>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-          <FiDollarSign className="mr-3 text-blue-600" />
-          Payment Transactions
+          <FiDollarSign className={`text-blue-600 ${isArabic ? 'ml-3' : 'mr-3'}`} />
+          {t.pageTitle}
         </h1>
       </div>
 
@@ -395,14 +447,14 @@ const PaymentTransactions = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <InputField
                 icon={FiSearch}
-                placeholder="Search transactions..."
+                placeholder={t.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 width="w-80"
               />
 
               <SelectBox
-                placeholder="Filter by status"
+                placeholder={t.filterByStatus}
                 value={statusFilter}
                 handleChange={setStatusFilter}
                 optionList={statusOptions}
@@ -415,7 +467,7 @@ const PaymentTransactions = () => {
                 isIcon={true}
                 isIconLeft={true}
                 icon={FiRefreshCw}
-                buttonText="Refresh"
+                buttonText={t.refresh}
                 onClick={handleRefresh}
                 bgColor="bg-purple-500"
                 textColor="text-white"
@@ -425,7 +477,7 @@ const PaymentTransactions = () => {
                 isIcon={true}
                 isIconLeft={true}
                 icon={FiDownload}
-                buttonText="Export"
+                buttonText={t.export}
                 onClick={handleExport}
                 borderColor="bg-purple"
                 borderWidth="border-2"
@@ -448,14 +500,14 @@ const PaymentTransactions = () => {
               <Table className="border border-gray-200 rounded-lg overflow-hidden">
                 <Thead className="bg-gray-50">
                   <TR>
-                    <TH>Transaction ID</TH>
-                    <TH>Customer</TH>
-                    <TH>Amount</TH>
-                    <TH>Date</TH>
-                    <TH>Payment Method</TH>
-                    <TH>Status</TH>
-                    <TH>Plan</TH>
-                    <TH>Actions</TH>
+                    <TH>{t.transactionId}</TH>
+                    <TH>{t.customer}</TH>
+                    <TH>{t.amount}</TH>
+                    <TH>{t.date}</TH>
+                    <TH>{t.paymentMethod}</TH>
+                    <TH>{t.status}</TH>
+                    <TH>{t.plan}</TH>
+                    <TH>{t.actions}</TH>
                   </TR>
                 </Thead>
                 <Tbody>
@@ -483,14 +535,14 @@ const PaymentTransactions = () => {
                           </span>
                         </TD>
                         <TD>{formatDate(txn.date)}</TD>
-                        <TD>{txn.paymentMethod}</TD>
+                        <TD>{translatePaymentMethod(txn.paymentMethod)}</TD>
                         <TD>
                           <Badge variant={getStatusBadge(txn.status)}>
                             {getStatusIcon(txn.status)}
-                            {txn.status}
+                            {translateStatus(txn.status)}
                           </Badge>
                         </TD>
-                        <TD>{txn.plan}</TD>
+                        <TD>{translatePlan(txn.plan)}</TD>
                         <TD>
                           <FilledButton
                             isIcon={true}
@@ -512,7 +564,7 @@ const PaymentTransactions = () => {
                         colSpan={8}
                         className="text-center py-8 text-gray-500"
                       >
-                        No transactions found
+                        {t.noTransactionsFound}
                       </TD>
                     </TR>
                   )}
@@ -536,14 +588,14 @@ const PaymentTransactions = () => {
 
       {/* Transaction Details Modal */}
       <Modall
-        title="Transaction Details"
+        title={t.transactionDetails}
         modalOpen={showDetailsModal}
         setModalOpen={setShowDetailsModal}
         body={renderModalContent()}
-        okText="Resend Receipt"
-        cancelText="Close"
+        okText={t.resendReceipt}
+        cancelText={t.close}
         okAction={() => {
-          setSuccessMessage("Receipt has been resent to customer email");
+          setSuccessMessage(t.receiptResent);
           setShowDetailsModal(false);
         }}
         cancelAction={() => setShowDetailsModal(false)}
