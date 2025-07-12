@@ -1140,3 +1140,801 @@
 
 
 
+import React, { useState } from "react";
+import { FaTrash, FaPlusCircle } from "react-icons/fa";
+import { IoEyeOutline } from "react-icons/io5";
+import { useSelector } from "react-redux";
+import BodyHeader from "../../../components/elements/bodyHeader/BodyHeader";
+import Tabs from "../../../components/elements/tabs/Tabs";
+import Container from "../../../components/elements/container/Container";
+import Alert from "../../../components/elements/alert/Alert";
+import Card from "../../../components/elements/card/Card";
+import InputField from "../../../components/elements/inputField/InputField";
+import SelectBox from "../../../components/elements/selectBox/SelectBox";
+import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import OutlineButton from "../../../components/elements/elements/buttons/OutlineButton/OutlineButton";
+import Table from "../../../components/elements/table/Table";
+import Thead from "../../../components/elements/thead/Thead";
+import Tbody from "../../../components/elements/tbody/Tbody";
+import TH from "../../../components/elements/th/TH";
+import TR from "../../../components/elements/tr/TR";
+import TD from "../../../components/elements/td/TD";
+import Modall from "../../../components/elements/modal/Modal";
+import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import Dropdown from "../../../components/elements/dropdown/Dropdown";
+import CheckboxField from "../../../components/elements/checkbox/CheckboxField";
+import { translations } from "../../../translations/CreateInvoicetranslation";
+
+// Sub-component for Client Details
+const ClientDetails = ({ clientData, setClientData, validateForm, t }) => {
+  const [showAdvancedModal, setShowAdvancedModal] = useState(false);
+
+  const handleAdvancedFieldChange = (field, value) => {
+    setClientData({ ...clientData, [field]: value });
+  };
+
+  const clientTypeOptions = [
+    { label: t('formLabels.individual'), value: "Individual" },
+    { label: t('formLabels.business'), value: "Business" },
+  ];
+
+  const countryOptions = [
+    { label: t('formLabels.selectCountry'), value: "" },
+    { label: t('formLabels.unitedStates'), value: "USA" },
+    { label: t('formLabels.canada'), value: "Canada" },
+    { label: t('formLabels.unitedKingdom'), value: "UK" },
+  ];
+
+  const invoicingMethodOptions = [
+    { label: t('formLabels.printOffline'), value: "Print (Offline)" },
+    { label: t('formLabels.email'), value: "Email" },
+    { label: t('formLabels.onlinePortal'), value: "Online Portal" },
+  ];
+
+  const currencyOptions = [
+    { label: t('formLabels.pkr'), value: "PKR" },
+    { label: t('formLabels.usd'), value: "USD" },
+    { label: t('formLabels.eur'), value: "EUR" },
+  ];
+
+  const languageOptions = [
+    { label: t('formLabels.selectLanguage'), value: "" },
+    { label: t('formLabels.english'), value: "English" },
+    { label: t('formLabels.urdu'), value: "Urdu" },
+  ];
+
+  const priceGroupOptions = [
+    { label: t('formLabels.selectPriceGroup'), value: "" },
+    { label: t('formLabels.standard'), value: "Standard" },
+    { label: t('formLabels.premium'), value: "Premium" },
+  ];
+
+  const accountOptions = [
+    { label: t('formLabels.selectAccount'), value: "" },
+    { label: t('formLabels.sales'), value: "Sales" },
+    { label: t('formLabels.miscellaneous'), value: "Miscellaneous" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <h5 className="text-lg font-bold">{t('sections.clientDetails')}</h5>
+      <SelectBox
+        label={t('formLabels.clientType')}
+        name="clientType"
+        value={clientData.clientType}
+        optionList={clientTypeOptions}
+        handleChange={(value) =>
+          setClientData({ ...clientData, clientType: value })
+        }
+        width="w-full"
+      />
+      <InputField
+        label={t('formLabels.businessName')}
+        name="businessName"
+        placeholder={t('placeholders.enterBusinessName')}
+        value={clientData.businessName}
+        onChange={(e) =>
+          setClientData({ ...clientData, businessName: e.target.value })
+        }
+        errors={
+          validateForm && !clientData.businessName
+            ? { businessName: { message: t('validation.businessNameRequired') } }
+            : {}
+        }
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <InputField
+          label={t('formLabels.firstName')}
+          name="firstName"
+          value={clientData.firstName}
+          onChange={(e) =>
+            setClientData({ ...clientData, firstName: e.target.value })
+          }
+        />
+        <InputField
+          label={t('formLabels.lastName')}
+          name="lastName"
+          value={clientData.lastName}
+          onChange={(e) =>
+            setClientData({ ...clientData, lastName: e.target.value })
+          }
+        />
+      </div>
+      <InputField
+        label={t('formLabels.email')}
+        name="email"
+        type="email"
+        placeholder={t('placeholders.enterEmail')}
+        value={clientData.email}
+        onChange={(e) =>
+          setClientData({ ...clientData, email: e.target.value })
+        }
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <InputField
+          label={t('formLabels.streetAddress')}
+          name="streetAddress"
+          value={clientData.streetAddress}
+          onChange={(e) =>
+            setClientData({ ...clientData, streetAddress: e.target.value })
+          }
+        />
+        <InputField
+          label={t('formLabels.addressLine2')}
+          name="addressLine2"
+          value={clientData.addressLine2}
+          onChange={(e) =>
+            setClientData({ ...clientData, addressLine2: e.target.value })
+          }
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <InputField
+          label={t('formLabels.city')}
+          name="city"
+          value={clientData.city}
+          onChange={(e) =>
+            setClientData({ ...clientData, city: e.target.value })
+          }
+        />
+        <InputField
+          label={t('formLabels.state')}
+          name="state"
+          value={clientData.state}
+          onChange={(e) =>
+            setClientData({ ...clientData, state: e.target.value })
+          }
+        />
+        <InputField
+          label={t('formLabels.zipCode')}
+          name="zipCode"
+          value={clientData.zipCode}
+          onChange={(e) =>
+            setClientData({ ...clientData, zipCode: e.target.value })
+          }
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <InputField
+          label={t('formLabels.telephone')}
+          name="telephone"
+          value={clientData.telephone}
+          onChange={(e) =>
+            setClientData({ ...clientData, telephone: e.target.value })
+          }
+        />
+        <InputField
+          label={t('formLabels.mobile')}
+          name="mobile"
+          value={clientData.mobile}
+          onChange={(e) =>
+            setClientData({ ...clientData, mobile: e.target.value })
+          }
+        />
+      </div>
+      <SelectBox
+        label={t('formLabels.country')}
+        name="country"
+        value={clientData.country}
+        optionList={countryOptions}
+        handleChange={(value) =>
+          setClientData({ ...clientData, country: value })
+        }
+        width="w-full"
+      />
+      <div className="flex items-center justify-between">
+        <CheckboxField
+          name="addShippingAddress"
+          label={t('formLabels.addShippingAddress')}
+          checked={clientData?.addShippingAddress || false}
+          onChange={(e) =>
+            setClientData({
+              ...clientData,
+              addShippingAddress: e.target.checked,
+            })
+          }
+        />
+        <OutlineButton
+          buttonText={t('buttons.advanced')}
+          wing
+          textColor="text-blue-600"
+          borderColor="border-blue-600"
+          hover="hover:bg-blue-50"
+          onClick={() => setShowAdvancedModal(true)}
+        />
+      </div>
+      <div className="flex justify-end gap-2">
+        <OutlineButton
+          buttonText={t('buttons.cancel')}
+          textColor="text-gray-600"
+          borderColor="border-gray-600"
+          hover="hover:bg-gray-50"
+        />
+        <FilledButton buttonText={t('buttons.saveClient')} bgColor="bg-blue-600" />
+      </div>
+
+      <Modall
+        title={t('sections.advancedClientDetails')}
+        modalOpen={showAdvancedModal}
+        setModalOpen={setShowAdvancedModal}
+        okText={t('buttons.saveChanges')}
+        cancelText={t('buttons.close')}
+        okAction={() => setShowAdvancedModal(false)}
+        cancelAction={() => setShowAdvancedModal(false)}
+        width={800}
+        body={
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label={t('formLabels.fullName')}
+                name="fullName"
+                placeholder={t('placeholders.enterFullName')}
+                value={clientData.fullName || ""}
+                onChange={(e) =>
+                  handleAdvancedFieldChange("fullName", e.target.value)
+                }
+                errors={
+                  validateForm && !clientData.fullName
+                    ? { fullName: { message: t('validation.fullNameRequired') } }
+                    : {}
+                }
+              />
+              <InputField
+                label={t('formLabels.codeNumber')}
+                name="codeNumber"
+                placeholder={t('placeholders.enterCodeNumber')}
+                value={clientData.codeNumber || "000001"}
+                onChange={(e) =>
+                  handleAdvancedFieldChange("codeNumber", e.target.value)
+                }
+                errors={
+                  validateForm && !clientData.codeNumber
+                    ? { codeNumber: { message: t('validation.codeNumberRequired') } }
+                    : {}
+                }
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SelectBox
+                label={t('formLabels.invoicingMethod')}
+                name="invoicingMethod"
+                value={clientData.invoicingMethod || "Print (Offline)"}
+                optionList={invoicingMethodOptions}
+                handleChange={(value) =>
+                  handleAdvancedFieldChange("invoicingMethod", value)
+                }
+                width="w-full"
+              />
+              <SelectBox
+                label={t('formLabels.currency')}
+                name="currency"
+                value={clientData.currency || "PKR"}
+                optionList={currencyOptions}
+                handleChange={(value) =>
+                  handleAdvancedFieldChange("currency", value)
+                }
+                width="w-full"
+              />
+            </div>
+            <InputField
+              label={t('formLabels.category')}
+              name="category"
+              placeholder={t('placeholders.enterCategory')}
+              value={clientData.category || ""}
+              onChange={(e) =>
+                handleAdvancedFieldChange("category", e.target.value)
+              }
+            />
+            <InputField
+              label={t('formLabels.notes')}
+              name="notes"
+              type="textarea"
+              placeholder={t('placeholders.enterNotes')}
+              value={clientData.notes || ""}
+              onChange={(e) =>
+                handleAdvancedFieldChange("notes", e.target.value)
+              }
+            />
+            <InputField
+              label={t('formLabels.attachments')}
+              name="attachments"
+              type="file"
+              onChange={(e) =>
+                handleAdvancedFieldChange(
+                  "attachments",
+                  Array.from(e.target.files)
+                )
+              }
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SelectBox
+                label={t('formLabels.displayLanguage')}
+                name="displayLanguage"
+                value={clientData.displayLanguage || ""}
+                optionList={languageOptions}
+                handleChange={(value) =>
+                  handleAdvancedFieldChange("displayLanguage", value)
+                }
+                width="w-full"
+              />
+              <SelectBox
+                label={t('formLabels.priceGroup')}
+                name="priceGroup"
+                value={clientData.priceGroup || ""}
+                optionList={priceGroupOptions}
+                handleChange={(value) =>
+                  handleAdvancedFieldChange("priceGroup", value)
+                }
+                width="w-full"
+              />
+            </div>
+            <SelectBox
+              label={t('formLabels.account')}
+              name="account"
+              value={clientData.account || ""}
+              optionList={accountOptions}
+              handleChange={(value) =>
+                handleAdvancedFieldChange("account", value)
+              }
+              width="w-full"
+            />
+            <InputField
+              label={t('formLabels.itemTags')}
+              name="itemTags"
+              placeholder={t('placeholders.enterTags')}
+              value={clientData.itemTags || ""}
+              onChange={(e) =>
+                handleAdvancedFieldChange("itemTags", e.target.value)
+              }
+            />
+            <CheckboxField
+              name="addSecondaryAddress"
+              label={t('formLabels.addSecondaryAddress')}
+              checked={clientData.addSecondaryAddress || false}
+              onChange={(e) =>
+                handleAdvancedFieldChange(
+                  "addSecondaryAddress",
+                  e.target.checked
+                )
+              }
+            />
+            <InputField
+              label={t('formLabels.contactsList')}
+              name="contactsList"
+              type="textarea"
+              placeholder={t('placeholders.enterContacts')}
+              value={clientData.contactsList || ""}
+              onChange={(e) =>
+                handleAdvancedFieldChange("contactsList", e.target.value)
+              }
+            />
+          </div>
+        }
+      />
+    </div>
+  );
+};
+
+// Main CreateInvoice Component
+const CreateInvoice = ({ onBack }) => {
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isRTL = currentLanguage === "ar";
+  const t = (key) => {
+    const keys = key.split('.');
+    let value = translations[currentLanguage]?.createInvoice;
+    
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) {
+        // Fallback to English if translation not found
+        let enValue = translations.en.createInvoice;
+        for (const enK of keys) {
+          enValue = enValue?.[enK];
+          if (enValue === undefined) return key; // Return key if not found in English either
+        }
+        return enValue;
+      }
+    }
+    
+    return value || key;
+  };
+
+  const { createCompany, error, isLoading } = useSuperAdmin();
+  const [noteTerms, setNoteTerms] = useState("");
+  const [activeTab, setActiveTab] = useState("discount");
+  const [discountType, setDiscountType] = useState("%");
+  const [discountValue, setDiscountValue] = useState(0);
+  const [adjustment, setAdjustment] = useState(0);
+  const [account, setAccount] = useState(t('formLabels.defaultAccount'));
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      item: "",
+      unitPrice: 0,
+      qty: 1,
+      stockOnHand: 100,
+      newStock: 99,
+    },
+  ]);
+  const [clientData, setClientData] = useState({
+    clientType: "Individual",
+    businessName: "",
+    firstName: "",
+    lastName: "",
+    fullName: "",
+    email: "",
+    streetAddress: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    telephone: "",
+    mobile: "",
+    country: "",
+    addShippingAddress: false,
+    addSecondaryAddress: false,
+    contactsList: "",
+    codeNumber: "000001",
+    invoicingMethod: t('formLabels.printOffline'),
+    currency: "PKR",
+    category: "",
+    notes: "",
+    attachments: [],
+    displayLanguage: "",
+    priceGroup: "",
+    account: "",
+    itemTags: "",
+  });
+  const [estimateData, setEstimateData] = useState({
+    estimateNumber: "000001",
+    estimateDate: new Date().toISOString().split('T')[0],
+  });
+  const [shippingInstructions, setShippingInstructions] = useState("");
+  const [files, setFiles] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  // Handler functions
+  const handleAddRow = () => {
+    setItems([
+      ...items,
+      {
+        id: items.length + 1,
+        item: "",
+        unitPrice: 0,
+        qty: 1,
+        stockOnHand: 100,
+        newStock: 99,
+      },
+    ]);
+  };
+
+  const handleRemoveRow = (idx) => {
+    setItems(items.filter((_, index) => index !== idx));
+  };
+
+  const handleItemChange = (idx, field, value) => {
+    setItems(
+      items.map((item, index) =>
+        index === idx
+          ? {
+              ...item,
+              [field]: field === "item" ? value : parseFloat(value) || 0,
+              newStock:
+                field === "qty"
+                  ? item.stockOnHand - (parseFloat(value) || 0)
+                  : item.newStock,
+            }
+          : item
+      )
+    );
+  };
+
+  const total = (item) => (item.unitPrice * item.qty).toFixed(2);
+
+  const itemsTotal = items.reduce(
+    (sum, item) => sum + item.unitPrice * item.qty,
+    0
+  );
+
+  const methodOptions = [
+    { label: t('formLabels.printOffline'), value: "Print (Offline)" },
+  ];
+  
+  const layoutOptions = [
+    { label: t('formLabels.defaultLayout'), value: "Default Timesheet Layout" },
+  ];
+
+  return (
+    <Container className={`p-4 bg-white rounded-lg shadow ${isRTL ? 'rtl' : 'ltr'}`}>
+      <BodyHeader
+        heading={t('heading')}
+        subHeading={t('subHeading')}
+      />
+      
+      <div className="flex flex-col md:flex-row justify-between mb-4">
+        <div className="flex gap-2 mb-3 md:mb-0">
+          <Dropdown
+            buttonText={t('buttons.preview')}
+            icon={IoEyeOutline}
+            items={[
+              { label: t('buttons.webPreview'), value: "web" },
+              { label: t('buttons.pdfPreview'), value: "pdf" },
+            ]}
+            onSelect={(item) => item.value === "web" && setShowPreview(true)}
+          />
+          <OutlineButton
+            buttonText={t('buttons.saveAsDraft')}
+            textColor="text-gray-600"
+            borderColor="border-gray-600"
+            hover="hover:bg-gray-50"
+          />
+        </div>
+        <FilledButton
+          buttonText={t('buttons.saveAndPrint')}
+          bgColor="bg-blue-600"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <SelectBox
+          label={t('formLabels.method')}
+          name="method"
+          value="Print (Offline)"
+          optionList={methodOptions}
+          width="w-full"
+        />
+        <SelectBox
+          label={t('formLabels.invoiceLayout')}
+          name="layout"
+          value="Default Timesheet Layout"
+          optionList={layoutOptions}
+          width="w-full"
+        />
+      </div>
+
+      <Card className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ClientDetails
+            clientData={clientData}
+            setClientData={setClientData}
+            validateForm={showError}
+            t={t}
+          />
+          <div className="space-y-4">
+            <h5 className="text-lg font-bold">{t('sections.estimateInfo')}</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <span className="font-medium">{t('formLabels.estimateNumber')}</span>
+              <InputField
+                name="estimateNumber"
+                value={estimateData.estimateNumber}
+                disabled
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <span className="font-medium">{t('formLabels.estimateDate')}</span>
+              <InputField
+                name="estimateDate"
+                type="date"
+                value={estimateData.estimateDate}
+                onChange={(e) =>
+                  setEstimateData({ ...estimateData, estimateDate: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4 bg-gray-50">
+        <div className="overflow-x-auto">
+          <Table>
+            <Thead>
+              <TR>
+                <TH>{t('formLabels.items')}</TH>
+                <TH>{t('formLabels.unitPrice')}</TH>
+                <TH>{t('formLabels.qty')}</TH>
+                <TH>{t('formLabels.stockOnHand')}</TH>
+                <TH>{t('formLabels.newStockOnHand')}</TH>
+                <TH>{t('formLabels.total')}</TH>
+                <TH />
+              </TR>
+            </Thead>
+            <Tbody>
+              {items.map((item, idx) => (
+                <TR key={item.id}>
+                  <TD>
+                    <InputField
+                      name={`item-${idx}`}
+                      placeholder={t('formLabels.item')}
+                      value={item.item}
+                      onChange={(e) =>
+                        handleItemChange(idx, "item", e.target.value)
+                      }
+                    />
+                  </TD>
+                  <TD>
+                    <InputField
+                      name={`unitPrice-${idx}`}
+                      type="number"
+                      value={item.unitPrice}
+                      onChange={(e) =>
+                        handleItemChange(idx, "unitPrice", e.target.value)
+                      }
+                      className="bg-yellow-50"
+                    />
+                  </TD>
+                  <TD>
+                    <InputField
+                      name={`qty-${idx}`}
+                      type="number"
+                      value={item.qty}
+                      onChange={(e) => handleItemChange(idx, "qty", e.target.value)}
+                      className="bg-yellow-50"
+                    />
+                  </TD>
+                  <TD>{item.stockOnHand.toFixed(2)}</TD>
+                  <TD>{item.newStock.toFixed(2)}</TD>
+                  <TD>${total(item)}</TD>
+                  <TD>
+                    <OutlineButton
+                      isIcon
+                      icon={FaTrash}
+                      textColor="text-red-600"
+                      borderColor="border-red-600"
+                      hover="hover:bg-red-50"
+                      onClick={() => handleRemoveRow(idx)}
+                    />
+                  </TD>
+                </TR>
+              ))}
+              <TR>
+                <TD colSpan={7} className="text-center">
+                  <FilledButton
+                    isIcon
+                    icon={FaPlusCircle}
+                    buttonText={t('buttons.addItem')}
+                    bgColor="bg-blue-600"
+                    isIconLeft
+                    onClick={handleAddRow}
+                  />
+                </TD>
+              </TR>
+            </Tbody>
+          </Table>
+        </div>
+        <div className="flex justify-end mt-2">
+          <span className="font-medium mr-2">{t('formLabels.itemsTotal')}:</span> $
+          {itemsTotal.toFixed(2)}
+        </div>
+      </Card>
+
+      <Card className="mb-4">
+        <Tabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          tabs={[
+            { key: "discount", label: t('sections.discountAdjustment') },
+            { key: "shipping", label: t('sections.shippingDetails') },
+            { key: "documents", label: t('sections.attachDocuments') },
+          ]}
+        >
+          {activeTab === "discount" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+              <div>
+                <span className="block mb-1 font-medium">{t('formLabels.discount')}</span>
+                <div className="flex gap-2">
+                  <InputField
+                    name="discountValue"
+                    type="number"
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                  />
+                  <SelectBox
+                    name="discountType"
+                    value={discountType}
+                    optionList={[
+                      { label: t('formLabels.percentage'), value: "%" },
+                      { label: t('formLabels.flat'), value: "$" },
+                    ]}
+                    handleChange={(value) => setDiscountType(value)}
+                    width="w-full"
+                  />
+                </div>
+              </div>
+              <InputField
+                label={t('formLabels.adjustment')}
+                name="adjustment"
+                type="number"
+                value={adjustment}
+                onChange={(e) => setAdjustment(parseFloat(e.target.value) || 0)}
+              />
+              <SelectBox
+                label={t('formLabels.account')}
+                name="account"
+                value={account}
+                optionList={[
+                  { label: t('formLabels.defaultAccount'), value: "Default Account" },
+                  { label: t('formLabels.sales'), value: "Sales" },
+                  { label: t('formLabels.miscellaneous'), value: "Miscellaneous" },
+                ]}
+                handleChange={(value) => setAccount(value)}
+                width="w-full"
+              />
+            </div>
+          )}
+          {activeTab === "shipping" && (
+            <div className="p-4">
+              <InputField
+                label={t('formLabels.shippingInstructions')}
+                name="shippingInstructions"
+                type="textarea"
+                placeholder={t('placeholders.enterShippingInstructions')}
+                value={shippingInstructions}
+                onChange={(e) => setShippingInstructions(e.target.value)}
+              />
+            </div>
+          )}
+          {activeTab === "documents" && (
+            <div className="p-4">
+              <InputField
+                label={t('formLabels.uploadFiles')}
+                name="files"
+                type="file"
+                onChange={(e) => setFiles(e.target.files)}
+              />
+            </div>
+          )}
+        </Tabs>
+      </Card>
+
+      <Card className="mb-4">
+        <div className="p-4">
+          <h5 className="text-lg font-bold mb-2">{t('formLabels.notesTerms')}</h5>
+          <textarea
+            value={noteTerms}
+            onChange={(e) => setNoteTerms(e.target.value)}
+            className="w-full h-32 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t('placeholders.enterNotesTerms')}
+          />
+        </div>
+      </Card>
+
+      <div className="flex justify-end gap-2">
+        <OutlineButton
+          buttonText={t('buttons.cancel')}
+          textColor="text-gray-600"
+          borderColor="border-gray-600"
+          hover="hover:bg-gray-50"
+          onClick={onBack}
+        />
+        <FilledButton
+          buttonText={t('buttons.saveEstimate')}
+          bgColor="bg-blue-600"
+        />
+      </div>
+    </Container>
+  );
+};
+
+export default CreateInvoice;
