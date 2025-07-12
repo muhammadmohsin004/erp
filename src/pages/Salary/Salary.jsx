@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
 import {
   Plus,
   Edit,
@@ -48,9 +49,11 @@ import Badge from "../../components/elements/Badge/Badge";
 import { useHR } from "../../Contexts/HrContext/HrContext";
 
 const Salary = () => {
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const t = translations[currentLanguage] || translations.en;
+
   // Context
   const {
-    // State
     salaries,
     salariesPagination,
     payslipData,
@@ -58,8 +61,6 @@ const Salary = () => {
     isLoading,
     isProcessing,
     error,
-
-    // Methods
     getSalaries,
     getSalary,
     generateSalary,
@@ -285,31 +286,51 @@ const Salary = () => {
       Paid: "success",
     };
 
-    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
+    return (
+      <Badge variant={variants[status] || "secondary"}>
+        {t[status?.toLowerCase()] || status}
+      </Badge>
+    );
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(currentLanguage === "ar" ? "ar-EG" : "en-US", {
       style: "currency",
       currency: "USD",
     }).format(amount || 0);
   };
 
   const getMonthName = (month) => {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+    const months =
+      currentLanguage === "ar"
+        ? [
+            "يناير",
+            "فبراير",
+            "مارس",
+            "أبريل",
+            "مايو",
+            "يونيو",
+            "يوليو",
+            "أغسطس",
+            "سبتمبر",
+            "أكتوبر",
+            "نوفمبر",
+            "ديسمبر",
+          ]
+        : [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
     return months[month - 1] || month;
   };
 
@@ -319,18 +340,27 @@ const Salary = () => {
   }));
 
   const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "Draft", label: "Draft" },
-    { value: "Processed", label: "Processed" },
-    { value: "Paid", label: "Paid" },
+    { value: "", label: t.allStatus },
+    { value: "Draft", label: t.draft },
+    { value: "Processed", label: t.processedStatus },
+    { value: "Paid", label: t.paidStatus },
   ];
 
   const paymentMethodOptions = [
-    { value: "Bank Transfer", label: "Bank Transfer" },
-    { value: "Cash", label: "Cash" },
-    { value: "Cheque", label: "Cheque" },
-    { value: "Direct Deposit", label: "Direct Deposit" },
-    { value: "Mobile Payment", label: "Mobile Payment" },
+    {
+      value: "Bank Transfer",
+      label: currentLanguage === "ar" ? "تحويل بنكي" : "Bank Transfer",
+    },
+    { value: "Cash", label: currentLanguage === "ar" ? "نقدًا" : "Cash" },
+    { value: "Cheque", label: currentLanguage === "ar" ? "شيك" : "Cheque" },
+    {
+      value: "Direct Deposit",
+      label: currentLanguage === "ar" ? "إيداع مباشر" : "Direct Deposit",
+    },
+    {
+      value: "Mobile Payment",
+      label: currentLanguage === "ar" ? "دفع عبر الهاتف" : "Mobile Payment",
+    },
   ];
 
   const employeeOptions = [
@@ -342,7 +372,10 @@ const Salary = () => {
   ];
 
   return (
-    <Container className="py-6 px-4 max-w-7xl mx-auto">
+    <Container
+      className="py-6 px-4 max-w-7xl mx-auto"
+      style={{ direction: currentLanguage === "ar" ? "rtl" : "ltr" }}
+    >
       {/* Error Alert */}
       {error && (
         <Alert
@@ -363,16 +396,14 @@ const Salary = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Salary Management
+                  {t.salaryManagement}
                 </h1>
-                <p className="text-gray-600">
-                  Generate, process, and manage employee salaries
-                </p>
+                <p className="text-gray-600">{t.generateProcessManage}</p>
               </div>
             </div>
             <div className="flex gap-2">
               <OutlineButton
-                buttonText="Export"
+                buttonText={t.export}
                 icon={Download}
                 isIcon={true}
                 isIconLeft={true}
@@ -388,7 +419,7 @@ const Salary = () => {
                 hover="hover:bg-gray-50"
               />
               <FilledButton
-                buttonText="Bulk Generate"
+                buttonText={t.bulkGenerate}
                 icon={Users}
                 isIcon={true}
                 isIconLeft={true}
@@ -401,7 +432,7 @@ const Salary = () => {
                 onClick={() => setShowBulkModal(true)}
               />
               <FilledButton
-                buttonText="Generate Salary"
+                buttonText={t.generateSalary}
                 icon={Plus}
                 isIcon={true}
                 isIconLeft={true}
@@ -427,7 +458,7 @@ const Salary = () => {
           <h3 className="text-2xl font-bold text-blue-600">
             {salariesPagination?.totalItems || 0}
           </h3>
-          <p className="text-sm text-gray-600">Total Records</p>
+          <p className="text-sm text-gray-600">{t.totalRecords}</p>
         </Card>
         <Card className="p-6 text-center">
           <div className="text-yellow-600 mb-2 flex justify-center">
@@ -436,14 +467,14 @@ const Salary = () => {
           <h3 className="text-2xl font-bold text-yellow-600">
             {stats.processed}
           </h3>
-          <p className="text-sm text-gray-600">Processed</p>
+          <p className="text-sm text-gray-600">{t.processed}</p>
         </Card>
         <Card className="p-6 text-center">
           <div className="text-green-600 mb-2 flex justify-center">
             <CheckCircle size={28} />
           </div>
           <h3 className="text-2xl font-bold text-green-600">{stats.paid}</h3>
-          <p className="text-sm text-gray-600">Paid</p>
+          <p className="text-sm text-gray-600">{t.paid}</p>
         </Card>
         <Card className="p-6 text-center">
           <div className="text-indigo-600 mb-2 flex justify-center">
@@ -452,7 +483,7 @@ const Salary = () => {
           <h3 className="text-2xl font-bold text-indigo-600">
             {formatCurrency(stats.totalAmount)}
           </h3>
-          <p className="text-sm text-gray-600">Total Paid</p>
+          <p className="text-sm text-gray-600">{t.totalPaid}</p>
         </Card>
       </div>
 
@@ -463,12 +494,12 @@ const Salary = () => {
             <SearchAndFilters
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder="Search by employee name..."
+              placeholder={t.searchPlaceholder}
               isFocused={false}
             />
           </div>
           <SelectBox
-            placeholder="Filter by Status"
+            placeholder={t.filterByStatus}
             optionList={statusOptions}
             value={filterStatus}
             handleChange={(value) => {
@@ -478,7 +509,7 @@ const Salary = () => {
             width="w-full"
           />
           <SelectBox
-            placeholder="Filter by Employee"
+            placeholder={t.filterByEmployee}
             optionList={employeeOptions}
             value={filterEmployee}
             handleChange={(value) => {
@@ -488,7 +519,7 @@ const Salary = () => {
             width="w-full"
           />
           <SelectBox
-            placeholder="Filter by Month"
+            placeholder={t.filterByMonth}
             optionList={monthOptions}
             value={filterMonth}
             handleChange={(value) => {
@@ -500,7 +531,7 @@ const Salary = () => {
         </div>
         <div className="mt-4">
           <InputField
-            placeholder="Filter by Year"
+            placeholder={t.filterByYear}
             type="number"
             value={filterYear}
             onChange={(e) => {
@@ -516,11 +547,11 @@ const Salary = () => {
       <Card>
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            Salary Records
+            {t.salaryRecords}
           </h2>
           <p className="text-sm text-gray-600">
-            Showing {filteredSalaryData.length} of{" "}
-            {salariesPagination?.totalItems || 0} records
+            {t.salaryRecords} {filteredSalaryData.length} {t.of}{" "}
+            {salariesPagination?.totalItems || 0} {t.records}
           </p>
         </div>
 
@@ -540,7 +571,7 @@ const Salary = () => {
           <div className="text-center py-12">
             <DollarSign size={48} className="text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No salary records found
+              {t.noSalaryRecords}
             </h3>
             <p className="text-gray-600 mb-4">
               {searchTerm ||
@@ -548,8 +579,8 @@ const Salary = () => {
               filterEmployee ||
               filterMonth ||
               filterYear
-                ? "Try adjusting your search or filter criteria"
-                : "Get started by generating your first salary record"}
+                ? t.adjustSearch
+                : t.generateFirstSalary}
             </p>
             {!searchTerm &&
               !filterStatus &&
@@ -557,7 +588,7 @@ const Salary = () => {
               !filterMonth &&
               !filterYear && (
                 <FilledButton
-                  buttonText="Generate First Salary"
+                  buttonText={t.generateFirstSalary}
                   icon={Plus}
                   isIcon={true}
                   isIconLeft={true}
@@ -571,13 +602,13 @@ const Salary = () => {
             <Table className="min-w-full">
               <Thead className="bg-gray-50">
                 <TR>
-                  <TH>Employee</TH>
-                  <TH>Period</TH>
-                  <TH>Basic Salary</TH>
-                  <TH>Net Salary</TH>
-                  <TH>Status</TH>
-                  <TH>Payment</TH>
-                  <TH className="text-center">Actions</TH>
+                  <TH>{t.employee}</TH>
+                  <TH>{t.period}</TH>
+                  <TH>{t.basicSalary}</TH>
+                  <TH>{t.netSalary}</TH>
+                  <TH>{t.status}</TH>
+                  <TH>{t.payment}</TH>
+                  <TH className="text-center">{t.actions}</TH>
                 </TR>
               </Thead>
               <Tbody>
@@ -611,7 +642,7 @@ const Salary = () => {
                             {getMonthName(salary.month)} {salary.year}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {salary.workingDays} working days
+                            {salary.workingDays} {t.workingDays}
                           </div>
                         </div>
                       </div>
@@ -621,7 +652,7 @@ const Salary = () => {
                         {formatCurrency(salary.basicSalary)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Gross: {formatCurrency(salary.grossSalary)}
+                        {t.grossSalary}: {formatCurrency(salary.grossSalary)}
                       </div>
                     </TD>
                     <TD>
@@ -629,7 +660,8 @@ const Salary = () => {
                         {formatCurrency(salary.netSalary)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Deductions: {formatCurrency(salary.totalDeductions)}
+                        {t.totalDeductions}:{" "}
+                        {formatCurrency(salary.totalDeductions)}
                       </div>
                     </TD>
                     <TD>{getStatusBadge(salary.status)}</TD>
@@ -641,35 +673,35 @@ const Salary = () => {
                           </div>
                           {salary.paymentReference && (
                             <div className="text-sm text-gray-500">
-                              Ref: {salary.paymentReference}
+                              {t.paymentReference}: {salary.paymentReference}
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span className="text-gray-500">Not paid</span>
+                        <span className="text-gray-500">{t.notPaid}</span>
                       )}
                     </TD>
                     <TD className="text-center">
                       <Dropdown
-                        buttonText="Actions"
+                        buttonText={t.actions}
                         buttonClassName="text-sm"
                         items={[
                           {
-                            label: "View Details",
+                            label: t.viewDetails,
                             action: () => handleViewDetails(salary),
                           },
                           {
-                            label: "View Payslip",
+                            label: t.viewPayslip,
                             action: () => handleViewPayslip(salary.id),
                           },
                           ...(salary.status === "Draft"
                             ? [
                                 {
-                                  label: "Process",
+                                  label: t.process,
                                   action: () => handleProcessSalary(salary.id),
                                 },
                                 {
-                                  label: "Delete",
+                                  label: t.delete,
                                   action: () => handleDeleteSalary(salary.id),
                                 },
                               ]
@@ -677,7 +709,7 @@ const Salary = () => {
                           ...(salary.status === "Processed"
                             ? [
                                 {
-                                  label: "Mark as Paid",
+                                  label: t.markAsPaid,
                                   action: () => handleMarkAsPaid(salary.id),
                                 },
                               ]
@@ -707,11 +739,11 @@ const Salary = () => {
 
       {/* Generate Salary Modal */}
       <Modall
-        title="Generate Salary"
+        title={t.generateSalaryModal}
         modalOpen={showAddModal}
         setModalOpen={setShowAddModal}
-        okText="Generate Salary"
-        cancelText="Cancel"
+        okText={t.generateSalary}
+        cancelText={t.cancel}
         okAction={handleAddSalary}
         cancelAction={() => setShowAddModal(false)}
         okButtonDisabled={
@@ -723,8 +755,8 @@ const Salary = () => {
         body={
           <div className="space-y-4">
             <SelectBox
-              label="Employee *"
-              placeholder="Select Employee"
+              label={t.employeeLabel}
+              placeholder={t.selectEmployee}
               optionList={employeeOptions}
               value={formData.employeeId}
               handleChange={(value) => handleInputChange("employeeId", value)}
@@ -732,17 +764,17 @@ const Salary = () => {
             />
             <div className="grid grid-cols-2 gap-4">
               <SelectBox
-                label="Month *"
-                placeholder="Select Month"
+                label={t.monthLabel}
+                placeholder={t.selectMonth}
                 optionList={monthOptions}
                 value={formData.month}
                 handleChange={(value) => handleInputChange("month", value)}
                 width="w-full"
               />
               <InputField
-                label="Year *"
+                label={t.yearLabel}
                 type="number"
-                placeholder="Enter Year"
+                placeholder={t.enterYear}
                 value={formData.year}
                 onChange={(e) => handleInputChange("year", e.target.value)}
                 width="w-full"
@@ -754,11 +786,11 @@ const Salary = () => {
 
       {/* Bulk Generate Modal */}
       <Modall
-        title="Bulk Generate Salaries"
+        title={t.bulkGenerateSalaries}
         modalOpen={showBulkModal}
         setModalOpen={setShowBulkModal}
-        okText={`Generate ${formData.bulkEmployeeIds.length} Salaries`}
-        cancelText="Cancel"
+        okText={`${t.generateSalary} ${formData.bulkEmployeeIds.length} ${t.salaries}`}
+        cancelText={t.cancel}
         okAction={handleBulkSalary}
         cancelAction={() => setShowBulkModal(false)}
         okButtonDisabled={
@@ -772,7 +804,7 @@ const Salary = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Employees *
+                {t.selectEmployees}
               </label>
               <div className="border rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
                 <div className="mb-2">
@@ -794,7 +826,7 @@ const Salary = () => {
                       }}
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
-                    <span className="text-sm font-medium">Select All</span>
+                    <span className="text-sm font-medium">{t.selectAll}</span>
                   </label>
                   <hr className="my-2" />
                 </div>
@@ -820,22 +852,22 @@ const Salary = () => {
                 ))}
               </div>
               <p className="text-sm text-gray-600 mt-1">
-                {formData.bulkEmployeeIds.length} employee(s) selected
+                {formData.bulkEmployeeIds.length} {t.employeesSelected}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <SelectBox
-                label="Month *"
-                placeholder="Select Month"
+                label={t.monthLabel}
+                placeholder={t.selectMonth}
                 optionList={monthOptions}
                 value={formData.month}
                 handleChange={(value) => handleInputChange("month", value)}
                 width="w-full"
               />
               <InputField
-                label="Year *"
+                label={t.yearLabel}
                 type="number"
-                placeholder="Enter Year"
+                placeholder={t.enterYear}
                 value={formData.year}
                 onChange={(e) => handleInputChange("year", e.target.value)}
                 width="w-full"
@@ -847,11 +879,11 @@ const Salary = () => {
 
       {/* Mark as Paid Modal */}
       <Modall
-        title="Mark Salary as Paid"
+        title={t.markSalaryAsPaid}
         modalOpen={showPayModal}
         setModalOpen={setShowPayModal}
-        okText="Mark as Paid"
-        cancelText="Cancel"
+        okText={t.markAsPaid}
+        cancelText={t.cancel}
         okAction={handlePaySalary}
         cancelAction={() => setShowPayModal(false)}
         okButtonDisabled={
@@ -860,8 +892,8 @@ const Salary = () => {
         body={
           <div className="space-y-4">
             <SelectBox
-              label="Payment Method *"
-              placeholder="Select Payment Method"
+              label={t.paymentMethodLabel}
+              placeholder={t.selectPaymentMethod}
               optionList={paymentMethodOptions}
               value={formData.paymentMethod}
               handleChange={(value) =>
@@ -870,8 +902,8 @@ const Salary = () => {
               width="w-full"
             />
             <InputField
-              label="Payment Reference *"
-              placeholder="Enter Payment Reference (Transaction ID, Check Number, etc.)"
+              label={t.paymentReferenceLabel}
+              placeholder={t.enterPaymentReference}
               value={formData.paymentReference}
               onChange={(e) =>
                 handleInputChange("paymentReference", e.target.value)
@@ -884,10 +916,10 @@ const Salary = () => {
 
       {/* View Details Modal */}
       <Modall
-        title="Salary Details"
+        title={t.salaryDetails}
         modalOpen={showDetailsModal}
         setModalOpen={setShowDetailsModal}
-        okText="Close"
+        okText={t.close}
         cancelText=""
         okAction={() => setShowDetailsModal(false)}
         cancelAction={() => setShowDetailsModal(false)}
@@ -898,31 +930,33 @@ const Salary = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">
-                    Employee Information
+                    {t.employeeInformation}
                   </h3>
                   <p>
-                    <strong>Name:</strong> {selectedSalary.employeeName}
+                    <strong>{t.name}:</strong> {selectedSalary.employeeName}
                   </p>
                   <p>
-                    <strong>Period:</strong>{" "}
+                    <strong>{t.period}:</strong>{" "}
                     {getMonthName(selectedSalary.month)} {selectedSalary.year}
                   </p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">
-                    Attendance Summary
+                    {t.attendanceSummary}
                   </h3>
                   <p>
-                    <strong>Working Days:</strong> {selectedSalary.workingDays}
+                    <strong>{t.workingDays}:</strong>{" "}
+                    {selectedSalary.workingDays}
                   </p>
                   <p>
-                    <strong>Present Days:</strong> {selectedSalary.presentDays}
+                    <strong>{t.presentDays}:</strong>{" "}
+                    {selectedSalary.presentDays}
                   </p>
                   <p>
-                    <strong>Leave Days:</strong> {selectedSalary.leaveDays}
+                    <strong>{t.leaveDays}:</strong> {selectedSalary.leaveDays}
                   </p>
                   <p>
-                    <strong>Overtime Hours:</strong>{" "}
+                    <strong>{t.overtimeHours}:</strong>{" "}
                     {selectedSalary.overtimeHours}
                   </p>
                 </div>
@@ -930,34 +964,34 @@ const Salary = () => {
 
               <div>
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  Salary Breakdown
+                  {t.salaryBreakdown}
                 </h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <p>
-                      <strong>Basic Salary:</strong>{" "}
+                      <strong>{t.basicSalary}:</strong>{" "}
                       {formatCurrency(selectedSalary.basicSalary)}
                     </p>
                     <p>
-                      <strong>Total Earnings:</strong>{" "}
+                      <strong>{t.totalEarnings}:</strong>{" "}
                       {formatCurrency(selectedSalary.totalEarnings)}
                     </p>
                     <p>
-                      <strong>Gross Salary:</strong>{" "}
+                      <strong>{t.grossSalary}:</strong>{" "}
                       {formatCurrency(selectedSalary.grossSalary)}
                     </p>
                   </div>
                   <div>
                     <p>
-                      <strong>Total Deductions:</strong>{" "}
+                      <strong>{t.totalDeductions}:</strong>{" "}
                       {formatCurrency(selectedSalary.totalDeductions)}
                     </p>
                     <p>
-                      <strong>Taxable Income:</strong>{" "}
+                      <strong>{t.taxableIncome}:</strong>{" "}
                       {formatCurrency(selectedSalary.taxableIncome)}
                     </p>
                     <p className="text-lg font-bold text-green-600">
-                      <strong>Net Salary:</strong>{" "}
+                      <strong>{t.netSalary}:</strong>{" "}
                       {formatCurrency(selectedSalary.netSalary)}
                     </p>
                   </div>
@@ -967,14 +1001,14 @@ const Salary = () => {
               {selectedSalary.paymentMethod && (
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">
-                    Payment Information
+                    {t.paymentInformation}
                   </h3>
                   <p>
-                    <strong>Payment Method:</strong>{" "}
+                    <strong>{t.paymentMethod}:</strong>{" "}
                     {selectedSalary.paymentMethod}
                   </p>
                   <p>
-                    <strong>Payment Reference:</strong>{" "}
+                    <strong>{t.paymentReference}:</strong>{" "}
                     {selectedSalary.paymentReference}
                   </p>
                 </div>
@@ -986,11 +1020,11 @@ const Salary = () => {
 
       {/* Payslip Modal */}
       <Modall
-        title="Employee Payslip"
+        title={t.employeePayslip}
         modalOpen={showPayslipModal}
         setModalOpen={setShowPayslipModal}
-        okText="Close"
-        cancelText="Download PDF"
+        okText={t.close}
+        cancelText={t.downloadPDF}
         okAction={() => setShowPayslipModal(false)}
         cancelAction={() => {
           /* Implement PDF download */
@@ -1012,28 +1046,33 @@ const Salary = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">
-                    Employee Information
+                    {t.employeeInformation}
                   </h3>
                   <p>
-                    <strong>Name:</strong> {payslipData.employee?.fullName}
+                    <strong>{t.name}:</strong> {payslipData.employee?.fullName}
                   </p>
                   <p>
-                    <strong>Code:</strong> {payslipData.employee?.employeeCode}
+                    <strong>{t.code}:</strong>{" "}
+                    {payslipData.employee?.employeeCode}
                   </p>
                   <p>
-                    <strong>Position:</strong> {payslipData.employee?.jobTitle}
+                    <strong>{t.position}:</strong>{" "}
+                    {payslipData.employee?.jobTitle}
                   </p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">
-                    Pay Period
+                    {t.payPeriod}
                   </h3>
                   <p>
-                    <strong>Period:</strong> {payslipData.salaryPeriod?.period}
+                    <strong>{t.period}:</strong>{" "}
+                    {payslipData.salaryPeriod?.period}
                   </p>
                   <p>
-                    <strong>Generated:</strong>{" "}
-                    {new Date(payslipData.generatedOn).toLocaleDateString()}
+                    <strong>{t.generated}:</strong>{" "}
+                    {new Date(payslipData.generatedOn).toLocaleDateString(
+                      currentLanguage === "ar" ? "ar-EG" : "en-US"
+                    )}
                   </p>
                 </div>
               </div>
@@ -1041,32 +1080,34 @@ const Salary = () => {
               {/* Attendance Summary */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  Attendance Summary
+                  {t.attendanceSummary}
                 </h3>
                 <div className="grid grid-cols-4 gap-4">
                   <div className="text-center border rounded-lg p-3">
                     <div className="text-2xl font-bold text-blue-600">
                       {payslipData.attendance?.workingDays}
                     </div>
-                    <div className="text-sm text-gray-600">Working Days</div>
+                    <div className="text-sm text-gray-600">{t.workingDays}</div>
                   </div>
                   <div className="text-center border rounded-lg p-3">
                     <div className="text-2xl font-bold text-green-600">
                       {payslipData.attendance?.presentDays}
                     </div>
-                    <div className="text-sm text-gray-600">Present Days</div>
+                    <div className="text-sm text-gray-600">{t.presentDays}</div>
                   </div>
                   <div className="text-center border rounded-lg p-3">
                     <div className="text-2xl font-bold text-yellow-600">
                       {payslipData.attendance?.leaveDays}
                     </div>
-                    <div className="text-sm text-gray-600">Leave Days</div>
+                    <div className="text-sm text-gray-600">{t.leaveDays}</div>
                   </div>
                   <div className="text-center border rounded-lg p-3">
                     <div className="text-2xl font-bold text-indigo-600">
                       {payslipData.attendance?.overtimeHours}
                     </div>
-                    <div className="text-sm text-gray-600">Overtime Hours</div>
+                    <div className="text-sm text-gray-600">
+                      {t.overtimeHours}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1075,7 +1116,7 @@ const Salary = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <h3 className="font-semibold text-green-600 mb-2">
-                    Earnings
+                    {t.earnings}
                   </h3>
                   <div className="border rounded-lg p-4 bg-green-50">
                     {payslipData.earnings?.map((earning, index) => (
@@ -1085,12 +1126,12 @@ const Salary = () => {
                           {formatCurrency(earning.amount)}
                         </span>
                       </div>
-                    )) || <p className="text-gray-600">No earnings data</p>}
+                    )) || <p className="text-gray-600">{t.noEarningsData}</p>}
                   </div>
                 </div>
                 <div>
                   <h3 className="font-semibold text-red-600 mb-2">
-                    Deductions
+                    {t.deductions}
                   </h3>
                   <div className="border rounded-lg p-4 bg-red-50">
                     {payslipData.deductions?.map((deduction, index) => (
@@ -1100,7 +1141,7 @@ const Salary = () => {
                           {formatCurrency(deduction.amount)}
                         </span>
                       </div>
-                    )) || <p className="text-gray-600">No deductions</p>}
+                    )) || <p className="text-gray-600">{t.noDeductions}</p>}
                   </div>
                 </div>
               </div>
@@ -1108,25 +1149,25 @@ const Salary = () => {
               {/* Summary */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  Salary Summary
+                  {t.salarySummary}
                 </h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span>Basic Salary:</span>
+                        <span>{t.basicSalary}:</span>
                         <span className="font-medium">
                           {formatCurrency(payslipData.summary?.basicSalary)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Total Earnings:</span>
+                        <span>{t.totalEarnings}:</span>
                         <span className="font-medium text-green-600">
                           {formatCurrency(payslipData.summary?.totalEarnings)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Total Deductions:</span>
+                        <span>{t.totalDeductions}:</span>
                         <span className="font-medium text-red-600">
                           {formatCurrency(payslipData.summary?.totalDeductions)}
                         </span>
@@ -1134,20 +1175,20 @@ const Salary = () => {
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span>Gross Salary:</span>
+                        <span>{t.grossSalary}:</span>
                         <span className="font-medium">
                           {formatCurrency(payslipData.summary?.grossSalary)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Taxable Income:</span>
+                        <span>{t.taxableIncome}:</span>
                         <span className="font-medium">
                           {formatCurrency(payslipData.summary?.taxableIncome)}
                         </span>
                       </div>
                       <hr className="my-2" />
                       <div className="flex justify-between text-lg font-bold">
-                        <span>Net Salary:</span>
+                        <span>{t.netSalary}:</span>
                         <span className="text-green-600">
                           {formatCurrency(payslipData.summary?.netSalary)}
                         </span>
@@ -1160,7 +1201,7 @@ const Salary = () => {
           ) : (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p>Loading payslip...</p>
+              <p>{t.loadingPayslip}</p>
             </div>
           )
         }
@@ -1168,11 +1209,11 @@ const Salary = () => {
 
       {/* Delete Confirmation Modal */}
       <Modall
-        title="Confirm Delete"
+        title={t.confirmDelete}
         modalOpen={showConfirmDelete}
         setModalOpen={setShowConfirmDelete}
-        okText="Delete"
-        cancelText="Cancel"
+        okText={t.delete}
+        cancelText={t.cancel}
         okAction={confirmDelete}
         cancelAction={() => setShowConfirmDelete(false)}
         okButtonDisabled={isLoading}
@@ -1180,12 +1221,9 @@ const Salary = () => {
           <div className="text-center">
             <Trash2 size={48} className="text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Delete Salary Record?
+              {t.deleteSalaryRecord}
             </h3>
-            <p className="text-gray-600">
-              This action cannot be undone. Are you sure you want to delete this
-              salary record?
-            </p>
+            <p className="text-gray-600">{t.deleteConfirmation}</p>
           </div>
         }
       />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   Plus,
   Edit,
@@ -10,7 +11,6 @@ import {
   Users,
 } from "lucide-react";
 import BodyHeader from "../../../components/elements/bodyHeader/BodyHeader";
-
 import Alert from "../../../components/elements/alert/Alert";
 import Card from "../../../components/elements/card/Card";
 import InputField from "../../../components/elements/inputField/InputField";
@@ -27,6 +27,8 @@ import Modall from "../../../components/elements/modal/Modal";
 import Dropdown from "../../../components/elements/dropdown/Dropdown";
 import Badge from "../../../components/elements/badge/Badge";
 import Container from "../../../components/elements/container/Container";
+import SearchAndFilters from "../../../components/elements/searchAndFilters/SearchAndFilters";
+import translations from "../../../translations/ManageInvoicestranslation";
 
 // Dummy Components (since we don't have the actual ones)
 const Span = ({ children, className = "", onClick }) => (
@@ -43,7 +45,30 @@ const H5 = ({ children, className = "" }) => (
   <h5 className={`text-lg ${className}`}>{children}</h5>
 );
 
+const Pagination = ({ currentPage, totalPages, onPageChange }) => (
+  <div className="flex justify-center space-x-2">
+    {Array.from({ length: totalPages }, (_, i) => (
+      <button
+        key={i + 1}
+        onClick={() => onPageChange(i + 1)}
+        className={`px-3 py-1 rounded ${
+          currentPage === i + 1
+            ? "bg-blue-500 text-white"
+            : "bg-gray-200 text-gray-700"
+        }`}
+      >
+        {i + 1}
+      </button>
+    ))}
+  </div>
+);
+
 const ManageInvoices = () => {
+  // Get current language from Redux store
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const t = translations[currentLanguage] || translations.en;
+  const isArabic = currentLanguage === "ar";
+
   const [invoices, setInvoices] = useState([]);
   const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -188,25 +213,25 @@ const ManageInvoices = () => {
 
   // Status options
   const statusOptions = [
-    { value: "all", label: "All Status" },
-    { value: "draft", label: "Draft" },
-    { value: "pending", label: "Pending" },
-    { value: "paid", label: "Paid" },
-    { value: "overdue", label: "Overdue" },
+    { value: "all", label: t.allStatus },
+    { value: "draft", label: t.draft },
+    { value: "pending", label: t.pending },
+    { value: "paid", label: t.paid },
+    { value: "overdue", label: t.overdue },
   ];
 
   // Date range options
   const dateRangeOptions = [
-    { value: "all", label: "All Time" },
-    { value: "week", label: "Last Week" },
-    { value: "month", label: "Last Month" },
-    { value: "quarter", label: "Last Quarter" },
+    { value: "all", label: t.allTime },
+    { value: "week", label: t.lastWeek },
+    { value: "month", label: t.lastMonth },
+    { value: "quarter", label: t.lastQuarter },
   ];
 
   // Handle form submission
   const handleSubmit = () => {
     if (!formData.invoiceNo || !formData.client || !formData.amount) {
-      showAlertMessage("Please fill in all required fields", "danger");
+      showAlertMessage(t.fillRequiredFields, "danger");
       return;
     }
 
@@ -218,7 +243,7 @@ const ManageInvoices = () => {
           : inv
       );
       setInvoices(updatedInvoices);
-      showAlertMessage("Invoice updated successfully!", "success");
+      showAlertMessage(t.invoiceUpdatedSuccess, "success");
     } else {
       // Add new invoice
       const newInvoice = {
@@ -227,7 +252,7 @@ const ManageInvoices = () => {
         amount: parseFloat(formData.amount),
       };
       setInvoices([...invoices, newInvoice]);
-      showAlertMessage("Invoice created successfully!", "success");
+      showAlertMessage(t.invoiceCreatedSuccess, "success");
     }
 
     resetForm();
@@ -271,7 +296,7 @@ const ManageInvoices = () => {
       );
       setInvoices(updatedInvoices);
       setDeleteInvoice(null);
-      showAlertMessage("Invoice deleted successfully!", "success");
+      showAlertMessage(t.invoiceDeletedSuccess, "success");
     }
   };
 
@@ -294,6 +319,17 @@ const ManageInvoices = () => {
     return variants[status] || "secondary";
   };
 
+  // Get translated status
+  const getTranslatedStatus = (status) => {
+    const statusMap = {
+      draft: t.draft,
+      pending: t.pending,
+      paid: t.paid,
+      overdue: t.overdue,
+    };
+    return statusMap[status] || status;
+  };
+
   // Calculate statistics
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
   const paidAmount = invoices
@@ -308,25 +344,25 @@ const ManageInvoices = () => {
 
   // Export dropdown items
   const exportItems = [
-    { label: "Export as CSV", value: "csv" },
-    { label: "Export as PDF", value: "pdf" },
-    { label: "Export as Excel", value: "excel" },
+    { label: t.exportCSV, value: "csv" },
+    { label: t.exportPDF, value: "pdf" },
+    { label: t.exportExcel, value: "excel" },
   ];
 
   const handleExport = (item) => {
     showAlertMessage(
-      `Exporting invoices as ${item.value.toUpperCase()}...`,
+      `${t.exportingInvoices} ${item.value.toUpperCase()}...`,
       "info"
     );
   };
 
   return (
-    <Container className="max-w-7xl mx-auto py-8 px-4">
+    <Container className={`max-w-7xl mx-auto py-8 px-4 ${isArabic ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div className="mb-8">
         <BodyHeader
-          heading="Manage Invoices"
-          subHeading="Create, edit, and track your invoices"
+          heading={t.manageInvoices}
+          subHeading={t.createEditTrackInvoices}
         />
       </div>
 
@@ -345,7 +381,7 @@ const ManageInvoices = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Amount</p>
+              <p className="text-sm font-medium text-gray-600">{t.totalAmount}</p>
               <p className="text-2xl font-bold text-gray-900">
                 ${totalAmount.toFixed(2)}
               </p>
@@ -357,7 +393,7 @@ const ManageInvoices = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Paid</p>
+              <p className="text-sm font-medium text-gray-600">{t.paid}</p>
               <p className="text-2xl font-bold text-green-600">
                 ${paidAmount.toFixed(2)}
               </p>
@@ -369,7 +405,7 @@ const ManageInvoices = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-sm font-medium text-gray-600">{t.pending}</p>
               <p className="text-2xl font-bold text-yellow-600">
                 ${pendingAmount.toFixed(2)}
               </p>
@@ -381,7 +417,7 @@ const ManageInvoices = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Overdue</p>
+              <p className="text-sm font-medium text-gray-600">{t.overdue}</p>
               <p className="text-2xl font-bold text-red-600">
                 ${overdueAmount.toFixed(2)}
               </p>
@@ -395,18 +431,18 @@ const ManageInvoices = () => {
       <Card>
         <div className="p-6">
           {/* Header Actions */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                Invoice List
+                {t.invoiceList}
               </h3>
               <p className="text-sm text-gray-600">
-                Manage your invoices and track payments
+                {t.manageInvoicesTrackPayments}
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className={`flex gap-3 ${isArabic ? 'flex-row-reverse' : ''}`}>
               <Dropdown
-                buttonText="Export"
+                buttonText={t.export}
                 icon={Download}
                 items={exportItems}
                 onSelect={handleExport}
@@ -415,8 +451,8 @@ const ManageInvoices = () => {
               <FilledButton
                 isIcon={true}
                 icon={Plus}
-                isIconLeft={true}
-                buttonText="Create Invoice"
+                isIconLeft={!isArabic}
+                buttonText={t.createInvoice}
                 bgColor="bg-blue-600"
                 textColor="text-white"
                 onClick={() => setShowModal(true)}
@@ -429,19 +465,19 @@ const ManageInvoices = () => {
             <SearchAndFilters
               searchValue={searchValue}
               setSearchValue={setSearchValue}
-              placeholder="Search invoices..."
+              placeholder={t.searchInvoices}
             />
 
-            <div className="flex flex-col sm:flex-row gap-4 mt-4 px-6">
+            <div className={`flex flex-col sm:flex-row gap-4 mt-4 px-6 ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
               <SelectBox
-                placeholder="Filter by Status"
+                placeholder={t.filterByStatus}
                 value={selectedStatus}
                 handleChange={setSelectedStatus}
                 optionList={statusOptions}
                 width="w-48"
               />
               <SelectBox
-                placeholder="Filter by Date"
+                placeholder={t.filterByDate}
                 value={selectedDateRange}
                 handleChange={setSelectedDateRange}
                 optionList={dateRangeOptions}
@@ -455,13 +491,13 @@ const ManageInvoices = () => {
             <Table>
               <Thead className="bg-gray-50">
                 <TR>
-                  <TH>Invoice No.</TH>
-                  <TH>Client</TH>
-                  <TH>Date</TH>
-                  <TH>Due Date</TH>
-                  <TH>Amount</TH>
-                  <TH>Status</TH>
-                  <TH>Actions</TH>
+                  <TH>{t.invoiceNo}</TH>
+                  <TH>{t.client}</TH>
+                  <TH>{t.date}</TH>
+                  <TH>{t.dueDate}</TH>
+                  <TH>{t.amount}</TH>
+                  <TH>{t.status}</TH>
+                  <TH>{t.actions}</TH>
                 </TR>
               </Thead>
               <Tbody>
@@ -479,12 +515,11 @@ const ManageInvoices = () => {
                       </TD>
                       <TD>
                         <Badge variant={getStatusBadge(invoice.status)}>
-                          {invoice.status.charAt(0).toUpperCase() +
-                            invoice.status.slice(1)}
+                          {getTranslatedStatus(invoice.status)}
                         </Badge>
                       </TD>
                       <TD>
-                        <div className="flex gap-2">
+                        <div className={`flex gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
                           <OutlineButton
                             isIcon={true}
                             icon={Edit}
@@ -522,7 +557,7 @@ const ManageInvoices = () => {
                 ) : (
                   <TR>
                     <TD colSpan={7} className="text-center py-8 text-gray-500">
-                      No invoices found
+                      {t.noInvoicesFound}
                     </TD>
                   </TR>
                 )}
@@ -545,11 +580,11 @@ const ManageInvoices = () => {
 
       {/* Create/Edit Invoice Modal */}
       <Modall
-        title={editingInvoice ? "Edit Invoice" : "Create New Invoice"}
+        title={editingInvoice ? t.editInvoice : t.createNewInvoice}
         modalOpen={showModal}
         setModalOpen={setShowModal}
-        okText={editingInvoice ? "Update" : "Create"}
-        cancelText="Cancel"
+        okText={editingInvoice ? t.update : t.create}
+        cancelText={t.cancel}
         okAction={handleSubmit}
         cancelAction={resetForm}
         width={600}
@@ -557,8 +592,8 @@ const ManageInvoices = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="Invoice Number"
-                placeholder="INV-2024-001"
+                label={t.invoiceNumber}
+                placeholder={t.invoiceNumberPlaceholder}
                 value={formData.invoiceNo}
                 onChange={(e) =>
                   setFormData({ ...formData, invoiceNo: e.target.value })
@@ -566,8 +601,8 @@ const ManageInvoices = () => {
                 width="w-full"
               />
               <InputField
-                label="Client Name"
-                placeholder="Client name"
+                label={t.clientName}
+                placeholder={t.clientNamePlaceholder}
                 value={formData.client}
                 onChange={(e) =>
                   setFormData({ ...formData, client: e.target.value })
@@ -578,7 +613,7 @@ const ManageInvoices = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="Issue Date"
+                label={t.issueDate}
                 type="date"
                 value={formData.date}
                 onChange={(e) =>
@@ -587,7 +622,7 @@ const ManageInvoices = () => {
                 width="w-full"
               />
               <InputField
-                label="Due Date"
+                label={t.dueDate}
                 type="date"
                 value={formData.dueDate}
                 onChange={(e) =>
@@ -599,9 +634,9 @@ const ManageInvoices = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="Amount"
+                label={t.amount}
                 type="number"
-                placeholder="0.00"
+                placeholder={t.amountPlaceholder}
                 value={formData.amount}
                 onChange={(e) =>
                   setFormData({ ...formData, amount: e.target.value })
@@ -609,7 +644,7 @@ const ManageInvoices = () => {
                 width="w-full"
               />
               <SelectBox
-                label="Status"
+                label={t.status}
                 value={formData.status}
                 handleChange={(value) =>
                   setFormData({ ...formData, status: value })
@@ -621,12 +656,12 @@ const ManageInvoices = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                {t.description}
               </label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows="3"
-                placeholder="Invoice description..."
+                placeholder={t.descriptionPlaceholder}
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -639,11 +674,11 @@ const ManageInvoices = () => {
 
       {/* Delete Confirmation Modal */}
       <Modall
-        title="Delete Invoice"
+        title={t.deleteInvoice}
         modalOpen={deleteInvoice !== null}
         setModalOpen={() => setDeleteInvoice(null)}
-        okText="Delete"
-        cancelText="Cancel"
+        okText={t.delete}
+        cancelText={t.cancel}
         okAction={handleDelete}
         cancelAction={() => setDeleteInvoice(null)}
         width={400}
@@ -651,11 +686,11 @@ const ManageInvoices = () => {
           <div className="text-center">
             <Trash2 className="mx-auto h-12 w-12 text-red-400 mb-4" />
             <p className="text-gray-600">
-              Are you sure you want to delete invoice{" "}
+              {t.deleteConfirmation}{" "}
               <strong>{deleteInvoice?.invoiceNo}</strong>?
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              This action cannot be undone.
+              {t.actionCannotBeUndone}
             </p>
           </div>
         }

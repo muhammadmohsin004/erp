@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { CloudUpload, X } from "lucide-react";
 import { useHR } from "../../Contexts/HrContext/HrContext";
 import InputField from "../../components/elements/inputField/InputField";
@@ -9,6 +10,7 @@ import SelectBox from "../../components/elements/selectBox/SelectBox";
 import CheckboxField from "../../components/elements/checkbox/CheckboxField";
 import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
+import employeeTranslations from "../../translations/employeeTranslations";
 
 const EmployeeForm = () => {
   const {
@@ -22,6 +24,15 @@ const EmployeeForm = () => {
     setFormMode,
     clearError,
   } = useHR();
+
+  // Get current language from Redux store
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get translations based on current language
+  const t = employeeTranslations[currentLanguage] || employeeTranslations.en;
+  
+  // Check if current language is Arabic for RTL support
+  const isArabic = currentLanguage === "ar";
 
   const isViewMode = formMode === "view";
   const isEditMode = formMode === "edit";
@@ -71,10 +82,10 @@ const EmployeeForm = () => {
   }, [selectedEmployee]);
 
   const statusOptions = [
-    { value: "Active", label: "Active" },
-    { value: "Inactive", label: "Inactive" },
-    { value: "On Leave", label: "On Leave" },
-    { value: "Terminated", label: "Terminated" },
+    { value: "Active", label: t.active },
+    { value: "Inactive", label: t.inactive },
+    { value: "On Leave", label: t.onLeave },
+    { value: "Terminated", label: t.terminated },
   ];
 
   const roleOptions = [
@@ -91,15 +102,15 @@ const EmployeeForm = () => {
   ];
 
   const branchOptions = [
-    { value: "Main Branch", label: "Main Branch" },
-    { value: "North Branch", label: "North Branch" },
-    { value: "South Branch", label: "South Branch" },
+    { value: "Main Branch", label: t.mainBranch },
+    { value: "North Branch", label: t.northBranch },
+    { value: "South Branch", label: t.southBranch },
   ];
 
   const languageOptions = [
-    { value: "English", label: "English" },
-    { value: "Urdu", label: "Urdu" },
-    { value: "Arabic", label: "Arabic" },
+    { value: "English", label: t.english },
+    { value: "Urdu", label: t.urdu },
+    { value: "Arabic", label: t.arabic },
   ];
 
   const handleInputChange = (e) => {
@@ -137,8 +148,8 @@ const EmployeeForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.F_Name) newErrors.F_Name = "First name is required";
-    if (!formData.Code) newErrors.Code = "Employee code is required";
+    if (!formData.F_Name) newErrors.F_Name = t.firstNameRequired;
+    if (!formData.Code) newErrors.Code = t.employeeCodeRequired;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -175,15 +186,15 @@ const EmployeeForm = () => {
   };
 
   return (
-    <Container className="py-4">
+    <Container className="py-4" dir={isArabic ? "rtl" : "ltr"}>
       <Card>
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
             {isCreateMode
-              ? "Add New Employee"
+              ? t.addNewEmployee
               : isEditMode
-              ? "Edit Employee"
-              : "Employee Details"}
+              ? t.editEmployee
+              : t.employeeDetails}
           </h2>
         </div>
 
@@ -200,63 +211,63 @@ const EmployeeForm = () => {
           {/* Employee Information Section */}
           <div className="px-6 py-4">
             <h3 className="text-md font-medium text-gray-900 mb-4">
-              Employee Information
+              {t.employeeInformation}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <InputField
                 name="F_Name"
-                placeholder="First Name"
+                placeholder={t.firstNamePlaceholder}
                 type="text"
                 value={formData.F_Name}
                 onChange={handleInputChange}
                 errors={errors}
                 disabled={isViewMode}
-                label="First Name *"
+                label={`${t.firstName} ${t.required}`}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="Surname"
-                placeholder="Surname"
+                placeholder={t.surnamePlaceholder}
                 type="text"
                 value={formData.Surname}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Surname"
+                label={t.surname}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="M_Name"
-                placeholder="Middle Name"
+                placeholder={t.middleNamePlaceholder}
                 type="text"
                 value={formData.M_Name}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Middle Name"
+                label={t.middleName}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="Code"
-                placeholder="Employee Code"
+                placeholder={t.employeeCodePlaceholder}
                 type="text"
                 value={formData.Code}
                 onChange={handleInputChange}
                 errors={errors}
                 disabled={isViewMode}
-                label="Employee Code *"
+                label={`${t.employeeCode} ${t.required}`}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <div className="col-span-1 md:col-span-2 lg:col-span-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Employee Picture
+                  {t.employeePicture}
                 </label>
                 <div className="flex items-center">
                   <label
@@ -278,7 +289,7 @@ const EmployeeForm = () => {
                       <div className="flex flex-col items-center justify-center p-4 text-center">
                         <CloudUpload className="w-8 h-8 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500">
-                          {isViewMode ? "No image" : "Upload Image"}
+                          {isViewMode ? t.noImage : t.uploadImage}
                         </p>
                       </div>
                     )}
@@ -299,7 +310,9 @@ const EmployeeForm = () => {
                             setImagePreview(null);
                             setFormData((prev) => ({ ...prev, Image: null }));
                           }}
-                          className="ml-4 p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                          className={`p-2 rounded-full bg-gray-200 hover:bg-gray-300 ${
+                            isArabic ? "mr-4" : "ml-4"
+                          }`}
                         >
                           <X className="w-5 h-5 text-gray-600" />
                         </button>
@@ -312,12 +325,12 @@ const EmployeeForm = () => {
               <div className="col-span-1 md:col-span-3">
                 <InputField
                   name="Notes"
-                  placeholder="Notes"
+                  placeholder={t.notesPlaceholder}
                   type="text"
                   value={formData.Notes}
                   onChange={handleInputChange}
                   disabled={isViewMode}
-                  label="Notes"
+                  label={t.notes}
                   width="w-full"
                   marginBottom="mb-0"
                 />
@@ -328,54 +341,54 @@ const EmployeeForm = () => {
           {/* Contact Information Section */}
           <div className="px-6 py-4">
             <h3 className="text-md font-medium text-gray-900 mb-4">
-              Contact Information
+              {t.contactInformation}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 name="MobileNumber"
-                placeholder="Mobile Number"
+                placeholder={t.mobileNumberPlaceholder}
                 type="tel"
                 value={formData.MobileNumber}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Mobile Number"
+                label={t.mobileNumber}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="PhoneNumber"
-                placeholder="Phone Number"
+                placeholder={t.phoneNumberPlaceholder}
                 type="tel"
                 value={formData.PhoneNumber}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Phone Number"
+                label={t.phoneNumber}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="Email"
-                placeholder="Email Address"
+                placeholder={t.emailPlaceholder}
                 type="email"
                 value={formData.Email}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Email Address"
+                label={t.emailAddress}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <SelectBox
                 name="Status"
-                placeholder="Select Status"
+                placeholder={t.selectStatus}
                 value={formData.Status}
                 handleChange={(value) => handleSelectChange("Status", value)}
                 optionList={statusOptions}
                 disabled={isViewMode}
-                label="Status"
+                label={t.status}
                 width="w-full"
                 marginBottom="mb-0"
               />
@@ -385,90 +398,90 @@ const EmployeeForm = () => {
           {/* Address Information Section */}
           <div className="px-6 py-4">
             <h3 className="text-md font-medium text-gray-900 mb-4">
-              Address Information
+              {t.addressInformation}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 name="AddressLine1"
-                placeholder="Address Line 1"
+                placeholder={t.addressLine1Placeholder}
                 type="text"
                 value={formData.AddressLine1}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Address Line 1"
+                label={t.addressLine1}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="AddressLine2"
-                placeholder="Address Line 2"
+                placeholder={t.addressLine2Placeholder}
                 type="text"
                 value={formData.AddressLine2}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Address Line 2"
+                label={t.addressLine2}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="City"
-                placeholder="City"
+                placeholder={t.cityPlaceholder}
                 type="text"
                 value={formData.City}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="City"
+                label={t.city}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="State"
-                placeholder="State"
+                placeholder={t.statePlaceholder}
                 type="text"
                 value={formData.State}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="State"
+                label={t.state}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="PostalCode"
-                placeholder="Postal Code"
+                placeholder={t.postalCodePlaceholder}
                 type="text"
                 value={formData.PostalCode}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Postal Code"
+                label={t.postalCode}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="Country"
-                placeholder="Country"
+                placeholder={t.countryPlaceholder}
                 type="text"
                 value={formData.Country}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Country"
+                label={t.country}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <InputField
                 name="Citizenship"
-                placeholder="Citizenship"
+                placeholder={t.citizenshipPlaceholder}
                 type="text"
                 value={formData.Citizenship}
                 onChange={handleInputChange}
                 disabled={isViewMode}
-                label="Citizenship"
+                label={t.citizenship}
                 width="w-full"
                 marginBottom="mb-0"
               />
@@ -478,58 +491,58 @@ const EmployeeForm = () => {
           {/* Account Information Section */}
           <div className="px-6 py-4">
             <h3 className="text-md font-medium text-gray-900 mb-4">
-              Account Information
+              {t.accountInformation}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <SelectBox
                 name="Role"
-                placeholder="Select Role"
+                placeholder={t.selectRole}
                 value={formData.Role}
                 handleChange={(value) => handleSelectChange("Role", value)}
                 optionList={roleOptions}
                 disabled={isViewMode}
-                label="Role"
+                label={t.role}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <SelectBox
                 name="DisplayLanguage"
-                placeholder="Select Language"
+                placeholder={t.selectLanguage}
                 value={formData.DisplayLanguage}
                 handleChange={(value) =>
                   handleSelectChange("DisplayLanguage", value)
                 }
                 optionList={languageOptions}
                 disabled={isViewMode}
-                label="Display Language"
+                label={t.displayLanguage}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <SelectBox
                 name="Branch"
-                placeholder="Select Branch"
+                placeholder={t.selectBranch}
                 value={formData.Branch}
                 handleChange={(value) => handleSelectChange("Branch", value)}
                 optionList={branchOptions}
                 disabled={isViewMode}
-                label="Branch"
+                label={t.branch}
                 width="w-full"
                 marginBottom="mb-0"
               />
 
               <SelectBox
                 name="AccessibleBranches"
-                placeholder="Select Accessible Branches"
+                placeholder={t.selectAccessibleBranches}
                 value={formData.AccessibleBranches}
                 handleChange={(values) =>
                   handleMultiSelectChange("AccessibleBranches", values)
                 }
                 optionList={branchOptions}
                 disabled={isViewMode}
-                label="Accessible Branches"
+                label={t.accessibleBranches}
                 width="w-full"
                 marginBottom="mb-0"
                 mode="multiple"
@@ -539,7 +552,7 @@ const EmployeeForm = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <CheckboxField
                     name="allow_access"
-                    label="Allow access to the system"
+                    label={t.allowAccess}
                     checked={formData.allow_access}
                     onChange={handleInputChange}
                     disabled={isViewMode}
@@ -547,7 +560,7 @@ const EmployeeForm = () => {
 
                   <CheckboxField
                     name="send_credentials"
-                    label="Send credentials to employee by email"
+                    label={t.sendCredentials}
                     checked={formData.send_credentials}
                     onChange={handleInputChange}
                     disabled={isViewMode}
@@ -559,9 +572,11 @@ const EmployeeForm = () => {
 
           {/* Form Actions */}
           {!isViewMode && (
-            <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+            <div className={`px-6 py-4 bg-gray-50 flex space-x-3 ${
+              isArabic ? "justify-start" : "justify-end"
+            }`}>
               <OutlineButton
-                buttonText="Cancel"
+                buttonText={t.cancel}
                 onClick={handleCancel}
                 borderColor="border-gray-300"
                 borderWidth="border"
@@ -574,7 +589,7 @@ const EmployeeForm = () => {
               />
 
               <FilledButton
-                buttonText={loading ? "Saving..." : "Save"}
+                buttonText={loading ? t.saving : t.save}
                 bgColor="bg-primary"
                 textColor="text-white"
                 rounded="rounded-md"

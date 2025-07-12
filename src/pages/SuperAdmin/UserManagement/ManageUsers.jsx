@@ -1,5 +1,6 @@
 // pages/users/ManageUsers.jsx
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   FiUsers,
   FiPlus,
@@ -25,13 +26,21 @@ import Pagination from "../../../components/elements/Pagination/Pagination";
 import Container from "../../../components/elements/container/Container";
 import Card from "../../../components/elements/card/Card";
 import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import manageUsersTranslations from "../../../translations/ManageUserstranslation";
 
 const ManageUsers = () => {
-  // State for users data
+  // Redux state for language
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get current translations based on language
+  const t = manageUsersTranslations[currentLanguage] || manageUsersTranslations.en;
+  
+  // Check if Arabic is selected
+  const isArabic = currentLanguage === "ar";
 
+  // State for users data
   const {
     allUsers,
-
     getAllUsers,
   } = useSuperAdmin();
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -56,6 +65,7 @@ const ManageUsers = () => {
   useEffect(() => {
     getAllUsers();
   }, []);
+
   useEffect(() => {
     let result = [...users];
 
@@ -117,18 +127,18 @@ const ManageUsers = () => {
     setSortConfig({ key, direction });
   };
 
-  // Available roles and statuses for filters
+  // Available roles and statuses for filters - now using translations
   const roles = [
-    { label: "All Roles", value: "all" },
-    { label: "Admin", value: "Admin" },
-    { label: "User", value: "User" },
-    { label: "Manager", value: "Manager" },
+    { label: t.allRoles, value: "all" },
+    { label: t.admin, value: "Admin" },
+    { label: t.user, value: "User" },
+    { label: t.manager, value: "Manager" },
   ];
 
   const statuses = [
-    { label: "All Statuses", value: "all" },
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
+    { label: t.allStatuses, value: "all" },
+    { label: t.active, value: "active" },
+    { label: t.inactive, value: "inactive" },
   ];
 
   // Pagination logic
@@ -153,11 +163,24 @@ const ManageUsers = () => {
   };
 
   const getStatusText = (isActive) => {
-    return isActive ? "Active" : "Inactive";
+    return isActive ? t.active : t.inactive;
+  };
+
+  const getRoleText = (role) => {
+    switch (role) {
+      case "Admin":
+        return t.admin;
+      case "Manager":
+        return t.manager;
+      case "User":
+        return t.user;
+      default:
+        return role;
+    }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Never logged in";
+    if (!dateString) return t.neverLoggedIn;
     const date = new Date(dateString);
     return date.toLocaleString();
   };
@@ -165,12 +188,12 @@ const ManageUsers = () => {
   // Export data function
   const exportToCSV = () => {
     const csvData = filteredUsers.map((user) => ({
-      Name: `${user.FirstName} ${user.LastName}`,
-      Email: user.Email,
-      Role: user.Role,
-      Status: getStatusText(user.IsActive),
-      LastLogin: formatDate(user.LastLoginAt),
-      Company: user.CompanyName || "N/A",
+      [t.exportName]: `${user.FirstName} ${user.LastName}`,
+      [t.exportEmail]: user.Email,
+      [t.exportRole]: getRoleText(user.Role),
+      [t.exportStatus]: getStatusText(user.IsActive),
+      [t.exportLastLogin]: formatDate(user.LastLoginAt),
+      [t.exportCompany]: user.CompanyName || t.notApplicable,
     }));
 
     const csvContent = [
@@ -195,25 +218,26 @@ const ManageUsers = () => {
     link.click();
     document.body.removeChild(link);
 
-    setSuccessMessage("Data exported successfully!");
+    setSuccessMessage(t.dataExportedSuccessfully);
     setTimeout(() => setSuccessMessage(""), 3000);
   };
 
   // Refresh users
   const handleRefresh = () => {
     setLoading(true);
-    refetch().then(() => {
-      setSuccessMessage("Users refreshed successfully!");
+    getAllUsers().then(() => {
+      setSuccessMessage(t.usersRefreshedSuccessfully);
       setTimeout(() => setSuccessMessage(""), 3000);
+      setLoading(false);
     });
   };
 
   return (
-    <Container className="py-4">
+    <Container className={`py-4 ${isArabic ? 'rtl' : 'ltr'}`}>
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-          <FiUsers className="mr-2" />
-          Manage Users
+        <h2 className={`text-2xl font-bold text-gray-800 flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <FiUsers className={`${isArabic ? 'ml-2' : 'mr-2'}`} />
+          {t.pageTitle}
         </h2>
       </div>
 
@@ -234,7 +258,7 @@ const ManageUsers = () => {
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex gap-2">
               <FilledButton
-                buttonText="Refresh"
+                buttonText={t.refresh}
                 isIcon
                 icon={FiRefreshCw}
                 isIconLeft
@@ -243,7 +267,7 @@ const ManageUsers = () => {
                 onClick={handleRefresh}
               />
               <FilledButton
-                buttonText="Export Data"
+                buttonText={t.exportData}
                 isIcon
                 icon={FiDownload}
                 isIconLeft
@@ -257,7 +281,7 @@ const ManageUsers = () => {
               <SearchAndFilters
                 searchValue={searchTerm}
                 setSearchValue={setSearchTerm}
-                placeholder="Search by name or email..."
+                placeholder={t.searchPlaceholder}
               />
             </div>
           </div>
@@ -265,15 +289,16 @@ const ManageUsers = () => {
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex gap-2">
               <Dropdown
-                buttonText={`Role: ${
-                  roleFilter === "all" ? "All" : roleFilter
+                buttonText={`${t.roleFilter}: ${
+                  roleFilter === "all" ? t.allRoles : getRoleText(roleFilter)
                 }`}
                 items={roles}
                 onSelect={(item) => setRoleFilter(item.value)}
               />
               <Dropdown
-                buttonText={`Status: ${
-                  statusFilter === "all" ? "All" : statusFilter
+                buttonText={`${t.statusFilter}: ${
+                  statusFilter === "all" ? t.allStatuses : 
+                  statusFilter === "active" ? t.active : t.inactive
                 }`}
                 items={statuses}
                 onSelect={(item) => setStatusFilter(item.value)}
@@ -281,16 +306,16 @@ const ManageUsers = () => {
             </div>
 
             <div className="text-sm text-gray-500">
-              Showing {indexOfFirstUser + 1}-
-              {Math.min(indexOfLastUser, filteredUsers.length)} of{" "}
-              {filteredUsers.length} users
+              {t.showing} {indexOfFirstUser + 1}-
+              {Math.min(indexOfLastUser, filteredUsers.length)} {t.of}{" "}
+              {filteredUsers.length} {t.users}
             </div>
           </div>
 
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-gray-600">Loading users...</p>
+              <p className="mt-2 text-gray-600">{t.loadingUsers}</p>
             </div>
           ) : (
             <>
@@ -303,7 +328,7 @@ const ManageUsers = () => {
                         className="cursor-pointer"
                       >
                         <div className="flex items-center">
-                          Name
+                          {t.name}
                           {sortConfig.key === "FirstName" &&
                             (sortConfig.direction === "asc" ? (
                               <FiChevronUp className="ml-1" />
@@ -317,7 +342,7 @@ const ManageUsers = () => {
                         className="cursor-pointer"
                       >
                         <div className="flex items-center">
-                          Email
+                          {t.email}
                           {sortConfig.key === "Email" &&
                             (sortConfig.direction === "asc" ? (
                               <FiChevronUp className="ml-1" />
@@ -331,7 +356,7 @@ const ManageUsers = () => {
                         className="cursor-pointer"
                       >
                         <div className="flex items-center">
-                          Role
+                          {t.role}
                           {sortConfig.key === "Role" &&
                             (sortConfig.direction === "asc" ? (
                               <FiChevronUp className="ml-1" />
@@ -345,7 +370,7 @@ const ManageUsers = () => {
                         className="cursor-pointer"
                       >
                         <div className="flex items-center">
-                          Status
+                          {t.status}
                           {sortConfig.key === "IsActive" &&
                             (sortConfig.direction === "asc" ? (
                               <FiChevronUp className="ml-1" />
@@ -359,7 +384,7 @@ const ManageUsers = () => {
                         className="cursor-pointer"
                       >
                         <div className="flex items-center">
-                          Last Login
+                          {t.lastLogin}
                           {sortConfig.key === "LastLoginAt" &&
                             (sortConfig.direction === "asc" ? (
                               <FiChevronUp className="ml-1" />
@@ -373,7 +398,7 @@ const ManageUsers = () => {
                         className="cursor-pointer"
                       >
                         <div className="flex items-center">
-                          Company
+                          {t.company}
                           {sortConfig.key === "CompanyName" &&
                             (sortConfig.direction === "asc" ? (
                               <FiChevronUp className="ml-1" />
@@ -394,7 +419,7 @@ const ManageUsers = () => {
                           <TD>{user.Email}</TD>
                           <TD>
                             <Badge variant={getRoleBadge(user.Role)}>
-                              {user.Role}
+                              {getRoleText(user.Role)}
                             </Badge>
                           </TD>
                           <TD>
@@ -403,13 +428,13 @@ const ManageUsers = () => {
                             </Badge>
                           </TD>
                           <TD>{formatDate(user.LastLoginAt)}</TD>
-                          <TD>{user.CompanyName || "N/A"}</TD>
+                          <TD>{user.CompanyName || t.notApplicable}</TD>
                         </TR>
                       ))
                     ) : (
                       <TR>
                         <TD colSpan={6} className="text-center py-8">
-                          No users found matching your criteria
+                          {t.noUsersFound}
                         </TD>
                       </TR>
                     )}

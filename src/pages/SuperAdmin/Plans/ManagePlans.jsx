@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { FiCreditCard, FiRefreshCw, FiZap, FiDownload } from "react-icons/fi";
 import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import translations from "../../../translations/ManagePlanstranslation";
 
 const ManagePlans = () => {
   const {
@@ -10,6 +12,11 @@ const ManagePlans = () => {
     getSubscriptionPlans,
     clearError,
   } = useSuperAdmin();
+
+  // Get current language from Redux
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  const t = translations[currentLanguage] || translations.en;
 
   const [filteredPlans, setFilteredPlans] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,33 +36,33 @@ const ManagePlans = () => {
   const exportToCSV = () => {
     if (!filteredPlans || filteredPlans.length === 0) return;
 
-    // Prepare CSV header
+    // Prepare CSV header with translations
     const headers = [
-      "Name",
-      "Description",
-      "Monthly Price",
-      "Yearly Price",
-      "Plan Type",
-      "Max Users",
-      "Max Employees",
-      "Max Products",
-      "Max Warehouses",
-      "Storage Limit (GB)",
-      "Is Popular",
-      "Features",
+      t.csvHeaders.name,
+      t.csvHeaders.description,
+      t.csvHeaders.monthlyPrice,
+      t.csvHeaders.yearlyPrice,
+      t.csvHeaders.planType,
+      t.csvHeaders.maxUsers,
+      t.csvHeaders.maxEmployees,
+      t.csvHeaders.maxProducts,
+      t.csvHeaders.maxWarehouses,
+      t.csvHeaders.storageLimitGB,
+      t.csvHeaders.isPopular,
+      t.csvHeaders.features,
     ].join(",");
 
     // Prepare CSV rows
     const rows = filteredPlans.map((plan) => {
       const features = [
-        plan.EnableInventory && "Inventory",
-        plan.EnableHR && "HR",
-        plan.EnableAccounting && "Accounting",
-        plan.EnableReports && "Reports",
-        plan.EnableAPI && "API",
-        plan.EnableCustomBranding && "Custom Branding",
-        plan.EnableAdvancedReports && "Advanced Reports",
-        plan.EnableMultiCurrency && "Multi-Currency",
+        plan.EnableInventory && t.inventory,
+        plan.EnableHR && t.hr,
+        plan.EnableAccounting && t.accounting,
+        plan.EnableReports && t.reports,
+        plan.EnableAPI && t.api,
+        plan.EnableCustomBranding && t.customBranding,
+        plan.EnableAdvancedReports && t.advancedReports,
+        plan.EnableMultiCurrency && t.multiCurrency,
       ]
         .filter(Boolean)
         .join("; ");
@@ -71,7 +78,7 @@ const ManagePlans = () => {
         plan.MaxProducts,
         plan.MaxWarehouses,
         plan.StorageLimitGB,
-        plan.IsPopular ? "Yes" : "No",
+        plan.IsPopular ? t.yes : t.no,
         `"${features}"`,
       ].join(",");
     });
@@ -114,25 +121,42 @@ const ManagePlans = () => {
     }
   };
 
+  const getTranslatedPlanType = (planType) => {
+    switch ((planType || "").toLowerCase()) {
+      case "free":
+        return t.free;
+      case "basic":
+        return t.basic;
+      case "professional":
+        return t.professional;
+      case "enterprise":
+        return t.enterprise;
+      case "standard":
+        return t.standard;
+      default:
+        return planType;
+    }
+  };
+
   const getEnabledFeatures = (plan) => {
     const features = [];
-    if (plan.EnableInventory) features.push("Inventory");
-    if (plan.EnableHR) features.push("HR");
-    if (plan.EnableAccounting) features.push("Accounting");
-    if (plan.EnableReports) features.push("Reports");
-    if (plan.EnableAPI) features.push("API");
-    if (plan.EnableCustomBranding) features.push("Custom Branding");
-    if (plan.EnableAdvancedReports) features.push("Advanced Reports");
-    if (plan.EnableMultiCurrency) features.push("Multi-Currency");
+    if (plan.EnableInventory) features.push(t.inventory);
+    if (plan.EnableHR) features.push(t.hr);
+    if (plan.EnableAccounting) features.push(t.accounting);
+    if (plan.EnableReports) features.push(t.reports);
+    if (plan.EnableAPI) features.push(t.api);
+    if (plan.EnableCustomBranding) features.push(t.customBranding);
+    if (plan.EnableAdvancedReports) features.push(t.advancedReports);
+    if (plan.EnableMultiCurrency) features.push(t.multiCurrency);
     return features;
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className={`container mx-auto px-4 py-8 ${isArabic ? 'rtl' : 'ltr'}`}>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-2">
-          <FiCreditCard className="mr-2" />
-          Manage Subscription Plans
+        <h2 className={`text-2xl font-bold text-gray-800 flex items-center mb-2 ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <FiCreditCard className={`${isArabic ? 'ml-2' : 'mr-2'}`} />
+          {t.manageSubscriptionPlans}
         </h2>
 
         {error && (
@@ -142,7 +166,7 @@ const ManagePlans = () => {
           >
             <span className="block sm:inline">{error}</span>
             <span
-              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+              className={`absolute top-0 bottom-0 ${isArabic ? 'left-0' : 'right-0'} px-4 py-3`}
               onClick={clearError}
             >
               <svg
@@ -151,7 +175,7 @@ const ManagePlans = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
               >
-                <title>Close</title>
+                <title>{t.close}</title>
                 <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
               </svg>
             </span>
@@ -159,7 +183,7 @@ const ManagePlans = () => {
         )}
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 ${isArabic ? 'sm:flex-row-reverse' : ''}`}>
             <button
               onClick={exportToCSV}
               disabled={isLoading || filteredPlans.length === 0}
@@ -167,10 +191,10 @@ const ManagePlans = () => {
                 isLoading || filteredPlans.length === 0
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
+              } ${isArabic ? 'flex-row-reverse' : ''}`}
             >
-              <FiDownload className="mr-2" />
-              Export Data
+              <FiDownload className={`${isArabic ? 'ml-2' : 'mr-2'}`} />
+              {t.exportData}
             </button>
 
             <button
@@ -180,12 +204,12 @@ const ManagePlans = () => {
                 isLoading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-              }`}
+              } ${isArabic ? 'flex-row-reverse' : ''}`}
             >
               <FiRefreshCw
-                className={`mr-2 ${isLoading ? "animate-spin" : ""}`}
+                className={`${isArabic ? 'ml-2' : 'mr-2'} ${isLoading ? "animate-spin" : ""}`}
               />
-              Refresh
+              {t.refresh}
             </button>
           </div>
 
@@ -201,45 +225,45 @@ const ManagePlans = () => {
                     <tr>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Name
+                        {t.name}
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Monthly
+                        {t.monthly}
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Yearly
+                        {t.yearly}
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Type
+                        {t.type}
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Features
+                        {t.features}
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Popular
+                        {t.popular}
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}
                       >
-                        Users
+                        {t.users}
                       </th>
                     </tr>
                   </thead>
@@ -257,10 +281,10 @@ const ManagePlans = () => {
                                 {plan.Description}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                               ${plan.MonthlyPrice?.toFixed(2)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                               ${plan.YearlyPrice?.toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -269,11 +293,11 @@ const ManagePlans = () => {
                                   plan.PlanType
                                 )}`}
                               >
-                                {plan.PlanType}
+                                {getTranslatedPlanType(plan.PlanType)}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-wrap gap-1">
+                              <div className={`flex flex-wrap gap-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
                                 {features.slice(0, 3).map((feature, idx) => (
                                   <span
                                     key={idx}
@@ -291,12 +315,12 @@ const ManagePlans = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               {plan.IsPopular && (
-                                <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center">
-                                  <FiZap className="mr-1" /> Popular
+                                <span className={`bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                                  <FiZap className={`${isArabic ? 'ml-1' : 'mr-1'}`} /> {t.popular}
                                 </span>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                               {plan.MaxUsers}
                             </td>
                           </tr>
@@ -309,8 +333,8 @@ const ManagePlans = () => {
                           className="px-6 py-4 text-center text-sm text-gray-500"
                         >
                           {filteredPlans.length === 0
-                            ? "No subscription plans available"
-                            : "No plans match current page"}
+                            ? t.noPlansAvailable
+                            : t.noPlanMatchCurrentPage}
                         </td>
                       </tr>
                     )}
@@ -320,13 +344,13 @@ const ManagePlans = () => {
 
               {totalPages > 1 && (
                 <div className="flex justify-center mt-6">
-                  <nav className="flex items-center gap-1">
+                  <nav className={`flex items-center gap-1 ${isArabic ? 'flex-row-reverse' : ''}`}>
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                       disabled={currentPage === 1}
                       className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 disabled:opacity-50"
                     >
-                      Previous
+                      {isArabic ? t.next : t.previous}
                     </button>
 
                     {Array.from({ length: totalPages }, (_, i) => (
@@ -350,7 +374,7 @@ const ManagePlans = () => {
                       disabled={currentPage === totalPages}
                       className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 disabled:opacity-50"
                     >
-                      Next
+                      {isArabic ? t.previous : t.next}
                     </button>
                   </nav>
                 </div>

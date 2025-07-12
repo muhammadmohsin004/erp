@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useHR } from "../../Contexts/HrContext/HrContext";
 import Container from "../../components/elements/container/Container";
@@ -15,6 +16,7 @@ import TD from "../../components/elements/td/TD";
 import Badge from "../../components/elements/Badge/Badge";
 import Pagination from "../../components/elements/Pagination/Pagination";
 import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
+import employeeTranslations from "../../translations/employeeTranslations";
 
 const EmployeesList = () => {
   const {
@@ -29,6 +31,15 @@ const EmployeesList = () => {
     goToPage,
     clearError,
   } = useHR();
+
+  // Get current language from Redux store
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get translations based on current language
+  const t = employeeTranslations[currentLanguage] || employeeTranslations.en;
+  
+  // Check if current language is Arabic for RTL support
+  const isArabic = currentLanguage === "ar";
 
   // Remove search and filter related states and functions since we're not using them
   const [sortConfig, setSortConfig] = useState({
@@ -54,11 +65,22 @@ const EmployeesList = () => {
     Terminated: "danger",
   };
 
+  // Translate status based on current language
+  const getTranslatedStatus = (status) => {
+    const statusMap = {
+      Active: t.active,
+      Inactive: t.inactive,
+      "On Leave": t.onLeave,
+      Terminated: t.terminated,
+    };
+    return statusMap[status] || status;
+  };
+
   return (
-    <Container className="py-4">
+    <Container className="py-4" dir={isArabic ? "rtl" : "ltr"}>
       <BodyHeader
-        heading="Employee Management"
-        subHeading="View and manage all employees"
+        heading={t.employeeManagement}
+        subHeading={t.viewAndManageEmployees}
       />
 
       {error && (
@@ -72,22 +94,22 @@ const EmployeesList = () => {
 
       <Card>
         {loading ? (
-          <div className="p-8 text-center">Loading employees...</div>
+          <div className="p-8 text-center">{t.loadingEmployees}</div>
         ) : employees.length === 0 ? (
-          <div className="p-8 text-center">No employees found</div>
+          <div className="p-8 text-center">{t.noEmployeesFound}</div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <Table>
                 <Thead>
                   <TR>
-                    <TH>Employee</TH>
-                    <TH>Code</TH>
-                    <TH>Contact</TH>
-                    <TH>Status</TH>
-                    <TH>Branch</TH>
-                    <TH>Role</TH>
-                    <TH>Actions</TH>
+                    <TH>{t.employee}</TH>
+                    <TH>{t.code}</TH>
+                    <TH>{t.contact}</TH>
+                    <TH>{t.status}</TH>
+                    <TH>{t.branch}</TH>
+                    <TH>{t.role}</TH>
+                    <TH>{t.actions}</TH>
                   </TR>
                 </Thead>
                 <Tbody>
@@ -99,7 +121,9 @@ const EmployeesList = () => {
                             <img
                               src={employee.Image}
                               alt={employee.F_Name}
-                              className="w-10 h-10 rounded-full object-cover mr-3"
+                              className={`w-10 h-10 rounded-full object-cover ${
+                                isArabic ? "ml-3" : "mr-3"
+                              }`}
                             />
                           )}
                           <div>
@@ -123,7 +147,7 @@ const EmployeesList = () => {
                       </TD>
                       <TD>
                         <Badge variant={statusVariant[employee.Status]}>
-                          {employee.Status}
+                          {getTranslatedStatus(employee.Status)}
                         </Badge>
                       </TD>
                       <TD>{employee.Branch}</TD>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Search,
   Building,
@@ -22,9 +23,15 @@ import {
 } from "lucide-react";
 import Table from "../../../components/elements/table/Table";
 import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import { companiesManagementTranslations } from "../../../translations/CompaniesManagementtranslation";
+// import { companiesManagementTranslations } from "./companiesManagementTranslations";
 
 const CompaniesManagement = () => {
   const navigate = useNavigate();
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  const t = companiesManagementTranslations[currentLanguage] || companiesManagementTranslations.en;
+
   const {
     companies,
     companiesPagination,
@@ -68,7 +75,6 @@ const CompaniesManagement = () => {
       console.error("Error loading companies:", error);
     }
   };
-  console.log("companies", companies);
 
   const handleSort = (key) => {
     let direction = "asc";
@@ -80,7 +86,7 @@ const CompaniesManagement = () => {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleStatusFilter = (status) => {
@@ -100,7 +106,7 @@ const CompaniesManagement = () => {
         await deleteCompany(companyToDelete.id);
         setShowDeleteModal(false);
         setCompanyToDelete(null);
-        loadCompanies(); // Refresh the list
+        loadCompanies();
       } catch (error) {
         console.error("Error deleting company:", error);
       }
@@ -118,7 +124,7 @@ const CompaniesManagement = () => {
         await activateCompany(company.id);
       }
       setShowActionDropdown(null);
-      loadCompanies(); // Refresh the list
+      loadCompanies();
     } catch (error) {
       console.error("Error toggling company status:", error);
     }
@@ -159,8 +165,8 @@ const CompaniesManagement = () => {
               number === currentPage
                 ? "bg-blue-600 text-white border-blue-600"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-            } ${number === 1 ? "rounded-l-md" : ""} ${
-              number === totalPages ? "rounded-r-md" : ""
+            } ${number === 1 ? (isArabic ? "rounded-r-md" : "rounded-l-md") : ""} ${
+              number === totalPages ? (isArabic ? "rounded-l-md" : "rounded-r-md") : ""
             }`}
           >
             {number}
@@ -173,7 +179,7 @@ const CompaniesManagement = () => {
         <button
           key={1}
           onClick={() => setCurrentPage(1)}
-          className={`px-3 py-2 text-sm font-medium border rounded-l-md ${
+          className={`px-3 py-2 text-sm font-medium border ${isArabic ? "rounded-r-md" : "rounded-l-md"} ${
             1 === currentPage
               ? "bg-blue-600 text-white border-blue-600"
               : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
@@ -229,7 +235,7 @@ const CompaniesManagement = () => {
           <button
             key={totalPages}
             onClick={() => setCurrentPage(totalPages)}
-            className={`px-3 py-2 text-sm font-medium border rounded-r-md ${
+            className={`px-3 py-2 text-sm font-medium border ${isArabic ? "rounded-l-md" : "rounded-r-md"} ${
               totalPages === currentPage
                 ? "bg-blue-600 text-white border-blue-600"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
@@ -245,30 +251,30 @@ const CompaniesManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`min-h-screen bg-gray-50 py-8 ${isArabic ? 'rtl' : 'ltr'}`} dir={isArabic ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div className="mb-4 md:mb-0">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Building className="mr-3 text-blue-600" size={32} />
-              Companies Management
+              <Building className={`${isArabic ? 'ml-3' : 'mr-3'} text-blue-600`} size={32} />
+              {t.title}
             </h1>
             <p className="text-gray-600 mt-1">
-              Manage all registered companies and their subscriptions
+              {t.subtitle}
             </p>
           </div>
 
           <div className="flex items-center space-x-4">
             <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-              Total: {totalItems}
+              {t.total}: {totalItems}
             </div>
             <button
               onClick={handleAddCompany}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center"
             >
-              <Plus className="mr-2" size={18} />
-              Add Company
+              <Plus className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={18} />
+              {t.addCompany}
             </button>
           </div>
         </div>
@@ -278,7 +284,7 @@ const CompaniesManagement = () => {
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <AlertCircle className="mr-2" size={18} />
+                <AlertCircle className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={18} />
                 <span>{error}</span>
               </div>
               <button
@@ -296,15 +302,15 @@ const CompaniesManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className={`absolute inset-y-0 ${isArabic ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
-                placeholder="Search by company name or email"
+                placeholder={t.searchPlaceholder}
                 value={searchTerm}
                 onChange={handleSearch}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`block w-full ${isArabic ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
               />
             </div>
 
@@ -315,9 +321,9 @@ const CompaniesManagement = () => {
                 onChange={(e) => handleStatusFilter(e.target.value)}
                 className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">{t.allStatus}</option>
+                <option value="active">{t.active}</option>
+                <option value="inactive">{t.inactive}</option>
               </select>
             </div>
 
@@ -325,7 +331,7 @@ const CompaniesManagement = () => {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Filter by plan"
+                placeholder={t.filterByPlan}
                 value={planFilter}
                 onChange={(e) => setPlanFilter(e.target.value)}
                 className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -339,7 +345,7 @@ const CompaniesManagement = () => {
           {isCompaniesLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Loading companies...</span>
+              <span className={`${isArabic ? 'mr-3' : 'ml-3'} text-gray-600`}>{t.loadingCompanies}</span>
             </div>
           ) : (
             <>
@@ -349,57 +355,57 @@ const CompaniesManagement = () => {
                     <tr>
                       <th
                         onClick={() => handleSort("name")}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100`}
                       >
                         <div className="flex items-center">
-                          Company Name
+                          {t.companyName}
                           {sortConfig.key === "name" &&
                             (sortConfig.direction === "asc" ? (
-                              <ArrowUp className="ml-1" size={14} />
+                              <ArrowUp className={`${isArabic ? 'mr-1' : 'ml-1'}`} size={14} />
                             ) : (
-                              <ArrowDown className="ml-1" size={14} />
+                              <ArrowDown className={`${isArabic ? 'mr-1' : 'ml-1'}`} size={14} />
                             ))}
                         </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contact Info
+                      <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                        {t.contactInfo}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                      <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                        {t.status}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Subscription
+                      <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                        {t.subscription}
                       </th>
                       <th
                         onClick={() => handleSort("userCount")}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100`}
                       >
                         <div className="flex items-center">
-                          Users
+                          {t.users}
                           {sortConfig.key === "userCount" &&
                             (sortConfig.direction === "asc" ? (
-                              <ArrowUp className="ml-1" size={14} />
+                              <ArrowUp className={`${isArabic ? 'mr-1' : 'ml-1'}`} size={14} />
                             ) : (
-                              <ArrowDown className="ml-1" size={14} />
+                              <ArrowDown className={`${isArabic ? 'mr-1' : 'ml-1'}`} size={14} />
                             ))}
                         </div>
                       </th>
                       <th
                         onClick={() => handleSort("createdAt")}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100`}
                       >
                         <div className="flex items-center">
-                          Created
+                          {t.created}
                           {sortConfig.key === "createdAt" &&
                             (sortConfig.direction === "asc" ? (
-                              <ArrowUp className="ml-1" size={14} />
+                              <ArrowUp className={`${isArabic ? 'mr-1' : 'ml-1'}`} size={14} />
                             ) : (
-                              <ArrowDown className="ml-1" size={14} />
+                              <ArrowDown className={`${isArabic ? 'mr-1' : 'ml-1'}`} size={14} />
                             ))}
                         </div>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                      <th className={`px-6 py-3 ${isArabic ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                        {t.actions}
                       </th>
                     </tr>
                   </thead>
@@ -409,15 +415,15 @@ const CompaniesManagement = () => {
                         <tr key={company.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className="bg-blue-100 rounded-lg p-2 mr-3">
+                              <div className={`bg-blue-100 rounded-lg p-2 ${isArabic ? 'ml-3' : 'mr-3'}`}>
                                 <Building className="text-blue-600" size={20} />
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {company.Name || "N/A"}
+                                  {company.Name || t.notAvailable}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  ID: {company.Id}
+                                  {t.id}: {company.Id}
                                 </div>
                               </div>
                             </div>
@@ -426,17 +432,17 @@ const CompaniesManagement = () => {
                             <div className="text-sm text-gray-900">
                               <div className="flex items-center mb-1">
                                 <Mail
-                                  className="mr-2 text-gray-400"
+                                  className={`${isArabic ? 'ml-2' : 'mr-2'} text-gray-400`}
                                   size={14}
                                 />
-                                {company.Email || "N/A"}
+                                {company.Email || t.notAvailable}
                               </div>
                               <div className="flex items-center">
                                 <Phone
-                                  className="mr-2 text-gray-400"
+                                  className={`${isArabic ? 'ml-2' : 'mr-2'} text-gray-400`}
                                   size={14}
                                 />
-                                {company.Phone || "N/A"}
+                                {company.Phone || t.notAvailable}
                               </div>
                             </div>
                           </td>
@@ -448,20 +454,20 @@ const CompaniesManagement = () => {
                                   : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {company.IsActive ? "Active" : "Inactive"}
+                              {company.IsActive ? t.active : t.inactive}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              {company.SubscriptionPlan || "Free"}
+                              {company.SubscriptionPlan || t.free}
                             </div>
                             <div className="text-sm text-gray-500">
-                              ${company.MonthlyRevenue || 0}/month
+                              ${company.MonthlyRevenue || 0}/{t.month}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <Users className="mr-2 text-gray-400" size={14} />
+                              <Users className={`${isArabic ? 'ml-2' : 'mr-2'} text-gray-400`} size={14} />
                               <span className="text-sm text-gray-900">
                                 {company.UserCount || 0}
                               </span>
@@ -470,17 +476,17 @@ const CompaniesManagement = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center text-sm text-gray-900">
                               <Calendar
-                                className="mr-2 text-gray-400"
+                                className={`${isArabic ? 'ml-2' : 'mr-2'} text-gray-400`}
                                 size={14}
                               />
                               {company.createdAt
                                 ? new Date(
                                     company.createdAt
                                   ).toLocaleDateString()
-                                : "N/A"}
+                                : t.notAvailable}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <td className={`px-6 py-4 whitespace-nowrap ${isArabic ? 'text-left' : 'text-right'} text-sm font-medium`}>
                             <div className="relative">
                               <button
                                 onClick={() =>
@@ -496,54 +502,54 @@ const CompaniesManagement = () => {
                               </button>
 
                               {showActionDropdown === company.id && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                <div className={`absolute ${isArabic ? 'left-0' : 'right-0'} mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200`}>
                                   <div className="py-1">
                                     <button
                                       onClick={() =>
                                         handleViewCompany(company.id)
                                       }
-                                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                      className={`flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full ${isArabic ? 'text-right' : 'text-left'}`}
                                     >
-                                      <Eye className="mr-2" size={14} />
-                                      View Details
+                                      <Eye className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={14} />
+                                      {t.viewDetails}
                                     </button>
                                     <button
                                       onClick={() =>
                                         handleEditCompany(company.id)
                                       }
-                                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                      className={`flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full ${isArabic ? 'text-right' : 'text-left'}`}
                                     >
-                                      <Edit className="mr-2" size={14} />
-                                      Edit Company
+                                      <Edit className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={14} />
+                                      {t.editCompany}
                                     </button>
                                     <button
                                       onClick={() =>
                                         handleStatusToggle(company)
                                       }
-                                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                      className={`flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full ${isArabic ? 'text-right' : 'text-left'}`}
                                     >
                                       {company.isActive ? (
                                         <>
-                                          <XCircle className="mr-2" size={14} />
-                                          Suspend
+                                          <XCircle className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={14} />
+                                          {t.suspend}
                                         </>
                                       ) : (
                                         <>
                                           <CheckCircle
-                                            className="mr-2"
+                                            className={`${isArabic ? 'ml-2' : 'mr-2'}`}
                                             size={14}
                                           />
-                                          Activate
+                                          {t.activate}
                                         </>
                                       )}
                                     </button>
                                     <hr className="my-1" />
                                     <button
                                       onClick={() => handleDeleteClick(company)}
-                                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                                      className={`flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full ${isArabic ? 'text-right' : 'text-left'}`}
                                     >
-                                      <Trash2 className="mr-2" size={14} />
-                                      Delete
+                                      <Trash2 className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={14} />
+                                      {t.delete}
                                     </button>
                                   </div>
                                 </div>
@@ -561,10 +567,10 @@ const CompaniesManagement = () => {
                               className="mx-auto mb-4 text-gray-300"
                             />
                             <p className="text-lg font-medium">
-                              No companies found
+                              {t.noCompaniesFound}
                             </p>
                             <p className="text-sm">
-                              Try adjusting your search criteria
+                              {t.noCompaniesSubtext}
                             </p>
                           </div>
                         </td>
@@ -578,15 +584,15 @@ const CompaniesManagement = () => {
               {totalPages > 1 && (
                 <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
                   <div className="text-sm text-gray-700">
-                    Showing {startItem} to {endItem} of {totalItems} results
+                    {t.showing} {startItem} {t.to} {endItem} {t.of} {totalItems} {t.results}
                   </div>
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 ${isArabic ? 'rounded-r-md' : 'rounded-l-md'} hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      First
+                      {t.first}
                     </button>
                     <button
                       onClick={() =>
@@ -595,7 +601,7 @@ const CompaniesManagement = () => {
                       disabled={currentPage === 1}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Previous
+                      {t.previous}
                     </button>
 
                     {generatePaginationItems()}
@@ -607,14 +613,14 @@ const CompaniesManagement = () => {
                       disabled={currentPage === totalPages}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Next
+                      {t.next}
                     </button>
                     <button
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 ${isArabic ? 'rounded-l-md' : 'rounded-r-md'} hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      Last
+                      {t.last}
                     </button>
                   </div>
                 </div>
@@ -633,25 +639,24 @@ const CompaniesManagement = () => {
                 <AlertCircle className="h-6 w-6 text-red-600" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
-                Confirm Delete
+                {t.confirmDelete}
               </h3>
               <p className="text-sm text-gray-500 text-center mb-6">
-                Are you sure you want to delete{" "}
-                <strong>{companyToDelete?.name}</strong>? This action cannot be
-                undone and will remove all associated data.
+                {t.deleteConfirmation}{" "}
+                <strong>{companyToDelete?.name}</strong>? {t.deleteWarning}
               </p>
               <div className="flex justify-center space-x-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors duration-200"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   onClick={confirmDelete}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200"
                 >
-                  Delete Company
+                  {t.deleteCompany}
                 </button>
               </div>
             </div>

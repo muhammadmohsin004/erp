@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   Clock,
   Calendar,
@@ -12,7 +13,7 @@ import {
   Download,
 } from "lucide-react";
 import { useLeaveAttendance } from "../../../Contexts/LeaveContext/LeaveContext";
-import { useHR } from "../../../Contexts/HRContext/HRContext"; // Add this import
+import { useHR } from "../../../Contexts/HRContext/HRContext";
 import Container from "../../../components/elements/container/Container";
 import Card from "../../../components/elements/card/Card";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -32,8 +33,8 @@ import BodyHeader from "../../../components/elements/bodyHeader/BodyHeader";
 import Alert from "../../../components/elements/Alert/Alert";
 import Modall from "../../../components/elements/modal/Modal";
 import Badge from "../../../components/elements/Badge/Badge";
+import { AttendanceModuleTranslation } from "../../../translations/AttendanceModuleTranslation";
 
-// Employee Select Component
 const EmployeeSelect = ({
   employees,
   selectedEmployeeId,
@@ -54,6 +55,9 @@ const EmployeeSelect = ({
 );
 
 const AttendanceModule = () => {
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const t = (key) => AttendanceModuleTranslation[currentLanguage || "en"][key] || key;
+
   const {
     attendances,
     attendanceDetail,
@@ -72,10 +76,8 @@ const AttendanceModule = () => {
     clearAttendanceSummary,
   } = useLeaveAttendance();
 
-  // Add HR context
   const { fetchEmployees, employees } = useHR();
 
-  // State management
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,6 +100,24 @@ const AttendanceModule = () => {
     location: "",
     notes: "",
   });
+
+
+
+  const monthOptions = (t) => [
+  { label: t("January"), value: 1 },
+  { label: t("February"), value: 2 },
+  { label: t("March"), value: 3 },
+  { label: t("April"), value: 4 },
+  { label: t("May"), value: 5 },
+  { label: t("June"), value: 6 },
+  { label: t("July"), value: 7 },
+  { label: t("August"), value: 8 },
+  { label: t("September"), value: 9 },
+  { label: t("October"), value: 10 },
+  { label: t("November"), value: 11 },
+  { label: t("December"), value: 12 },
+];
+
   const [summaryFilters, setSummaryFilters] = useState({
     employeeId: "",
     month: new Date().getMonth() + 1,
@@ -105,10 +125,9 @@ const AttendanceModule = () => {
   });
   const [isFocused, setIsFocused] = useState(false);
 
-  // Load initial data
   useEffect(() => {
     loadAttendances();
-    loadEmployees(); // Add this to load employees
+    loadEmployees();
   }, [filters, currentPage]);
 
   const loadAttendances = async () => {
@@ -124,7 +143,6 @@ const AttendanceModule = () => {
     }
   };
 
-  // Add function to load employees
   const loadEmployees = async () => {
     try {
       await fetchEmployees();
@@ -197,7 +215,7 @@ const AttendanceModule = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(currentLanguage === "ar" ? "ar-EG" : "en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -206,7 +224,7 @@ const AttendanceModule = () => {
 
   const formatTime = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleTimeString("en-US", {
+    return new Date(dateString).toLocaleTimeString(currentLanguage === "ar" ? "ar-EG" : "en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -214,10 +232,10 @@ const AttendanceModule = () => {
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      Present: { variant: "success", text: "Present" },
-      Absent: { variant: "danger", text: "Absent" },
-      Late: { variant: "warning", text: "Late" },
-      "Half Day": { variant: "info", text: "Half Day" },
+      Present: { variant: "success", text: t("present") },
+      Absent: { variant: "danger", text: t("absent") },
+      Late: { variant: "warning", text: t("late") },
+      "Half Day": { variant: "info", text: t("halfDay") },
     };
 
     const statusInfo = statusMap[status] || {
@@ -236,17 +254,17 @@ const AttendanceModule = () => {
   );
 
   const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "Present", label: "Present" },
-    { value: "Absent", label: "Absent" },
-    { value: "Late", label: "Late" },
-    { value: "Half Day", label: "Half Day" },
+    { value: "", label: t("allStatus") },
+    { value: "Present", label: t("present") },
+    { value: "Absent", label: t("absent") },
+    { value: "Late", label: t("late") },
+    { value: "Half Day", label: t("halfDay") },
   ];
 
   const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-    { id: "attendance", label: "Attendance Records", icon: Calendar },
-    { id: "checkin", label: "Check In/Out", icon: Clock },
+    { id: "dashboard", label: t("dashboard"), icon: BarChart3 },
+    { id: "attendance", label: t("attendanceRecords"), icon: Calendar },
+    { id: "checkin", label: t("checkInOut"), icon: Clock },
   ];
 
   const renderDashboard = () => (
@@ -255,7 +273,7 @@ const AttendanceModule = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Records</p>
+              <p className="text-sm font-medium text-gray-600">{t("totalRecords")}</p>
               <p className="text-2xl font-bold text-gray-900">
                 {attendances.length}
               </p>
@@ -267,7 +285,7 @@ const AttendanceModule = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Present Today</p>
+              <p className="text-sm font-medium text-gray-600">{t("presentToday")}</p>
               <p className="text-2xl font-bold text-green-600">
                 {attendances.filter((a) => a.status === "Present").length}
               </p>
@@ -279,7 +297,7 @@ const AttendanceModule = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Late Arrivals</p>
+              <p className="text-sm font-medium text-gray-600">{t("lateArrivals")}</p>
               <p className="text-2xl font-bold text-yellow-600">
                 {attendances.filter((a) => a.status === "Late").length}
               </p>
@@ -291,7 +309,7 @@ const AttendanceModule = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Absent</p>
+              <p className="text-sm font-medium text-gray-600">{t("absent")}</p>
               <p className="text-2xl font-bold text-red-600">
                 {attendances.filter((a) => a.status === "Absent").length}
               </p>
@@ -304,11 +322,11 @@ const AttendanceModule = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Quick Actions
+            {t("quickActions")}
           </h3>
           <div className="space-y-3">
             <FilledButton
-              buttonText="Check In"
+              buttonText={t("checkIn")}
               icon={Clock}
               isIcon={true}
               isIconLeft={true}
@@ -316,7 +334,7 @@ const AttendanceModule = () => {
               width="w-full"
             />
             <OutlineButton
-              buttonText="Check Out"
+              buttonText={t("checkOut")}
               icon={Clock}
               isIcon={true}
               isIconLeft={true}
@@ -338,7 +356,7 @@ const AttendanceModule = () => {
 
         <Card className="p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Attendance Summary
+            {t("attendanceSummary")}
           </h3>
           <div className="space-y-4">
             <EmployeeSelect
@@ -350,34 +368,22 @@ const AttendanceModule = () => {
                   employeeId: value,
                 }))
               }
-              placeholder="Select Employee"
+              placeholder={t("selectEmployee")}
             />
             <div className="grid grid-cols-2 gap-4">
-              <SelectBox
-                placeholder="Month"
-                value={summaryFilters.month}
-                handleChange={(value) =>
-                  setSummaryFilters((prev) => ({ ...prev, month: value }))
-                }
-                optionList={[
-                  { value: 1, label: "January" },
-                  { value: 2, label: "February" },
-                  { value: 3, label: "March" },
-                  { value: 4, label: "April" },
-                  { value: 5, label: "May" },
-                  { value: 6, label: "June" },
-                  { value: 7, label: "July" },
-                  { value: 8, label: "August" },
-                  { value: 9, label: "September" },
-                  { value: 10, label: "October" },
-                  { value: 11, label: "November" },
-                  { value: 12, label: "December" },
-                ]}
-                width="w-full"
-              />
+             <SelectBox 
+  placeholder={t("month")}
+  value={summaryFilters.month}
+  handleChange={(value) =>
+    setSummaryFilters((prev) => ({ ...prev, month: value }))
+  }
+  optionList={monthOptions(t)}
+  width="w-full"
+/>
+
               <InputField
                 type="number"
-                placeholder="Year"
+                placeholder={t("year")}
                 value={summaryFilters.year}
                 onChange={(e) =>
                   setSummaryFilters((prev) => ({
@@ -389,7 +395,7 @@ const AttendanceModule = () => {
               />
             </div>
             <FilledButton
-              buttonText="View Summary"
+              buttonText={t("viewSummary")}
               icon={BarChart3}
               isIcon={true}
               isIconLeft={true}
@@ -410,12 +416,12 @@ const AttendanceModule = () => {
             <SearchAndFilters
               searchValue={searchValue}
               setSearchValue={setSearchValue}
-              placeholder="Search by employee name or status..."
+              placeholder={t("searchPlaceholder")}
               isFocused={isFocused}
             />
             <div className="flex items-center gap-3">
               <FilledButton
-                buttonText="Clear Filters"
+                buttonText={t("clearFilters")}
                 icon={Filter}
                 isIcon={true}
                 isIconLeft={true}
@@ -423,7 +429,7 @@ const AttendanceModule = () => {
                 bgColor="bg-gray-500"
               />
               <FilledButton
-                buttonText="Export"
+                buttonText={t("export")}
                 icon={Download}
                 isIcon={true}
                 isIconLeft={true}
@@ -435,14 +441,14 @@ const AttendanceModule = () => {
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <InputField
               type="date"
-              placeholder="From Date"
+              placeholder={t("fromDate")}
               value={filters.fromDate}
               onChange={(e) => handleFilterChange("fromDate", e.target.value)}
               width="w-full"
             />
             <InputField
               type="date"
-              placeholder="To Date"
+              placeholder={t("toDate")}
               value={filters.toDate}
               onChange={(e) => handleFilterChange("toDate", e.target.value)}
               width="w-full"
@@ -453,10 +459,10 @@ const AttendanceModule = () => {
               onEmployeeChange={(value) =>
                 handleFilterChange("employeeId", value)
               }
-              placeholder="Select Employee"
+              placeholder={t("selectEmployee")}
             />
             <SelectBox
-              placeholder="Status"
+              placeholder={t("status")}
               value={filters.status}
               handleChange={(value) => handleFilterChange("status", value)}
               optionList={statusOptions}
@@ -476,20 +482,20 @@ const AttendanceModule = () => {
             <Table>
               <Thead className="bg-gray-50">
                 <TR>
-                  <TH>Employee</TH>
-                  <TH>Date</TH>
-                  <TH>Check In</TH>
-                  <TH>Check Out</TH>
-                  <TH>Status</TH>
-                  <TH>Working Hours</TH>
-                  <TH>Actions</TH>
+                  <TH>{t("employee")}</TH>
+                  <TH>{t("date")}</TH>
+                  <TH>{t("checkInTime")}</TH>
+                  <TH>{t("checkOutTime")}</TH>
+                  <TH>{t("status")}</TH>
+                  <TH>{t("workingHours")}</TH>
+                  <TH>{t("actions")}</TH>
                 </TR>
               </Thead>
               <Tbody>
                 {filteredAttendances.length === 0 ? (
                   <TR>
                     <TD colSpan={7} className="text-center py-8 text-gray-500">
-                      No attendance records found
+                      {t("noRecords")}
                     </TD>
                   </TR>
                 ) : (
@@ -566,12 +572,12 @@ const AttendanceModule = () => {
         <Card className="p-6">
           <div className="text-center">
             <Clock className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Check In</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t("checkIn")}</h3>
             <p className="text-sm text-gray-600 mb-6">
-              Start your work day by checking in
+              {t("startYourDay")}
             </p>
             <FilledButton
-              buttonText="Check In Now"
+              buttonText={t("checkInNow")}
               icon={CheckCircle}
               isIcon={true}
               isIconLeft={true}
@@ -586,13 +592,13 @@ const AttendanceModule = () => {
           <div className="text-center">
             <Clock className="h-16 w-16 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Check Out
+              {t("checkOut")}
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              End your work day by checking out
+              {t("endYourDay")}
             </p>
             <FilledButton
-              buttonText="Check Out Now"
+              buttonText={t("checkOutNow")}
               icon={XCircle}
               isIcon={true}
               isIconLeft={true}
@@ -606,7 +612,7 @@ const AttendanceModule = () => {
 
       <Card className="p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">
-          Today's Activity
+          {t("todaysActivity")}
         </h3>
         <div className="space-y-4">
           {attendances.slice(0, 5).map((attendance) => (
@@ -630,13 +636,13 @@ const AttendanceModule = () => {
                   <p className="text-sm font-medium text-gray-900">
                     {formatTime(attendance.checkInTime)}
                   </p>
-                  <p className="text-xs text-gray-500">Check In</p>
+                  <p className="text-xs text-gray-500">{t("checkInTime")}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">
                     {formatTime(attendance.checkOutTime)}
                   </p>
-                  <p className="text-xs text-gray-500">Check Out</p>
+                  <p className="text-xs text-gray-500">{t("checkOutTime")}</p>
                 </div>
                 {getStatusBadge(attendance.status)}
               </div>
@@ -648,11 +654,11 @@ const AttendanceModule = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen bg-gray-50 ${currentLanguage === "ar" ? "rtl" : ""}`}>
       <Container className="py-8">
         <BodyHeader
-          heading="Attendance Management"
-          subHeading="Track and manage employee attendance efficiently"
+          heading={t("attendanceManagement")}
+          subHeading={t("trackAndManage")}
         />
 
         {error && (
@@ -695,18 +701,18 @@ const AttendanceModule = () => {
 
         {/* Check In Modal */}
         <Modall
-          title="Check In"
+          title={t("checkIn")}
           modalOpen={checkInModal}
           setModalOpen={setCheckInModal}
-          okText="Check In"
-          cancelText="Cancel"
+          okText={t("checkIn")}
+          cancelText={t("cancel")}
           okAction={handleCheckIn}
           cancelAction={() => setCheckInModal(false)}
           okButtonDisabled={isProcessing}
           body={
             <div className="space-y-4">
               <InputField
-                placeholder="Location"
+                placeholder={t("location")}
                 value={checkInData.location}
                 onChange={(e) =>
                   setCheckInData((prev) => ({
@@ -718,7 +724,7 @@ const AttendanceModule = () => {
                 icon={MapPin}
               />
               <InputField
-                placeholder="Notes (optional)"
+                placeholder={t("notesOptional")}
                 value={checkInData.notes}
                 onChange={(e) =>
                   setCheckInData((prev) => ({ ...prev, notes: e.target.value }))
@@ -731,18 +737,18 @@ const AttendanceModule = () => {
 
         {/* Check Out Modal */}
         <Modall
-          title="Check Out"
+          title={t("checkOut")}
           modalOpen={checkOutModal}
           setModalOpen={setCheckOutModal}
-          okText="Check Out"
-          cancelText="Cancel"
+          okText={t("checkOut")}
+          cancelText={t("cancel")}
           okAction={handleCheckOut}
           cancelAction={() => setCheckOutModal(false)}
           okButtonDisabled={isProcessing}
           body={
             <div className="space-y-4">
               <InputField
-                placeholder="Location"
+                placeholder={t("location")}
                 value={checkOutData.location}
                 onChange={(e) =>
                   setCheckOutData((prev) => ({
@@ -754,7 +760,7 @@ const AttendanceModule = () => {
                 icon={MapPin}
               />
               <InputField
-                placeholder="Notes (optional)"
+                placeholder={t("notesOptional")}
                 value={checkOutData.notes}
                 onChange={(e) =>
                   setCheckOutData((prev) => ({
@@ -770,10 +776,10 @@ const AttendanceModule = () => {
 
         {/* Attendance Detail Modal */}
         <Modall
-          title="Attendance Details"
+          title={t("attendanceDetails")}
           modalOpen={detailModal}
           setModalOpen={setDetailModal}
-          okText="Close"
+          okText={t("close")}
           cancelText=""
           okAction={() => setDetailModal(false)}
           width={600}
@@ -783,7 +789,7 @@ const AttendanceModule = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Employee
+                      {t("employee")}
                     </label>
                     <p className="text-sm text-gray-900">
                       {attendanceDetail.employeeName}
@@ -791,7 +797,7 @@ const AttendanceModule = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Date
+                      {t("date")}
                     </label>
                     <p className="text-sm text-gray-900">
                       {formatDate(attendanceDetail.date)}
@@ -799,7 +805,7 @@ const AttendanceModule = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Check In
+                      {t("checkInTime")}
                     </label>
                     <p className="text-sm text-gray-900">
                       {formatTime(attendanceDetail.checkInTime)}
@@ -807,7 +813,7 @@ const AttendanceModule = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Check Out
+                      {t("checkOutTime")}
                     </label>
                     <p className="text-sm text-gray-900">
                       {formatTime(attendanceDetail.checkOutTime)}
@@ -815,7 +821,7 @@ const AttendanceModule = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Status
+                      {t("status")}
                     </label>
                     <div className="mt-1">
                       {getStatusBadge(attendanceDetail.status)}
@@ -823,7 +829,7 @@ const AttendanceModule = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Working Hours
+                      {t("workingHours")}
                     </label>
                     <p className="text-sm text-gray-900">
                       {attendanceDetail.workingHours || "-"}
@@ -833,7 +839,7 @@ const AttendanceModule = () => {
                 {attendanceDetail.notes && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Notes
+                      {t("notes")}
                     </label>
                     <p className="text-sm text-gray-900">
                       {attendanceDetail.notes}
@@ -847,10 +853,10 @@ const AttendanceModule = () => {
 
         {/* Attendance Summary Modal */}
         <Modall
-          title="Attendance Summary"
+          title={t("attendanceSummary")}
           modalOpen={summaryModal}
           setModalOpen={setSummaryModal}
-          okText="Close"
+          okText={t("close")}
           cancelText=""
           okAction={() => setSummaryModal(false)}
           width={700}
@@ -859,25 +865,25 @@ const AttendanceModule = () => {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <p className="text-sm text-green-600">Total Present</p>
+                    <p className="text-sm text-green-600">{t("totalPresent")}</p>
                     <p className="text-2xl font-bold text-green-700">
                       {attendanceSummary.totalPresent || 0}
                     </p>
                   </div>
                   <div className="bg-red-50 p-4 rounded-lg">
-                    <p className="text-sm text-red-600">Total Absent</p>
+                    <p className="text-sm text-red-600">{t("totalAbsent")}</p>
                     <p className="text-2xl font-bold text-red-700">
                       {attendanceSummary.totalAbsent || 0}
                     </p>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg">
-                    <p className="text-sm text-yellow-600">Late Days</p>
+                    <p className="text-sm text-yellow-600">{t("lateDays")}</p>
                     <p className="text-2xl font-bold text-yellow-700">
                       {attendanceSummary.lateDays || 0}
                     </p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <p className="text-sm text-blue-600">Working Days</p>
+                    <p className="text-sm text-blue-600">{t("workingDays")}</p>
                     <p className="text-2xl font-bold text-blue-700">
                       {attendanceSummary.workingDays || 0}
                     </p>
@@ -887,17 +893,17 @@ const AttendanceModule = () => {
                 {attendanceSummary.details && (
                   <div>
                     <h4 className="text-lg font-medium text-gray-900 mb-4">
-                      Daily Breakdown
+                      {t("dailyBreakdown")}
                     </h4>
                     <div className="max-h-60 overflow-y-auto">
                       <Table>
                         <Thead className="bg-gray-50">
                           <TR>
-                            <TH>Date</TH>
-                            <TH>Check In</TH>
-                            <TH>Check Out</TH>
-                            <TH>Status</TH>
-                            <TH>Hours</TH>
+                            <TH>{t("date")}</TH>
+                            <TH>{t("checkInTime")}</TH>
+                            <TH>{t("checkOutTime")}</TH>
+                            <TH>{t("status")}</TH>
+                            <TH>{t("workingHours")}</TH>
                           </TR>
                         </Thead>
                         <Tbody>
@@ -920,7 +926,7 @@ const AttendanceModule = () => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-700">
-                        Attendance Rate
+                        {t("attendanceRate")}
                       </span>
                       <span className="text-lg font-bold text-blue-600">
                         {attendanceSummary.attendanceRate}%

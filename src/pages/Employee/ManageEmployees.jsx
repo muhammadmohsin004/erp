@@ -1,13 +1,24 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import EmployeesList from "./EmployeesList";
 import EmployeeForm from "./EmployeeForm";
 import { Plus } from "lucide-react";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import { useHR } from "../../Contexts/HrContext/HrContext";
+import employeeTranslations from "../../translations/employeeTranslations";
 
 const ManageEmployees = () => {
   const { formMode, setFormMode, setSelectedEmployee } = useHR();
   const [showForm, setShowForm] = useState(false);
+  
+  // Get current language from Redux store
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get translations based on current language
+  const t = employeeTranslations[currentLanguage] || employeeTranslations.en;
+  
+  // Check if current language is Arabic for RTL support
+  const isArabic = currentLanguage === "ar";
 
   const handleAddEmployee = () => {
     setSelectedEmployee(null);
@@ -20,15 +31,16 @@ const ManageEmployees = () => {
   };
 
   return (
-    <div>
+    <div dir={isArabic ? "rtl" : "ltr"} className={isArabic ? "font-arabic" : ""}>
       {!showForm && formMode !== "view" && formMode !== "edit" ? (
         <>
-          <div className="flex justify-end mb-4">
+          <div className={`flex mb-4 ${isArabic ? "justify-start" : "justify-end"}`}>
             <FilledButton
               isIcon
               icon={Plus}
-              isIconLeft
-              buttonText="Add Employee"
+              isIconLeft={!isArabic}
+              isIconRight={isArabic}
+              buttonText={t.addEmployee}
               onClick={handleAddEmployee}
               bgColor="bg-primary"
               textColor="text-white"
@@ -41,9 +53,9 @@ const ManageEmployees = () => {
         </>
       ) : (
         <>
-          <div className="flex justify-start mb-4">
+          <div className={`flex mb-4 ${isArabic ? "justify-end" : "justify-start"}`}>
             <FilledButton
-              buttonText="Back to List"
+              buttonText={t.backToList}
               onClick={handleBackToList}
               bgColor="bg-gray-500"
               textColor="text-white"

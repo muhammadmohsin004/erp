@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   HiOfficeBuilding,
   HiUsers,
@@ -12,8 +13,13 @@ import {
   HiRefresh,
 } from "react-icons/hi";
 import { useSuperAdmin } from "../../../Contexts/superAdminDashborad/SuperAdminContext";
+import { translations } from "../../../translations/Superdashboard";
 
 const SuperDashboard = () => {
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  const t = translations[currentLanguage] || translations.en;
+
   const {
     stats,
     recentCompanies,
@@ -54,20 +60,20 @@ const SuperDashboard = () => {
     };
 
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 h-full">
-        <div className="flex items-center justify-between mb-4">
+      <div className={`bg-white rounded-lg shadow-md p-6 h-full ${isArabic ? 'text-right' : 'text-left'}`}>
+        <div className={`flex items-center justify-between mb-4 ${isArabic ? 'flex-row-reverse' : ''}`}>
           <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
             <Icon className="w-6 h-6" />
           </div>
           <div
             className={`flex items-center text-sm font-medium ${getGrowthColor(
               change
-            )}`}
+            )} ${isArabic ? 'flex-row-reverse' : ''}`}
           >
             {isPositive ? (
-              <HiArrowUp className="w-4 h-4 mr-1" />
+              <HiArrowUp className={`w-4 h-4 ${isArabic ? 'ml-1' : 'mr-1'}`} />
             ) : (
-              <HiArrowDown className="w-4 h-4 mr-1" />
+              <HiArrowDown className={`w-4 h-4 ${isArabic ? 'ml-1' : 'mr-1'}`} />
             )}
             {Math.abs(change)}%
           </div>
@@ -105,14 +111,14 @@ const SuperDashboard = () => {
       <div className="text-center">
         <HiExclamation className="w-16 h-16 text-red-500 mx-auto mb-4" />
         <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Error Loading Dashboard
+          {t.errorLoadingDashboard}
         </h2>
         <p className="text-gray-600 mb-4">{message}</p>
         <button
           onClick={onRetry}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
         >
-          Try Again
+          {t.tryAgain}
         </button>
       </div>
     </div>
@@ -127,22 +133,22 @@ const SuperDashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className={`max-w-7xl mx-auto p-6 ${isArabic ? 'text-right' : 'text-left'}`} dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Super Admin Dashboard
+              {t.superAdminDashboard}
             </h1>
             <p className="text-gray-600 mt-1">
-              Comprehensive platform overview
+              {t.comprehensivePlatformOverview}
             </p>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className={`flex items-center space-x-4 ${isArabic ? 'flex-row-reverse space-x-reverse' : ''}`}>
             {lastUpdated && (
               <span className="text-sm text-gray-500">
-                Last updated: {formatDate(lastUpdated)}
+                {t.lastUpdated}: {formatDate(lastUpdated)}
               </span>
             )}
             <button
@@ -152,12 +158,12 @@ const SuperDashboard = () => {
                 isLoading
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
+              } ${isArabic ? 'flex-row-reverse' : ''}`}
             >
               <HiRefresh
-                className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                className={`w-4 h-4 ${isArabic ? 'ml-2' : 'mr-2'} ${isLoading ? "animate-spin" : ""}`}
               />
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -165,11 +171,10 @@ const SuperDashboard = () => {
         {/* Data staleness indicator */}
         {isDataStale() && (
           <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-md p-4">
-            <div className="flex items-center">
-              <HiExclamation className="w-5 h-5 text-yellow-400 mr-2" />
+            <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <HiExclamation className={`w-5 h-5 text-yellow-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
               <span className="text-sm text-yellow-800">
-                Data may be outdated. Consider refreshing for the latest
-                information.
+                {t.dataOutdated}
               </span>
             </div>
           </div>
@@ -178,16 +183,16 @@ const SuperDashboard = () => {
         {/* Error banner */}
         {error && (
           <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <HiExclamation className="w-5 h-5 text-red-400 mr-2" />
+            <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+                <HiExclamation className={`w-5 h-5 text-red-400 ${isArabic ? 'ml-2' : 'mr-2'}`} />
                 <span className="text-sm text-red-800">{error}</span>
               </div>
               <button
                 onClick={clearError}
                 className="text-red-600 hover:text-red-800 text-sm"
               >
-                Dismiss
+                {t.dismiss}
               </button>
             </div>
           </div>
@@ -197,7 +202,7 @@ const SuperDashboard = () => {
       {/* Main Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
-          title="Total Companies"
+          title={t.totalCompanies}
           value={stats.TotalCompanies}
           change={stats.CompanyGrowthPercentage}
           icon={HiOfficeBuilding}
@@ -205,7 +210,7 @@ const SuperDashboard = () => {
           isLoading={isLoading}
         />
         <MetricCard
-          title="Total Users"
+          title={t.totalUsers}
           value={stats.TotalUsers}
           change={stats.UserGrowthPercentage}
           icon={HiUsers}
@@ -213,7 +218,7 @@ const SuperDashboard = () => {
           isLoading={isLoading}
         />
         <MetricCard
-          title="Monthly Revenue"
+          title={t.monthlyRevenue}
           value={formatCurrency(stats.MonthlyRevenue)}
           change={stats.RevenueGrowthPercentage}
           icon={HiCreditCard}
@@ -221,7 +226,7 @@ const SuperDashboard = () => {
           isLoading={isLoading}
         />
         <MetricCard
-          title="Open Tickets"
+          title={t.openTickets}
           value={stats.OpenTickets}
           change={0}
           icon={HiBell}
@@ -232,17 +237,17 @@ const SuperDashboard = () => {
 
       {/* Secondary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className={`bg-white rounded-lg shadow-md p-6 ${isArabic ? 'text-right' : 'text-left'}`}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Storage & API Usage
+            {t.storageApiUsage}
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Storage Used:</span>
-              <span className="font-medium">{stats.StorageUsedGB} GB</span>
+            <div className={`flex justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <span className="text-gray-600">{t.storageUsed}:</span>
+              <span className="font-medium">{stats.StorageUsedGB} {t.gb}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Total API Calls:</span>
+            <div className={`flex justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <span className="text-gray-600">{t.totalApiCalls}:</span>
               <span className="font-medium">
                 {stats.TotalApiCalls?.toLocaleString()}
               </span>
@@ -250,33 +255,33 @@ const SuperDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className={`bg-white rounded-lg shadow-md p-6 ${isArabic ? 'text-right' : 'text-left'}`}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Subscription Overview
+            {t.subscriptionOverview}
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Active Companies:</span>
+            <div className={`flex justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <span className="text-gray-600">{t.activeCompanies}:</span>
               <span className="font-medium">{stats.ActiveCompanies}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">New This Month:</span>
+            <div className={`flex justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <span className="text-gray-600">{t.newThisMonth}:</span>
               <span className="font-medium">{stats.NewCompaniesThisMonth}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className={`bg-white rounded-lg shadow-md p-6 ${isArabic ? 'text-right' : 'text-left'}`}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            User Activity
+            {t.userActivity}
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Active Users:</span>
+            <div className={`flex justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <span className="text-gray-600">{t.activeUsers}:</span>
               <span className="font-medium">{stats.ActiveUsers}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Yearly Revenue:</span>
+            <div className={`flex justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <span className="text-gray-600">{t.yearlyRevenue}:</span>
               <span className="font-medium">
                 {formatCurrency(stats.YearlyRevenue)}
               </span>
@@ -288,10 +293,10 @@ const SuperDashboard = () => {
       {/* Recent Activities Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Recent Companies */}
-        <div className="bg-white rounded-lg shadow-md">
+        <div className={`bg-white rounded-lg shadow-md ${isArabic ? 'text-right' : 'text-left'}`}>
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
-              Recent Companies
+              {t.recentCompanies}
             </h3>
           </div>
           <div className="p-0">
@@ -300,27 +305,27 @@ const SuperDashboard = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.name}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Plan
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.plan}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Users
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.users}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Joined
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.joined}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {recentCompanies.map((company) => (
                       <tr key={company.Id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                           {company.Name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className={`px-6 py-4 whitespace-nowrap ${isArabic ? 'text-right' : 'text-left'}`}>
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
                               company.SubscriptionPlan
@@ -329,10 +334,10 @@ const SuperDashboard = () => {
                             {company.SubscriptionPlan}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                           {company.UserCount}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${isArabic ? 'text-right' : 'text-left'}`}>
                           {formatDate(company.CreatedAt)}
                         </td>
                       </tr>
@@ -343,17 +348,17 @@ const SuperDashboard = () => {
             ) : (
               <div className="text-center py-12">
                 <HiOfficeBuilding className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No recent companies found</p>
+                <p className="text-gray-500">{t.noRecentCompanies}</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Recent Tickets */}
-        <div className="bg-white rounded-lg shadow-md">
+        <div className={`bg-white rounded-lg shadow-md ${isArabic ? 'text-right' : 'text-left'}`}>
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
-              Recent Tickets
+              {t.recentTickets}
             </h3>
           </div>
           <div className="p-0">
@@ -362,17 +367,17 @@ const SuperDashboard = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ticket #
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.ticketNumber}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Subject
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.subject}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Company
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.company}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                        {t.status}
                       </th>
                     </tr>
                   </thead>
@@ -380,16 +385,16 @@ const SuperDashboard = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {recentTickets.map((ticket) => (
                       <tr key={ticket.Id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                           {ticket.TicketNumber}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                           {ticket.Subject}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
                           {ticket.CompanyName}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className={`px-6 py-4 whitespace-nowrap ${isArabic ? 'text-right' : 'text-left'}`}>
                           <span
                             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
                               ticket.Status
@@ -406,7 +411,7 @@ const SuperDashboard = () => {
             ) : (
               <div className="text-center py-12">
                 <HiBell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No recent tickets found</p>
+                <p className="text-gray-500">{t.noRecentTickets}</p>
               </div>
             )}
           </div>
@@ -414,9 +419,9 @@ const SuperDashboard = () => {
       </div>
 
       {/* System Alerts */}
-      <div className="bg-white rounded-lg shadow-md mb-8">
-        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">System Alerts</h3>
+      <div className={`bg-white rounded-lg shadow-md mb-8 ${isArabic ? 'text-right' : 'text-left'}`}>
+        <div className={`p-6 border-b border-gray-200 flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
+          <h3 className="text-lg font-semibold text-gray-900">{t.systemAlerts}</h3>
           <span
             className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
               getActiveAlertsCount() > 0
@@ -424,7 +429,7 @@ const SuperDashboard = () => {
                 : "bg-green-100 text-green-800"
             }`}
           >
-            {getActiveAlertsCount()} Active
+            {getActiveAlertsCount()} {t.active}
           </span>
         </div>
         <div className="p-6">
@@ -439,26 +444,26 @@ const SuperDashboard = () => {
                       : "bg-yellow-50 border-yellow-200"
                   }`}
                 >
-                  <div className="flex items-start">
+                  <div className={`flex items-start ${isArabic ? 'flex-row-reverse' : ''}`}>
                     {alert.IsResolved ? (
-                      <HiCheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
+                      <HiCheckCircle className={`h-5 w-5 text-green-500 mt-0.5 ${isArabic ? 'ml-3' : 'mr-3'}`} />
                     ) : (
-                      <HiExclamation className="h-5 w-5 text-yellow-500 mr-3 mt-0.5" />
+                      <HiExclamation className={`h-5 w-5 text-yellow-500 mt-0.5 ${isArabic ? 'ml-3' : 'mr-3'}`} />
                     )}
                     <div className="flex-1">
-                      <div className="flex items-center justify-between">
+                      <div className={`flex items-center justify-between ${isArabic ? 'flex-row-reverse' : ''}`}>
                         <h4 className="text-sm font-medium">{alert.Type}</h4>
                         {!alert.IsResolved && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Active
+                            {t.active}
                           </span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 mt-1">
                         {alert.Message}
                       </p>
-                      <div className="mt-2 flex items-center text-xs text-gray-500">
-                        <HiClock className="h-3 w-3 mr-1" />
+                      <div className={`mt-2 flex items-center text-xs text-gray-500 ${isArabic ? 'flex-row-reverse' : ''}`}>
+                        <HiClock className={`h-3 w-3 ${isArabic ? 'ml-1' : 'mr-1'}`} />
                         {formatDate(alert.CreatedAt)}
                       </div>
                     </div>
@@ -470,7 +475,7 @@ const SuperDashboard = () => {
             <div className="text-center py-12">
               <HiCheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
               <p className="text-gray-500">
-                No system alerts - All systems operational
+                {t.allSystemsOperational}
               </p>
             </div>
           )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   FiSearch,
   FiEdit2,
@@ -23,49 +24,57 @@ import Modall from "../../../components/elements/modal/Modal";
 import InputField from "../../../components/elements/inputField/InputField";
 import SelectBox from "../../../components/elements/selectBox/SelectBox";
 import Badge from "../../../components/elements/badge/Badge";
+import { getTranslation } from "../../../translations/ManageModulestranslation";
 
 const ManageModules = () => {
-  // Sample modules data
-  const initialModules = [
+  // Redux state for language
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+
+  // Helper function to get translated text
+  const t = (key) => getTranslation(key, currentLanguage);
+
+  // Sample modules data with translations
+  const getInitialModules = () => [
     {
       id: 1,
-      name: "User Management",
-      description: "Manage system users and permissions",
+      name: t("userManagement"),
+      description: t("userManagementDesc"),
       status: "active",
       created: "2023-05-15",
     },
     {
       id: 2,
-      name: "Content Management",
-      description: "Create and manage website content",
+      name: t("contentManagement"),
+      description: t("contentManagementDesc"),
       status: "inactive",
       created: "2023-06-20",
     },
     {
       id: 3,
-      name: "Analytics Dashboard",
-      description: "View system analytics and reports",
+      name: t("analyticsDashboard"),
+      description: t("analyticsDashboardDesc"),
       status: "active",
       created: "2023-07-10",
     },
     {
       id: 4,
-      name: "Billing System",
-      description: "Manage subscriptions and payments",
+      name: t("billingSystem"),
+      description: t("billingSystemDesc"),
       status: "active",
       created: "2023-08-05",
     },
     {
       id: 5,
-      name: "Notification Center",
-      description: "Configure and send notifications",
+      name: t("notificationCenter"),
+      description: t("notificationCenterDesc"),
       status: "inactive",
       created: "2023-09-12",
     },
   ];
 
-  const [modules, setModules] = useState(initialModules);
-  const [filteredModules, setFilteredModules] = useState(initialModules);
+  const [modules, setModules] = useState(getInitialModules());
+  const [filteredModules, setFilteredModules] = useState(getInitialModules());
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -84,10 +93,17 @@ const ManageModules = () => {
     message: "",
   });
 
-  // Status options for SelectBox
+  // Update modules when language changes
+  useEffect(() => {
+    const updatedModules = getInitialModules();
+    setModules(updatedModules);
+    setFilteredModules(updatedModules);
+  }, [currentLanguage]);
+
+  // Status options for SelectBox with translations
   const statusOptions = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
+    { value: "active", label: t("active") },
+    { value: "inactive", label: t("inactive") },
   ];
 
   // Filter modules based on search term
@@ -118,7 +134,7 @@ const ManageModules = () => {
     setAlert({
       show: true,
       variant: "success",
-      message: "Module status updated successfully!",
+      message: t("moduleStatusUpdated"),
     });
   };
 
@@ -146,20 +162,20 @@ const ManageModules = () => {
         setAlert({
           show: true,
           variant: "success",
-          message: "Module updated successfully!",
+          message: t("moduleUpdated"),
         });
       } else {
         // Add new module
         const newModule = {
           ...currentModule,
-          id: Date.now(), // Better ID generation
+          id: Date.now(),
           created: new Date().toISOString().split("T")[0],
         };
         setModules([...modules, newModule]);
         setAlert({
           show: true,
           variant: "success",
-          message: "Module added successfully!",
+          message: t("moduleAdded"),
         });
       }
 
@@ -194,7 +210,7 @@ const ManageModules = () => {
       setAlert({
         show: true,
         variant: "success",
-        message: "Module deleted successfully!",
+        message: t("moduleDeleted"),
       });
       setIsLoading(false);
       setShowDeleteModal(false);
@@ -213,7 +229,7 @@ const ManageModules = () => {
   };
 
   return (
-    <Container className="py-6 px-4 max-w-7xl">
+    <Container className={`py-6 px-4 max-w-7xl ${isArabic ? 'rtl' : 'ltr'}`}>
       {/* Alert */}
       {alert.show && (
         <Alert
@@ -226,8 +242,8 @@ const ManageModules = () => {
 
       {/* Header */}
       <BodyHeader
-        heading="Manage Modules"
-        subHeading="View, add, edit, and manage system modules"
+        heading={t("manageModules")}
+        subHeading={t("manageModulesSubheading")}
       />
 
       {/* Search and Add Button */}
@@ -236,20 +252,20 @@ const ManageModules = () => {
           <Container className="relative">
             <input
               type="text"
-              placeholder="Search modules by name or description..."
+              placeholder={t("searchPlaceholder")}
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full ${isArabic ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             />
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FiSearch className={`absolute ${isArabic ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400`} />
           </Container>
         </Container>
         <Container className="flex justify-end">
           <FilledButton
             isIcon={true}
             icon={FiPlus}
-            isIconLeft={true}
-            buttonText="Add New Module"
+            isIconLeft={!isArabic}
+            buttonText={t("addNewModule")}
             onClick={() => setShowModal(true)}
             bgColor="bg-blue-600"
             textColor="text-white"
@@ -265,11 +281,11 @@ const ManageModules = () => {
           <Table>
             <Thead className="bg-gray-50">
               <TR>
-                <TH>Module Name</TH>
-                <TH>Description</TH>
-                <TH>Status</TH>
-                <TH>Created</TH>
-                <TH>Actions</TH>
+                <TH>{t("moduleName")}</TH>
+                <TH>{t("description")}</TH>
+                <TH>{t("status")}</TH>
+                <TH>{t("created")}</TH>
+                <TH>{t("actions")}</TH>
               </TR>
             </Thead>
             <Tbody>
@@ -307,7 +323,7 @@ const ManageModules = () => {
                           module.status === "active" ? "success" : "secondary"
                         }
                       >
-                        {module.status === "active" ? "Active" : "Inactive"}
+                        {module.status === "active" ? t("active") : t("inactive")}
                       </Badge>
                     </TD>
                     <TD className="text-gray-600">{module.created}</TD>
@@ -381,8 +397,7 @@ const ManageModules = () => {
               ) : (
                 <TR>
                   <TD colSpan={5} className="text-center py-8 text-gray-500">
-                    No modules found. Try a different search or add a new
-                    module.
+                    {t("noModulesFound")}
                   </TD>
                 </TR>
               )}
@@ -393,11 +408,11 @@ const ManageModules = () => {
 
       {/* Add/Edit Module Modal */}
       <Modall
-        title={isEditing ? "Edit Module" : "Add New Module"}
+        title={isEditing ? t("editModule") : t("addModule")}
         modalOpen={showModal}
         setModalOpen={setShowModal}
-        okText={isEditing ? "Update Module" : "Add Module"}
-        cancelText="Cancel"
+        okText={isEditing ? t("updateModule") : t("addModuleBtn")}
+        cancelText={t("cancel")}
         okAction={handleSubmit}
         cancelAction={handleCancelModal}
         okButtonDisabled={isLoading}
@@ -405,9 +420,9 @@ const ManageModules = () => {
         body={
           <Container className="space-y-4">
             <InputField
-              label="Module Name"
+              label={t("moduleNameLabel")}
               name="name"
-              placeholder="Enter module name"
+              placeholder={t("moduleNamePlaceholder")}
               type="text"
               value={currentModule.name}
               onChange={handleInputChange}
@@ -417,7 +432,7 @@ const ManageModules = () => {
 
             <Container className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
+                {t("descriptionLabel")}
               </label>
               <textarea
                 name="description"
@@ -425,14 +440,14 @@ const ManageModules = () => {
                 onChange={handleInputChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter module description"
+                placeholder={t("descriptionPlaceholder")}
               />
             </Container>
 
             <SelectBox
-              label="Status"
+              label={t("statusLabel")}
               name="status"
-              placeholder="Select status"
+              placeholder={t("statusPlaceholder")}
               optionList={statusOptions}
               value={currentModule.status}
               handleChange={handleSelectChange}
@@ -445,11 +460,11 @@ const ManageModules = () => {
 
       {/* Delete Confirmation Modal */}
       <Modall
-        title="Confirm Deletion"
+        title={t("confirmDeletion")}
         modalOpen={showDeleteModal}
         setModalOpen={setShowDeleteModal}
-        okText="Delete Module"
-        cancelText="Cancel"
+        okText={t("deleteModule")}
+        cancelText={t("cancel")}
         okAction={confirmDelete}
         cancelAction={handleCancelDeleteModal}
         okButtonDisabled={isLoading}
@@ -457,11 +472,11 @@ const ManageModules = () => {
         body={
           <Container>
             <p className="text-gray-700">
-              Are you sure you want to delete the module{" "}
+              {t("deleteConfirmation")}{" "}
               <span className="font-semibold text-gray-900">
                 {moduleToDelete?.name}
               </span>
-              ? This action cannot be undone.
+              {t("deleteWarning")}
             </p>
           </Container>
         }

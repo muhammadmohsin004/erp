@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Building,
   Mail,
@@ -19,9 +20,15 @@ import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminA
 import InputField from "../../../components/elements/inputField/InputField";
 import SelectBox from "../../../components/elements/selectBox/SelectBox";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
+import addCompanyTranslations from "../../../translations/AddCompanytranslation";
+
 
 const AddCompany = () => {
   const navigate = useNavigate();
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  const t = addCompanyTranslations[currentLanguage] || addCompanyTranslations.en;
+
   const {
     createCompany,
     getSubscriptionPlans,
@@ -85,50 +92,45 @@ const AddCompany = () => {
 
     // Required fields validation
     if (!formData.name.trim())
-      errors.name = { message: "Company name is required" };
+      errors.name = { message: t.validation.companyNameRequired };
     if (!formData.email.trim())
-      errors.email = { message: "Company email is required" };
+      errors.email = { message: t.validation.companyEmailRequired };
     if (!formData.address.trim())
-      errors.address = { message: "Address is required" };
-    if (!formData.city.trim()) errors.city = { message: "City is required" };
+      errors.address = { message: t.validation.addressRequired };
+    if (!formData.city.trim()) 
+      errors.city = { message: t.validation.cityRequired };
     if (!formData.state.trim())
-      errors.state = { message: "State/Province is required" };
+      errors.state = { message: t.validation.stateRequired };
     if (!formData.country.trim())
-      errors.country = { message: "Country is required" };
+      errors.country = { message: t.validation.countryRequired };
     if (!formData.adminFirstName.trim())
-      errors.adminFirstName = { message: "Admin first name is required" };
+      errors.adminFirstName = { message: t.validation.adminFirstNameRequired };
     if (!formData.adminLastName.trim())
-      errors.adminLastName = { message: "Admin last name is required" };
+      errors.adminLastName = { message: t.validation.adminLastNameRequired };
     if (!formData.adminEmail.trim())
-      errors.adminEmail = { message: "Admin email is required" };
+      errors.adminEmail = { message: t.validation.adminEmailRequired };
     if (!formData.adminPassword.trim())
-      errors.adminPassword = { message: "Admin password is required" };
+      errors.adminPassword = { message: t.validation.adminPasswordRequired };
     if (!formData.subscriptionPlanId)
-      errors.subscriptionPlanId = { message: "Subscription plan is required" };
+      errors.subscriptionPlanId = { message: t.validation.subscriptionPlanRequired };
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
-      errors.email = { message: "Please enter a valid email address" };
+      errors.email = { message: t.validation.validEmail };
     }
     if (formData.adminEmail && !emailRegex.test(formData.adminEmail)) {
-      errors.adminEmail = {
-        message: "Please enter a valid admin email address",
-      };
+      errors.adminEmail = { message: t.validation.validAdminEmail };
     }
 
     // Password validation
     if (formData.adminPassword && formData.adminPassword.length < 8) {
-      errors.adminPassword = {
-        message: "Password must be at least 8 characters",
-      };
+      errors.adminPassword = { message: t.validation.passwordLength };
     }
 
     // Website validation
     if (formData.website && !formData.website.startsWith("http")) {
-      errors.website = {
-        message: "Website must start with http:// or https://",
-      };
+      errors.website = { message: t.validation.websiteFormat };
     }
 
     setFormErrors(errors);
@@ -159,7 +161,7 @@ const AddCompany = () => {
         setFormErrors((prev) => ({
           ...prev,
           subscriptionPlanId: {
-            message: "Please select a valid subscription plan",
+            message: t.validation.validSubscriptionPlan,
           },
         }));
         setIsSubmitting(false);
@@ -231,28 +233,30 @@ const AddCompany = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`min-h-screen bg-gray-50 py-8 ${isArabic ? 'rtl' : 'ltr'}`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={handleBack}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200"
+            className={`inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200 ${
+              isArabic ? 'flex-row-reverse' : ''
+            }`}
           >
-            <ArrowLeft className="mr-2" size={20} />
-            Back to Companies
+            <ArrowLeft className={`${isArabic ? 'ml-2 rotate-180' : 'mr-2'}`} size={20} />
+            {t.backToCompanies}
           </button>
 
-          <div className="flex items-center">
-            <div className="bg-blue-100 rounded-lg p-3 mr-4">
+          <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+            <div className={`bg-blue-100 rounded-lg p-3 ${isArabic ? 'ml-4' : 'mr-4'}`}>
               <Building className="text-blue-600" size={24} />
             </div>
-            <div>
+            <div className={isArabic ? 'text-right' : 'text-left'}>
               <h1 className="text-3xl font-bold text-gray-900">
-                Add New Company
+                {t.addNewCompany}
               </h1>
               <p className="text-gray-600">
-                Create a new company with admin account and subscription
+                {t.createCompanyDescription}
               </p>
             </div>
           </div>
@@ -261,12 +265,12 @@ const AddCompany = () => {
         {/* Error Alert */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            <div className="flex items-center">
-              <AlertCircle className="mr-2" size={18} />
+            <div className={`flex items-center ${isArabic ? 'flex-row-reverse' : ''}`}>
+              <AlertCircle className={`${isArabic ? 'ml-2' : 'mr-2'}`} size={18} />
               <span>{error}</span>
               <button
                 onClick={clearError}
-                className="ml-auto text-red-600 hover:text-red-800"
+                className={`${isArabic ? 'mr-auto' : 'ml-auto'} text-red-600 hover:text-red-800`}
               >
                 ×
               </button>
@@ -279,9 +283,11 @@ const AddCompany = () => {
           {/* Company Details Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <Building className="mr-2 text-blue-600" size={20} />
-                Company Details
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${
+                isArabic ? 'flex-row-reverse' : ''
+              }`}>
+                <Building className={`text-blue-600 ${isArabic ? 'ml-2' : 'mr-2'}`} size={20} />
+                {t.companyDetails}
               </h2>
             </div>
 
@@ -290,9 +296,9 @@ const AddCompany = () => {
                 {/* Company Name */}
                 <InputField
                   name="name"
-                  label="Company Name *"
+                  label={`${t.companyName} *`}
                   type="text"
-                  placeholder="Enter company name"
+                  placeholder={t.placeholders.companyName}
                   value={formData.name}
                   onChange={handleChange}
                   errors={formErrors}
@@ -301,9 +307,9 @@ const AddCompany = () => {
                 {/* Company Email */}
                 <InputField
                   name="email"
-                  label="Company Email *"
+                  label={`${t.companyEmail} *`}
                   type="email"
-                  placeholder="company@example.com"
+                  placeholder={t.placeholders.companyEmail}
                   value={formData.email}
                   onChange={handleChange}
                   errors={formErrors}
@@ -313,9 +319,9 @@ const AddCompany = () => {
                 {/* Phone */}
                 <InputField
                   name="phone"
-                  label="Phone Number"
+                  label={t.phoneNumber}
                   type="tel"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder={t.placeholders.phoneNumber}
                   value={formData.phone}
                   onChange={handleChange}
                   errors={formErrors}
@@ -325,9 +331,9 @@ const AddCompany = () => {
                 {/* Website */}
                 <InputField
                   name="website"
-                  label="Website"
+                  label={t.website}
                   type="url"
-                  placeholder="https://www.example.com"
+                  placeholder={t.placeholders.website}
                   value={formData.website}
                   onChange={handleChange}
                   errors={formErrors}
@@ -338,9 +344,9 @@ const AddCompany = () => {
                 <div className="md:col-span-2">
                   <InputField
                     name="taxNumber"
-                    label="Tax Number"
+                    label={t.taxNumber}
                     type="text"
-                    placeholder="Enter tax identification number"
+                    placeholder={t.placeholders.taxNumber}
                     value={formData.taxNumber}
                     onChange={handleChange}
                     errors={formErrors}
@@ -353,9 +359,11 @@ const AddCompany = () => {
           {/* Address Information Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <MapPin className="mr-2 text-blue-600" size={20} />
-                Address Information
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${
+                isArabic ? 'flex-row-reverse' : ''
+              }`}>
+                <MapPin className={`text-blue-600 ${isArabic ? 'ml-2' : 'mr-2'}`} size={20} />
+                {t.addressInformation}
               </h2>
             </div>
 
@@ -363,9 +371,9 @@ const AddCompany = () => {
               {/* Street Address */}
               <InputField
                 name="address"
-                label="Street Address *"
+                label={`${t.streetAddress} *`}
                 type="text"
-                placeholder="Enter street address"
+                placeholder={t.placeholders.streetAddress}
                 value={formData.address}
                 onChange={handleChange}
                 errors={formErrors}
@@ -375,9 +383,9 @@ const AddCompany = () => {
                 {/* City */}
                 <InputField
                   name="city"
-                  label="City *"
+                  label={`${t.city} *`}
                   type="text"
-                  placeholder="Enter city"
+                  placeholder={t.placeholders.city}
                   value={formData.city}
                   onChange={handleChange}
                   errors={formErrors}
@@ -386,9 +394,9 @@ const AddCompany = () => {
                 {/* State */}
                 <InputField
                   name="state"
-                  label="State/Province *"
+                  label={`${t.stateProvince} *`}
                   type="text"
-                  placeholder="Enter state/province"
+                  placeholder={t.placeholders.stateProvince}
                   value={formData.state}
                   onChange={handleChange}
                   errors={formErrors}
@@ -397,9 +405,9 @@ const AddCompany = () => {
                 {/* Country */}
                 <InputField
                   name="country"
-                  label="Country *"
+                  label={`${t.country} *`}
                   type="text"
-                  placeholder="Enter country"
+                  placeholder={t.placeholders.country}
                   value={formData.country}
                   onChange={handleChange}
                   errors={formErrors}
@@ -411,9 +419,11 @@ const AddCompany = () => {
           {/* Admin Information Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <User className="mr-2 text-blue-600" size={20} />
-                Administrator Account
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${
+                isArabic ? 'flex-row-reverse' : ''
+              }`}>
+                <User className={`text-blue-600 ${isArabic ? 'ml-2' : 'mr-2'}`} size={20} />
+                {t.administratorAccount}
               </h2>
             </div>
 
@@ -422,9 +432,9 @@ const AddCompany = () => {
                 {/* Admin First Name */}
                 <InputField
                   name="adminFirstName"
-                  label="First Name *"
+                  label={`${t.firstName} *`}
                   type="text"
-                  placeholder="Enter first name"
+                  placeholder={t.placeholders.firstName}
                   value={formData.adminFirstName}
                   onChange={handleChange}
                   errors={formErrors}
@@ -433,9 +443,9 @@ const AddCompany = () => {
                 {/* Admin Last Name */}
                 <InputField
                   name="adminLastName"
-                  label="Last Name *"
+                  label={`${t.lastName} *`}
                   type="text"
-                  placeholder="Enter last name"
+                  placeholder={t.placeholders.lastName}
                   value={formData.adminLastName}
                   onChange={handleChange}
                   errors={formErrors}
@@ -444,9 +454,9 @@ const AddCompany = () => {
                 {/* Admin Email */}
                 <InputField
                   name="adminEmail"
-                  label="Email Address *"
+                  label={`${t.emailAddress} *`}
                   type="email"
-                  placeholder="admin@example.com"
+                  placeholder={t.placeholders.adminEmail}
                   value={formData.adminEmail}
                   onChange={handleChange}
                   errors={formErrors}
@@ -456,9 +466,9 @@ const AddCompany = () => {
                 {/* Admin Phone */}
                 <InputField
                   name="adminPhone"
-                  label="Phone Number"
+                  label={t.phoneNumber}
                   type="tel"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder={t.placeholders.adminPhone}
                   value={formData.adminPhone}
                   onChange={handleChange}
                   errors={formErrors}
@@ -469,9 +479,9 @@ const AddCompany = () => {
                 <div className="md:col-span-2">
                   <InputField
                     name="adminPassword"
-                    label="Password *"
+                    label={`${t.password} *`}
                     type="password"
-                    placeholder="Enter password (minimum 8 characters)"
+                    placeholder={t.placeholders.password}
                     value={formData.adminPassword}
                     onChange={handleChange}
                     errors={formErrors}
@@ -479,8 +489,8 @@ const AddCompany = () => {
                     isVisible={isPasswordVisible}
                     setIsVisible={setIsPasswordVisible}
                   />
-                  <p className="mt-1 text-sm text-gray-600">
-                    Password must be at least 8 characters long
+                  <p className={`mt-1 text-sm text-gray-600 ${isArabic ? 'text-right' : 'text-left'}`}>
+                    {t.passwordHint}
                   </p>
                 </div>
               </div>
@@ -490,9 +500,11 @@ const AddCompany = () => {
           {/* Subscription Plan Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <CreditCard className="mr-2 text-blue-600" size={20} />
-                Subscription Plan
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${
+                isArabic ? 'flex-row-reverse' : ''
+              }`}>
+                <CreditCard className={`text-blue-600 ${isArabic ? 'ml-2' : 'mr-2'}`} size={20} />
+                {t.subscriptionPlan}
               </h2>
             </div>
 
@@ -501,13 +513,15 @@ const AddCompany = () => {
                 {isLoading ? (
                   <div className="flex items-center justify-center py-4">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    <span className="ml-2 text-gray-600">Loading plans...</span>
+                    <span className={`text-gray-600 ${isArabic ? 'mr-2' : 'ml-2'}`}>
+                      {t.loadingPlans}
+                    </span>
                   </div>
                 ) : (
                   <SelectBox
                     name="subscriptionPlanId"
-                    label="Select Plan *"
-                    placeholder="Select a subscription plan"
+                    label={`${t.selectPlan} *`}
+                    placeholder={t.selectSubscriptionPlan}
                     value={formData.subscriptionPlanId}
                     handleChange={handleSelectChange}
                     optionList={subscriptionPlanOptions}
@@ -520,8 +534,8 @@ const AddCompany = () => {
                 {/* Debug information */}
                 {!isLoading && subscriptionPlansList.length === 0 && (
                   <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <p className="text-sm text-yellow-800">
-                      No subscription plans available.
+                    <p className={`text-sm text-yellow-800 ${isArabic ? 'text-right' : 'text-left'}`}>
+                      {t.noPlansAvailable}
                     </p>
                   </div>
                 )}
@@ -535,21 +549,23 @@ const AddCompany = () => {
                           plan.Id.toString() === formData.subscriptionPlanId
                       );
                       return selectedPlan ? (
-                        <div>
+                        <div className={isArabic ? 'text-right' : 'text-left'}>
                           <p className="text-sm font-medium text-blue-800">
-                            Selected: {selectedPlan.Name}
+                            {t.selected}: {selectedPlan.Name}
                           </p>
                           <p className="text-xs text-blue-600 mt-1">
                             {selectedPlan.Description}
                           </p>
                           <p className="text-xs text-blue-600">
-                            ${selectedPlan.MonthlyPrice}/month • Max Users:{" "}
-                            {selectedPlan.MaxUsers} • Max Products:{" "}
+                            ${selectedPlan.MonthlyPrice}/month • {t.maxUsers}:{" "}
+                            {selectedPlan.MaxUsers} • {t.maxProducts}:{" "}
                             {selectedPlan.MaxProducts}
                           </p>
                         </div>
                       ) : (
-                        <p className="text-sm text-red-600">Plan not found</p>
+                        <p className={`text-sm text-red-600 ${isArabic ? 'text-right' : 'text-left'}`}>
+                          {t.planNotFound}
+                        </p>
                       );
                     })()}
                   </div>
@@ -559,9 +575,9 @@ const AddCompany = () => {
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6">
+          <div className={`flex justify-end space-x-4 pt-6 ${isArabic ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <FilledButton
-              buttonText="Cancel"
+              buttonText={t.cancel}
               bgColor="bg-white"
               textColor="text-gray-700"
               rounded="rounded-lg"
@@ -581,7 +597,7 @@ const AddCompany = () => {
               isIconLeft={true}
               iconSize="w-5 h-5"
               buttonText={
-                isSubmitting ? "Creating Company..." : "Create Company"
+                isSubmitting ? t.creatingCompany : t.createCompany
               }
               bgColor="bg-blue-600 hover:bg-blue-700"
               textColor="text-white"
