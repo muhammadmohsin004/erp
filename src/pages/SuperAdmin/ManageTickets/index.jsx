@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   FiSearch,
   FiEdit2,
@@ -29,8 +30,14 @@ import Modall from "../../../components/elements/modal/Modal";
 import Skeleton from "../../../components/elements/skeleton/Skeleton";
 import Badge from "../../../components/elements/badge/Badge";
 import BodyHeader from "../../../components/elements/bodyHeader/BodyHeader";
+import manageTicketsTranslations from "../../../translations/indextranslation"
 
 const ManageTickets = () => {
+  // Get current language from Redux
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const isArabic = currentLanguage === "ar";
+  const t = manageTicketsTranslations[currentLanguage] || manageTicketsTranslations.en;
+
   // Sample tickets data
   const initialTickets = [
     {
@@ -144,49 +151,108 @@ const ManageTickets = () => {
     department: "IT Support",
   });
 
-  // Options for dropdowns
+  // Options for dropdowns with translations
   const statusOptions = [
-    { value: "all", label: "All Status" },
-    { value: "open", label: "Open" },
-    { value: "in-progress", label: "In Progress" },
-    { value: "pending", label: "Pending" },
-    { value: "resolved", label: "Resolved" },
-    { value: "closed", label: "Closed" },
+    { value: "all", label: t.allStatus },
+    { value: "open", label: t.open },
+    { value: "in-progress", label: t.inProgress },
+    { value: "pending", label: t.pending },
+    { value: "resolved", label: t.resolved },
+    { value: "closed", label: t.closed },
   ];
 
   const priorityOptions = [
-    { value: "all", label: "All Priority" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "critical", label: "Critical" },
+    { value: "all", label: t.allPriority },
+    { value: "low", label: t.low },
+    { value: "medium", label: t.medium },
+    { value: "high", label: t.high },
+    { value: "critical", label: t.critical },
   ];
 
   const categoryOptions = [
-    { value: "all", label: "All Categories" },
-    { value: "technical", label: "Technical" },
-    { value: "billing", label: "Billing" },
-    { value: "account", label: "Account" },
-    { value: "feature-request", label: "Feature Request" },
-    { value: "general", label: "General" },
+    { value: "all", label: t.allCategories },
+    { value: "technical", label: t.technical },
+    { value: "billing", label: t.billing },
+    { value: "account", label: t.account },
+    { value: "feature-request", label: t.featureRequest },
+    { value: "general", label: t.general },
   ];
 
   const departmentOptions = [
-    { value: "all", label: "All Departments" },
-    { value: "IT Support", label: "IT Support" },
-    { value: "Customer Service", label: "Customer Service" },
-    { value: "Finance", label: "Finance" },
-    { value: "Product", label: "Product" },
-    { value: "Sales", label: "Sales" },
+    { value: "all", label: t.allDepartments },
+    { value: "IT Support", label: t.itSupport },
+    { value: "Customer Service", label: t.customerService },
+    { value: "Finance", label: t.finance },
+    { value: "Product", label: t.product },
+    { value: "Sales", label: t.sales },
   ];
 
   const assigneeOptions = [
-    { value: "Sarah Wilson", label: "Sarah Wilson" },
-    { value: "Mike Johnson", label: "Mike Johnson" },
-    { value: "Emma Davis", label: "Emma Davis" },
-    { value: "David Lee", label: "David Lee" },
-    { value: "Tom Anderson", label: "Tom Anderson" },
+    { value: "Sarah Wilson", label: t.assignees.sarahWilson },
+    { value: "Mike Johnson", label: t.assignees.mikeJohnson },
+    { value: "Emma Davis", label: t.assignees.emmaDavis },
+    { value: "David Lee", label: t.assignees.davidLee },
+    { value: "Tom Anderson", label: t.assignees.tomAnderson },
   ];
+
+  // Helper function to get translated status
+  const getTranslatedStatus = (status) => {
+    const statusMap = {
+      open: t.open,
+      'in-progress': t.inProgress,
+      pending: t.pending,
+      resolved: t.resolved,
+      closed: t.closed,
+    };
+    return statusMap[status] || status;
+  };
+
+  // Helper function to get translated priority
+  const getTranslatedPriority = (priority) => {
+    const priorityMap = {
+      low: t.low,
+      medium: t.medium,
+      high: t.high,
+      critical: t.critical,
+    };
+    return priorityMap[priority] || priority;
+  };
+
+  // Helper function to get translated category
+  const getTranslatedCategory = (category) => {
+    const categoryMap = {
+      technical: t.technical,
+      billing: t.billing,
+      account: t.account,
+      'feature-request': t.featureRequest,
+      general: t.general,
+    };
+    return categoryMap[category] || category;
+  };
+
+  // Helper function to get translated department
+  const getTranslatedDepartment = (department) => {
+    const departmentMap = {
+      'IT Support': t.itSupport,
+      'Customer Service': t.customerService,
+      'Finance': t.finance,
+      'Product': t.product,
+      'Sales': t.sales,
+    };
+    return departmentMap[department] || department;
+  };
+
+  // Helper function to get translated assignee
+  const getTranslatedAssignee = (assignee) => {
+    const assigneeMap = {
+      'Sarah Wilson': t.assignees.sarahWilson,
+      'Mike Johnson': t.assignees.mikeJohnson,
+      'Emma Davis': t.assignees.emmaDavis,
+      'David Lee': t.assignees.davidLee,
+      'Tom Anderson': t.assignees.tomAnderson,
+    };
+    return assigneeMap[assignee] || assignee;
+  };
 
   // Filter and search logic
   useEffect(() => {
@@ -235,7 +301,7 @@ const ManageTickets = () => {
 
   // Utility functions
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(isArabic ? "ar-SA" : "en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -315,7 +381,7 @@ const ManageTickets = () => {
       setAlert({
         show: true,
         variant: "success",
-        message: "Ticket deleted successfully!",
+        message: t.ticketDeleted,
       });
       setIsLoading(false);
       setShowDeleteModal(false);
@@ -357,7 +423,7 @@ const ManageTickets = () => {
         setAlert({
           show: true,
           variant: "success",
-          message: "Ticket updated successfully!",
+          message: t.ticketUpdated,
         });
       } else {
         const newTicket = {
@@ -370,7 +436,7 @@ const ManageTickets = () => {
         setAlert({
           show: true,
           variant: "success",
-          message: "Ticket created successfully!",
+          message: t.ticketCreated,
         });
       }
       setIsLoading(false);
@@ -400,12 +466,12 @@ const ManageTickets = () => {
     setAlert({
       show: true,
       variant: "info",
-      message: "Export functionality would be implemented here!",
+      message: t.exportMessage,
     });
   };
 
   return (
-    <Container className="py-6 px-4 max-w-7xl">
+    <Container className={`py-6 px-4 max-w-7xl ${isArabic ? 'rtl' : 'ltr'}`}>
       {/* Alert */}
       {alert.show && (
         <Alert
@@ -418,8 +484,8 @@ const ManageTickets = () => {
 
       {/* Header */}
       <BodyHeader
-        heading="Manage Tickets"
-        subHeading="Monitor and manage all customer support tickets"
+        heading={t.pageTitle}
+        subHeading={t.pageSubtitle}
       />
 
       {/* Stats Cards */}
@@ -429,7 +495,7 @@ const ManageTickets = () => {
             <div className="text-2xl font-bold text-blue-600">
               {tickets.filter((t) => t.status === "open").length}
             </div>
-            <div className="text-sm text-blue-700">Open</div>
+            <div className="text-sm text-blue-700">{t.open}</div>
           </Container>
         </Card>
         <Card className="p-4 bg-yellow-50 border-l-4 border-yellow-500">
@@ -437,7 +503,7 @@ const ManageTickets = () => {
             <div className="text-2xl font-bold text-yellow-600">
               {tickets.filter((t) => t.status === "in-progress").length}
             </div>
-            <div className="text-sm text-yellow-700">In Progress</div>
+            <div className="text-sm text-yellow-700">{t.inProgress}</div>
           </Container>
         </Card>
         <Card className="p-4 bg-purple-50 border-l-4 border-purple-500">
@@ -445,7 +511,7 @@ const ManageTickets = () => {
             <div className="text-2xl font-bold text-purple-600">
               {tickets.filter((t) => t.status === "pending").length}
             </div>
-            <div className="text-sm text-purple-700">Pending</div>
+            <div className="text-sm text-purple-700">{t.pending}</div>
           </Container>
         </Card>
         <Card className="p-4 bg-green-50 border-l-4 border-green-500">
@@ -453,7 +519,7 @@ const ManageTickets = () => {
             <div className="text-2xl font-bold text-green-600">
               {tickets.filter((t) => t.status === "resolved").length}
             </div>
-            <div className="text-sm text-green-700">Resolved</div>
+            <div className="text-sm text-green-700">{t.resolved}</div>
           </Container>
         </Card>
         <Card className="p-4 bg-gray-50 border-l-4 border-gray-500">
@@ -461,7 +527,7 @@ const ManageTickets = () => {
             <div className="text-2xl font-bold text-gray-600">
               {tickets.filter((t) => t.status === "closed").length}
             </div>
-            <div className="text-sm text-gray-700">Closed</div>
+            <div className="text-sm text-gray-700">{t.closed}</div>
           </Container>
         </Card>
       </Container>
@@ -474,40 +540,40 @@ const ManageTickets = () => {
             <Container className="relative">
               <input
                 type="text"
-                placeholder="Search tickets by title, customer, or email..."
+                placeholder={t.searchPlaceholder}
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full ${isArabic ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FiSearch className={`absolute ${isArabic ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400`} />
             </Container>
           </Container>
 
           {/* Filters */}
           <Container className="flex flex-wrap gap-2">
             <SelectBox
-              placeholder="Status"
+              placeholder={t.allStatus}
               optionList={statusOptions}
               value={statusFilter}
               handleChange={setStatusFilter}
               width="w-32"
             />
             <SelectBox
-              placeholder="Priority"
+              placeholder={t.allPriority}
               optionList={priorityOptions}
               value={priorityFilter}
               handleChange={setPriorityFilter}
               width="w-32"
             />
             <SelectBox
-              placeholder="Category"
+              placeholder={t.allCategories}
               optionList={categoryOptions}
               value={categoryFilter}
               handleChange={setCategoryFilter}
               width="w-40"
             />
             <SelectBox
-              placeholder="Department"
+              placeholder={t.allDepartments}
               optionList={departmentOptions}
               value={departmentFilter}
               handleChange={setDepartmentFilter}
@@ -538,7 +604,7 @@ const ManageTickets = () => {
             isIcon={true}
             icon={FiPlus}
             isIconLeft={true}
-            buttonText="Create Ticket"
+            buttonText={t.createTicket}
             onClick={handleCreateTicket}
             bgColor="bg-blue-600"
             textColor="text-white"
@@ -549,7 +615,7 @@ const ManageTickets = () => {
             isIcon={true}
             icon={FiDownload}
             isIconLeft={true}
-            buttonText="Export"
+            buttonText={t.export}
             borderColor="border-green-500"
             borderWidth="border"
             textColor="text-green-600"

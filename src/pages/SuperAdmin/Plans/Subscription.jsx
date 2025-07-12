@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   CreditCard,
   RefreshCw,
@@ -12,6 +13,7 @@ import SelectBox from "../../../components/elements/selectBox/SelectBox";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import CheckboxField from "../../../components/elements/checkbox/CheckboxField";
 import { useSuperAdmin } from "../../../Contexts/superAdminApiClient/superAdminApiClient";
+import subscriptionTranslations from "../../../translations/Subscriptiontranslation";
 
 const initialPlanState = {
   Name: "",
@@ -37,40 +39,45 @@ const initialPlanState = {
   SortOrder: 0,
 };
 
-const planTypes = [
-  { label: "Basic", value: "Basic" },
-  { label: "Standard", value: "Standard" },
-  { label: "Premium", value: "Premium" },
-  { label: "Enterprise", value: "Enterprise" },
-];
-
-const featureGroups = [
-  {
-    features: [
-      { name: "EnableInventory", label: "Enable Inventory" },
-      { name: "EnableHR", label: "Enable HR" },
-      { name: "EnableAccounting", label: "Enable Accounting" },
-      { name: "EnableReports", label: "Enable Reports" },
-    ],
-  },
-  {
-    features: [
-      { name: "EnableAPI", label: "Enable API" },
-      { name: "EnableCustomBranding", label: "Enable Custom Branding" },
-      { name: "EnableAdvancedReports", label: "Enable Advanced Reports" },
-      { name: "EnableMultiCurrency", label: "Enable Multi-Currency" },
-    ],
-  },
-];
-
 const Subscription = () => {
   const navigate = useNavigate();
-  const { createSubscriptionPlan, error, clearError, isLoading } =
-    useSuperAdmin();
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  const { createSubscriptionPlan, error, clearError, isLoading } = useSuperAdmin();
   const [formData, setFormData] = useState(initialPlanState);
   const [formErrors, setFormErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get translations based on current language
+  const t = subscriptionTranslations[currentLanguage] || subscriptionTranslations.en;
+  const isRTL = currentLanguage === "ar";
+
+  // Dynamic plan types based on language
+  const planTypes = [
+    { label: t.basic, value: "Basic" },
+    { label: t.standard, value: "Standard" },
+    { label: t.premium, value: "Premium" },
+    { label: t.enterprise, value: "Enterprise" },
+  ];
+
+  const featureGroups = [
+    {
+      features: [
+        { name: "EnableInventory", label: t.enableInventory },
+        { name: "EnableHR", label: t.enableHR },
+        { name: "EnableAccounting", label: t.enableAccounting },
+        { name: "EnableReports", label: t.enableReports },
+      ],
+    },
+    {
+      features: [
+        { name: "EnableAPI", label: t.enableAPI },
+        { name: "EnableCustomBranding", label: t.enableCustomBranding },
+        { name: "EnableAdvancedReports", label: t.enableAdvancedReports },
+        { name: "EnableMultiCurrency", label: t.enableMultiCurrency },
+      ],
+    },
+  ];
 
   useEffect(() => {
     if (error) clearError();
@@ -104,25 +111,25 @@ const Subscription = () => {
     const errors = {};
 
     if (!formData.Name.trim())
-      errors.Name = { message: "Plan name is required" };
+      errors.Name = { message: t.planNameRequired };
     if (!formData.Description.trim())
-      errors.Description = { message: "Description is required" };
+      errors.Description = { message: t.descriptionRequired };
     if (formData.MonthlyPrice < 0)
-      errors.MonthlyPrice = { message: "Monthly price cannot be negative" };
+      errors.MonthlyPrice = { message: t.monthlyPriceNegative };
     if (formData.YearlyPrice < 0)
-      errors.YearlyPrice = { message: "Yearly price cannot be negative" };
+      errors.YearlyPrice = { message: t.yearlyPriceNegative };
     if (formData.MaxUsers < 0)
-      errors.MaxUsers = { message: "Max users cannot be negative" };
+      errors.MaxUsers = { message: t.maxUsersNegative };
     if (formData.MaxEmployees < 0)
-      errors.MaxEmployees = { message: "Max employees cannot be negative" };
+      errors.MaxEmployees = { message: t.maxEmployeesNegative };
     if (formData.MaxProducts < 0)
-      errors.MaxProducts = { message: "Max products cannot be negative" };
+      errors.MaxProducts = { message: t.maxProductsNegative };
     if (formData.MaxWarehouses < 0)
-      errors.MaxWarehouses = { message: "Max warehouses cannot be negative" };
+      errors.MaxWarehouses = { message: t.maxWarehousesNegative };
     if (formData.StorageLimitGB < 0)
-      errors.StorageLimitGB = { message: "Storage limit cannot be negative" };
+      errors.StorageLimitGB = { message: t.storageLimitNegative };
     if (formData.SortOrder < 0)
-      errors.SortOrder = { message: "Sort order cannot be negative" };
+      errors.SortOrder = { message: t.sortOrderNegative };
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -137,12 +144,12 @@ const Subscription = () => {
     setIsSubmitting(true);
     try {
       const response = await createSubscriptionPlan(formData);
-      setSuccessMessage(response.message || "Plan created successfully");
+      setSuccessMessage(response.message || t.planCreatedSuccess);
       setFormData(initialPlanState);
       setTimeout(() => setSuccessMessage(""), 5000);
     } catch (err) {
       setFormErrors({
-        general: { message: err.message || "Failed to create plan" },
+        general: { message: err.message || t.failedToCreatePlan },
       });
     } finally {
       setIsSubmitting(false);
@@ -152,7 +159,7 @@ const Subscription = () => {
   const handleRefresh = () => {
     setIsSubmitting(true);
     setTimeout(() => {
-      setSuccessMessage("Subscriptions refreshed successfully!");
+      setSuccessMessage(t.subscriptionsRefreshed);
       setIsSubmitting(false);
       setTimeout(() => setSuccessMessage(""), 5000);
     }, 800);
@@ -163,28 +170,28 @@ const Subscription = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className={`min-h-screen bg-gray-50 py-8 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={handleBack}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200"
+            className={`inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
           >
-            <ArrowLeft className="mr-2" size={20} />
-            Back to Subscriptions
+            <ArrowLeft className={`${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} size={20} />
+            {t.backToSubscriptions}
           </button>
 
-          <div className="flex items-center">
-            <div className="bg-blue-100 rounded-lg p-3 mr-4">
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`bg-blue-100 rounded-lg p-3 ${isRTL ? 'ml-4' : 'mr-4'}`}>
               <CreditCard className="text-blue-600" size={24} />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Create Subscription Plan
+                {t.createSubscriptionPlan}
               </h1>
               <p className="text-gray-600">
-                Create a new subscription plan with custom features
+                {t.createSubscriptionPlanDesc}
               </p>
             </div>
           </div>
@@ -197,7 +204,7 @@ const Subscription = () => {
               <span>{successMessage}</span>
               <button
                 onClick={() => setSuccessMessage("")}
-                className="ml-auto text-green-600 hover:text-green-800"
+                className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-green-600 hover:text-green-800`}
               >
                 ×
               </button>
@@ -207,14 +214,14 @@ const Subscription = () => {
         {(error || formErrors.general) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             <div className="flex items-center">
-              <AlertCircle className="mr-2" size={18} />
+              <AlertCircle className={`${isRTL ? 'ml-2' : 'mr-2'}`} size={18} />
               <span>{error || formErrors.general?.message}</span>
               <button
                 onClick={() => {
                   clearError();
                   setFormErrors((prev) => ({ ...prev, general: "" }));
                 }}
-                className="ml-auto text-red-600 hover:text-red-800"
+                className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-red-600 hover:text-red-800`}
               >
                 ×
               </button>
@@ -227,26 +234,26 @@ const Subscription = () => {
           {/* Plan Details Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <CreditCard className="mr-2 text-blue-600" size={20} />
-                Plan Details
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <CreditCard className={`${isRTL ? 'ml-2' : 'mr-2'} text-blue-600`} size={20} />
+                {t.planDetails}
               </h2>
             </div>
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
                   name="Name"
-                  label="Plan Name *"
+                  label={`${t.planName} *`}
                   type="text"
-                  placeholder="Enter plan name"
+                  placeholder={t.planNamePlaceholder}
                   value={formData.Name}
                   onChange={handleChange}
                   errors={formErrors}
                 />
                 <SelectBox
                   name="PlanType"
-                  label="Plan Type *"
-                  placeholder="Select a plan type"
+                  label={`${t.planType} *`}
+                  placeholder={t.planTypePlaceholder}
                   value={formData.PlanType}
                   handleChange={handleSelectChange}
                   optionList={planTypes}
@@ -256,9 +263,9 @@ const Subscription = () => {
               </div>
               <InputField
                 name="Description"
-                label="Description *"
+                label={`${t.description} *`}
                 type="textarea"
-                placeholder="Enter plan description"
+                placeholder={t.descriptionPlaceholder}
                 value={formData.Description}
                 onChange={handleChange}
                 errors={formErrors}
@@ -267,9 +274,9 @@ const Subscription = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField
                   name="MonthlyPrice"
-                  label="Monthly Price ($) *"
+                  label={`${t.monthlyPrice} *`}
                   type="number"
-                  placeholder="Enter monthly price"
+                  placeholder={t.monthlyPricePlaceholder}
                   value={formData.MonthlyPrice}
                   onChange={handleChange}
                   errors={formErrors}
@@ -278,9 +285,9 @@ const Subscription = () => {
                 />
                 <InputField
                   name="YearlyPrice"
-                  label="Yearly Price ($) *"
+                  label={`${t.yearlyPrice} *`}
                   type="number"
-                  placeholder="Enter yearly price"
+                  placeholder={t.yearlyPricePlaceholder}
                   value={formData.YearlyPrice}
                   onChange={handleChange}
                   errors={formErrors}
@@ -294,18 +301,18 @@ const Subscription = () => {
           {/* Limits Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <CreditCard className="mr-2 text-blue-600" size={20} />
-                Plan Limits
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <CreditCard className={`${isRTL ? 'ml-2' : 'mr-2'} text-blue-600`} size={20} />
+                {t.planLimits}
               </h2>
             </div>
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <InputField
                   name="MaxUsers"
-                  label="Max Users *"
+                  label={`${t.maxUsers} *`}
                   type="number"
-                  placeholder="Enter max users"
+                  placeholder={t.maxUsersPlaceholder}
                   value={formData.MaxUsers}
                   onChange={handleChange}
                   errors={formErrors}
@@ -313,9 +320,9 @@ const Subscription = () => {
                 />
                 <InputField
                   name="MaxEmployees"
-                  label="Max Employees *"
+                  label={`${t.maxEmployees} *`}
                   type="number"
-                  placeholder="Enter max employees"
+                  placeholder={t.maxEmployeesPlaceholder}
                   value={formData.MaxEmployees}
                   onChange={handleChange}
                   errors={formErrors}
@@ -323,9 +330,9 @@ const Subscription = () => {
                 />
                 <InputField
                   name="MaxProducts"
-                  label="Max Products *"
+                  label={`${t.maxProducts} *`}
                   type="number"
-                  placeholder="Enter max products"
+                  placeholder={t.maxProductsPlaceholder}
                   value={formData.MaxProducts}
                   onChange={handleChange}
                   errors={formErrors}
@@ -333,9 +340,9 @@ const Subscription = () => {
                 />
                 <InputField
                   name="MaxWarehouses"
-                  label="Max Warehouses *"
+                  label={`${t.maxWarehouses} *`}
                   type="number"
-                  placeholder="Enter max warehouses"
+                  placeholder={t.maxWarehousesPlaceholder}
                   value={formData.MaxWarehouses}
                   onChange={handleChange}
                   errors={formErrors}
@@ -343,9 +350,9 @@ const Subscription = () => {
                 />
                 <InputField
                   name="StorageLimitGB"
-                  label="Storage Limit (GB) *"
+                  label={`${t.storageLimit} *`}
                   type="number"
-                  placeholder="Enter storage limit"
+                  placeholder={t.storageLimitPlaceholder}
                   value={formData.StorageLimitGB}
                   onChange={handleChange}
                   errors={formErrors}
@@ -353,9 +360,9 @@ const Subscription = () => {
                 />
                 <InputField
                   name="SortOrder"
-                  label="Sort Order *"
+                  label={`${t.sortOrder} *`}
                   type="number"
-                  placeholder="Enter sort order"
+                  placeholder={t.sortOrderPlaceholder}
                   value={formData.SortOrder}
                   onChange={handleChange}
                   errors={formErrors}
@@ -364,12 +371,13 @@ const Subscription = () => {
               </div>
             </div>
           </div>
+
           {/* Features Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <CreditCard className="mr-2 text-blue-600" size={20} />
-                Features
+              <h2 className={`text-xl font-semibold text-gray-900 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <CreditCard className={`${isRTL ? 'ml-2' : 'mr-2'} text-blue-600`} size={20} />
+                {t.features}
               </h2>
             </div>
             <div className="p-6">
@@ -392,14 +400,14 @@ const Subscription = () => {
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <CheckboxField
                   name="IsActive"
-                  label="Is Active"
+                  label={t.isActive}
                   checked={formData.IsActive}
                   onChange={handleChange}
                   errors={formErrors}
                 />
                 <CheckboxField
                   name="IsPopular"
-                  label="Is Popular (Featured)"
+                  label={t.isPopular}
                   checked={formData.IsPopular}
                   onChange={handleChange}
                   errors={formErrors}
@@ -409,12 +417,12 @@ const Subscription = () => {
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-between space-x-4 pt-6">
+          <div className={`flex justify-between space-x-4 pt-6 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <FilledButton
-              buttonText="Refresh Subscriptions"
+              buttonText={t.refreshSubscriptions}
               isIcon={true}
               icon={RefreshCw}
-              isIconLeft={true}
+              isIconLeft={!isRTL}
               iconSize="w-5 h-5"
               bgColor="bg-white"
               textColor="text-gray-700"
@@ -428,9 +436,9 @@ const Subscription = () => {
               px="px-6 py-3"
               disabled={isSubmitting || isLoading}
             />
-            <div className="flex space-x-4">
+            <div className={`flex space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
               <FilledButton
-                buttonText="Cancel"
+                buttonText={t.cancel}
                 bgColor="bg-white"
                 textColor="text-gray-700"
                 rounded="rounded-lg"
@@ -446,9 +454,9 @@ const Subscription = () => {
               <FilledButton
                 isIcon={true}
                 icon={Plus}
-                isIconLeft={true}
+                isIconLeft={!isRTL}
                 iconSize="w-5 h-5"
-                buttonText={isSubmitting ? "Creating Plan..." : "Create Plan"}
+                buttonText={isSubmitting ? t.creatingPlan : t.createPlan}
                 bgColor="bg-blue-600 hover:bg-blue-700"
                 textColor="text-white"
                 rounded="rounded-lg"
