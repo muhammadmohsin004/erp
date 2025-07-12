@@ -47,6 +47,7 @@ import Modall from "../../components/elements/modal/Modal";
 import Skeleton from "../../components/elements/skeleton/Skeleton";
 import Badge from "../../components/elements/Badge/Badge";
 import { useHR } from "../../Contexts/HrContext/HrContext";
+import translations from "../../translations/SalaryTranslation";
 
 const Salary = () => {
   const { language: currentLanguage } = useSelector((state) => state.language);
