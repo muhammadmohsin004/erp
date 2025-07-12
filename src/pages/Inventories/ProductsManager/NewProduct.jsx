@@ -646,10 +646,10 @@ const NewProduct = () => {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-
-      if (!validateForm()) {
-        return;
-      }
+      console.log("event triger");
+      // if (!validateForm()) {
+      //   return;
+      // }
 
       setIsSaving(true);
       try {
