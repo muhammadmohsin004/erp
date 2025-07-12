@@ -91,8 +91,8 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
   // Get user role - using state instead of localStorage
   const userRole = useMemo(() => {
     try {
-      // Simulating user role - replace with your actual data source
-      return "Admin";
+      const role = localStorage.getItem("role");
+      return role;
     } catch (error) {
       console.error("Error getting user role:", error);
       return "User";
