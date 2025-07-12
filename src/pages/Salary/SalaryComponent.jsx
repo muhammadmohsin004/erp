@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Plus, Edit, Trash2, Search, DollarSign, Filter } from "lucide-react";
 import Badge from "../../components/elements/Badge/Badge";
 import InputField from "../../components/elements/inputField/InputField";
@@ -21,8 +22,16 @@ import OutlineButton from "../../components/elements/elements/buttons/OutlineBut
 import Pagination from "../../components/elements/Pagination/Pagination";
 import Modall from "../../components/elements/modal/Modal";
 import { useSalary } from "../../Contexts/SalaryManagementContext/SalaryManagementContext";
+import SalaryComponentTranslation from "../../translations/SalaryComponentTranslation";
 
 const SalaryComponent = () => {
+  // Redux selector for language
+  const { language: currentLanguage } = useSelector((state) => state.language);
+  
+  // Get current translations
+  const t = SalaryComponentTranslation[currentLanguage] || translations.en;
+  const isArabic = currentLanguage === "ar";
+
   const {
     // State from context
     salaryComponents,
@@ -125,7 +134,7 @@ const SalaryComponent = () => {
 
   // Dynamic options based on loaded data - add null checks
   const typeOptions = [
-    { value: "", label: "All Types" },
+    { value: "", label: t.allTypes },
     ...(componentTypes || []).map((type) => ({
       value: type.Value || type.value || type,
       label: type.Label || type.label || type.Value || type.value || type,
@@ -133,23 +142,23 @@ const SalaryComponent = () => {
   ];
 
   const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "true", label: "Active" },
-    { value: "false", label: "Inactive" },
+    { value: "", label: t.allStatus },
+    { value: "true", label: t.active },
+    { value: "false", label: t.inactive },
   ];
 
   // Fixed calculation type options with proper null check
   const calculationTypeOptions =
     calculationTypes && calculationTypes.length > 0
       ? calculationTypes.map((type) => ({
-          value: type.Value || type.value || type,
-          label: type.Label || type.label || type.Value || type.value || type,
-        }))
+        value: type.Value || type.value || type,
+        label: type.Label || type.label || type.Value || type.value || type,
+      }))
       : [
-          { value: "Amount", label: "Fixed Amount" },
-          { value: "Percentage", label: "Percentage" },
-          { value: "Formula", label: "Formula" },
-        ];
+        { value: "Amount", label: t.fixedAmount },
+        { value: "Percentage", label: t.percentage },
+        { value: "Formula", label: t.formula },
+      ];
 
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({
@@ -204,12 +213,12 @@ const SalaryComponent = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this component?")) {
+    if (window.confirm(t.deleteConfirmation)) {
       try {
         await deleteSalaryComponent(id);
         setAlert({
           show: true,
-          message: "Component deleted successfully!",
+          message: t.componentDeletedSuccess,
           variant: "success",
         });
         // Reload data after deletion
@@ -217,7 +226,7 @@ const SalaryComponent = () => {
       } catch (error) {
         setAlert({
           show: true,
-          message: error.message || "Failed to delete component",
+          message: error.message || t.failedToDeleteComponent,
           variant: "error",
         });
       }
@@ -254,14 +263,14 @@ const SalaryComponent = () => {
         );
         setAlert({
           show: true,
-          message: "Component updated successfully!",
+          message: t.componentUpdatedSuccess,
           variant: "success",
         });
       } else {
         await createSalaryComponent(apiData);
         setAlert({
           show: true,
-          message: "Component added successfully!",
+          message: t.componentAddedSuccess,
           variant: "success",
         });
       }
@@ -292,7 +301,7 @@ const SalaryComponent = () => {
       console.error("Error in handleSubmit:", error);
       setAlert({
         show: true,
-        message: error.message || "Failed to save component",
+        message: error.message || t.failedToSaveComponent,
         variant: "error",
       });
     }
@@ -335,17 +344,19 @@ const SalaryComponent = () => {
 
   const getStatusBadge = (IsActive) => (
     <Badge variant={IsActive ? "success" : "secondary"}>
-      {IsActive ? "Active" : "Inactive"}
+      {IsActive ? t.active : t.inactive}
     </Badge>
   );
 
   const getTypeBadge = (type) => (
-    <Badge variant={type === "Deduction" ? "danger" : "success"}>{type}</Badge>
+    <Badge variant={type === "Deduction" ? "danger" : "success"}>
+      {type === "Deduction" ? t.deduction : t.earning}
+    </Badge>
   );
 
   const getTaxableBadge = (IsTaxable) => (
     <Badge variant={IsTaxable ? "warning" : "info"}>
-      {IsTaxable ? "Taxable" : "Non-Taxable"}
+      {IsTaxable ? t.taxableBadge : t.nonTaxable}
     </Badge>
   );
 
@@ -355,31 +366,31 @@ const SalaryComponent = () => {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
-          label="Component Name"
+          label={t.componentName}
           name="Name"
-          placeholder="e.g. Health Insurance, Basic Salary"
+          placeholder={t.componentNamePlaceholder}
           value={formData.Name}
           onChange={(e) => handleInputChange("Name", e.target.value)}
           width="w-full"
         />
         <SelectBox
-          label="Type"
+          label={t.type}
           name="Type"
-          placeholder="Select type"
+          placeholder={t.selectType}
           value={formData.Type}
           handleChange={(value) => handleInputChange("Type", value)}
           optionList={[
-            { value: "Earning", label: "Earning" },
-            { value: "Deduction", label: "Deduction" },
+            { value: "Earning", label: t.earning },
+            { value: "Deduction", label: t.deduction },
           ]}
           width="w-full"
         />
       </div>
 
       <InputField
-        label="Description"
+        label={t.description}
         name="Description"
-        placeholder="Enter description"
+        placeholder={t.descriptionPlaceholder}
         value={formData.Description}
         onChange={(e) => handleInputChange("Description", e.target.value)}
         width="w-full"
@@ -387,9 +398,9 @@ const SalaryComponent = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SelectBox
-          label="Calculation Type"
+          label={t.calculationType}
           name="CalculationType"
-          placeholder="Select calculation type"
+          placeholder={t.selectCalculationType}
           value={formData.CalculationType}
           handleChange={(value) => handleInputChange("CalculationType", value)}
           optionList={calculationTypeOptions}
@@ -397,7 +408,7 @@ const SalaryComponent = () => {
         />
         {formData.CalculationType === "Amount" && (
           <InputField
-            label="Default Amount"
+            label={t.defaultAmount}
             name="DefaultAmount"
             type="number"
             placeholder="0.00"
@@ -408,7 +419,7 @@ const SalaryComponent = () => {
         )}
         {formData.CalculationType === "Percentage" && (
           <InputField
-            label="Default Percentage"
+            label={t.defaultPercentage}
             name="DefaultPercentage"
             type="number"
             placeholder="0.00"
@@ -423,7 +434,7 @@ const SalaryComponent = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
-          label="Display Order"
+          label={t.displayOrder}
           name="DisplayOrder"
           type="number"
           placeholder="1"
@@ -435,12 +446,12 @@ const SalaryComponent = () => {
         />
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Options
+            {t.options}
           </label>
           <div className="space-y-2">
             <CheckboxField
               name="IsActive"
-              label="Active"
+              label={t.active}
               checked={formData.IsActive}
               onChange={(e) =>
                 handleCheckboxChange("IsActive", e.target.checked)
@@ -448,7 +459,7 @@ const SalaryComponent = () => {
             />
             <CheckboxField
               name="IsTaxable"
-              label="Taxable"
+              label={t.taxableBadge}
               checked={formData.IsTaxable}
               onChange={(e) =>
                 handleCheckboxChange("IsTaxable", e.target.checked)
@@ -456,7 +467,7 @@ const SalaryComponent = () => {
             />
             <CheckboxField
               name="IsMandatory"
-              label="Mandatory"
+              label={t.mandatory}
               checked={formData.IsMandatory}
               onChange={(e) =>
                 handleCheckboxChange("IsMandatory", e.target.checked)
@@ -464,7 +475,7 @@ const SalaryComponent = () => {
             />
             <CheckboxField
               name="IsStatutory"
-              label="Statutory"
+              label={t.statutory}
               checked={formData.IsStatutory}
               onChange={(e) =>
                 handleCheckboxChange("IsStatutory", e.target.checked)
@@ -477,7 +488,7 @@ const SalaryComponent = () => {
   );
 
   return (
-    <Container className="p-6 space-y-6">
+    <Container className={`p-6 space-y-6 ${isArabic ? 'rtl' : 'ltr'}`}>
       {/* Alert */}
       {alert.show && (
         <Alert
@@ -490,14 +501,14 @@ const SalaryComponent = () => {
       {/* Header */}
       <div className="flex">
         <BodyHeader
-          heading="Salary Components"
-          subHeading="Manage all salary components and deductions"
+          heading={t.salaryComponents}
+          subHeading={t.salaryComponentsSubHeading}
         />
         <FilledButton
-          buttonText="Add Component"
+          buttonText={t.addComponent}
           icon={Plus}
           isIcon={true}
-          isIconLeft={true}
+          isIconLeft={!isArabic}
           onClick={handleAdd}
           iconSize="w-4 h-4"
           bgColor="bg-gray-100 hover:bg-gray-200"
@@ -517,21 +528,21 @@ const SalaryComponent = () => {
             <SearchAndFilters
               searchValue={searchValue}
               setSearchValue={setSearchValue}
-              placeholder="Search components..."
+              placeholder={t.searchComponents}
               isFocused={false}
             />
           </div>
 
           <div className="flex gap-2">
             <SelectBox
-              placeholder="Filter by type"
+              placeholder={t.filterByType}
               value={typeFilter}
               handleChange={(value) => handleFilterChange("type", value)}
               optionList={typeOptions}
               width="w-32"
             />
             <SelectBox
-              placeholder="Filter by status"
+              placeholder={t.filterByStatus}
               value={statusFilter}
               handleChange={(value) => handleFilterChange("status", value)}
               optionList={statusOptions}
@@ -547,12 +558,12 @@ const SalaryComponent = () => {
           <Table>
             <Thead className="bg-gray-50">
               <TR>
-                <TH>Name & Description</TH>
-                <TH>Type</TH>
-                <TH>Calculation</TH>
-                <TH>Status</TH>
-                <TH>Taxable</TH>
-                <TH>Actions</TH>
+                <TH>{t.nameAndDescription}</TH>
+                <TH>{t.type}</TH>
+                <TH>{t.calculation}</TH>
+                <TH>{t.status}</TH>
+                <TH>{t.taxable}</TH>
+                <TH>{t.actions}</TH>
               </TR>
             </Thead>
             <Tbody>
@@ -567,7 +578,7 @@ const SalaryComponent = () => {
               ) : filteredComponents.length === 0 ? (
                 <TR>
                   <TD colSpan={6} className="text-center text-gray-500">
-                    No salary components found
+                    {t.noSalaryComponentsFound}
                   </TD>
                 </TR>
               ) : (
@@ -588,19 +599,19 @@ const SalaryComponent = () => {
                       <div>
                         <div className="font-medium">
                           {component.CalculationType === "Amount"
-                            ? `$${
-                                component.DefaultAmount?.toFixed(2) || "0.00"
-                              }`
+                            ? `$${component.DefaultAmount?.toFixed(2) || "0.00"
+                            }`
                             : component.CalculationType === "Percentage"
-                            ? `${
-                                (component.DefaultPercentage * 100)?.toFixed(
-                                  2
-                                ) || "0.00"
+                              ? `${(component.DefaultPercentage * 100)?.toFixed(
+                                2
+                              ) || "0.00"
                               }%`
-                            : "Formula"}
+                              : t.formula}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {component.CalculationType}
+                          {component.CalculationType === "Amount" ? t.amount :
+                           component.CalculationType === "Percentage" ? t.percentage :
+                           t.formula}
                         </div>
                       </div>
                     </TD>
@@ -665,14 +676,14 @@ const SalaryComponent = () => {
       <Modall
         title={
           editingComponent
-            ? "Edit Salary Component"
-            : "Add New Salary Component"
+            ? t.editSalaryComponent
+            : t.addNewSalaryComponent
         }
         modalOpen={showModal}
         setModalOpen={setShowModal}
         body={modalBody}
-        okText={editingComponent ? "Update Component" : "Add Component"}
-        cancelText="Cancel"
+        okText={editingComponent ? t.updateComponent : t.addComponent}
+        cancelText={t.cancel}
         okAction={handleSubmit}
         cancelAction={() => setShowModal(false)}
         okButtonDisabled={isLoading}

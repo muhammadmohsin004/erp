@@ -340,11 +340,11 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         key: "inventory-management",
         roles: ["Admin", "Manager", "Employee"],
         submenuItems: [
-          {
-            label: t.inventoryOverview,
-            path: getRoleBasedPath("/inventory"),
-            icon: Archive,
-          },
+          // {
+          //   label: t.inventoryOverview,
+          //   path: getRoleBasedPath("/inventory"),
+          //   icon: Archive,
+          // },
           {
             label: t.warehouses,
             path: getRoleBasedPath("/WareHouse"),

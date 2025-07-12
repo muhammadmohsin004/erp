@@ -11,67 +11,17 @@ import SelectBox from "../../components/elements/selectBox/SelectBox";
 import CheckboxField from "../../components/elements/checkbox/CheckboxField";
 import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
+import { employeeTranslations } from "../../translations/CreaeNewEmployeeTranslation";
 
 const CreateNewEmployee = () => {
-  const language = useSelector((state) => state.language.language);
+  const { language: currentLanguage } = useSelector((state) => state.language);
   const { Id } = localStorage.getItem("user");
   const userId = Id;
   const { createEmployee, loading, error, clearError, formMode, setFormMode } =
     useHR();
 
-  // Translations
-  const text = {
-    en: {
-      employeeInformation: "Employee Information",
-      firstName: "First Name",
-      surname: "Surname",
-      middleName: "Middle Name",
-      employeeCode: "Employee Code",
-      employeePicture: "Employee Picture",
-      uploadImage: "Upload Image",
-      imageInstructions: "Drag image here or select from your computer.",
-      notes: "Notes",
-      mobileNumber: "Mobile Number",
-      phoneNumber: "Phone Number",
-      accountInformation: "Account Information",
-      emailAddress: "Email Address",
-      status: "Status",
-      active: "Active",
-      inactive: "Inactive",
-      onLeave: "On Leave",
-      terminated: "Terminated",
-      allowAccess: "Allow access to the system",
-      sendCredentials: "Send credentials to employee by email",
-      role: "Role",
-      displayLanguage: "Display Language",
-      english: "English",
-      urdu: "Urdu",
-      arabic: "Arabic",
-      branch: "Branch",
-      selectBranch: "Select Branch",
-      mainBranch: "Main Branch",
-      northBranch: "North Branch",
-      southBranch: "South Branch",
-      accessibleBranches: "Accessible Branches",
-      cancel: "Cancel",
-      save: "Save",
-      saving: "Saving...",
-      successMessage: "Employee information saved successfully!",
-      requiredField: "*",
-      pleaseProvideFirstName: "Please provide a first name.",
-      pleaseProvideEmployeeCode: "Please provide an employee code.",
-      country: "Country",
-      citizenship: "Citizenship",
-      addressLine1: "Address Line 1",
-      addressLine2: "Address Line 2",
-      city: "City",
-      state: "State",
-      postalCode: "Postal Code",
-    },
-    ar: {
-      // Arabic translations...
-    },
-  }[language === "ar" ? "ar" : "en"];
+  // Get translations based on current language
+  const text = employeeTranslations[currentLanguage === "ar" ? "ar" : "en"];
 
   // Form state
   const [formData, setFormData] = useState({
@@ -212,19 +162,25 @@ const CreateNewEmployee = () => {
     setFormMode("view");
   };
 
+  // Helper function to get sub-heading text
+  const getSubHeading = () => {
+    switch (formMode) {
+      case "create":
+        return text.addNewEmployee;
+      case "edit":
+        return text.editEmployeeDetails;
+      default:
+        return text.viewEmployeeDetails;
+    }
+  };
+
   return (
     <Container
-      className={`py-4 ${language === "ar" ? "text-right" : "text-left"}`}
+      className={`py-4 ${currentLanguage === "ar" ? "text-right" : "text-left"}`}
     >
       <BodyHeader
         heading={text.employeeInformation}
-        subHeading={
-          formMode === "create"
-            ? "Add a new employee"
-            : formMode === "edit"
-            ? "Edit employee details"
-            : "View employee details"
-        }
+        subHeading={getSubHeading()}
       />
 
       {error && (
@@ -328,7 +284,7 @@ const CreateNewEmployee = () => {
                       <div className="flex flex-col items-center justify-center p-4 text-center">
                         <CloudUpload className="w-8 h-8 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500">
-                          {formMode === "view" ? "No image" : text.uploadImage}
+                          {formMode === "view" ? text.noImage : text.uploadImage}
                         </p>
                       </div>
                     )}
@@ -438,7 +394,7 @@ const CreateNewEmployee = () => {
           {/* Address Information Section */}
           <div className="px-6 py-4">
             <h3 className="text-md font-medium text-gray-900 mb-4">
-              Address Information
+              {text.addressInformation}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
