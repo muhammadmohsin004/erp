@@ -39,7 +39,8 @@ const NewRequisition = () => {
     "Clone Requisition": language === "ar" ? "نسخ الطلب" : "Clone Requisition",
     Save: language === "ar" ? "حفظ" : "Save",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Requisition Number": language === "ar" ? "رقم الطلب" : "Requisition Number",
+    "Requisition Number":
+      language === "ar" ? "رقم الطلب" : "Requisition Number",
     Type: language === "ar" ? "النوع" : "Type",
     Date: language === "ar" ? "التاريخ" : "Date",
     "Journal Account": language === "ar" ? "حساب اليومية" : "Journal Account",
@@ -63,24 +64,37 @@ const NewRequisition = () => {
     Remove: language === "ar" ? "إزالة" : "Remove",
     Attachments: language === "ar" ? "المرفقات" : "Attachments",
     "Upload Files": language === "ar" ? "رفع الملفات" : "Upload Files",
-    "No files selected": language === "ar" ? "لم يتم اختيار ملفات" : "No files selected",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
+    "No files selected":
+      language === "ar" ? "لم يتم اختيار ملفات" : "No files selected",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Additional Information":
+      language === "ar" ? "معلومات إضافية" : "Additional Information",
     "Grand Total": language === "ar" ? "المجموع الإجمالي" : "Grand Total",
     "Total Items": language === "ar" ? "إجمالي العناصر" : "Total Items",
-    "Please fill in all required fields": language === "ar" ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill in all required fields",
-    "Requisition saved successfully": language === "ar" ? "تم حفظ الطلب بنجاح" : "Requisition saved successfully",
-    "Error saving requisition": language === "ar" ? "خطأ في حفظ الطلب" : "Error saving requisition",
+    "Please fill in all required fields":
+      language === "ar"
+        ? "يرجى ملء جميع الحقول المطلوبة"
+        : "Please fill in all required fields",
+    "Requisition saved successfully":
+      language === "ar"
+        ? "تم حفظ الطلب بنجاح"
+        : "Requisition saved successfully",
+    "Error saving requisition":
+      language === "ar" ? "خطأ في حفظ الطلب" : "Error saving requisition",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     "Required field": language === "ar" ? "حقل مطلوب" : "Required field",
-    "Optional": language === "ar" ? "اختياري" : "Optional",
+    Optional: language === "ar" ? "اختياري" : "Optional",
     "Calculate Total": language === "ar" ? "احسب المجموع" : "Calculate Total",
     "Auto Calculate": language === "ar" ? "حساب تلقائي" : "Auto Calculate",
-    "File uploaded successfully": language === "ar" ? "تم رفع الملف بنجاح" : "File uploaded successfully",
-    "Error uploading file": language === "ar" ? "خطأ في رفع الملف" : "Error uploading file",
+    "File uploaded successfully":
+      language === "ar" ? "تم رفع الملف بنجاح" : "File uploaded successfully",
+    "Error uploading file":
+      language === "ar" ? "خطأ في رفع الملف" : "Error uploading file",
     "Remove file": language === "ar" ? "إزالة الملف" : "Remove file",
     "Download file": language === "ar" ? "تحميل الملف" : "Download file",
-    "Supported formats": language === "ar" ? "الصيغ المدعومة" : "Supported formats",
+    "Supported formats":
+      language === "ar" ? "الصيغ المدعومة" : "Supported formats",
   };
 
   // Get contexts
@@ -101,14 +115,18 @@ const NewRequisition = () => {
   const { dropdowns, getProductsDropdown } = useProductsManager();
 
   // Process data from contexts
-  const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products : [];
-  const suppliersData = Array.isArray(suppliers?.Data?.$values) ? suppliers.Data.$values : [];
+  const productsDropdown = Array.isArray(dropdowns?.products)
+    ? dropdowns.products
+    : [];
+  const suppliersData = Array.isArray(suppliers?.Data?.$values)
+    ? suppliers.Data.$values
+    : [];
 
   // Form state
   const [formData, setFormData] = useState({
     Number: "",
     Type: "",
-    Date: new Date().toISOString().split('T')[0],
+    Date: new Date().toISOString().split("T")[0],
     JournalAccount: "",
     SupplierId: null,
     Notes: "",
@@ -142,9 +160,9 @@ const NewRequisition = () => {
   const isCloning = cloneData && !isEditing;
 
   // Page title
-  const pageTitle = isEditing 
+  const pageTitle = isEditing
     ? translations["Edit Requisition"]
-    : isCloning 
+    : isCloning
     ? translations["Clone Requisition"]
     : translations["New Requisition"];
 
@@ -174,7 +192,7 @@ const NewRequisition = () => {
       setFormData({
         Number: editData.Number || "",
         Type: editData.Type || "",
-        Date: editData.Date || new Date().toISOString().split('T')[0],
+        Date: editData.Date || new Date().toISOString().split("T")[0],
         JournalAccount: editData.JournalAccount || "",
         SupplierId: editData.SupplierId || null,
         Notes: editData.Notes || "",
@@ -191,7 +209,7 @@ const NewRequisition = () => {
       setFormData({
         Number: "", // Clear number for clone
         Type: cloneData.Type || "",
-        Date: new Date().toISOString().split('T')[0], // Use current date
+        Date: new Date().toISOString().split("T")[0], // Use current date
         JournalAccount: cloneData.JournalAccount || "",
         SupplierId: cloneData.SupplierId || null,
         Notes: cloneData.Notes || "",
@@ -213,36 +231,39 @@ const NewRequisition = () => {
 
   // Form handlers
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
     // Clear validation error for this field
     if (validationErrors[field]) {
-      setValidationErrors(prev => ({
+      setValidationErrors((prev) => ({
         ...prev,
-        [field]: null
+        [field]: null,
       }));
     }
   };
 
   // Item handlers
   const handleNewItemChange = (field, value) => {
-    setNewItem(prev => {
+    setNewItem((prev) => {
       const updated = { ...prev, [field]: value };
-      
+
       // Auto-calculate total when unit price or quantity changes
-      if (field === 'UnitPrice' || field === 'Qty') {
-        const unitPrice = parseFloat(field === 'UnitPrice' ? value : updated.UnitPrice) || 0;
-        const qty = parseFloat(field === 'Qty' ? value : updated.Qty) || 0;
+      if (field === "UnitPrice" || field === "Qty") {
+        const unitPrice =
+          parseFloat(field === "UnitPrice" ? value : updated.UnitPrice) || 0;
+        const qty = parseFloat(field === "Qty" ? value : updated.Qty) || 0;
         updated.Total = (unitPrice * qty).toFixed(2);
       }
 
       // Auto-calculate new stock when quantity changes
-      if (field === 'Qty' || field === 'StockOnHand') {
-        const stockOnHand = parseFloat(field === 'StockOnHand' ? value : updated.StockOnHand) || 0;
-        const qty = parseFloat(field === 'Qty' ? value : updated.Qty) || 0;
+      if (field === "Qty" || field === "StockOnHand") {
+        const stockOnHand =
+          parseFloat(field === "StockOnHand" ? value : updated.StockOnHand) ||
+          0;
+        const qty = parseFloat(field === "Qty" ? value : updated.Qty) || 0;
         updated.NewStockOnHand = (stockOnHand + qty).toFixed(2);
       }
 
@@ -254,8 +275,10 @@ const NewRequisition = () => {
     const errors = {};
 
     if (!newItem.ProductId) errors.ProductId = translations["Required field"];
-    if (!newItem.UnitPrice || parseFloat(newItem.UnitPrice) <= 0) errors.UnitPrice = translations["Required field"];
-    if (!newItem.Qty || parseFloat(newItem.Qty) <= 0) errors.Qty = translations["Required field"];
+    if (!newItem.UnitPrice || parseFloat(newItem.UnitPrice) <= 0)
+      errors.UnitPrice = translations["Required field"];
+    if (!newItem.Qty || parseFloat(newItem.Qty) <= 0)
+      errors.Qty = translations["Required field"];
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -263,30 +286,37 @@ const NewRequisition = () => {
     }
 
     // Check if product already exists in items
-    const existingItemIndex = items.findIndex(item => item.ProductId === parseInt(newItem.ProductId));
-    
+    const existingItemIndex = items.findIndex(
+      (item) => item.ProductId === parseInt(newItem.ProductId)
+    );
+
     if (existingItemIndex >= 0) {
       // Update existing item quantity
       const updatedItems = [...items];
       const existingItem = updatedItems[existingItemIndex];
       const newQty = parseFloat(existingItem.Qty) + parseFloat(newItem.Qty);
       const newTotal = parseFloat(existingItem.UnitPrice) * newQty;
-      
+
       updatedItems[existingItemIndex] = {
         ...existingItem,
         Qty: newQty.toString(),
         Total: newTotal.toFixed(2),
-        NewStockOnHand: (parseFloat(existingItem.StockOnHand) + newQty).toFixed(2)
+        NewStockOnHand: (parseFloat(existingItem.StockOnHand) + newQty).toFixed(
+          2
+        ),
       };
-      
+
       setItems(updatedItems);
     } else {
       // Add new item
-      setItems(prev => [...prev, {
-        ...newItem,
-        ProductId: parseInt(newItem.ProductId),
-        Id: Date.now() // Temporary ID for new items
-      }]);
+      setItems((prev) => [
+        ...prev,
+        {
+          ...newItem,
+          ProductId: parseInt(newItem.ProductId),
+          Id: Date.now(), // Temporary ID for new items
+        },
+      ]);
     }
 
     // Reset form
@@ -303,17 +333,17 @@ const NewRequisition = () => {
   };
 
   const removeItem = (index) => {
-    setItems(prev => prev.filter((_, i) => i !== index));
+    setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
   // File handlers
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
-    setSelectedFiles(prev => [...prev, ...files]);
+    setSelectedFiles((prev) => [...prev, ...files]);
   };
 
   const removeSelectedFile = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const uploadFiles = async (requisitionId) => {
@@ -323,7 +353,10 @@ const NewRequisition = () => {
     try {
       const result = await uploadAttachments(requisitionId, selectedFiles);
       if (result && result.UploadedAttachments) {
-        setUploadedAttachments(prev => [...prev, ...result.UploadedAttachments]);
+        setUploadedAttachments((prev) => [
+          ...prev,
+          ...result.UploadedAttachments,
+        ]);
         setSelectedFiles([]);
         return true;
       }
@@ -352,8 +385,8 @@ const NewRequisition = () => {
     try {
       const success = await deleteAttachment(editData?.Id, attachmentId);
       if (success) {
-        setUploadedAttachments(prev => 
-          prev.filter(att => att.Id !== attachmentId)
+        setUploadedAttachments((prev) =>
+          prev.filter((att) => att.Id !== attachmentId)
         );
       }
     } catch (error) {
@@ -393,24 +426,36 @@ const NewRequisition = () => {
 
     setSaving(true);
     try {
+      // Structure the data exactly as shown in the curl command
       const requisitionData = {
-        ...formData,
         SupplierId: formData.SupplierId || undefined,
-        Items: items.map(item => ({
+        Type: formData.Type,
+        Date: formData.Date,
+        JournalAccount: formData.JournalAccount || undefined,
+        Number: formData.Number,
+        Notes: formData.Notes || undefined,
+        Items: items.map((item) => ({
           ProductId: item.ProductId,
           UnitPrice: parseFloat(item.UnitPrice),
-          Qty: parseInt(item.Qty),
-          StockOnHand: item.StockOnHand,
-          NewStockOnHand: item.NewStockOnHand,
-          Total: parseFloat(item.Total)
-        }))
+          Qty: item.Qty.toString(), // Keep as string as expected by API
+          StockOnHand: item.StockOnHand?.toString() || "0",
+          NewStockOnHand: item.NewStockOnHand?.toString() || "0",
+          Total: parseFloat(item.Total),
+        })),
       };
+
+      // Remove undefined values to clean the payload
+      const cleanedData = Object.fromEntries(
+        Object.entries(requisitionData).filter(
+          ([_, value]) => value !== undefined
+        )
+      );
 
       let result;
       if (isEditing) {
-        result = await updateRequisition(editData.Id, requisitionData);
+        result = await updateRequisition(editData.Id, cleanedData);
       } else {
-        result = await createRequisition(requisitionData);
+        result = await createRequisition(cleanedData);
       }
 
       if (result) {
@@ -420,7 +465,7 @@ const NewRequisition = () => {
         }
 
         alert(translations["Requisition saved successfully"]);
-        navigate("/admin/new-requisition");
+        navigate("/admin/Requsition-Manager");
       } else {
         alert(translations["Error saving requisition"]);
       }
@@ -434,13 +479,13 @@ const NewRequisition = () => {
 
   // Get product name by ID
   const getProductName = (productId) => {
-    const product = productsDropdown.find(p => p.Id === productId);
+    const product = productsDropdown.find((p) => p.Id === productId);
     return product?.Name || `Product #${productId}`;
   };
 
   // Get supplier name by ID
   const getSupplierName = (supplierId) => {
-    const supplier = suppliersData.find(s => s.Id === supplierId);
+    const supplier = suppliersData.find((s) => s.Id === supplierId);
     return supplier?.Name || `Supplier #${supplierId}`;
   };
 
@@ -521,7 +566,7 @@ const NewRequisition = () => {
                 <FileText className="w-5 h-5" />
                 {translations["Basic Information"]}
               </h2>
-              
+
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Requisition Number */}
                 <Container>
@@ -533,15 +578,21 @@ const NewRequisition = () => {
                     <input
                       type="text"
                       value={formData.Number}
-                      onChange={(e) => handleInputChange('Number', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("Number", e.target.value)
+                      }
                       className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        validationErrors.Number ? 'border-red-300' : 'border-gray-300'
+                        validationErrors.Number
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       placeholder="Enter requisition number"
                     />
                   </Container>
                   {validationErrors.Number && (
-                    <Span className="text-red-500 text-sm mt-1">{validationErrors.Number}</Span>
+                    <Span className="text-red-500 text-sm mt-1">
+                      {validationErrors.Number}
+                    </Span>
                   )}
                 </Container>
 
@@ -552,9 +603,11 @@ const NewRequisition = () => {
                   </label>
                   <select
                     value={formData.Type}
-                    onChange={(e) => handleInputChange('Type', e.target.value)}
+                    onChange={(e) => handleInputChange("Type", e.target.value)}
                     className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                      validationErrors.Type ? 'border-red-300' : 'border-gray-300'
+                      validationErrors.Type
+                        ? "border-red-300"
+                        : "border-gray-300"
                     }`}
                   >
                     <option value="">{translations["Select Type"]}</option>
@@ -564,7 +617,9 @@ const NewRequisition = () => {
                     <option value="Transfer">{translations.Transfer}</option>
                   </select>
                   {validationErrors.Type && (
-                    <Span className="text-red-500 text-sm mt-1">{validationErrors.Type}</Span>
+                    <Span className="text-red-500 text-sm mt-1">
+                      {validationErrors.Type}
+                    </Span>
                   )}
                 </Container>
 
@@ -578,14 +633,20 @@ const NewRequisition = () => {
                     <input
                       type="date"
                       value={formData.Date}
-                      onChange={(e) => handleInputChange('Date', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("Date", e.target.value)
+                      }
                       className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        validationErrors.Date ? 'border-red-300' : 'border-gray-300'
+                        validationErrors.Date
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                     />
                   </Container>
                   {validationErrors.Date && (
-                    <Span className="text-red-500 text-sm mt-1">{validationErrors.Date}</Span>
+                    <Span className="text-red-500 text-sm mt-1">
+                      {validationErrors.Date}
+                    </Span>
                   )}
                 </Container>
 
@@ -598,11 +659,18 @@ const NewRequisition = () => {
                     <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <select
                       value={formData.SupplierId || ""}
-                      onChange={(e) => handleInputChange('SupplierId', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "SupplierId",
+                          e.target.value ? parseInt(e.target.value) : null
+                        )
+                      }
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="">{translations["Select Supplier"]}</option>
-                      {suppliersData.map(supplier => (
+                      <option value="">
+                        {translations["Select Supplier"]}
+                      </option>
+                      {suppliersData.map((supplier) => (
                         <option key={supplier.Id} value={supplier.Id}>
                           {supplier.Name}
                         </option>
@@ -621,7 +689,9 @@ const NewRequisition = () => {
                   <input
                     type="text"
                     value={formData.JournalAccount}
-                    onChange={(e) => handleInputChange('JournalAccount', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("JournalAccount", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter journal account"
                   />
@@ -633,7 +703,7 @@ const NewRequisition = () => {
                   </label>
                   <textarea
                     value={formData.Notes}
-                    onChange={(e) => handleInputChange('Notes', e.target.value)}
+                    onChange={(e) => handleInputChange("Notes", e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter notes"
@@ -677,20 +747,28 @@ const NewRequisition = () => {
                       </label>
                       <select
                         value={newItem.ProductId}
-                        onChange={(e) => handleNewItemChange('ProductId', e.target.value)}
+                        onChange={(e) =>
+                          handleNewItemChange("ProductId", e.target.value)
+                        }
                         className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          validationErrors.ProductId ? 'border-red-300' : 'border-gray-300'
+                          validationErrors.ProductId
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                       >
-                        <option value="">{translations["Select Product"]}</option>
-                        {productsDropdown.map(product => (
+                        <option value="">
+                          {translations["Select Product"]}
+                        </option>
+                        {productsDropdown.map((product) => (
                           <option key={product.Id} value={product.Id}>
                             {product.Name}
                           </option>
                         ))}
                       </select>
                       {validationErrors.ProductId && (
-                        <Span className="text-red-500 text-sm mt-1">{validationErrors.ProductId}</Span>
+                        <Span className="text-red-500 text-sm mt-1">
+                          {validationErrors.ProductId}
+                        </Span>
                       )}
                     </Container>
 
@@ -703,14 +781,20 @@ const NewRequisition = () => {
                         type="number"
                         step="0.01"
                         value={newItem.UnitPrice}
-                        onChange={(e) => handleNewItemChange('UnitPrice', e.target.value)}
+                        onChange={(e) =>
+                          handleNewItemChange("UnitPrice", e.target.value)
+                        }
                         className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          validationErrors.UnitPrice ? 'border-red-300' : 'border-gray-300'
+                          validationErrors.UnitPrice
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         placeholder="0.00"
                       />
                       {validationErrors.UnitPrice && (
-                        <Span className="text-red-500 text-sm mt-1">{validationErrors.UnitPrice}</Span>
+                        <Span className="text-red-500 text-sm mt-1">
+                          {validationErrors.UnitPrice}
+                        </Span>
                       )}
                     </Container>
 
@@ -722,14 +806,20 @@ const NewRequisition = () => {
                       <input
                         type="number"
                         value={newItem.Qty}
-                        onChange={(e) => handleNewItemChange('Qty', e.target.value)}
+                        onChange={(e) =>
+                          handleNewItemChange("Qty", e.target.value)
+                        }
                         className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          validationErrors.Qty ? 'border-red-300' : 'border-gray-300'
+                          validationErrors.Qty
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         placeholder="1"
                       />
                       {validationErrors.Qty && (
-                        <Span className="text-red-500 text-sm mt-1">{validationErrors.Qty}</Span>
+                        <Span className="text-red-500 text-sm mt-1">
+                          {validationErrors.Qty}
+                        </Span>
                       )}
                     </Container>
 
@@ -742,7 +832,9 @@ const NewRequisition = () => {
                         type="number"
                         step="0.01"
                         value={newItem.StockOnHand}
-                        onChange={(e) => handleNewItemChange('StockOnHand', e.target.value)}
+                        onChange={(e) =>
+                          handleNewItemChange("StockOnHand", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         placeholder="0.00"
                       />
@@ -757,7 +849,9 @@ const NewRequisition = () => {
                         type="number"
                         step="0.01"
                         value={newItem.NewStockOnHand}
-                        onChange={(e) => handleNewItemChange('NewStockOnHand', e.target.value)}
+                        onChange={(e) =>
+                          handleNewItemChange("NewStockOnHand", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         placeholder="0.00"
                       />
@@ -773,7 +867,9 @@ const NewRequisition = () => {
                           type="number"
                           step="0.01"
                           value={newItem.Total}
-                          onChange={(e) => handleNewItemChange('Total', e.target.value)}
+                          onChange={(e) =>
+                            handleNewItemChange("Total", e.target.value)
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                           placeholder="0.00"
                         />
@@ -863,19 +959,29 @@ const NewRequisition = () => {
                             </Container>
                           </td>
                           <td className="px-4 py-3">
-                            <Span className="text-sm text-gray-900">${item.UnitPrice}</Span>
+                            <Span className="text-sm text-gray-900">
+                              ${item.UnitPrice}
+                            </Span>
                           </td>
                           <td className="px-4 py-3">
-                            <Span className="text-sm text-gray-900">{item.Qty}</Span>
+                            <Span className="text-sm text-gray-900">
+                              {item.Qty}
+                            </Span>
                           </td>
                           <td className="px-4 py-3">
-                            <Span className="text-sm text-gray-900">{item.StockOnHand || '0'}</Span>
+                            <Span className="text-sm text-gray-900">
+                              {item.StockOnHand || "0"}
+                            </Span>
                           </td>
                           <td className="px-4 py-3">
-                            <Span className="text-sm text-gray-900">{item.NewStockOnHand || '0'}</Span>
+                            <Span className="text-sm text-gray-900">
+                              {item.NewStockOnHand || "0"}
+                            </Span>
                           </td>
                           <td className="px-4 py-3">
-                            <Span className="text-sm font-medium text-green-600">${item.Total}</Span>
+                            <Span className="text-sm font-medium text-green-600">
+                              ${item.Total}
+                            </Span>
                           </td>
                           <td className="px-4 py-3 text-center">
                             <button
@@ -926,7 +1032,8 @@ const NewRequisition = () => {
                       Click to upload files or drag and drop
                     </Span>
                     <Span className="text-xs text-gray-500">
-                      {translations["Supported formats"]}: PDF, DOC, DOCX, JPG, PNG (Max 10MB)
+                      {translations["Supported formats"]}: PDF, DOC, DOCX, JPG,
+                      PNG (Max 10MB)
                     </Span>
                   </label>
                 </Container>
@@ -935,13 +1042,20 @@ const NewRequisition = () => {
               {/* Selected Files */}
               {selectedFiles.length > 0 && (
                 <Container className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Files:</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Selected Files:
+                  </h4>
                   <Container className="space-y-2">
                     {selectedFiles.map((file, index) => (
-                      <Container key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <Container
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
+                      >
                         <Container className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-blue-500" />
-                          <Span className="text-sm text-gray-900">{file.name}</Span>
+                          <Span className="text-sm text-gray-900">
+                            {file.name}
+                          </Span>
                           <Span className="text-xs text-gray-500">
                             ({(file.size / 1024 / 1024).toFixed(2)} MB)
                           </Span>
@@ -962,10 +1076,15 @@ const NewRequisition = () => {
               {/* Uploaded Attachments (for edit mode) */}
               {uploadedAttachments.length > 0 && (
                 <Container>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Attachments:</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Uploaded Attachments:
+                  </h4>
                   <Container className="space-y-2">
                     {uploadedAttachments.map((attachment, index) => (
-                      <Container key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <Container
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-green-50 rounded-lg"
+                      >
                         <Container className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-green-500" />
                           <Span className="text-sm text-gray-900">
@@ -976,14 +1095,18 @@ const NewRequisition = () => {
                           {isEditing && (
                             <>
                               <button
-                                onClick={() => handleDownloadAttachment(attachment)}
+                                onClick={() =>
+                                  handleDownloadAttachment(attachment)
+                                }
                                 className="p-1 text-blue-500 hover:text-blue-700"
                                 title={translations["Download file"]}
                               >
                                 <Download className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleDeleteAttachment(attachment.Id)}
+                                onClick={() =>
+                                  handleDeleteAttachment(attachment.Id)
+                                }
                                 className="p-1 text-red-500 hover:text-red-700"
                                 title={translations["Remove file"]}
                               >
@@ -998,12 +1121,15 @@ const NewRequisition = () => {
                 </Container>
               )}
 
-              {selectedFiles.length === 0 && uploadedAttachments.length === 0 && (
-                <Container className="text-center py-4">
-                  <FileX className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <Span className="text-gray-500 text-sm">{translations["No files selected"]}</Span>
-                </Container>
-              )}
+              {selectedFiles.length === 0 &&
+                uploadedAttachments.length === 0 && (
+                  <Container className="text-center py-4">
+                    <FileX className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <Span className="text-gray-500 text-sm">
+                      {translations["No files selected"]}
+                    </Span>
+                  </Container>
+                )}
             </Container>
           </Container>
 
@@ -1018,19 +1144,29 @@ const NewRequisition = () => {
 
               <Container className="space-y-4">
                 <Container className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <Span className="text-sm text-gray-600">{translations["Total Items"]}</Span>
-                  <Span className="text-sm font-medium text-gray-900">{totalItems}</Span>
+                  <Span className="text-sm text-gray-600">
+                    {translations["Total Items"]}
+                  </Span>
+                  <Span className="text-sm font-medium text-gray-900">
+                    {totalItems}
+                  </Span>
                 </Container>
 
                 <Container className="flex justify-between items-center py-2">
-                  <Span className="text-base font-medium text-gray-900">{translations["Grand Total"]}</Span>
-                  <Span className="text-lg font-bold text-green-600">${grandTotal.toFixed(2)}</Span>
+                  <Span className="text-base font-medium text-gray-900">
+                    {translations["Grand Total"]}
+                  </Span>
+                  <Span className="text-lg font-bold text-green-600">
+                    ${grandTotal.toFixed(2)}
+                  </Span>
                 </Container>
               </Container>
 
               {formData.SupplierId && (
                 <Container className="mt-4 pt-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-600">Selected Supplier:</Span>
+                  <Span className="text-sm text-gray-600">
+                    Selected Supplier:
+                  </Span>
                   <Span className="text-sm font-medium text-gray-900 block">
                     {getSupplierName(formData.SupplierId)}
                   </Span>
@@ -1040,8 +1176,10 @@ const NewRequisition = () => {
 
             {/* Quick Actions */}
             <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Quick Actions
+              </h3>
+
               <Container className="space-y-3">
                 <FilledButton
                   isIcon={true}
@@ -1072,15 +1210,17 @@ const NewRequisition = () => {
                   fontWeight="font-medium"
                   fontSize="text-sm"
                   isIconLeft={true}
-                  onClick={() => document.getElementById('file-upload').click()}
+                  onClick={() => document.getElementById("file-upload").click()}
                 />
               </Container>
             </Container>
 
             {/* Form Status */}
             <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Form Status</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Form Status
+              </h3>
+
               <Container className="space-y-3">
                 <Container className="flex items-center gap-2">
                   {formData.Number && formData.Type && formData.Date ? (
@@ -1088,7 +1228,9 @@ const NewRequisition = () => {
                   ) : (
                     <AlertCircle className="w-4 h-4 text-orange-500" />
                   )}
-                  <Span className="text-sm text-gray-600">Basic Information</Span>
+                  <Span className="text-sm text-gray-600">
+                    Basic Information
+                  </Span>
                 </Container>
 
                 <Container className="flex items-center gap-2">
@@ -1097,17 +1239,21 @@ const NewRequisition = () => {
                   ) : (
                     <AlertCircle className="w-4 h-4 text-gray-400" />
                   )}
-                  <Span className="text-sm text-gray-600">Items ({items.length})</Span>
+                  <Span className="text-sm text-gray-600">
+                    Items ({items.length})
+                  </Span>
                 </Container>
 
                 <Container className="flex items-center gap-2">
-                  {selectedFiles.length > 0 || uploadedAttachments.length > 0 ? (
+                  {selectedFiles.length > 0 ||
+                  uploadedAttachments.length > 0 ? (
                     <CheckCircle className="w-4 h-4 text-green-500" />
                   ) : (
                     <AlertCircle className="w-4 h-4 text-gray-400" />
                   )}
                   <Span className="text-sm text-gray-600">
-                    Attachments ({selectedFiles.length + uploadedAttachments.length})
+                    Attachments (
+                    {selectedFiles.length + uploadedAttachments.length})
                   </Span>
                 </Container>
               </Container>
@@ -1131,9 +1277,11 @@ const NewRequisition = () => {
             <Container className="bg-white rounded-lg p-6 flex items-center gap-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <Span className="text-gray-900">
-                {saving ? "Saving requisition..." : 
-                 uploadingFiles ? "Uploading files..." : 
-                 translations.Loading}
+                {saving
+                  ? "Saving requisition..."
+                  : uploadingFiles
+                  ? "Uploading files..."
+                  : translations.Loading}
               </Span>
             </Container>
           </Container>
