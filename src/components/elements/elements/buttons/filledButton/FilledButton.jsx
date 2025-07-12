@@ -7,7 +7,6 @@ const FilledButton = ({
   isIconLeft,
   isIconRight,
   iconSize = "w-4 h-4",
-  bgColor = "bg-gradient-purple", // <-- using your app.css gradient
   textColor = "text-white",
   rounded = "rounded-md",
   buttonText,
@@ -23,11 +22,11 @@ const FilledButton = ({
   return (
     <button
       disabled={disabled}
-      className={`${bgColor} ${textColor} ${height} ${width} ${fontWeight} ${fontSize} text-center ${rounded} ${px} ${
+      className={`bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 ${textColor} ${height} ${width} ${fontWeight} ${fontSize} text-center ${rounded} ${px} ${
         disabled
-          ? "opacity-60 cursor-not-allowed"
-          : "hover:opacity-90 cursor-pointer"
-      } flex justify-center items-center transition-opacity duration-200`}
+          ? "opacity-60 cursor-not-allowed hover:from-purple-500 hover:to-purple-700"
+          : "cursor-pointer"
+      } flex justify-center items-center transition-all duration-200 transform hover:scale-105 active:scale-95`}
       type={type}
       onClick={onClick}
     >

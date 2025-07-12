@@ -13,6 +13,52 @@
   }
 }
 
+@layer components {
+  /* Custom input field styles with gradient borders */
+  .input-field-container {
+    position: relative;
+  }
+
+  .input-field-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    background: var(--color-gradient-purple);
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
+
+  .input-field-container:focus-within::before {
+    opacity: 1;
+  }
+
+  .input-field-container:hover::before {
+    opacity: 0.7;
+  }
+
+  /* Alternative simpler approach using box-shadow */
+  .input-gradient-border {
+    border: 1px solid #d8b4fe; /* light purple fallback */
+    transition: all 0.2s ease;
+  }
+
+  .input-gradient-border:focus-within {
+    border-color: transparent;
+    box-shadow: 0 0 0 1px #8a2be2, 0 0 0 2px #9932cc;
+  }
+
+  .input-gradient-border:hover:not(:focus-within) {
+    border-color: #c084fc; /* medium purple */
+  }
+}
+
 @layer utilities {
   .bg-gradient-purple {
     background-image: var(--color-gradient-purple);
@@ -25,7 +71,6 @@
     color: transparent;
   }
 }
-
 
 /* Scrollbar styles for sidebar */
 .scrollbar-hide {
@@ -81,7 +126,7 @@
   .mobile-sidebar-closed {
     transform: translateX(-100%);
   }
-  
+
   .mobile-sidebar-open {
     transform: translateX(0);
   }
@@ -100,13 +145,18 @@
 }
 
 .sidebar-item-hover::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.1),
+    transparent
+  );
   transition: left 0.5s ease-in-out;
 }
 
@@ -134,7 +184,6 @@
 .submenu-exit-active {
   max-height: 0;
 }
-
 
 /* Add to your global CSS file (e.g., globals.css or index.css) */
 
@@ -221,7 +270,8 @@ html[dir="ltr"] .dropdown-enter {
 
 /* Arabic font support */
 html[dir="rtl"] {
-  font-family: 'Tajawal', 'Cairo', 'Amiri', 'Noto Sans Arabic', Arial, sans-serif;
+  font-family: "Tajawal", "Cairo", "Amiri", "Noto Sans Arabic", Arial,
+    sans-serif;
 }
 
 /* Better Arabic number display */
@@ -317,8 +367,12 @@ html[dir="rtl"] .spinner {
 }
 
 @keyframes spin-rtl {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 /* Search input RTL enhancement */
@@ -339,17 +393,17 @@ html[dir="ltr"] .search-input {
     left: auto;
     transform: translateX(100%);
   }
-  
+
   html[dir="rtl"] .mobile-menu.open {
     transform: translateX(0);
   }
-  
+
   html[dir="ltr"] .mobile-menu {
     left: 0;
     right: auto;
     transform: translateX(-100%);
   }
-  
+
   html[dir="ltr"] .mobile-menu.open {
     transform: translateX(0);
   }

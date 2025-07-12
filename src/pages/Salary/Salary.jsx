@@ -45,6 +45,7 @@ import Pagination from "../../components/elements/Pagination/Pagination";
 import Modall from "../../components/elements/modal/Modal";
 import Skeleton from "../../components/elements/skeleton/Skeleton";
 import Badge from "../../components/elements/Badge/Badge";
+import { useHR } from "../../Contexts/HrContext/HrContext";
 
 const Salary = () => {
   // Context
@@ -72,6 +73,8 @@ const Salary = () => {
     clearPayslipData,
   } = useSalary();
 
+  const { fetchEmployees, employees } = useHR();
+
   // Local state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -89,7 +92,7 @@ const Salary = () => {
   const [filterYear, setFilterYear] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  const [employeeData, setEmployeeData] = useState([]);
   // Form data
   const [formData, setFormData] = useState({
     employeeId: "",
@@ -101,13 +104,11 @@ const Salary = () => {
   });
 
   // Mock employee data (replace with actual employee context)
-  const [employeeData, setEmployeeData] = useState([]);
 
   // Load data on component mount
   useEffect(() => {
     loadSalaries();
-    // Load employees from your employee context
-    // getEmployees();
+    fetchEmployees();
   }, [
     currentPage,
     itemsPerPage,
@@ -116,6 +117,12 @@ const Salary = () => {
     filterMonth,
     filterYear,
   ]);
+  useEffect(() => {
+    if (employees && employees.length > 0) {
+      setEmployeeData(employees);
+      console.log("employeeData updated:", employees);
+    }
+  }, [employees]);
 
   const loadSalaries = async () => {
     try {
@@ -326,10 +333,13 @@ const Salary = () => {
     { value: "Mobile Payment", label: "Mobile Payment" },
   ];
 
-  const employeeOptions = employeeData.map((emp) => ({
-    value: emp.id,
-    label: `${emp.firstName} ${emp.lastName} - ${emp.email}`,
-  }));
+  const employeeOptions = [
+    { value: "", label: "All Employees" }, // Add this option for filtering
+    ...employeeData.map((emp) => ({
+      value: emp.Id,
+      label: `${emp.F_Name} ${emp.Surname} - ${emp.Email}`,
+    })),
+  ];
 
   return (
     <Container className="py-6 px-4 max-w-7xl mx-auto">
@@ -584,11 +594,11 @@ const Salary = () => {
                             : "N/A"}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
+                          {/* <div className="font-medium text-gray-900">
                             {salary.employeeName || "Unknown Employee"}
-                          </div>
+                          </div> */}
                           <div className="text-sm text-gray-500">
-                            ID: {salary.employeeId}
+                            ID: {salary.EmployeeId}
                           </div>
                         </div>
                       </div>
@@ -790,16 +800,16 @@ const Salary = () => {
                 </div>
                 {employeeData.map((employee) => (
                   <label
-                    key={employee.id}
+                    key={employee.Id}
                     className="flex items-center space-x-2 mb-1"
                   >
                     <input
                       type="checkbox"
                       checked={formData.bulkEmployeeIds.includes(
-                        employee.id.toString()
+                        employee.Id.toString()
                       )}
                       onChange={() =>
-                        handleBulkEmployeeChange(employee.id.toString())
+                        handleBulkEmployeeChange(employee.Id.toString())
                       }
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />

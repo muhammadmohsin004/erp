@@ -77,6 +77,19 @@ const EmployeeForm = () => {
     { value: "Terminated", label: "Terminated" },
   ];
 
+  const roleOptions = [
+    { value: "Admin", label: "Admin" },
+    { value: "HR Manager", label: "HR Manager" },
+    { value: "Employee", label: "Employee" },
+    { value: "Manager", label: "Manager" },
+    { value: "Supervisor", label: "Supervisor" },
+    { value: "Team Lead", label: "Team Lead" },
+    { value: "Senior Employee", label: "Senior Employee" },
+    { value: "Junior Employee", label: "Junior Employee" },
+    { value: "Intern", label: "Intern" },
+    { value: "Contractor", label: "Contractor" },
+  ];
+
   const branchOptions = [
     { value: "Main Branch", label: "Main Branch" },
     { value: "North Branch", label: "North Branch" },
@@ -474,6 +487,7 @@ const EmployeeForm = () => {
                 placeholder="Select Role"
                 value={formData.Role}
                 handleChange={(value) => handleSelectChange("Role", value)}
+                optionList={roleOptions}
                 disabled={isViewMode}
                 label="Role"
                 width="w-full"
