@@ -354,15 +354,7 @@ const InvoiceDashboard = () => {
         </div>
 
         {/* Language Toggle */}
-        <div className="mb-6">
-          <button
-            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-            className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors"
-          >
-            Switch to {language === "en" ? "Arabic" : "English"}
-          </button>
-        </div>
-
+       
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <QuickActionCard
