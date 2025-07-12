@@ -46,7 +46,7 @@ import Pagination from "../../components/elements/Pagination/Pagination";
 import Modall from "../../components/elements/modal/Modal";
 import Skeleton from "../../components/elements/skeleton/Skeleton";
 import Badge from "../../components/elements/Badge/Badge";
-import translations from "../../translations/SalaryTranslation";
+import { useHR } from "../../Contexts/HrContext/HrContext";
 
 const Salary = () => {
   const { language: currentLanguage } = useSelector((state) => state.language);
@@ -74,6 +74,8 @@ const Salary = () => {
     clearPayslipData,
   } = useSalary();
 
+  const { fetchEmployees, employees } = useHR();
+
   // Local state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -91,7 +93,7 @@ const Salary = () => {
   const [filterYear, setFilterYear] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  const [employeeData, setEmployeeData] = useState([]);
   // Form data
   const [formData, setFormData] = useState({
     employeeId: "",
@@ -103,11 +105,11 @@ const Salary = () => {
   });
 
   // Mock employee data (replace with actual employee context)
-  const [employeeData, setEmployeeData] = useState([]);
 
   // Load data on component mount
   useEffect(() => {
     loadSalaries();
+    fetchEmployees();
   }, [
     currentPage,
     itemsPerPage,
@@ -116,6 +118,12 @@ const Salary = () => {
     filterMonth,
     filterYear,
   ]);
+  useEffect(() => {
+    if (employees && employees.length > 0) {
+      setEmployeeData(employees);
+      console.log("employeeData updated:", employees);
+    }
+  }, [employees]);
 
   const loadSalaries = async () => {
     try {
@@ -278,7 +286,11 @@ const Salary = () => {
       Paid: "success",
     };
 
-    return <Badge variant={variants[status] || "secondary"}>{t[status?.toLowerCase()] || status}</Badge>;
+    return (
+      <Badge variant={variants[status] || "secondary"}>
+        {t[status?.toLowerCase()] || status}
+      </Badge>
+    );
   };
 
   const formatCurrency = (amount) => {
@@ -289,33 +301,36 @@ const Salary = () => {
   };
 
   const getMonthName = (month) => {
-    const months = currentLanguage === "ar" ? [
-      "يناير",
-      "فبراير",
-      "مارس",
-      "أبريل",
-      "مايو",
-      "يونيو",
-      "يوليو",
-      "أغسطس",
-      "سبتمبر",
-      "أكتوبر",
-      "نوفمبر",
-      "ديسمبر",
-    ] : [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+    const months =
+      currentLanguage === "ar"
+        ? [
+            "يناير",
+            "فبراير",
+            "مارس",
+            "أبريل",
+            "مايو",
+            "يونيو",
+            "يوليو",
+            "أغسطس",
+            "سبتمبر",
+            "أكتوبر",
+            "نوفمبر",
+            "ديسمبر",
+          ]
+        : [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
     return months[month - 1] || month;
   };
 
@@ -332,20 +347,35 @@ const Salary = () => {
   ];
 
   const paymentMethodOptions = [
-    { value: "Bank Transfer", label: currentLanguage === "ar" ? "تحويل بنكي" : "Bank Transfer" },
+    {
+      value: "Bank Transfer",
+      label: currentLanguage === "ar" ? "تحويل بنكي" : "Bank Transfer",
+    },
     { value: "Cash", label: currentLanguage === "ar" ? "نقدًا" : "Cash" },
     { value: "Cheque", label: currentLanguage === "ar" ? "شيك" : "Cheque" },
-    { value: "Direct Deposit", label: currentLanguage === "ar" ? "إيداع مباشر" : "Direct Deposit" },
-    { value: "Mobile Payment", label: currentLanguage === "ar" ? "دفع عبر الهاتف" : "Mobile Payment" },
+    {
+      value: "Direct Deposit",
+      label: currentLanguage === "ar" ? "إيداع مباشر" : "Direct Deposit",
+    },
+    {
+      value: "Mobile Payment",
+      label: currentLanguage === "ar" ? "دفع عبر الهاتف" : "Mobile Payment",
+    },
   ];
 
-  const employeeOptions = employeeData.map((emp) => ({
-    value: emp.id,
-    label: `${emp.firstName} ${emp.lastName} - ${emp.email}`,
-  }));
+  const employeeOptions = [
+    { value: "", label: "All Employees" }, // Add this option for filtering
+    ...employeeData.map((emp) => ({
+      value: emp.Id,
+      label: `${emp.F_Name} ${emp.Surname} - ${emp.Email}`,
+    })),
+  ];
 
   return (
-    <Container className="py-6 px-4 max-w-7xl mx-auto" style={{ direction: currentLanguage === "ar" ? "rtl" : "ltr" }}>
+    <Container
+      className="py-6 px-4 max-w-7xl mx-auto"
+      style={{ direction: currentLanguage === "ar" ? "rtl" : "ltr" }}
+    >
       {/* Error Alert */}
       {error && (
         <Alert
@@ -368,9 +398,7 @@ const Salary = () => {
                 <h1 className="text-2xl font-bold text-gray-900">
                   {t.salaryManagement}
                 </h1>
-                <p className="text-gray-600">
-                  {t.generateProcessManage}
-                </p>
+                <p className="text-gray-600">{t.generateProcessManage}</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -522,7 +550,7 @@ const Salary = () => {
             {t.salaryRecords}
           </h2>
           <p className="text-sm text-gray-600">
-            {t.salaryRecords} {filteredSalaryData.length} {t.of} {" "}
+            {t.salaryRecords} {filteredSalaryData.length} {t.of}{" "}
             {salariesPagination?.totalItems || 0} {t.records}
           </p>
         </div>
@@ -597,11 +625,11 @@ const Salary = () => {
                             : "N/A"}
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
-                            {salary.employeeName || t.unknownEmployee}
-                          </div>
+                          {/* <div className="font-medium text-gray-900">
+                            {salary.employeeName || "Unknown Employee"}
+                          </div> */}
                           <div className="text-sm text-gray-500">
-                            ID: {salary.employeeId}
+                            ID: {salary.EmployeeId}
                           </div>
                         </div>
                       </div>
@@ -632,7 +660,8 @@ const Salary = () => {
                         {formatCurrency(salary.netSalary)}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {t.totalDeductions}: {formatCurrency(salary.totalDeductions)}
+                        {t.totalDeductions}:{" "}
+                        {formatCurrency(salary.totalDeductions)}
                       </div>
                     </TD>
                     <TD>{getStatusBadge(salary.status)}</TD>
@@ -803,16 +832,16 @@ const Salary = () => {
                 </div>
                 {employeeData.map((employee) => (
                   <label
-                    key={employee.id}
+                    key={employee.Id}
                     className="flex items-center space-x-2 mb-1"
                   >
                     <input
                       type="checkbox"
                       checked={formData.bulkEmployeeIds.includes(
-                        employee.id.toString()
+                        employee.Id.toString()
                       )}
                       onChange={() =>
-                        handleBulkEmployeeChange(employee.id.toString())
+                        handleBulkEmployeeChange(employee.Id.toString())
                       }
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
@@ -916,10 +945,12 @@ const Salary = () => {
                     {t.attendanceSummary}
                   </h3>
                   <p>
-                    <strong>{t.workingDays}:</strong> {selectedSalary.workingDays}
+                    <strong>{t.workingDays}:</strong>{" "}
+                    {selectedSalary.workingDays}
                   </p>
                   <p>
-                    <strong>{t.presentDays}:</strong> {selectedSalary.presentDays}
+                    <strong>{t.presentDays}:</strong>{" "}
+                    {selectedSalary.presentDays}
                   </p>
                   <p>
                     <strong>{t.leaveDays}:</strong> {selectedSalary.leaveDays}
@@ -1021,10 +1052,12 @@ const Salary = () => {
                     <strong>{t.name}:</strong> {payslipData.employee?.fullName}
                   </p>
                   <p>
-                    <strong>{t.code}:</strong> {payslipData.employee?.employeeCode}
+                    <strong>{t.code}:</strong>{" "}
+                    {payslipData.employee?.employeeCode}
                   </p>
                   <p>
-                    <strong>{t.position}:</strong> {payslipData.employee?.jobTitle}
+                    <strong>{t.position}:</strong>{" "}
+                    {payslipData.employee?.jobTitle}
                   </p>
                 </div>
                 <div>
@@ -1032,11 +1065,14 @@ const Salary = () => {
                     {t.payPeriod}
                   </h3>
                   <p>
-                    <strong>{t.period}:</strong> {payslipData.salaryPeriod?.period}
+                    <strong>{t.period}:</strong>{" "}
+                    {payslipData.salaryPeriod?.period}
                   </p>
                   <p>
                     <strong>{t.generated}:</strong>{" "}
-                    {new Date(payslipData.generatedOn).toLocaleDateString(currentLanguage === "ar" ? "ar-EG" : "en-US")}
+                    {new Date(payslipData.generatedOn).toLocaleDateString(
+                      currentLanguage === "ar" ? "ar-EG" : "en-US"
+                    )}
                   </p>
                 </div>
               </div>
@@ -1069,7 +1105,9 @@ const Salary = () => {
                     <div className="text-2xl font-bold text-indigo-600">
                       {payslipData.attendance?.overtimeHours}
                     </div>
-                    <div className="text-sm text-gray-600">{t.overtimeHours}</div>
+                    <div className="text-sm text-gray-600">
+                      {t.overtimeHours}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1185,9 +1223,7 @@ const Salary = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               {t.deleteSalaryRecord}
             </h3>
-            <p className="text-gray-600">
-              {t.deleteConfirmation}
-            </p>
+            <p className="text-gray-600">{t.deleteConfirmation}</p>
           </div>
         }
       />
