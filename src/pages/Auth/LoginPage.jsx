@@ -145,7 +145,7 @@ function LoginPage() {
   // Helper function to determine redirect path based on role
   const getRedirectPath = (role) => {
     const roleMap = {
-      SuperAdmin: "/admin/superadmin/dashboard",
+      SuperAdmin: "/superadmin/dashboard",
       Admin: "/admin/dashboard",
       Manager: "/admin/dashboard",
       Employee: "/admin/dashboard",
