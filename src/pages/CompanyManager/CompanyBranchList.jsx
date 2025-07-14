@@ -612,7 +612,9 @@ const CompanyBranchList = () => {
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {branch.IsActive ? translations.Active : translations.Inactive}
+                            {branch.IsActive
+                              ? translations.Active
+                              : translations.Inactive}
                           </Span>
                         </td>
                         <td className="px-6 py-4">
@@ -661,77 +663,83 @@ const CompanyBranchList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.PageNumber * pagination.PageSize,
-                      pagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {pagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.PageNumber} / {pagination.TotalPages}
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
+                      {Math.min(
+                        pagination.PageNumber * pagination.PageSize,
+                        pagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {pagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {pagination.PageNumber} / {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -761,8 +769,10 @@ const CompanyBranchList = () => {
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Basic Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Branch Name"]}
@@ -811,8 +821,10 @@ const CompanyBranchList = () => {
 
                 {/* Contact & Status Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Contact & Status</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Contact & Status
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Zip Code"]}
@@ -842,7 +854,9 @@ const CompanyBranchList = () => {
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {selectedBranch.IsHeadOffice ? translations.Yes : translations.No}
+                      {selectedBranch.IsHeadOffice
+                        ? translations.Yes
+                        : translations.No}
                     </Span>
                   </Container>
 
@@ -857,7 +871,9 @@ const CompanyBranchList = () => {
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {selectedBranch.IsActive ? translations.Active : translations.Inactive}
+                      {selectedBranch.IsActive
+                        ? translations.Active
+                        : translations.Inactive}
                     </Span>
                   </Container>
                 </Container>
@@ -912,8 +928,8 @@ const CompanyBranchList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the branch{" "}
-              <strong>"{branchToDelete?.BranchName}"</strong>{" "}
-              and all associated data.
+              <strong>"{branchToDelete?.BranchName}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }
@@ -923,7 +939,7 @@ const CompanyBranchList = () => {
       {showFilters && (
         <Container className="fixed inset-0 z-50 overflow-hidden">
           <Container
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0 "
             onClick={() => setShowFilters(false)}
           />
           <Container className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl">

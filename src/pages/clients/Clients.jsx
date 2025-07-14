@@ -24,13 +24,13 @@ import {
   Calendar,
 } from "lucide-react";
 import {
-  AiOutlineEye, // Eye icon for view
-  AiOutlineEdit, // Edit icon for edit
-  AiOutlineCopy, // Copy icon for clone
-  AiOutlineDelete, // Delete icon for delete
-  AiOutlinePlus, // Plus icon for add
-  AiOutlineFilter, // Filter icon
-  AiOutlineDownload, // Download icon for export
+  AiOutlineEye,
+  AiOutlineEdit,
+  AiOutlineCopy,
+  AiOutlineDelete,
+  AiOutlinePlus,
+  AiOutlineFilter,
+  AiOutlineDownload,
 } from "react-icons/ai";
 import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -92,6 +92,12 @@ const ClientList = () => {
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
     "No results found":
       language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Exporting...": language === "ar" ? "جاري التصدير..." : "Exporting...",
+    "Export completed":
+      language === "ar" ? "تم التصدير بنجاح" : "Export completed",
+    "Export failed": language === "ar" ? "فشل التصدير" : "Export failed",
   };
 
   // Get clients context
@@ -117,6 +123,13 @@ const ClientList = () => {
     sortBy: "CreatedAt",
     sortAscending: false,
   });
+  const [appliedFilters, setAppliedFilters] = useState({
+    clientType: "",
+    country: "",
+    city: "",
+    sortBy: "CreatedAt",
+    sortAscending: false,
+  });
   const [selectedClients, setSelectedClients] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -125,6 +138,7 @@ const ClientList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch clients on component mount
   useEffect(() => {
@@ -159,14 +173,14 @@ const ClientList = () => {
     setSelectAll(false);
   }, [clients]);
 
- useEffect(() => {
-  // Check both Redux state and localStorage
-  const localToken = localStorage.getItem('token'); // or whatever key you use for the token
-  
-  if (!token && !localToken) {
-    navigate("/admin-Login");
-  }
-}, [token, navigate]);
+  useEffect(() => {
+    // Check both Redux state and localStorage
+    const localToken = localStorage.getItem("token");
+
+    if (!token && !localToken) {
+      navigate("/admin-Login");
+    }
+  }, [token, navigate]);
 
   // Search function
   const handleSearchClients = async () => {
@@ -174,10 +188,184 @@ const ClientList = () => {
       await getClients({
         page: 1,
         searchTerm: searchTerm,
-        ...filterOptions,
+        ...appliedFilters,
       });
     } catch (error) {
       console.error("Error searching clients:", error);
+    }
+  };
+
+  // Filter functions - Updated to work properly
+  const handleApplyFilters = async () => {
+    try {
+      setAppliedFilters({ ...filterOptions });
+      await getClients({
+        page: 1,
+        searchTerm: searchTerm,
+        ...filterOptions,
+      });
+      setShowFilters(false);
+    } catch (error) {
+      console.error("Error applying filters:", error);
+    }
+  };
+
+  const handleClearFilters = async () => {
+    const resetFilters = {
+      clientType: "",
+      country: "",
+      city: "",
+      sortBy: "CreatedAt",
+      sortAscending: false,
+    };
+
+    setSearchTerm("");
+    setFilterOptions(resetFilters);
+    setAppliedFilters(resetFilters);
+    setShowFilters(false);
+
+    try {
+      await getClients({ page: 1 });
+    } catch (error) {
+      console.error("Error clearing filters:", error);
+    }
+  };
+
+  // Export functionality - Complete implementation
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return "";
+
+    const headers = [
+      "Client Type",
+      "Full Name",
+      "Business Name",
+      "Email",
+      "Mobile",
+      "Telephone",
+      "Street Address 1",
+      "Street Address 2",
+      "City",
+      "State",
+      "Postal Code",
+      "Country",
+      "VAT Number",
+      "Code Number",
+      "Currency",
+      "Category",
+      "Invoicing Method",
+      "Notes",
+      "Created At",
+      "Updated At",
+    ];
+
+    const csvContent = [
+      headers.join(","),
+      ...data.map((client) =>
+        [
+          `"${client.ClientType || ""}"`,
+          `"${client.FullName || ""}"`,
+          `"${client.BusinessName || ""}"`,
+          `"${client.Email || ""}"`,
+          `"${client.Mobile || ""}"`,
+          `"${client.Telephone || ""}"`,
+          `"${client.StreetAddress1 || ""}"`,
+          `"${client.StreetAddress2 || ""}"`,
+          `"${client.City || ""}"`,
+          `"${client.State || ""}"`,
+          `"${client.PostalCode || ""}"`,
+          `"${client.Country || ""}"`,
+          `"${client.VatNumber || ""}"`,
+          `"${client.CodeNumber || ""}"`,
+          `"${client.Currency || ""}"`,
+          `"${client.Category || ""}"`,
+          `"${client.InvoicingMethod || ""}"`,
+          `"${client.Notes || ""}"`,
+          `"${
+            client.CreatedAt
+              ? new Date(client.CreatedAt).toLocaleDateString()
+              : ""
+          }"`,
+          `"${
+            client.UpdatedAt
+              ? new Date(client.UpdatedAt).toLocaleDateString()
+              : ""
+          }"`,
+        ].join(",")
+      ),
+    ].join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      let exportData = [];
+
+      if (selectedClients.length > 0) {
+        // Export selected clients
+        exportData = Array.isArray(clients)
+          ? clients.filter((client) => selectedClients.includes(client.Id))
+          : [];
+      } else {
+        // Export all clients (fetch all pages if needed)
+        exportData = Array.isArray(clients) ? clients : [];
+
+        // If there are more pages, fetch all clients
+        if (pagination && pagination.totalPages > 1) {
+          try {
+            // Fetch all clients for export
+            const allClientsResponse = await getClients({
+              page: 1,
+              pageSize: pagination.totalItems, // Get all items in one request
+              searchTerm: searchTerm,
+              ...appliedFilters,
+            });
+
+            if (allClientsResponse && Array.isArray(allClientsResponse)) {
+              exportData = allClientsResponse;
+            }
+          } catch (error) {
+            console.error("Error fetching all clients for export:", error);
+            // Fallback to current page data
+            exportData = Array.isArray(clients) ? clients : [];
+          }
+        }
+      }
+
+      if (exportData.length === 0) {
+        alert("No data to export");
+        return;
+      }
+
+      const csvContent = convertToCSV(exportData);
+      const filename = `clients_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(translations["Export completed"]);
+    } catch (error) {
+      console.error("Error exporting clients:", error);
+      alert(translations["Export failed"]);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -280,7 +468,7 @@ const ClientList = () => {
       // Refresh the client list
       await getClients({
         searchTerm: searchTerm,
-        ...filterOptions,
+        ...appliedFilters,
       });
     } catch (error) {
       console.error("Error deleting client:", error);
@@ -298,52 +486,11 @@ const ClientList = () => {
       await getClients({
         page: newPage,
         searchTerm: searchTerm,
-        ...filterOptions,
+        ...appliedFilters,
       });
     } catch (error) {
       console.error("Error changing page:", error);
     }
-  };
-
-  // Filter functions
-  const handleApplyFilters = async () => {
-    try {
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
-      setShowFilters(false);
-    } catch (error) {
-      console.error("Error applying filters:", error);
-    }
-  };
-
-  const handleClearFilters = async () => {
-    setSearchTerm("");
-    setFilterOptions({
-      clientType: "",
-      country: "",
-      city: "",
-      sortBy: "CreatedAt",
-      sortAscending: false,
-    });
-    setShowFilters(false);
-
-    try {
-      await getClients({ page: 1 });
-    } catch (error) {
-      console.error("Error clearing filters:", error);
-    }
-  };
-
-  // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export clients:",
-      selectedClients.length > 0 ? selectedClients : "all"
-    );
-    alert("Export functionality to be implemented");
   };
 
   // Statistics Card Component
@@ -407,16 +554,21 @@ const ClientList = () => {
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+              bgColor={
+                isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
+              }
+              textColor={isExporting ? "text-gray-600" : "text-gray-700"}
               rounded="rounded-lg"
-              buttonText={translations.Export}
+              buttonText={
+                isExporting ? translations["Exporting..."] : translations.Export
+              }
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
               onClick={handleExport}
+              disabled={isExporting}
             />
             <FilledButton
               isIcon={true}
@@ -1157,7 +1309,7 @@ const ClientList = () => {
       {showFilters && (
         <Container className="fixed inset-0 z-50 overflow-hidden">
           <Container
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0"
             onClick={() => setShowFilters(false)}
           />
           <Container className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl">
@@ -1279,6 +1431,36 @@ const ClientList = () => {
                     </Span>
                   </label>
                 </Container>
+
+                {/* Show active filters */}
+                {(appliedFilters.clientType ||
+                  appliedFilters.country ||
+                  appliedFilters.city) && (
+                  <Container className="pt-4 border-t border-gray-200">
+                    <Span className="text-sm font-medium text-gray-700 mb-2 block">
+                      Active Filters:
+                    </Span>
+                    <Container className="space-y-1">
+                      {appliedFilters.clientType && (
+                        <Span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                          Type:{" "}
+                          {translations[appliedFilters.clientType] ||
+                            appliedFilters.clientType}
+                        </Span>
+                      )}
+                      {appliedFilters.country && (
+                        <Span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-1">
+                          Country: {appliedFilters.country}
+                        </Span>
+                      )}
+                      {appliedFilters.city && (
+                        <Span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded ml-1">
+                          City: {appliedFilters.city}
+                        </Span>
+                      )}
+                    </Container>
+                  </Container>
+                )}
               </Container>
 
               <Container className="flex gap-3 mt-6">

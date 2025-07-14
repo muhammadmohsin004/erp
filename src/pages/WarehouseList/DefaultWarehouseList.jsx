@@ -28,13 +28,13 @@ import {
   CheckCircle,
 } from "lucide-react";
 import {
-  AiOutlineEye, // Eye icon for view
-  AiOutlineEdit, // Edit icon for edit
-  AiOutlineCopy, // Copy icon for clone
-  AiOutlineDelete, // Delete icon for delete
-  AiOutlinePlus, // Plus icon for add
-  AiOutlineFilter, // Filter icon
-  AiOutlineDownload, // Download icon for export
+  AiOutlineEye,
+  AiOutlineEdit,
+  AiOutlineCopy,
+  AiOutlineDelete,
+  AiOutlinePlus,
+  AiOutlineFilter,
+  AiOutlineDownload,
 } from "react-icons/ai";
 import { useWarehouse } from "../../Contexts/WarehouseContext/WarehouseContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -51,14 +51,18 @@ const DefaultWarehouseList = () => {
 
   const translations = {
     "Add Warehouse": language === "ar" ? "إضافة مستودع" : "Add Warehouse",
-    "Default Warehouses": language === "ar" ? "المستودعات الافتراضية" : "Default Warehouses",
+    "Default Warehouses":
+      language === "ar" ? "المستودعات الافتراضية" : "Default Warehouses",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    NoWarehouses: language === "ar" ? "لا يوجد مستودعات افتراضية" : "No default warehouses found",
+    NoWarehouses:
+      language === "ar"
+        ? "لا يوجد مستودعات افتراضية"
+        : "No default warehouses found",
     Name: language === "ar" ? "الاسم" : "Name",
     Code: language === "ar" ? "الكود" : "Code",
     Manager: language === "ar" ? "المدير" : "Manager",
@@ -87,7 +91,8 @@ const DefaultWarehouseList = () => {
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Warehouse Details": language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
+    "Warehouse Details":
+      language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     Description: language === "ar" ? "الوصف" : "Description",
     Email: language === "ar" ? "البريد الإلكتروني" : "Email",
@@ -100,10 +105,14 @@ const DefaultWarehouseList = () => {
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
     Permissions: language === "ar" ? "الصلاحيات" : "Permissions",
     "View Permission": language === "ar" ? "صلاحية العرض" : "View Permission",
-    "Create Invoice Permission": language === "ar" ? "صلاحية إنشاء الفاتورة" : "Create Invoice Permission",
-    "Update Stock Permission": language === "ar" ? "صلاحية تحديث المخزون" : "Update Stock Permission",
+    "Create Invoice Permission":
+      language === "ar" ? "صلاحية إنشاء الفاتورة" : "Create Invoice Permission",
+    "Update Stock Permission":
+      language === "ar" ? "صلاحية تحديث المخزون" : "Update Stock Permission",
     "Set as Default": language === "ar" ? "تعيين كافتراضي" : "Set as Default",
     "Remove Default": language === "ar" ? "إزالة الافتراضي" : "Remove Default",
+    "Export Success": language === "ar" ? "تم التصدير بنجاح" : "Export Success",
+    "Export Failed": language === "ar" ? "فشل التصدير" : "Export Failed",
   };
 
   // Get warehouse context
@@ -126,23 +135,25 @@ const DefaultWarehouseList = () => {
     changePageSize,
     clearError,
     setFilters,
-    // getStatistics, // Remove this as it might not exist
   } = useWarehouse();
 
   // Filter only default warehouses from the main warehouses list
   const defaultWarehouses = React.useMemo(() => {
-    // Handle different possible data structures
     let warehousesList = [];
-    
+
     if (Array.isArray(warehouses)) {
       warehousesList = warehouses;
-    } else if (warehouses && warehouses.Data && Array.isArray(warehouses.Data.$values)) {
+    } else if (
+      warehouses &&
+      warehouses.Data &&
+      Array.isArray(warehouses.Data.$values)
+    ) {
       warehousesList = warehouses.Data.$values;
     } else if (warehouses && Array.isArray(warehouses.Data)) {
       warehousesList = warehouses.Data;
     }
-    
-    return warehousesList.filter(warehouse => warehouse.IsDefault === true);
+
+    return warehousesList.filter((warehouse) => warehouse.IsDefault === true);
   }, [warehouses]);
 
   // Local state management
@@ -152,6 +163,11 @@ const DefaultWarehouseList = () => {
     status: "",
     sortBy: "CreatedAt",
     sortAscending: false,
+    managerName: "",
+    city: "",
+    country: "",
+    dateFrom: "",
+    dateTo: "",
   });
   const [selectedWarehouses, setSelectedWarehouses] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -163,6 +179,7 @@ const DefaultWarehouseList = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(null);
   const [isTogglingDefault, setIsTogglingDefault] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Calculate statistics for default warehouses only
   const [defaultStatistics, setDefaultStatistics] = useState({
@@ -177,8 +194,6 @@ const DefaultWarehouseList = () => {
     const fetchInitialData = async () => {
       try {
         await getWarehouses();
-        // Remove getStatistics call since it might not be available
-        // await getStatistics();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -187,50 +202,101 @@ const DefaultWarehouseList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token, getWarehouses]); // Remove getStatistics from dependencies
+  }, [token, getWarehouses]);
 
   // Update statistics when default warehouses change
   useEffect(() => {
     if (Array.isArray(defaultWarehouses) && defaultWarehouses.length >= 0) {
       const stats = {
         totalWarehouses: defaultWarehouses.length,
-        activeWarehouses: defaultWarehouses.filter(w => w.Status === "Active").length,
-        primaryWarehouses: defaultWarehouses.filter(w => w.Primary === "1" || w.Primary === "Yes").length,
-        warehousesThisMonth: defaultWarehouses.filter(w => {
+        activeWarehouses: defaultWarehouses.filter((w) => w.Status === "Active")
+          .length,
+        primaryWarehouses: defaultWarehouses.filter(
+          (w) => w.Primary === "1" || w.Primary === "Yes"
+        ).length,
+        warehousesThisMonth: defaultWarehouses.filter((w) => {
           const createdDate = new Date(w.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
       };
       setDefaultStatistics(stats);
     }
   }, [defaultWarehouses]);
 
-  // Filter and search default warehouses locally
+  // Enhanced filter and search default warehouses locally
   const filteredDefaultWarehouses = React.useMemo(() => {
     let filtered = [...defaultWarehouses];
 
     // Apply search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(w =>
-        (w.Name && w.Name.toLowerCase().includes(search)) ||
-        (w.Code && w.Code.toLowerCase().includes(search)) ||
-        (w.Address && w.Address.toLowerCase().includes(search)) ||
-        (w.ManagerName && w.ManagerName.toLowerCase().includes(search))
+      filtered = filtered.filter(
+        (w) =>
+          (w.Name && w.Name.toLowerCase().includes(search)) ||
+          (w.Code && w.Code.toLowerCase().includes(search)) ||
+          (w.Address && w.Address.toLowerCase().includes(search)) ||
+          (w.ManagerName && w.ManagerName.toLowerCase().includes(search)) ||
+          (w.Email && w.Email.toLowerCase().includes(search)) ||
+          (w.Phone && w.Phone.toLowerCase().includes(search))
       );
     }
 
     // Apply status filter
-    if (filterOptions.status) {
-      filtered = filtered.filter(w => w.Status === filterOptions.status);
+    if (filterOptions.status && filterOptions.status !== "All") {
+      filtered = filtered.filter((w) => w.Status === filterOptions.status);
+    }
+
+    // Apply manager name filter
+    if (filterOptions.managerName) {
+      const managerSearch = filterOptions.managerName.toLowerCase();
+      filtered = filtered.filter(
+        (w) =>
+          w.ManagerName && w.ManagerName.toLowerCase().includes(managerSearch)
+      );
+    }
+
+    // Apply city filter
+    if (filterOptions.city) {
+      const citySearch = filterOptions.city.toLowerCase();
+      filtered = filtered.filter(
+        (w) => w.City && w.City.toLowerCase().includes(citySearch)
+      );
+    }
+
+    // Apply country filter
+    if (filterOptions.country) {
+      const countrySearch = filterOptions.country.toLowerCase();
+      filtered = filtered.filter(
+        (w) => w.Country && w.Country.toLowerCase().includes(countrySearch)
+      );
+    }
+
+    // Apply date range filter
+    if (filterOptions.dateFrom) {
+      const fromDate = new Date(filterOptions.dateFrom);
+      filtered = filtered.filter((w) => {
+        const createdDate = new Date(w.CreatedAt);
+        return createdDate >= fromDate;
+      });
+    }
+
+    if (filterOptions.dateTo) {
+      const toDate = new Date(filterOptions.dateTo);
+      toDate.setHours(23, 59, 59, 999); // End of day
+      filtered = filtered.filter((w) => {
+        const createdDate = new Date(w.CreatedAt);
+        return createdDate <= toDate;
+      });
     }
 
     // Apply sorting
     filtered.sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (filterOptions.sortBy.toLowerCase()) {
         case "name":
           aValue = a.Name || "";
@@ -248,19 +314,25 @@ const DefaultWarehouseList = () => {
           aValue = a.ManagerName || "";
           bValue = b.ManagerName || "";
           break;
+        case "city":
+          aValue = a.City || "";
+          bValue = b.City || "";
+          break;
+        case "country":
+          aValue = a.Country || "";
+          bValue = b.Country || "";
+          break;
         default:
           aValue = new Date(a.CreatedAt || 0);
           bValue = new Date(b.CreatedAt || 0);
       }
 
       if (typeof aValue === "string") {
-        return filterOptions.sortAscending 
+        return filterOptions.sortAscending
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       } else {
-        return filterOptions.sortAscending 
-          ? aValue - bValue
-          : bValue - aValue;
+        return filterOptions.sortAscending ? aValue - bValue : bValue - aValue;
       }
     });
 
@@ -288,6 +360,79 @@ const DefaultWarehouseList = () => {
     }
   }, [token, navigate]);
 
+  // CSV Export functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return "";
+
+    const headers = [
+      "Name",
+      "Code",
+      "Status",
+      "Manager Name",
+      "Email",
+      "Phone",
+      "Address",
+      "City",
+      "State",
+      "Country",
+      "Postal Code",
+      "Shipping Address",
+      "Description",
+      "Primary",
+      "Default",
+      "View Permission",
+      "Create Invoice Permission",
+      "Update Stock Permission",
+      "Created At",
+      "Updated At",
+    ];
+
+    const csvData = data.map((warehouse) => [
+      warehouse.Name || "",
+      warehouse.Code || "",
+      warehouse.Status || "",
+      warehouse.ManagerName || "",
+      warehouse.Email || "",
+      warehouse.Phone || "",
+      warehouse.Address || "",
+      warehouse.City || "",
+      warehouse.State || "",
+      warehouse.Country || "",
+      warehouse.PostalCode || "",
+      warehouse.ShippingAddress || "",
+      warehouse.Description || "",
+      warehouse.Primary === "1" || warehouse.Primary === "Yes" ? "Yes" : "No",
+      warehouse.IsDefault ? "Yes" : "No",
+      warehouse.ViewPermission === "1" ? "Yes" : "No",
+      warehouse.CreateInvoicePermission === "1" ? "Yes" : "No",
+      warehouse.UpdateStockPermission === "1" ? "Yes" : "No",
+      warehouse.CreatedAt
+        ? new Date(warehouse.CreatedAt).toLocaleDateString()
+        : "",
+      warehouse.UpdatedAt
+        ? new Date(warehouse.UpdatedAt).toLocaleDateString()
+        : "",
+    ]);
+
+    const csvContent = [headers, ...csvData]
+      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Warehouse selection
   const handleWarehouseSelection = (warehouseId) => {
     setSelectedWarehouses((prev) => {
@@ -303,7 +448,9 @@ const DefaultWarehouseList = () => {
     if (selectAll) {
       setSelectedWarehouses([]);
     } else {
-      const warehouseIds = filteredDefaultWarehouses.map((warehouse) => warehouse.Id);
+      const warehouseIds = filteredDefaultWarehouses.map(
+        (warehouse) => warehouse.Id
+      );
       setSelectedWarehouses(warehouseIds);
     }
     setSelectAll(!selectAll);
@@ -364,7 +511,9 @@ const DefaultWarehouseList = () => {
   };
 
   const handleDeleteWarehouse = (warehouseId) => {
-    const warehouse = filteredDefaultWarehouses.find((w) => w.Id === warehouseId);
+    const warehouse = filteredDefaultWarehouses.find(
+      (w) => w.Id === warehouseId
+    );
     if (warehouse) {
       setWarehouseToDelete(warehouse);
       setShowDeleteModal(true);
@@ -388,13 +537,14 @@ const DefaultWarehouseList = () => {
   const handleToggleDefault = async (warehouseId) => {
     setIsTogglingDefault(warehouseId);
     try {
-      const warehouse = filteredDefaultWarehouses.find(w => w.Id === warehouseId);
+      const warehouse = filteredDefaultWarehouses.find(
+        (w) => w.Id === warehouseId
+      );
       if (warehouse) {
         await updateWarehouse(warehouseId, {
           ...warehouse,
-          IsDefault: !warehouse.IsDefault
+          IsDefault: !warehouse.IsDefault,
         });
-        // Refresh warehouses list
         await getWarehouses();
       }
     } catch (error) {
@@ -413,7 +563,6 @@ const DefaultWarehouseList = () => {
       await deleteWarehouse(warehouseToDelete.Id);
       setShowDeleteModal(false);
       setWarehouseToDelete(null);
-      // Refresh the warehouse list
       await getWarehouses();
     } catch (error) {
       console.error("Error deleting warehouse:", error);
@@ -423,9 +572,10 @@ const DefaultWarehouseList = () => {
     }
   };
 
-  // Filter functions
+  // Enhanced filter functions
   const handleApplyFilters = () => {
     setShowFilters(false);
+    // Filters are applied automatically through the filteredDefaultWarehouses useMemo
   };
 
   const handleClearFilters = () => {
@@ -434,17 +584,53 @@ const DefaultWarehouseList = () => {
       status: "",
       sortBy: "CreatedAt",
       sortAscending: false,
+      managerName: "",
+      city: "",
+      country: "",
+      dateFrom: "",
+      dateTo: "",
     });
     setShowFilters(false);
   };
 
-  // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export default warehouses:",
-      selectedWarehouses.length > 0 ? selectedWarehouses : "all"
-    );
-    alert("Export functionality to be implemented");
+  // Enhanced export functionality
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      let dataToExport = [];
+
+      if (selectedWarehouses.length > 0) {
+        // Export selected warehouses
+        dataToExport = filteredDefaultWarehouses.filter((warehouse) =>
+          selectedWarehouses.includes(warehouse.Id)
+        );
+      } else {
+        // Export all filtered warehouses
+        dataToExport = filteredDefaultWarehouses;
+      }
+
+      if (dataToExport.length === 0) {
+        alert("No data to export");
+        return;
+      }
+
+      const csvContent = convertToCSV(dataToExport);
+      const filename = `default-warehouses-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(
+        `${translations["Export Success"]} - ${dataToExport.length} warehouses exported`
+      );
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      alert(translations["Export Failed"]);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Statistics Card Component
@@ -472,7 +658,6 @@ const DefaultWarehouseList = () => {
       </Container>
     );
   }
-
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -506,17 +691,26 @@ const DefaultWarehouseList = () => {
             />
             <FilledButton
               isIcon={true}
-              icon={Download}
+              icon={
+                isExporting
+                  ? () => (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    )
+                  : Download
+              }
               iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
+              bgColor={
+                isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
+              }
               textColor="text-gray-700"
               rounded="rounded-lg"
-              buttonText={translations.Export}
+              buttonText={isExporting ? "Exporting..." : translations.Export}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
+              disabled={isExporting}
               onClick={handleExport}
             />
             <FilledButton
@@ -669,7 +863,9 @@ const DefaultWarehouseList = () => {
                           <input
                             type="checkbox"
                             checked={selectedWarehouses.includes(warehouse.Id)}
-                            onChange={() => handleWarehouseSelection(warehouse.Id)}
+                            onChange={() =>
+                              handleWarehouseSelection(warehouse.Id)
+                            }
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -683,7 +879,8 @@ const DefaultWarehouseList = () => {
                                 <Star className="w-3 h-3 mr-1" />
                                 {translations.Default}
                               </Span>
-                              {(warehouse.Primary === "1" || warehouse.Primary === "Yes") && (
+                              {(warehouse.Primary === "1" ||
+                                warehouse.Primary === "Yes") && (
                                 <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
                                   {translations.Primary}
                                 </Span>
@@ -731,20 +928,31 @@ const DefaultWarehouseList = () => {
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {warehouse.Address || warehouse.ShippingAddress || warehouse.City ? (
+                          {warehouse.Address ||
+                          warehouse.ShippingAddress ||
+                          warehouse.City ? (
                             <Container className="flex items-start">
                               <MapPin className="w-4 h-4 text-gray-400 mr-1 mt-0.5 flex-shrink-0" />
                               <Container className="text-sm text-gray-900">
                                 {warehouse.Address && (
-                                  <Span className="block">{warehouse.Address}</Span>
-                                )}
-                                {warehouse.ShippingAddress && warehouse.ShippingAddress !== warehouse.Address && (
-                                  <Span className="block text-gray-600">
-                                    Ship: {warehouse.ShippingAddress}
+                                  <Span className="block">
+                                    {warehouse.Address}
                                   </Span>
                                 )}
+                                {warehouse.ShippingAddress &&
+                                  warehouse.ShippingAddress !==
+                                    warehouse.Address && (
+                                    <Span className="block text-gray-600">
+                                      Ship: {warehouse.ShippingAddress}
+                                    </Span>
+                                  )}
                                 <Span className="block">
-                                  {[warehouse.City, warehouse.State, warehouse.PostalCode, warehouse.Country]
+                                  {[
+                                    warehouse.City,
+                                    warehouse.State,
+                                    warehouse.PostalCode,
+                                    warehouse.Country,
+                                  ]
                                     .filter(Boolean)
                                     .join(", ")}
                                 </Span>
@@ -799,7 +1007,11 @@ const DefaultWarehouseList = () => {
                               onClick={() => handleToggleDefault(warehouse.Id)}
                               disabled={isTogglingDefault === warehouse.Id}
                               className="inline-flex items-center justify-center w-7 h-7 bg-orange-600 hover:bg-orange-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 disabled:opacity-50"
-                              title={warehouse.IsDefault ? translations["Remove Default"] : translations["Set as Default"]}
+                              title={
+                                warehouse.IsDefault
+                                  ? translations["Remove Default"]
+                                  : translations["Set as Default"]
+                              }
                             >
                               {isTogglingDefault === warehouse.Id ? (
                                 <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
@@ -826,7 +1038,9 @@ const DefaultWarehouseList = () => {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteWarehouse(warehouse.Id)}
+                              onClick={() =>
+                                handleDeleteWarehouse(warehouse.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -901,11 +1115,13 @@ const DefaultWarehouseList = () => {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {translations[selectedWarehouse.Status] || selectedWarehouse.Status}
+                    {translations[selectedWarehouse.Status] ||
+                      selectedWarehouse.Status}
                   </Span>
                 </Container>
 
-                {(selectedWarehouse.Primary === "1" || selectedWarehouse.Primary === "Yes") && (
+                {(selectedWarehouse.Primary === "1" ||
+                  selectedWarehouse.Primary === "Yes") && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       Type
@@ -995,17 +1211,18 @@ const DefaultWarehouseList = () => {
                   </Container>
                 )}
 
-                {selectedWarehouse.ShippingAddress && 
-                 selectedWarehouse.ShippingAddress !== selectedWarehouse.Address && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["Shipping Address"]}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedWarehouse.ShippingAddress}
-                    </Span>
-                  </Container>
-                )}
+                {selectedWarehouse.ShippingAddress &&
+                  selectedWarehouse.ShippingAddress !==
+                    selectedWarehouse.Address && (
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations["Shipping Address"]}
+                      </Span>
+                      <Span className="text-sm text-gray-900 block mt-1">
+                        {selectedWarehouse.ShippingAddress}
+                      </Span>
+                    </Container>
+                  )}
 
                 <Container>
                   <Span className="text-sm font-medium text-gray-500 mb-2 block">
@@ -1023,7 +1240,9 @@ const DefaultWarehouseList = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {selectedWarehouse.ViewPermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.ViewPermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                     <Container className="flex items-center justify-between">
@@ -1037,7 +1256,9 @@ const DefaultWarehouseList = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {selectedWarehouse.CreateInvoicePermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.CreateInvoicePermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                     <Container className="flex items-center justify-between">
@@ -1051,7 +1272,9 @@ const DefaultWarehouseList = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {selectedWarehouse.UpdateStockPermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.UpdateStockPermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                   </Container>
@@ -1063,13 +1286,17 @@ const DefaultWarehouseList = () => {
                   <Container>
                     Created:{" "}
                     {selectedWarehouse.CreatedAt
-                      ? new Date(selectedWarehouse.CreatedAt).toLocaleDateString()
+                      ? new Date(
+                          selectedWarehouse.CreatedAt
+                        ).toLocaleDateString()
                       : "N/A"}
                   </Container>
                   {selectedWarehouse.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedWarehouse.UpdatedAt).toLocaleDateString()}
+                      {new Date(
+                        selectedWarehouse.UpdatedAt
+                      ).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -1106,8 +1333,8 @@ const DefaultWarehouseList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the default warehouse{" "}
-              <strong>"{warehouseToDelete?.Name}"</strong>{" "}
-              and all associated data.
+              <strong>"{warehouseToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }

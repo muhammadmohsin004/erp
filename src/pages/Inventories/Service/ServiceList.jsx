@@ -94,6 +94,12 @@ const ServiceList = () => {
     Tags: language === "ar" ? "العلامات" : "Tags",
     Images: language === "ar" ? "الصور" : "Images",
     Price: language === "ar" ? "السعر" : "Price",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
+    "Exporting...": language === "ar" ? "جاري التصدير..." : "Exporting...",
+    "Export Successful":
+      language === "ar" ? "تم التصدير بنجاح" : "Export Successful",
+    "Export Failed": language === "ar" ? "فشل التصدير" : "Export Failed",
   };
 
   // Get service context
@@ -132,6 +138,8 @@ const ServiceList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
 
   // Statistics state
   const [statistics, setStatistics] = useState({
@@ -191,18 +199,165 @@ const ServiceList = () => {
     return () => clearTimeout(delayedSearch);
   }, [searchTerm]);
 
-  // Handle filters change
-  // useEffect(() => {
-  //   setSelectedServices([]);
-  //   setSelectAll(false);
-  // }, [servicesData]);
-
   useEffect(() => {
     if (!token) {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
-  // console.log("servicesData", servicesData);
+
+  // CSV Export Functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return "";
+
+    // Define headers
+    const headers = [
+      "ID",
+      "Name",
+      "Service Code",
+      "Description",
+      "Unit Price",
+      "Purchase Price",
+      "Minimum Price",
+      "Discount",
+      "Discount Type",
+      "Status",
+      "Internal Notes",
+      "Categories Count",
+      "Taxes Count",
+      "Tags Count",
+      "Images Count",
+      "Created At",
+      "Updated At",
+    ];
+
+    // Convert data to CSV format
+    const csvRows = [];
+
+    // Add headers
+    csvRows.push(headers.join(","));
+
+    // Add data rows
+    data.forEach((service) => {
+      const row = [
+        service.Id || "",
+        `"${(service.Name || "").replace(/"/g, '""')}"`,
+        service.ServiceCode || "",
+        `"${(service.Description || "").replace(/"/g, '""')}"`,
+        formatCurrency(service.UnitPrice),
+        formatCurrency(service.PurchasePrice),
+        formatCurrency(service.MinimumPrice),
+        formatCurrency(service.Discount),
+        service.DiscountType || "",
+        service.Status || "",
+        `"${(service.InternalNotes || "").replace(/"/g, '""')}"`,
+        service.Categories?.length || 0,
+        service.Taxes?.length || 0,
+        service.Tags?.length || 0,
+        service.Images?.length || 0,
+        service.CreatedAt
+          ? new Date(service.CreatedAt).toLocaleDateString()
+          : "",
+        service.UpdatedAt
+          ? new Date(service.UpdatedAt).toLocaleDateString()
+          : "",
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    return csvRows.join("\n");
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    setShowExportDropdown(false);
+
+    try {
+      // If we have all services data, use it; otherwise fetch all
+      let allServicesData = servicesData;
+
+      if (pagination && pagination.TotalItems > servicesData.length) {
+        // Fetch all services if we don't have all data
+        // This would require an API call to get all services without pagination
+        // For now, we'll use the current data
+        console.log("Exporting current page data only");
+      }
+
+      const csvContent = convertToCSV(allServicesData);
+      const filename = `services_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(translations["Export Successful"]);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert(translations["Export Failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportSelected = async () => {
+    if (selectedServices.length === 0) {
+      alert("Please select services to export");
+      return;
+    }
+
+    setIsExporting(true);
+    setShowExportDropdown(false);
+
+    try {
+      // Get selected services data
+      const selectedServicesData = servicesData.filter((service) =>
+        selectedServices.includes(service.Id)
+      );
+
+      const csvContent = convertToCSV(selectedServicesData);
+      const filename = `selected_services_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(translations["Export Successful"]);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert(translations["Export Failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportDropdown && !event.target.closest(".export-dropdown")) {
+        setShowExportDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showExportDropdown]);
 
   // Search function
   const handleSearchServices = async () => {
@@ -373,15 +528,6 @@ const ServiceList = () => {
     }
   };
 
-  // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export services:",
-      selectedServices.length > 0 ? selectedServices : "all"
-    );
-    alert("Export functionality to be implemented");
-  };
-
   // Format currency
   const formatCurrency = (value) => {
     const numValue = parseFloat(value) || 0;
@@ -420,7 +566,6 @@ const ServiceList = () => {
       </Container>
     );
   }
-
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -452,21 +597,58 @@ const ServiceList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            <FilledButton
-              isIcon={true}
-              icon={Download}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText={translations.Export}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={handleExport}
-            />
+
+            {/* Export Dropdown */}
+            <Container className="relative export-dropdown flex flex-row">
+              <FilledButton
+                isIcon={true}
+                icon={Download}
+                iconSize="w-4 h-4"
+                bgColor={
+                  isExporting ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"
+                }
+                textColor="text-gray-700"
+                rounded="rounded-lg"
+                buttonText={
+                  isExporting
+                    ? translations["Exporting..."]
+                    : translations.Export
+                }
+                height="h-10"
+                px="px-4"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                isIconLeft={true}
+                disabled={isExporting}
+                onClick={() => setShowExportDropdown(!showExportDropdown)}
+              />
+
+              {/* Export Dropdown Menu */}
+              {showExportDropdown && (
+                <Container className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                  <Container className="py-1">
+                    <button
+                      onClick={handleExportAll}
+                      disabled={isExporting || servicesData.length === 0}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      {translations["Export All"]} ({servicesData.length})
+                    </button>
+                    <button
+                      onClick={handleExportSelected}
+                      disabled={isExporting || selectedServices.length === 0}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      {translations["Export Selected"]} (
+                      {selectedServices.length})
+                    </button>
+                  </Container>
+                </Container>
+              )}
+            </Container>
+
             <FilledButton
               isIcon={true}
               icon={Plus}

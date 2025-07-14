@@ -38,10 +38,14 @@ const NewExpense = () => {
     Back: language === "ar" ? "رجوع" : "Back",
     Save: language === "ar" ? "حفظ" : "Save",
     "Save Changes": language === "ar" ? "حفظ التغييرات" : "Save Changes",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Financial Information": language === "ar" ? "المعلومات المالية" : "Financial Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
-    "Recurring Settings": language === "ar" ? "إعدادات التكرار" : "Recurring Settings",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Financial Information":
+      language === "ar" ? "المعلومات المالية" : "Financial Information",
+    "Additional Information":
+      language === "ar" ? "معلومات إضافية" : "Additional Information",
+    "Recurring Settings":
+      language === "ar" ? "إعدادات التكرار" : "Recurring Settings",
     Description: language === "ar" ? "الوصف" : "Description",
     "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
     Amount: language === "ar" ? "المبلغ" : "Amount",
@@ -49,32 +53,53 @@ const NewExpense = () => {
     Date: language === "ar" ? "التاريخ" : "Date",
     "Vendor ID": language === "ar" ? "معرف البائع" : "Vendor ID",
     "Category ID": language === "ar" ? "معرف الفئة" : "Category ID",
-    "Journal Account ID": language === "ar" ? "معرف حساب اليومية" : "Journal Account ID",
+    "Journal Account ID":
+      language === "ar" ? "معرف حساب اليومية" : "Journal Account ID",
     "Supplier ID": language === "ar" ? "معرف المورد" : "Supplier ID",
     "Is Recurring": language === "ar" ? "متكرر" : "Is Recurring",
-    "Recurring Frequency": language === "ar" ? "تكرار التكرار" : "Recurring Frequency",
-    "Recurring End Date": language === "ar" ? "تاريخ انتهاء التكرار" : "Recurring End Date",
-    "Attachment": language === "ar" ? "المرفق" : "Attachment",
+    "Recurring Frequency":
+      language === "ar" ? "تكرار التكرار" : "Recurring Frequency",
+    "Recurring End Date":
+      language === "ar" ? "تاريخ انتهاء التكرار" : "Recurring End Date",
+    Attachment: language === "ar" ? "المرفق" : "Attachment",
     "Enter description": language === "ar" ? "أدخل الوصف" : "Enter description",
-    "Enter code number": language === "ar" ? "أدخل رقم الكود" : "Enter code number",
+    "Enter code number":
+      language === "ar" ? "أدخل رقم الكود" : "Enter code number",
     "Enter amount": language === "ar" ? "أدخل المبلغ" : "Enter amount",
     "Select date": language === "ar" ? "اختر التاريخ" : "Select date",
     "Select currency": language === "ar" ? "اختر العملة" : "Select currency",
-    "Enter vendor ID": language === "ar" ? "أدخل معرف البائع" : "Enter vendor ID",
-    "Enter category ID": language === "ar" ? "أدخل معرف الفئة" : "Enter category ID",
-    "Enter journal account ID": language === "ar" ? "أدخل معرف حساب اليومية" : "Enter journal account ID",
-    "Enter supplier ID": language === "ar" ? "أدخل معرف المورد" : "Enter supplier ID",
+    "Enter vendor ID":
+      language === "ar" ? "أدخل معرف البائع" : "Enter vendor ID",
+    "Enter category ID":
+      language === "ar" ? "أدخل معرف الفئة" : "Enter category ID",
+    "Enter journal account ID":
+      language === "ar" ? "أدخل معرف حساب اليومية" : "Enter journal account ID",
+    "Enter supplier ID":
+      language === "ar" ? "أدخل معرف المورد" : "Enter supplier ID",
     "Select frequency": language === "ar" ? "اختر التكرار" : "Select frequency",
-    "Select end date": language === "ar" ? "اختر تاريخ الانتهاء" : "Select end date",
+    "Select end date":
+      language === "ar" ? "اختر تاريخ الانتهاء" : "Select end date",
     "Upload file": language === "ar" ? "رفع ملف" : "Upload file",
-    "Description is required": language === "ar" ? "الوصف مطلوب" : "Description is required",
-    "Amount is required": language === "ar" ? "المبلغ مطلوب" : "Amount is required",
-    "Invalid amount format": language === "ar" ? "تنسيق المبلغ غير صحيح" : "Invalid amount format",
-    "Date is required": language === "ar" ? "التاريخ مطلوب" : "Date is required",
-    "Expense created successfully": language === "ar" ? "تم إنشاء المصروف بنجاح" : "Expense created successfully",
-    "Expense updated successfully": language === "ar" ? "تم تحديث المصروف بنجاح" : "Expense updated successfully",
-    "Failed to create expense": language === "ar" ? "فشل في إنشاء المصروف" : "Failed to create expense",
-    "Failed to update expense": language === "ar" ? "فشل في تحديث المصروف" : "Failed to update expense",
+    "Description is required":
+      language === "ar" ? "الوصف مطلوب" : "Description is required",
+    "Amount is required":
+      language === "ar" ? "المبلغ مطلوب" : "Amount is required",
+    "Invalid amount format":
+      language === "ar" ? "تنسيق المبلغ غير صحيح" : "Invalid amount format",
+    "Date is required":
+      language === "ar" ? "التاريخ مطلوب" : "Date is required",
+    "Expense created successfully":
+      language === "ar"
+        ? "تم إنشاء المصروف بنجاح"
+        : "Expense created successfully",
+    "Expense updated successfully":
+      language === "ar"
+        ? "تم تحديث المصروف بنجاح"
+        : "Expense updated successfully",
+    "Failed to create expense":
+      language === "ar" ? "فشل في إنشاء المصروف" : "Failed to create expense",
+    "Failed to update expense":
+      language === "ar" ? "فشل في تحديث المصروف" : "Failed to update expense",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     Daily: language === "ar" ? "يومي" : "Daily",
     Weekly: language === "ar" ? "أسبوعي" : "Weekly",
@@ -87,16 +112,22 @@ const NewExpense = () => {
     "File uploaded": language === "ar" ? "تم رفع الملف" : "File uploaded",
     "Remove file": language === "ar" ? "إزالة الملف" : "Remove file",
     "Expense Category": language === "ar" ? "فئة المصروف" : "Expense Category",
-    "Office Supplies": language === "ar" ? "مستلزمات المكتب" : "Office Supplies",
-    "Travel & Transportation": language === "ar" ? "السفر والنقل" : "Travel & Transportation",
-    "Marketing & Advertising": language === "ar" ? "التسويق والإعلان" : "Marketing & Advertising",
-    "Utilities": language === "ar" ? "المرافق" : "Utilities",
-    "Rent": language === "ar" ? "الإيجار" : "Rent",
-    "Professional Services": language === "ar" ? "الخدمات المهنية" : "Professional Services",
-    "Equipment": language === "ar" ? "المعدات" : "Equipment",
-    "Software & Subscriptions": language === "ar" ? "البرمجيات والاشتراكات" : "Software & Subscriptions",
-    "Meals & Entertainment": language === "ar" ? "الوجبات والترفيه" : "Meals & Entertainment",
-    "Other": language === "ar" ? "أخرى" : "Other",
+    "Office Supplies":
+      language === "ar" ? "مستلزمات المكتب" : "Office Supplies",
+    "Travel & Transportation":
+      language === "ar" ? "السفر والنقل" : "Travel & Transportation",
+    "Marketing & Advertising":
+      language === "ar" ? "التسويق والإعلان" : "Marketing & Advertising",
+    Utilities: language === "ar" ? "المرافق" : "Utilities",
+    Rent: language === "ar" ? "الإيجار" : "Rent",
+    "Professional Services":
+      language === "ar" ? "الخدمات المهنية" : "Professional Services",
+    Equipment: language === "ar" ? "المعدات" : "Equipment",
+    "Software & Subscriptions":
+      language === "ar" ? "البرمجيات والاشتراكات" : "Software & Subscriptions",
+    "Meals & Entertainment":
+      language === "ar" ? "الوجبات والترفيه" : "Meals & Entertainment",
+    Other: language === "ar" ? "أخرى" : "Other",
   };
 
   // Form state
@@ -105,7 +136,7 @@ const NewExpense = () => {
     Currency: "PKR",
     Description: "",
     CodeNumber: "",
-    Date: new Date().toISOString().split('T')[0],
+    Date: new Date().toISOString().split("T")[0],
     VendorId: "",
     CategoryId: "",
     JournalAccountId: "",
@@ -130,14 +161,18 @@ const NewExpense = () => {
         Currency: editData.Currency || "PKR",
         Description: editData.Description || "",
         CodeNumber: editData.CodeNumber || "",
-        Date: editData.Date ? editData.Date.split('T')[0] : new Date().toISOString().split('T')[0],
+        Date: editData.Date
+          ? editData.Date.split("T")[0]
+          : new Date().toISOString().split("T")[0],
         VendorId: editData.VendorId || "",
         CategoryId: editData.CategoryId || "",
         JournalAccountId: editData.JournalAccountId || "",
         SupplierId: editData.SupplierId || "",
         IsRecurring: editData.IsRecurring || false,
         RecurringFrequency: editData.RecurringFrequency || "",
-        RecurringEndDate: editData.RecurringEndDate ? editData.RecurringEndDate.split('T')[0] : "",
+        RecurringEndDate: editData.RecurringEndDate
+          ? editData.RecurringEndDate.split("T")[0]
+          : "",
         AttachmentPath: editData.AttachmentPath || "",
         IsExpense: true,
       });
@@ -147,14 +182,16 @@ const NewExpense = () => {
         Currency: cloneData.Currency || "PKR",
         Description: cloneData.Description || "",
         CodeNumber: "", // Reset code number for clone
-        Date: new Date().toISOString().split('T')[0], // Use current date for clone
+        Date: new Date().toISOString().split("T")[0], // Use current date for clone
         VendorId: cloneData.VendorId || "",
         CategoryId: cloneData.CategoryId || "",
         JournalAccountId: cloneData.JournalAccountId || "",
         SupplierId: cloneData.SupplierId || "",
         IsRecurring: cloneData.IsRecurring || false,
         RecurringFrequency: cloneData.RecurringFrequency || "",
-        RecurringEndDate: cloneData.RecurringEndDate ? cloneData.RecurringEndDate.split('T')[0] : "",
+        RecurringEndDate: cloneData.RecurringEndDate
+          ? cloneData.RecurringEndDate.split("T")[0]
+          : "",
         AttachmentPath: "", // Reset attachment for clone
         IsExpense: true,
       });
@@ -170,16 +207,16 @@ const NewExpense = () => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ""
+        [field]: "",
       }));
     }
   };
@@ -191,9 +228,9 @@ const NewExpense = () => {
       // In a real application, you would upload the file to a server
       // For now, we'll just store the file name
       setUploadedFile(file);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        AttachmentPath: `/uploads/expense/${file.name}`
+        AttachmentPath: `/uploads/expense/${file.name}`,
       }));
     }
   };
@@ -201,9 +238,9 @@ const NewExpense = () => {
   // Remove uploaded file
   const removeFile = () => {
     setUploadedFile(null);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      AttachmentPath: ""
+      AttachmentPath: "",
     }));
   };
 
@@ -216,7 +253,7 @@ const NewExpense = () => {
       newErrors.Description = translations["Description is required"];
     }
 
-    if (!formData.Amount || formData.Amount.trim() === "") {
+    if (!formData.Amount && formData.Amount !== 0) {
       newErrors.Amount = translations["Amount is required"];
     } else {
       const amount = parseFloat(formData.Amount);
@@ -255,19 +292,23 @@ const NewExpense = () => {
 
     try {
       let result;
-      
+
       // Prepare form data for API
       const apiData = {
         ...formData,
         Amount: parseFloat(formData.Amount),
         VendorId: formData.VendorId ? parseInt(formData.VendorId) : null,
         CategoryId: formData.CategoryId ? parseInt(formData.CategoryId) : null,
-        JournalAccountId: formData.JournalAccountId ? parseInt(formData.JournalAccountId) : null,
+        JournalAccountId: formData.JournalAccountId
+          ? parseInt(formData.JournalAccountId)
+          : null,
         SupplierId: formData.SupplierId ? parseInt(formData.SupplierId) : null,
         Date: new Date(formData.Date).toISOString(),
-        RecurringEndDate: formData.RecurringEndDate ? new Date(formData.RecurringEndDate).toISOString() : null,
+        RecurringEndDate: formData.RecurringEndDate
+          ? new Date(formData.RecurringEndDate).toISOString()
+          : null,
       };
-      
+
       if (isEditing && editData) {
         // Update existing expense
         result = await updateExpense(editData.Id, apiData);
@@ -289,7 +330,11 @@ const NewExpense = () => {
       }
     } catch (error) {
       console.error("Error submitting expense:", error);
-      alert(isEditing ? translations["Failed to update expense"] : translations["Failed to create expense"]);
+      alert(
+        isEditing
+          ? translations["Failed to update expense"]
+          : translations["Failed to create expense"]
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -370,11 +415,14 @@ const NewExpense = () => {
               {/* Description */}
               <Container className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations.Description} <span className="text-red-500">*</span>
+                  {translations.Description}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.Description}
-                  onChange={(e) => handleInputChange("Description", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("Description", e.target.value)
+                  }
                   placeholder={translations["Enter description"]}
                   rows={3}
                   className={`w-full px-3 py-2 border rounded-md focus:ring-red-500 focus:border-red-500 ${
@@ -382,7 +430,9 @@ const NewExpense = () => {
                   }`}
                 />
                 {errors.Description && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Description}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Description}
+                  </Span>
                 )}
               </Container>
 
@@ -394,7 +444,9 @@ const NewExpense = () => {
                 <input
                   type="text"
                   value={formData.CodeNumber}
-                  onChange={(e) => handleInputChange("CodeNumber", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("CodeNumber", e.target.value)
+                  }
                   placeholder={translations["Enter code number"]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 />
@@ -419,7 +471,9 @@ const NewExpense = () => {
                   />
                 </Container>
                 {errors.Date && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Date}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Date}
+                  </Span>
                 )}
               </Container>
 
@@ -434,15 +488,27 @@ const NewExpense = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 >
                   <option value="">Select Category</option>
-                  <option value="office-supplies">{translations["Office Supplies"]}</option>
-                  <option value="travel">{translations["Travel & Transportation"]}</option>
-                  <option value="marketing">{translations["Marketing & Advertising"]}</option>
+                  <option value="office-supplies">
+                    {translations["Office Supplies"]}
+                  </option>
+                  <option value="travel">
+                    {translations["Travel & Transportation"]}
+                  </option>
+                  <option value="marketing">
+                    {translations["Marketing & Advertising"]}
+                  </option>
                   <option value="utilities">{translations.Utilities}</option>
                   <option value="rent">{translations.Rent}</option>
-                  <option value="professional">{translations["Professional Services"]}</option>
+                  <option value="professional">
+                    {translations["Professional Services"]}
+                  </option>
                   <option value="equipment">{translations.Equipment}</option>
-                  <option value="software">{translations["Software & Subscriptions"]}</option>
-                  <option value="meals">{translations["Meals & Entertainment"]}</option>
+                  <option value="software">
+                    {translations["Software & Subscriptions"]}
+                  </option>
+                  <option value="meals">
+                    {translations["Meals & Entertainment"]}
+                  </option>
                   <option value="other">{translations.Other}</option>
                 </select>
               </Container>
@@ -473,7 +539,9 @@ const NewExpense = () => {
                     step="0.01"
                     min="0"
                     value={formData.Amount}
-                    onChange={(e) => handleInputChange("Amount", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("Amount", e.target.value)
+                    }
                     placeholder={translations["Enter amount"]}
                     className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-red-500 focus:border-red-500 ${
                       errors.Amount ? "border-red-500" : "border-gray-300"
@@ -481,7 +549,9 @@ const NewExpense = () => {
                   />
                 </Container>
                 {errors.Amount && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Amount}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Amount}
+                  </Span>
                 )}
               </Container>
 
@@ -492,7 +562,9 @@ const NewExpense = () => {
                 </label>
                 <select
                   value={formData.Currency}
-                  onChange={(e) => handleInputChange("Currency", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("Currency", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 >
                   <option value="PKR">{translations.PKR}</option>
@@ -521,7 +593,9 @@ const NewExpense = () => {
                 <input
                   type="number"
                   value={formData.VendorId}
-                  onChange={(e) => handleInputChange("VendorId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("VendorId", e.target.value)
+                  }
                   placeholder={translations["Enter vendor ID"]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 />
@@ -535,7 +609,9 @@ const NewExpense = () => {
                 <input
                   type="number"
                   value={formData.CategoryId}
-                  onChange={(e) => handleInputChange("CategoryId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("CategoryId", e.target.value)
+                  }
                   placeholder={translations["Enter category ID"]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 />
@@ -549,7 +625,9 @@ const NewExpense = () => {
                 <input
                   type="number"
                   value={formData.JournalAccountId}
-                  onChange={(e) => handleInputChange("JournalAccountId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("JournalAccountId", e.target.value)
+                  }
                   placeholder={translations["Enter journal account ID"]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 />
@@ -563,7 +641,9 @@ const NewExpense = () => {
                 <input
                   type="number"
                   value={formData.SupplierId}
-                  onChange={(e) => handleInputChange("SupplierId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("SupplierId", e.target.value)
+                  }
                   placeholder={translations["Enter supplier ID"]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 />
@@ -587,7 +667,9 @@ const NewExpense = () => {
                   <input
                     type="checkbox"
                     checked={formData.IsRecurring}
-                    onChange={(e) => handleInputChange("IsRecurring", e.target.checked)}
+                    onChange={(e) =>
+                      handleInputChange("IsRecurring", e.target.checked)
+                    }
                     className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
                   />
                   <Span className="ml-2 text-sm font-medium text-gray-700">
@@ -606,20 +688,30 @@ const NewExpense = () => {
                     </label>
                     <select
                       value={formData.RecurringFrequency}
-                      onChange={(e) => handleInputChange("RecurringFrequency", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("RecurringFrequency", e.target.value)
+                      }
                       className={`w-full px-3 py-2 border rounded-md focus:ring-red-500 focus:border-red-500 ${
-                        errors.RecurringFrequency ? "border-red-500" : "border-gray-300"
+                        errors.RecurringFrequency
+                          ? "border-red-500"
+                          : "border-gray-300"
                       }`}
                     >
-                      <option value="">{translations["Select frequency"]}</option>
+                      <option value="">
+                        {translations["Select frequency"]}
+                      </option>
                       <option value="Daily">{translations.Daily}</option>
                       <option value="Weekly">{translations.Weekly}</option>
                       <option value="Monthly">{translations.Monthly}</option>
-                      <option value="Quarterly">{translations.Quarterly}</option>
+                      <option value="Quarterly">
+                        {translations.Quarterly}
+                      </option>
                       <option value="Yearly">{translations.Yearly}</option>
                     </select>
                     {errors.RecurringFrequency && (
-                      <Span className="text-red-500 text-sm mt-1">{errors.RecurringFrequency}</Span>
+                      <Span className="text-red-500 text-sm mt-1">
+                        {errors.RecurringFrequency}
+                      </Span>
                     )}
                   </Container>
 
@@ -635,15 +727,21 @@ const NewExpense = () => {
                       <input
                         type="date"
                         value={formData.RecurringEndDate}
-                        onChange={(e) => handleInputChange("RecurringEndDate", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("RecurringEndDate", e.target.value)
+                        }
                         min={formData.Date} // End date should be after start date
                         className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-red-500 focus:border-red-500 ${
-                          errors.RecurringEndDate ? "border-red-500" : "border-gray-300"
+                          errors.RecurringEndDate
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                       />
                     </Container>
                     {errors.RecurringEndDate && (
-                      <Span className="text-red-500 text-sm mt-1">{errors.RecurringEndDate}</Span>
+                      <Span className="text-red-500 text-sm mt-1">
+                        {errors.RecurringEndDate}
+                      </Span>
                     )}
                   </Container>
                 </Container>
@@ -671,7 +769,8 @@ const NewExpense = () => {
                     <Container className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Upload className="w-8 h-8 mb-4 text-gray-500" />
                       <Span className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
                       </Span>
                       <Span className="text-xs text-gray-500">
                         PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, GIF up to 10MB
@@ -693,7 +792,9 @@ const NewExpense = () => {
                   <Container className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-red-600" />
                     <Span className="text-sm text-red-800">
-                      {uploadedFile ? uploadedFile.name : formData.AttachmentPath.split('/').pop()}
+                      {uploadedFile
+                        ? uploadedFile.name
+                        : formData.AttachmentPath.split("/").pop()}
                     </Span>
                     <Span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
                       {translations["File uploaded"]}

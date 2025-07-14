@@ -45,9 +45,11 @@ const ExpenseList = () => {
 
   // Translations object
   const translations = {
-    "Expense Management": language === "ar" ? "إدارة المصروفات" : "Expense Management",
+    "Expense Management":
+      language === "ar" ? "إدارة المصروفات" : "Expense Management",
     "Add Expense": language === "ar" ? "إضافة مصروف" : "Add Expense",
-    "Back to Dashboard": language === "ar" ? "العودة للوحة التحكم" : "Back to Dashboard",
+    "Back to Dashboard":
+      language === "ar" ? "العودة للوحة التحكم" : "Back to Dashboard",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
@@ -55,7 +57,8 @@ const ExpenseList = () => {
     "Export PDF": language === "ar" ? "تصدير PDF" : "Export PDF",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No expenses found": language === "ar" ? "لا يوجد مصروفات" : "No expenses found",
+    "No expenses found":
+      language === "ar" ? "لا يوجد مصروفات" : "No expenses found",
     Amount: language === "ar" ? "المبلغ" : "Amount",
     Currency: language === "ar" ? "العملة" : "Currency",
     Description: language === "ar" ? "الوصف" : "Description",
@@ -72,29 +75,36 @@ const ExpenseList = () => {
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Expense": language === "ar" ? "حذف المصروف" : "Delete Expense",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Expense Details": language === "ar" ? "تفاصيل المصروف" : "Expense Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "Total Expenses": language === "ar" ? "إجمالي المصروفات" : "Total Expenses",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     "Total Amount": language === "ar" ? "إجمالي المبلغ" : "Total Amount",
     "Is Recurring": language === "ar" ? "متكرر" : "Is Recurring",
-    "Recurring Frequency": language === "ar" ? "تكرار التكرار" : "Recurring Frequency",
-    "Recurring End Date": language === "ar" ? "تاريخ انتهاء التكرار" : "Recurring End Date",
+    "Recurring Frequency":
+      language === "ar" ? "تكرار التكرار" : "Recurring Frequency",
+    "Recurring End Date":
+      language === "ar" ? "تاريخ انتهاء التكرار" : "Recurring End Date",
     "Vendor ID": language === "ar" ? "معرف البائع" : "Vendor ID",
     "Category ID": language === "ar" ? "معرف الفئة" : "Category ID",
-    "Attachment": language === "ar" ? "المرفق" : "Attachment",
+    Attachment: language === "ar" ? "المرفق" : "Attachment",
     Yes: language === "ar" ? "نعم" : "Yes",
     No: language === "ar" ? "لا" : "No",
-    "Download Attachment": language === "ar" ? "تحميل المرفق" : "Download Attachment",
+    "Download Attachment":
+      language === "ar" ? "تحميل المرفق" : "Download Attachment",
     Refresh: language === "ar" ? "تحديث" : "Refresh",
     "Average Amount": language === "ar" ? "متوسط المبلغ" : "Average Amount",
     "Expense Type": language === "ar" ? "نوع المصروف" : "Expense Type",
     "One-time": language === "ar" ? "مرة واحدة" : "One-time",
-    "Recurring": language === "ar" ? "متكرر" : "Recurring",
+    Recurring: language === "ar" ? "متكرر" : "Recurring",
   };
 
   // Get finance context
@@ -153,13 +163,20 @@ const ExpenseList = () => {
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {isCurrency ? formatCurrency(value) : (value || 0)}
+            {isCurrency ? formatCurrency(value) : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -191,16 +208,25 @@ const ExpenseList = () => {
     if (Array.isArray(expensesData) && expensesData.length > 0) {
       const stats = {
         totalExpenses: expensePagination?.TotalItems || expensesData.length,
-        totalAmount: expensesData.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0),
-        thisMonth: expensesData.filter(expense => {
+        totalAmount: expensesData.reduce(
+          (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+          0
+        ),
+        thisMonth: expensesData.filter((expense) => {
           const createdDate = new Date(expense.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
-        averageAmount: expensesData.length > 0 
-          ? expensesData.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0) / expensesData.length 
-          : 0,
+        averageAmount:
+          expensesData.length > 0
+            ? expensesData.reduce(
+                (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+                0
+              ) / expensesData.length
+            : 0,
       };
       setStatistics(stats);
     }
@@ -370,12 +396,12 @@ const ExpenseList = () => {
 
     try {
       setExpenseFilters({
-        searchTerm: '',
-        currency: '',
-        sortBy: 'Id',
+        searchTerm: "",
+        currency: "",
+        sortBy: "Id",
         sortAscending: false,
-        dateFrom: '',
-        dateTo: '',
+        dateFrom: "",
+        dateTo: "",
         isRecurring: null,
       });
       await getExpenses();
@@ -386,9 +412,12 @@ const ExpenseList = () => {
 
   // Export functionality - PDF generation
   const handleExportPDF = () => {
-    const selectedData = selectedExpenses.length > 0 
-      ? expensesData.filter(expense => selectedExpenses.includes(expense.Id))
-      : expensesData;
+    const selectedData =
+      selectedExpenses.length > 0
+        ? expensesData.filter((expense) =>
+            selectedExpenses.includes(expense.Id)
+          )
+        : expensesData;
 
     if (selectedData.length === 0) {
       alert("No data to export");
@@ -421,9 +450,27 @@ const ExpenseList = () => {
           
           <div class="summary">
             <h3>Summary</h3>
-            <p><strong>Total Amount:</strong> ${formatCurrency(selectedData.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0))}</p>
-            <p><strong>Average Amount:</strong> ${formatCurrency(selectedData.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0) / selectedData.length)}</p>
-            <p><strong>Date Range:</strong> ${selectedData.length > 0 ? `${formatDate(Math.min(...selectedData.map(e => e.Date)))} - ${formatDate(Math.max(...selectedData.map(e => e.Date)))}` : 'N/A'}</p>
+            <p><strong>Total Amount:</strong> ${formatCurrency(
+              selectedData.reduce(
+                (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+                0
+              )
+            )}</p>
+            <p><strong>Average Amount:</strong> ${formatCurrency(
+              selectedData.reduce(
+                (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+                0
+              ) / selectedData.length
+            )}</p>
+            <p><strong>Date Range:</strong> ${
+              selectedData.length > 0
+                ? `${formatDate(
+                    Math.min(...selectedData.map((e) => e.Date))
+                  )} - ${formatDate(
+                    Math.max(...selectedData.map((e) => e.Date))
+                  )}`
+                : "N/A"
+            }</p>
           </div>
 
           <table>
@@ -440,20 +487,23 @@ const ExpenseList = () => {
             <tbody>
     `;
 
-    selectedData.forEach(expense => {
+    selectedData.forEach((expense) => {
       pdfContent += `
         <tr>
           <td>${formatDate(expense.Date)}</td>
-          <td>${expense.Description || 'N/A'}</td>
-          <td>${expense.CodeNumber || '-'}</td>
+          <td>${expense.Description || "N/A"}</td>
+          <td>${expense.CodeNumber || "-"}</td>
           <td>${formatCurrency(expense.Amount, expense.Currency)}</td>
           <td>${expense.Currency}</td>
-          <td>${expense.IsRecurring ? 'Recurring' : 'One-time'}</td>
+          <td>${expense.IsRecurring ? "Recurring" : "One-time"}</td>
         </tr>
       `;
     });
 
-    const totalAmount = selectedData.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0);
+    const totalAmount = selectedData.reduce(
+      (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+      0
+    );
 
     pdfContent += `
             <tr class="total">
@@ -473,11 +523,13 @@ const ExpenseList = () => {
     `;
 
     // Create and download PDF
-    const blob = new Blob([pdfContent], { type: 'text/html' });
+    const blob = new Blob([pdfContent], { type: "text/html" });
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `expense-report-${new Date().toISOString().split('T')[0]}.html`;
+    link.download = `expense-report-${
+      new Date().toISOString().split("T")[0]
+    }.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -485,13 +537,13 @@ const ExpenseList = () => {
   };
 
   // Regular export functionality
-  const handleExport = () => {
-    console.log(
-      "Export expenses:",
-      selectedExpenses.length > 0 ? selectedExpenses : "all"
-    );
-    alert("Export functionality to be implemented");
-  };
+  // const handleExport = () => {
+  //   console.log(
+  //     "Export expenses:",
+  //     selectedExpenses.length > 0 ? selectedExpenses : "all"
+  //   );
+  //   alert("Export functionality to be implemented");
+  // };
 
   // Loading state
   if (!token) {
@@ -575,7 +627,7 @@ const ExpenseList = () => {
               isIconLeft={true}
               onClick={handleExportPDF}
             />
-            <FilledButton
+            {/* <FilledButton
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
@@ -589,7 +641,7 @@ const ExpenseList = () => {
               fontSize="text-sm"
               isIconLeft={true}
               onClick={handleExport}
-            />
+            /> */}
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -785,7 +837,9 @@ const ExpenseList = () => {
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
-                            {expense.IsRecurring ? translations.Recurring : translations["One-time"]}
+                            {expense.IsRecurring
+                              ? translations.Recurring
+                              : translations["One-time"]}
                           </Span>
                         </td>
                         <td className="px-6 py-4">
@@ -834,77 +888,90 @@ const ExpenseList = () => {
               </Container>
 
               {/* Pagination */}
-              {expensePagination && expensePagination.TotalPages && expensePagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(expensePagination.CurrentPage - 1) * expensePagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      expensePagination.CurrentPage * expensePagination.PageSize,
-                      expensePagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {expensePagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!expensePagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!expensePagination.HasPreviousPage}
-                      onClick={() => handlePageChange(expensePagination.CurrentPage - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {expensePagination.CurrentPage} / {expensePagination.TotalPages}
+              {expensePagination &&
+                expensePagination.TotalPages &&
+                expensePagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(expensePagination.CurrentPage - 1) *
+                        expensePagination.PageSize +
+                        1}{" "}
+                      -{" "}
+                      {Math.min(
+                        expensePagination.CurrentPage *
+                          expensePagination.PageSize,
+                        expensePagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {expensePagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!expensePagination.HasNextPage}
-                      onClick={() => handlePageChange(expensePagination.CurrentPage + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!expensePagination.HasNextPage}
-                      onClick={() => handlePageChange(expensePagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!expensePagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!expensePagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(expensePagination.CurrentPage - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {expensePagination.CurrentPage} /{" "}
+                        {expensePagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!expensePagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(expensePagination.CurrentPage + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!expensePagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(expensePagination.TotalPages)
+                        }
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -934,8 +1001,10 @@ const ExpenseList = () => {
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Basic Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Description}
@@ -959,7 +1028,10 @@ const ExpenseList = () => {
                       {translations.Amount}
                     </Span>
                     <Span className="text-sm text-red-600 font-medium block mt-1">
-                      {formatCurrency(selectedExpense.Amount, selectedExpense.Currency)}
+                      {formatCurrency(
+                        selectedExpense.Amount,
+                        selectedExpense.Currency
+                      )}
                     </Span>
                   </Container>
 
@@ -975,18 +1047,24 @@ const ExpenseList = () => {
 
                 {/* Additional Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Additional Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Additional Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Expense Type"]}
                     </Span>
-                    <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedExpense.IsRecurring
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}>
-                      {selectedExpense.IsRecurring ? translations.Recurring : translations["One-time"]}
+                    <Span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                        selectedExpense.IsRecurring
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {selectedExpense.IsRecurring
+                        ? translations.Recurring
+                        : translations["One-time"]}
                     </Span>
                   </Container>
 
@@ -1030,7 +1108,9 @@ const ExpenseList = () => {
                         fontWeight="font-medium"
                         fontSize="text-xs"
                         isIconLeft={true}
-                        onClick={() => window.open(selectedExpense.AttachmentPath, '_blank')}
+                        onClick={() =>
+                          window.open(selectedExpense.AttachmentPath, "_blank")
+                        }
                       />
                     </Container>
                   )}
@@ -1099,8 +1179,8 @@ const ExpenseList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the expense{" "}
-              <strong>"{expenseToDelete?.Description}"</strong>{" "}
-              and all associated data.
+              <strong>"{expenseToDelete?.Description}"</strong> and all
+              associated data.
             </Span>
           </Container>
         }
@@ -1164,7 +1244,10 @@ const ExpenseList = () => {
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
-                        isRecurring: e.target.value === "" ? null : e.target.value === "true",
+                        isRecurring:
+                          e.target.value === ""
+                            ? null
+                            : e.target.value === "true",
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"

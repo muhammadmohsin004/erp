@@ -12,6 +12,7 @@ import CheckboxField from "../../components/elements/checkbox/CheckboxField";
 import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import { employeeTranslations } from "../../translations/CreaeNewEmployeeTranslation";
+import { useNavigate } from "react-router-dom";
 
 const CreateNewEmployee = () => {
   const { language: currentLanguage } = useSelector((state) => state.language);
@@ -19,7 +20,7 @@ const CreateNewEmployee = () => {
   const userId = Id;
   const { createEmployee, loading, error, clearError, formMode, setFormMode } =
     useHR();
-
+  const navigate = useNavigate();
   // Get translations based on current language
   const text = employeeTranslations[currentLanguage === "ar" ? "ar" : "en"];
 
@@ -152,6 +153,7 @@ const CreateNewEmployee = () => {
           });
           setImagePreview(null);
         }
+        navigate("/admin/manage-employee");
       }
     } catch (err) {
       console.error("Error creating employee:", err);
@@ -176,7 +178,9 @@ const CreateNewEmployee = () => {
 
   return (
     <Container
-      className={`py-4 ${currentLanguage === "ar" ? "text-right" : "text-left"}`}
+      className={`py-4 ${
+        currentLanguage === "ar" ? "text-right" : "text-left"
+      }`}
     >
       <BodyHeader
         heading={text.employeeInformation}
@@ -284,7 +288,9 @@ const CreateNewEmployee = () => {
                       <div className="flex flex-col items-center justify-center p-4 text-center">
                         <CloudUpload className="w-8 h-8 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500">
-                          {formMode === "view" ? text.noImage : text.uploadImage}
+                          {formMode === "view"
+                            ? text.noImage
+                            : text.uploadImage}
                         </p>
                       </div>
                     )}
