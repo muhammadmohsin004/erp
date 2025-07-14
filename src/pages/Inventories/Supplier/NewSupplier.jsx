@@ -40,10 +40,14 @@ const NewSupplier = () => {
     Back: language === "ar" ? "رجوع" : "Back",
     Save: language === "ar" ? "حفظ" : "Save",
     "Save Changes": language === "ar" ? "حفظ التغييرات" : "Save Changes",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Contact Information": language === "ar" ? "معلومات الاتصال" : "Contact Information",
-    "Address Information": language === "ar" ? "معلومات العنوان" : "Address Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Contact Information":
+      language === "ar" ? "معلومات الاتصال" : "Contact Information",
+    "Address Information":
+      language === "ar" ? "معلومات العنوان" : "Address Information",
+    "Additional Information":
+      language === "ar" ? "معلومات إضافية" : "Additional Information",
     "Supplier Name": language === "ar" ? "اسم المورد" : "Supplier Name",
     "Contact Person": language === "ar" ? "الشخص المسؤول" : "Contact Person",
     Email: language === "ar" ? "البريد الإلكتروني" : "Email",
@@ -58,23 +62,41 @@ const NewSupplier = () => {
     Status: language === "ar" ? "الحالة" : "Status",
     Active: language === "ar" ? "نشط" : "Active",
     Inactive: language === "ar" ? "غير نشط" : "Inactive",
-    "Enter supplier name": language === "ar" ? "أدخل اسم المورد" : "Enter supplier name",
-    "Enter contact person name": language === "ar" ? "أدخل اسم الشخص المسؤول" : "Enter contact person name",
-    "Enter email address": language === "ar" ? "أدخل البريد الإلكتروني" : "Enter email address",
-    "Enter phone number": language === "ar" ? "أدخل رقم الهاتف" : "Enter phone number",
+    "Enter supplier name":
+      language === "ar" ? "أدخل اسم المورد" : "Enter supplier name",
+    "Enter contact person name":
+      language === "ar"
+        ? "أدخل اسم الشخص المسؤول"
+        : "Enter contact person name",
+    "Enter email address":
+      language === "ar" ? "أدخل البريد الإلكتروني" : "Enter email address",
+    "Enter phone number":
+      language === "ar" ? "أدخل رقم الهاتف" : "Enter phone number",
     "Enter address": language === "ar" ? "أدخل العنوان" : "Enter address",
     "Enter city": language === "ar" ? "أدخل المدينة" : "Enter city",
     "Enter state": language === "ar" ? "أدخل الولاية" : "Enter state",
     "Enter country": language === "ar" ? "أدخل البلد" : "Enter country",
-    "Enter zip code": language === "ar" ? "أدخل الرمز البريدي" : "Enter zip code",
+    "Enter zip code":
+      language === "ar" ? "أدخل الرمز البريدي" : "Enter zip code",
     "Enter tax ID": language === "ar" ? "أدخل الرقم الضريبي" : "Enter tax ID",
     "Enter notes": language === "ar" ? "أدخل ملاحظات" : "Enter notes",
     "Name is required": language === "ar" ? "الاسم مطلوب" : "Name is required",
-    "Invalid email format": language === "ar" ? "تنسيق البريد الإلكتروني غير صحيح" : "Invalid email format",
-    "Supplier created successfully": language === "ar" ? "تم إنشاء المورد بنجاح" : "Supplier created successfully",
-    "Supplier updated successfully": language === "ar" ? "تم تحديث المورد بنجاح" : "Supplier updated successfully",
-    "Failed to create supplier": language === "ar" ? "فشل في إنشاء المورد" : "Failed to create supplier",
-    "Failed to update supplier": language === "ar" ? "فشل في تحديث المورد" : "Failed to update supplier",
+    "Invalid email format":
+      language === "ar"
+        ? "تنسيق البريد الإلكتروني غير صحيح"
+        : "Invalid email format",
+    "Supplier created successfully":
+      language === "ar"
+        ? "تم إنشاء المورد بنجاح"
+        : "Supplier created successfully",
+    "Supplier updated successfully":
+      language === "ar"
+        ? "تم تحديث المورد بنجاح"
+        : "Supplier updated successfully",
+    "Failed to create supplier":
+      language === "ar" ? "فشل في إنشاء المورد" : "Failed to create supplier",
+    "Failed to update supplier":
+      language === "ar" ? "فشل في تحديث المورد" : "Failed to update supplier",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
   };
 
@@ -141,16 +163,16 @@ const NewSupplier = () => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ""
+        [field]: "",
       }));
     }
   };
@@ -185,13 +207,13 @@ const NewSupplier = () => {
 
     try {
       let result;
-      
+
       if (isEditing && editData) {
         // Update existing supplier
         result = await updateSupplier(editData.Id, formData);
         if (result) {
           alert(translations["Supplier updated successfully"]);
-          navigate("/admin/suppliers");
+          navigate("/admin/Manage-Suppliers");
         } else {
           alert(translations["Failed to update supplier"]);
         }
@@ -200,14 +222,18 @@ const NewSupplier = () => {
         result = await createSupplier(formData);
         if (result) {
           alert(translations["Supplier created successfully"]);
-          navigate("/admin/suppliers");
+          navigate("/admin/Manage-Suppliers");
         } else {
           alert(translations["Failed to create supplier"]);
         }
       }
     } catch (error) {
       console.error("Error submitting supplier:", error);
-      alert(isEditing ? translations["Failed to update supplier"] : translations["Failed to create supplier"]);
+      alert(
+        isEditing
+          ? translations["Failed to update supplier"]
+          : translations["Failed to create supplier"]
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -288,7 +314,8 @@ const NewSupplier = () => {
               {/* Supplier Name */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Supplier Name"]} <span className="text-red-500">*</span>
+                  {translations["Supplier Name"]}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -300,7 +327,9 @@ const NewSupplier = () => {
                   }`}
                 />
                 {errors.Name && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Name}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Name}
+                  </Span>
                 )}
               </Container>
 
@@ -339,7 +368,9 @@ const NewSupplier = () => {
                 <input
                   type="text"
                   value={formData.ContactPerson}
-                  onChange={(e) => handleInputChange("ContactPerson", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("ContactPerson", e.target.value)
+                  }
                   placeholder={translations["Enter contact person name"]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -365,7 +396,9 @@ const NewSupplier = () => {
                   />
                 </Container>
                 {errors.Email && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Email}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Email}
+                  </Span>
                 )}
               </Container>
 
@@ -451,7 +484,9 @@ const NewSupplier = () => {
                   <input
                     type="text"
                     value={formData.ZipCode}
-                    onChange={(e) => handleInputChange("ZipCode", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("ZipCode", e.target.value)
+                    }
                     placeholder={translations["Enter zip code"]}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -465,7 +500,9 @@ const NewSupplier = () => {
                   <input
                     type="text"
                     value={formData.Country}
-                    onChange={(e) => handleInputChange("Country", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("Country", e.target.value)
+                    }
                     placeholder={translations["Enter country"]}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />

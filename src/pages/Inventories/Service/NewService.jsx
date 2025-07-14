@@ -38,9 +38,12 @@ const NewService = () => {
     Back: language === "ar" ? "رجوع" : "Back",
     Save: language === "ar" ? "حفظ" : "Save",
     "Save Changes": language === "ar" ? "حفظ التغييرات" : "Save Changes",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Pricing Information": language === "ar" ? "معلومات التسعير" : "Pricing Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Pricing Information":
+      language === "ar" ? "معلومات التسعير" : "Pricing Information",
+    "Additional Information":
+      language === "ar" ? "معلومات إضافية" : "Additional Information",
     "Service Name": language === "ar" ? "اسم الخدمة" : "Service Name",
     "Service Code": language === "ar" ? "كود الخدمة" : "Service Code",
     Description: language === "ar" ? "الوصف" : "Description",
@@ -53,24 +56,41 @@ const NewService = () => {
     Status: language === "ar" ? "الحالة" : "Status",
     Active: language === "ar" ? "نشط" : "Active",
     Inactive: language === "ar" ? "غير نشط" : "Inactive",
-    "Enter service name": language === "ar" ? "أدخل اسم الخدمة" : "Enter service name",
-    "Enter service code": language === "ar" ? "أدخل كود الخدمة" : "Enter service code",
+    "Enter service name":
+      language === "ar" ? "أدخل اسم الخدمة" : "Enter service name",
+    "Enter service code":
+      language === "ar" ? "أدخل كود الخدمة" : "Enter service code",
     "Enter description": language === "ar" ? "أدخل الوصف" : "Enter description",
-    "Enter purchase price": language === "ar" ? "أدخل سعر الشراء" : "Enter purchase price",
-    "Enter unit price": language === "ar" ? "أدخل سعر الوحدة" : "Enter unit price",
-    "Enter minimum price": language === "ar" ? "أدخل الحد الأدنى للسعر" : "Enter minimum price",
-    "Enter discount amount": language === "ar" ? "أدخل مبلغ الخصم" : "Enter discount amount",
-    "Enter internal notes": language === "ar" ? "أدخل ملاحظات داخلية" : "Enter internal notes",
+    "Enter purchase price":
+      language === "ar" ? "أدخل سعر الشراء" : "Enter purchase price",
+    "Enter unit price":
+      language === "ar" ? "أدخل سعر الوحدة" : "Enter unit price",
+    "Enter minimum price":
+      language === "ar" ? "أدخل الحد الأدنى للسعر" : "Enter minimum price",
+    "Enter discount amount":
+      language === "ar" ? "أدخل مبلغ الخصم" : "Enter discount amount",
+    "Enter internal notes":
+      language === "ar" ? "أدخل ملاحظات داخلية" : "Enter internal notes",
     "Name is required": language === "ar" ? "الاسم مطلوب" : "Name is required",
-    "Invalid price format": language === "ar" ? "تنسيق السعر غير صحيح" : "Invalid price format",
-    "Service created successfully": language === "ar" ? "تم إنشاء الخدمة بنجاح" : "Service created successfully",
-    "Service updated successfully": language === "ar" ? "تم تحديث الخدمة بنجاح" : "Service updated successfully",
-    "Failed to create service": language === "ar" ? "فشل في إنشاء الخدمة" : "Failed to create service",
-    "Failed to update service": language === "ar" ? "فشل في تحديث الخدمة" : "Failed to update service",
+    "Invalid price format":
+      language === "ar" ? "تنسيق السعر غير صحيح" : "Invalid price format",
+    "Service created successfully":
+      language === "ar"
+        ? "تم إنشاء الخدمة بنجاح"
+        : "Service created successfully",
+    "Service updated successfully":
+      language === "ar"
+        ? "تم تحديث الخدمة بنجاح"
+        : "Service updated successfully",
+    "Failed to create service":
+      language === "ar" ? "فشل في إنشاء الخدمة" : "Failed to create service",
+    "Failed to update service":
+      language === "ar" ? "فشل في تحديث الخدمة" : "Failed to update service",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     Percentage: language === "ar" ? "نسبة مئوية" : "Percentage",
     Fixed: language === "ar" ? "مبلغ ثابت" : "Fixed Amount",
-    "Select discount type": language === "ar" ? "اختر نوع الخصم" : "Select discount type",
+    "Select discount type":
+      language === "ar" ? "اختر نوع الخصم" : "Select discount type",
   };
 
   // Form state
@@ -133,16 +153,16 @@ const NewService = () => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ""
+        [field]: "",
       }));
     }
   };
@@ -157,8 +177,13 @@ const NewService = () => {
     }
 
     // Price validation
-    const priceFields = ['PurchasePrice', 'UnitPrice', 'MinimumPrice', 'Discount'];
-    priceFields.forEach(field => {
+    const priceFields = [
+      "PurchasePrice",
+      "UnitPrice",
+      "MinimumPrice",
+      "Discount",
+    ];
+    priceFields.forEach((field) => {
       if (formData[field] && formData[field].trim()) {
         const value = parseFloat(formData[field]);
         if (isNaN(value) || value < 0) {
@@ -183,12 +208,12 @@ const NewService = () => {
 
     try {
       let result;
-      
+
       if (isEditing && editData) {
         // Update existing service
         result = await updateService(editData.Id, formData);
         if (result) {
-          alert(translations["Service updated successfully"]);
+          // alert(translations["Service updated successfully"]);
           navigate("/admin/Services-Manager");
         } else {
           alert(translations["Failed to update service"]);
@@ -197,7 +222,7 @@ const NewService = () => {
         // Create new service
         result = await createService(formData);
         if (result) {
-          alert(translations["Service created successfully"]);
+          // alert(translations["Service created successfully"]);
           navigate("/admin/Services-Manager");
         } else {
           alert(translations["Failed to create service"]);
@@ -205,7 +230,11 @@ const NewService = () => {
       }
     } catch (error) {
       console.error("Error submitting service:", error);
-      alert(isEditing ? translations["Failed to update service"] : translations["Failed to create service"]);
+      alert(
+        isEditing
+          ? translations["Failed to update service"]
+          : translations["Failed to create service"]
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -286,7 +315,8 @@ const NewService = () => {
               {/* Service Name */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Service Name"]} <span className="text-red-500">*</span>
+                  {translations["Service Name"]}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -298,7 +328,9 @@ const NewService = () => {
                   }`}
                 />
                 {errors.Name && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Name}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Name}
+                  </Span>
                 )}
               </Container>
 
@@ -314,7 +346,9 @@ const NewService = () => {
                   <input
                     type="text"
                     value={formData.ServiceCode}
-                    onChange={(e) => handleInputChange("ServiceCode", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("ServiceCode", e.target.value)
+                    }
                     placeholder={translations["Enter service code"]}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -343,7 +377,9 @@ const NewService = () => {
                 </label>
                 <textarea
                   value={formData.Description}
-                  onChange={(e) => handleInputChange("Description", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("Description", e.target.value)
+                  }
                   placeholder={translations["Enter description"]}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -376,15 +412,21 @@ const NewService = () => {
                     step="0.01"
                     min="0"
                     value={formData.PurchasePrice}
-                    onChange={(e) => handleInputChange("PurchasePrice", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("PurchasePrice", e.target.value)
+                    }
                     placeholder={translations["Enter purchase price"]}
                     className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.PurchasePrice ? "border-red-500" : "border-gray-300"
+                      errors.PurchasePrice
+                        ? "border-red-500"
+                        : "border-gray-300"
                     }`}
                   />
                 </Container>
                 {errors.PurchasePrice && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.PurchasePrice}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.PurchasePrice}
+                  </Span>
                 )}
               </Container>
 
@@ -402,7 +444,9 @@ const NewService = () => {
                     step="0.01"
                     min="0"
                     value={formData.UnitPrice}
-                    onChange={(e) => handleInputChange("UnitPrice", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("UnitPrice", e.target.value)
+                    }
                     placeholder={translations["Enter unit price"]}
                     className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
                       errors.UnitPrice ? "border-red-500" : "border-gray-300"
@@ -410,7 +454,9 @@ const NewService = () => {
                   />
                 </Container>
                 {errors.UnitPrice && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.UnitPrice}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.UnitPrice}
+                  </Span>
                 )}
               </Container>
 
@@ -428,7 +474,9 @@ const NewService = () => {
                     step="0.01"
                     min="0"
                     value={formData.MinimumPrice}
-                    onChange={(e) => handleInputChange("MinimumPrice", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("MinimumPrice", e.target.value)
+                    }
                     placeholder={translations["Enter minimum price"]}
                     className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
                       errors.MinimumPrice ? "border-red-500" : "border-gray-300"
@@ -436,7 +484,9 @@ const NewService = () => {
                   />
                 </Container>
                 {errors.MinimumPrice && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.MinimumPrice}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.MinimumPrice}
+                  </Span>
                 )}
               </Container>
 
@@ -454,7 +504,9 @@ const NewService = () => {
                     step="0.01"
                     min="0"
                     value={formData.Discount}
-                    onChange={(e) => handleInputChange("Discount", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("Discount", e.target.value)
+                    }
                     placeholder={translations["Enter discount amount"]}
                     className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
                       errors.Discount ? "border-red-500" : "border-gray-300"
@@ -462,7 +514,9 @@ const NewService = () => {
                   />
                 </Container>
                 {errors.Discount && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.Discount}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.Discount}
+                  </Span>
                 )}
               </Container>
 
@@ -473,10 +527,14 @@ const NewService = () => {
                 </label>
                 <select
                   value={formData.DiscountType}
-                  onChange={(e) => handleInputChange("DiscountType", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("DiscountType", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">{translations["Select discount type"]}</option>
+                  <option value="">
+                    {translations["Select discount type"]}
+                  </option>
                   <option value="Percentage">{translations.Percentage}</option>
                   <option value="Fixed">{translations.Fixed}</option>
                 </select>
@@ -501,7 +559,9 @@ const NewService = () => {
                 </label>
                 <textarea
                   value={formData.InternalNotes}
-                  onChange={(e) => handleInputChange("InternalNotes", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("InternalNotes", e.target.value)
+                  }
                   placeholder={translations["Enter internal notes"]}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"

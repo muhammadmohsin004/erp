@@ -113,6 +113,7 @@ const ServiceList = () => {
   } = useService();
 
   // Process services data from API response
+  console.log("services================>", services);
   const servicesData = services?.Data?.$values || [];
 
   // Local state management
@@ -160,12 +161,15 @@ const ServiceList = () => {
     if (Array.isArray(servicesData) && servicesData.length > 0) {
       const stats = {
         totalServices: pagination?.TotalItems || servicesData.length,
-        activeServices: servicesData.filter(s => s.Status === "Active").length,
-        servicesThisMonth: servicesData.filter(s => {
+        activeServices: servicesData.filter((s) => s.Status === "Active")
+          .length,
+        servicesThisMonth: servicesData.filter((s) => {
           const createdDate = new Date(s.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
         totalRevenue: servicesData.reduce((sum, s) => {
           const unitPrice = parseFloat(s.UnitPrice) || 0;
@@ -188,16 +192,17 @@ const ServiceList = () => {
   }, [searchTerm]);
 
   // Handle filters change
-  useEffect(() => {
-    setSelectedServices([]);
-    setSelectAll(false);
-  }, [servicesData]);
+  // useEffect(() => {
+  //   setSelectedServices([]);
+  //   setSelectAll(false);
+  // }, [servicesData]);
 
   useEffect(() => {
     if (!token) {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+  // console.log("servicesData", servicesData);
 
   // Search function
   const handleSearchServices = async () => {
@@ -357,10 +362,10 @@ const ServiceList = () => {
     try {
       // Reset filters in context and fetch fresh data
       setFilters({
-        searchTerm: '',
-        status: '',
-        sortBy: 'Id',
-        sortAscending: false
+        searchTerm: "",
+        status: "",
+        sortBy: "Id",
+        sortAscending: false,
       });
       await getServices();
     } catch (error) {
@@ -384,13 +389,20 @@ const ServiceList = () => {
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {isCurrency ? `$${formatCurrency(value)}` : (value || 0)}
+            {isCurrency ? `$${formatCurrency(value)}` : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -641,7 +653,8 @@ const ServiceList = () => {
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {service.Discount && parseFloat(service.Discount) > 0 ? (
+                          {service.Discount &&
+                          parseFloat(service.Discount) > 0 ? (
                             <Container className="flex items-center gap-1">
                               <Span className="text-sm text-orange-600">
                                 {formatCurrency(service.Discount)}
@@ -713,77 +726,83 @@ const ServiceList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.PageNumber * pagination.PageSize,
-                      pagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {pagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.PageNumber} / {pagination.TotalPages}
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
+                      {Math.min(
+                        pagination.PageNumber * pagination.PageSize,
+                        pagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {pagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {pagination.PageNumber} / {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -813,8 +832,10 @@ const ServiceList = () => {
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Basic Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Name}
@@ -853,15 +874,18 @@ const ServiceList = () => {
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {translations[selectedService.Status] || selectedService.Status}
+                      {translations[selectedService.Status] ||
+                        selectedService.Status}
                     </Span>
                   </Container>
                 </Container>
 
                 {/* Pricing Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Pricing Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Pricing Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Purchase Price"]}
@@ -1001,8 +1025,8 @@ const ServiceList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the service{" "}
-              <strong>"{serviceToDelete?.Name}"</strong>{" "}
-              and all associated data.
+              <strong>"{serviceToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }

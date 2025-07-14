@@ -464,7 +464,7 @@ const NewRequisition = () => {
           await uploadFiles(result.Id);
         }
 
-        alert(translations["Requisition saved successfully"]);
+        // alert(translations["Requisition saved successfully"]);
         navigate("/admin/Requsition-Manager");
       } else {
         alert(translations["Error saving requisition"]);

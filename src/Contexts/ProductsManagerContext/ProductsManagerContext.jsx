@@ -751,6 +751,55 @@ export const ProductsManagerProvider = ({ children }) => {
         token ? `${token.substring(0, 20)}...` : "No token"
       );
 
+      // If makeApiCall already parses JSON, it returns the parsed data directly
+      const responseData = await makeApiCall(API_BASE_URLS.products, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          accept: "text/plain",
+        },
+        body: JSON.stringify(productData),
+      });
+
+      console.log("Create product response:", responseData);
+
+      // Check if the response indicates success
+      if (responseData.Success) {
+        dispatch({ type: actionTypes.ADD_PRODUCT, payload: responseData.Data });
+        return responseData.Data;
+      } else {
+        throw new Error(responseData.Message || "Failed to create product");
+      }
+    } catch (error) {
+      console.error("Context create product error:", error);
+
+      // Handle different error scenarios
+      if (error.message.includes("401")) {
+        console.error("Authentication error - possible token issue");
+      }
+
+      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+      throw error;
+    } finally {
+      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+    }
+  }, []);
+
+  // Alternative approach if makeApiCall returns the raw Response object
+  const createProductAlternative = useCallback(async (productData) => {
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+      console.log("=== CONTEXT: Creating product ===");
+      console.log("Product data:", productData);
+
+      const token = getAuthToken();
+      console.log(
+        "Token preview:",
+        token ? `${token.substring(0, 20)}...` : "No token"
+      );
+
       const response = await makeApiCall(API_BASE_URLS.products, {
         method: "POST",
         headers: {
@@ -763,12 +812,19 @@ export const ProductsManagerProvider = ({ children }) => {
 
       console.log("Create product response:", response);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create product");
+      // Check if response has .json method (raw Response object)
+      let responseData;
+      if (typeof response.json === "function") {
+        // It's a raw Response object
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to create product");
+        }
+        responseData = await response.json();
+      } else {
+        // It's already parsed JSON data
+        responseData = response;
       }
-
-      const responseData = await response.json();
 
       if (responseData.Success) {
         dispatch({ type: actionTypes.ADD_PRODUCT, payload: responseData.Data });
@@ -1262,7 +1318,7 @@ export const ProductsManagerProvider = ({ children }) => {
       if (result.Success) {
         dispatch({
           type: actionTypes.ADD_MULTIPLE_PRODUCT_IMAGES,
-          payload: result.Data.UploadedImages,
+          payload: result.Data.UploadedImages.$values,
         });
         return result.Data;
       } else {

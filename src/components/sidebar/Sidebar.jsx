@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
   } = useSidebarData();
 
   // Debug logging
-  console.log('Sidebar isOpen:', isOpen, 'isMobile:', isMobile);
+  console.log("Sidebar isOpen:", isOpen, "isMobile:", isMobile);
 
   // State for user data from localStorage
   const [userData, setUserData] = useState(null);
@@ -27,13 +27,13 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
   useEffect(() => {
     const loadUserData = () => {
       try {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem("user");
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setUserData(parsedUser);
         }
       } catch (error) {
-        console.error('Error loading user data from localStorage:', error);
+        console.error("Error loading user data from localStorage:", error);
       }
     };
 
@@ -51,7 +51,10 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
   const CompanyLogo = useMemo(() => {
     if (!userData) return null;
 
-    const companyInitial = userData.BusinessName?.charAt(0)?.toUpperCase() || userData.CompanyName?.charAt(0)?.toUpperCase() || "C";
+    const companyInitial =
+      userData.BusinessName?.charAt(0)?.toUpperCase() ||
+      userData.CompanyName?.charAt(0)?.toUpperCase() ||
+      "C";
 
     return (
       <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-lg">
@@ -205,9 +208,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
               } ${currentLanguage === "ar" ? "flex-row-reverse" : ""} ${
                 subIndex === 0 ? "rounded-t-none" : ""
               } ${
-                subIndex === item.submenuItems.length - 1
-                  ? "rounded-b-lg"
-                  : ""
+                subIndex === item.submenuItems.length - 1 ? "rounded-b-lg" : ""
               }`;
             }}
           >
@@ -365,7 +366,10 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
               {CompanyLogo}
               <div className="min-w-0 flex-1">
                 <h2 className="text-white font-bold text-lg truncate">
-                  {userData?.BusinessName || userData?.CompanyName || t?.defaultCompanyName || "Business"}
+                  {userData?.BusinessName ||
+                    userData?.CompanyName ||
+                    t?.defaultCompanyName ||
+                    "Business"}
                 </h2>
               </div>
             </div>
@@ -373,7 +377,9 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             <div className="flex items-center justify-center w-full">
               <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-sm">
-                  {userData?.BusinessName?.charAt(0)?.toUpperCase() || userData?.CompanyName?.charAt(0)?.toUpperCase() || "C"}
+                  {userData?.BusinessName?.charAt(0)?.toUpperCase() ||
+                    userData?.CompanyName?.charAt(0)?.toUpperCase() ||
+                    "C"}
                 </span>
               </div>
             </div>
@@ -399,16 +405,21 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {userData?.F_Name && userData?.L_Name 
+                  {userData?.F_Name && userData?.L_Name
                     ? `${userData.F_Name} ${userData.L_Name}`
-                    : userData?.F_Name || userData?.Name || userInfo?.F_Name || userInfo?.Name || "User"}
+                    : userData?.F_Name ||
+                      userData?.Name ||
+                      userInfo?.F_Name ||
+                      userInfo?.Name ||
+                      "User"}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {userData?.Email || userInfo?.email || "No email"}
                 </p>
                 <div className="flex items-center mt-1">
                   <span className="text-xs text-purple-600 font-medium">
-                    {t?.accessLevel || "Access Level"}: {userData?.Position || userData?.Role || "User"}
+                    {t?.accessLevel || "Access Level"}:{" "}
+                    {userData?.Position || userData?.Role || "User"}
                   </span>
                 </div>
               </div>
@@ -417,6 +428,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         )}
 
         {/* Navigation Menu */}
+
         <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
           <style jsx>{`
             .scrollbar-hide::-webkit-scrollbar {
@@ -437,7 +449,8 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           {isOpen ? (
             <div className="text-center">
               <p className="text-xs text-gray-500 mb-2">
-                {t?.current || "Current"} {userData?.Role || userData?.Position || "User"}
+                {t?.current || "Current"}{" "}
+                {userData?.Role || userData?.Position || "User"}
               </p>
               <div className="flex items-center justify-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -448,7 +461,11 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             </div>
           ) : (
             <div className="flex justify-center">
-              <div className={`w-2 h-2 ${userData?.IsActive ? "bg-green-500" : "bg-gray-400"} rounded-full animate-pulse`}></div>
+              <div
+                className={`w-2 h-2 ${
+                  userData?.IsActive ? "bg-green-500" : "bg-gray-400"
+                } rounded-full animate-pulse`}
+              ></div>
             </div>
           )}
         </div>
