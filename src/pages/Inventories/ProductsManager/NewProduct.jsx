@@ -716,9 +716,12 @@ const NewProduct = () => {
         }
 
         // Show success message
-        alert(`Product ${isEditing ? "updated" : "created"} successfully!`);
+        console.log(
+          `Product ${isEditing ? "updated" : "created"} successfully!`
+        );
 
         // Navigate back to products list
+        console.log("-------chjk ---------");
         navigate("/admin/Products-Manager");
       } catch (error) {
         console.log("Error saving product:", error);

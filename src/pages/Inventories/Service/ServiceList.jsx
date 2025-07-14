@@ -94,6 +94,12 @@ const ServiceList = () => {
     Tags: language === "ar" ? "العلامات" : "Tags",
     Images: language === "ar" ? "الصور" : "Images",
     Price: language === "ar" ? "السعر" : "Price",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
+    "Exporting...": language === "ar" ? "جاري التصدير..." : "Exporting...",
+    "Export Successful":
+      language === "ar" ? "تم التصدير بنجاح" : "Export Successful",
+    "Export Failed": language === "ar" ? "فشل التصدير" : "Export Failed",
   };
 
   // Get service context
@@ -113,6 +119,7 @@ const ServiceList = () => {
   } = useService();
 
   // Process services data from API response
+  console.log("services================>", services);
   const servicesData = services?.Data?.$values || [];
 
   // Local state management
@@ -131,6 +138,8 @@ const ServiceList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
 
   // Statistics state
   const [statistics, setStatistics] = useState({
@@ -160,12 +169,15 @@ const ServiceList = () => {
     if (Array.isArray(servicesData) && servicesData.length > 0) {
       const stats = {
         totalServices: pagination?.TotalItems || servicesData.length,
-        activeServices: servicesData.filter(s => s.Status === "Active").length,
-        servicesThisMonth: servicesData.filter(s => {
+        activeServices: servicesData.filter((s) => s.Status === "Active")
+          .length,
+        servicesThisMonth: servicesData.filter((s) => {
           const createdDate = new Date(s.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
         totalRevenue: servicesData.reduce((sum, s) => {
           const unitPrice = parseFloat(s.UnitPrice) || 0;
@@ -187,17 +199,165 @@ const ServiceList = () => {
     return () => clearTimeout(delayedSearch);
   }, [searchTerm]);
 
-  // Handle filters change
-  useEffect(() => {
-    setSelectedServices([]);
-    setSelectAll(false);
-  }, [servicesData]);
-
   useEffect(() => {
     if (!token) {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+
+  // CSV Export Functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return "";
+
+    // Define headers
+    const headers = [
+      "ID",
+      "Name",
+      "Service Code",
+      "Description",
+      "Unit Price",
+      "Purchase Price",
+      "Minimum Price",
+      "Discount",
+      "Discount Type",
+      "Status",
+      "Internal Notes",
+      "Categories Count",
+      "Taxes Count",
+      "Tags Count",
+      "Images Count",
+      "Created At",
+      "Updated At",
+    ];
+
+    // Convert data to CSV format
+    const csvRows = [];
+
+    // Add headers
+    csvRows.push(headers.join(","));
+
+    // Add data rows
+    data.forEach((service) => {
+      const row = [
+        service.Id || "",
+        `"${(service.Name || "").replace(/"/g, '""')}"`,
+        service.ServiceCode || "",
+        `"${(service.Description || "").replace(/"/g, '""')}"`,
+        formatCurrency(service.UnitPrice),
+        formatCurrency(service.PurchasePrice),
+        formatCurrency(service.MinimumPrice),
+        formatCurrency(service.Discount),
+        service.DiscountType || "",
+        service.Status || "",
+        `"${(service.InternalNotes || "").replace(/"/g, '""')}"`,
+        service.Categories?.length || 0,
+        service.Taxes?.length || 0,
+        service.Tags?.length || 0,
+        service.Images?.length || 0,
+        service.CreatedAt
+          ? new Date(service.CreatedAt).toLocaleDateString()
+          : "",
+        service.UpdatedAt
+          ? new Date(service.UpdatedAt).toLocaleDateString()
+          : "",
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    return csvRows.join("\n");
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    setShowExportDropdown(false);
+
+    try {
+      // If we have all services data, use it; otherwise fetch all
+      let allServicesData = servicesData;
+
+      if (pagination && pagination.TotalItems > servicesData.length) {
+        // Fetch all services if we don't have all data
+        // This would require an API call to get all services without pagination
+        // For now, we'll use the current data
+        console.log("Exporting current page data only");
+      }
+
+      const csvContent = convertToCSV(allServicesData);
+      const filename = `services_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(translations["Export Successful"]);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert(translations["Export Failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportSelected = async () => {
+    if (selectedServices.length === 0) {
+      alert("Please select services to export");
+      return;
+    }
+
+    setIsExporting(true);
+    setShowExportDropdown(false);
+
+    try {
+      // Get selected services data
+      const selectedServicesData = servicesData.filter((service) =>
+        selectedServices.includes(service.Id)
+      );
+
+      const csvContent = convertToCSV(selectedServicesData);
+      const filename = `selected_services_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(translations["Export Successful"]);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert(translations["Export Failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportDropdown && !event.target.closest(".export-dropdown")) {
+        setShowExportDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showExportDropdown]);
 
   // Search function
   const handleSearchServices = async () => {
@@ -357,24 +517,15 @@ const ServiceList = () => {
     try {
       // Reset filters in context and fetch fresh data
       setFilters({
-        searchTerm: '',
-        status: '',
-        sortBy: 'Id',
-        sortAscending: false
+        searchTerm: "",
+        status: "",
+        sortBy: "Id",
+        sortAscending: false,
       });
       await getServices();
     } catch (error) {
       console.error("Error clearing filters:", error);
     }
-  };
-
-  // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export services:",
-      selectedServices.length > 0 ? selectedServices : "all"
-    );
-    alert("Export functionality to be implemented");
   };
 
   // Format currency
@@ -384,13 +535,20 @@ const ServiceList = () => {
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {isCurrency ? `$${formatCurrency(value)}` : (value || 0)}
+            {isCurrency ? `$${formatCurrency(value)}` : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -408,7 +566,6 @@ const ServiceList = () => {
       </Container>
     );
   }
-
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -440,21 +597,58 @@ const ServiceList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            <FilledButton
-              isIcon={true}
-              icon={Download}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText={translations.Export}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={handleExport}
-            />
+
+            {/* Export Dropdown */}
+            <Container className="relative export-dropdown flex flex-row">
+              <FilledButton
+                isIcon={true}
+                icon={Download}
+                iconSize="w-4 h-4"
+                bgColor={
+                  isExporting ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"
+                }
+                textColor="text-gray-700"
+                rounded="rounded-lg"
+                buttonText={
+                  isExporting
+                    ? translations["Exporting..."]
+                    : translations.Export
+                }
+                height="h-10"
+                px="px-4"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                isIconLeft={true}
+                disabled={isExporting}
+                onClick={() => setShowExportDropdown(!showExportDropdown)}
+              />
+
+              {/* Export Dropdown Menu */}
+              {showExportDropdown && (
+                <Container className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                  <Container className="py-1">
+                    <button
+                      onClick={handleExportAll}
+                      disabled={isExporting || servicesData.length === 0}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      {translations["Export All"]} ({servicesData.length})
+                    </button>
+                    <button
+                      onClick={handleExportSelected}
+                      disabled={isExporting || selectedServices.length === 0}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      {translations["Export Selected"]} (
+                      {selectedServices.length})
+                    </button>
+                  </Container>
+                </Container>
+              )}
+            </Container>
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -641,7 +835,8 @@ const ServiceList = () => {
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {service.Discount && parseFloat(service.Discount) > 0 ? (
+                          {service.Discount &&
+                          parseFloat(service.Discount) > 0 ? (
                             <Container className="flex items-center gap-1">
                               <Span className="text-sm text-orange-600">
                                 {formatCurrency(service.Discount)}
@@ -713,77 +908,83 @@ const ServiceList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.PageNumber * pagination.PageSize,
-                      pagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {pagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.PageNumber} / {pagination.TotalPages}
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
+                      {Math.min(
+                        pagination.PageNumber * pagination.PageSize,
+                        pagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {pagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {pagination.PageNumber} / {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -813,8 +1014,10 @@ const ServiceList = () => {
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Basic Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Name}
@@ -853,15 +1056,18 @@ const ServiceList = () => {
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {translations[selectedService.Status] || selectedService.Status}
+                      {translations[selectedService.Status] ||
+                        selectedService.Status}
                     </Span>
                   </Container>
                 </Container>
 
                 {/* Pricing Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Pricing Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Pricing Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Purchase Price"]}
@@ -1001,8 +1207,8 @@ const ServiceList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the service{" "}
-              <strong>"{serviceToDelete?.Name}"</strong>{" "}
-              and all associated data.
+              <strong>"{serviceToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }

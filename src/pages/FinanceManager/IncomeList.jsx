@@ -43,13 +43,17 @@ const IncomeList = () => {
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Income Management": language === "ar" ? "إدارة الدخل" : "Income Management",
+    "Income Management":
+      language === "ar" ? "إدارة الدخل" : "Income Management",
     "Add Income": language === "ar" ? "إضافة دخل" : "Add Income",
-    "Back to Dashboard": language === "ar" ? "العودة للوحة التحكم" : "Back to Dashboard",
+    "Back to Dashboard":
+      language === "ar" ? "العودة للوحة التحكم" : "Back to Dashboard",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     "No incomes found": language === "ar" ? "لا يوجد دخل" : "No incomes found",
@@ -69,27 +73,41 @@ const IncomeList = () => {
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Income": language === "ar" ? "حذف الدخل" : "Delete Income",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Income Details": language === "ar" ? "تفاصيل الدخل" : "Income Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "Total Incomes": language === "ar" ? "إجمالي الدخل" : "Total Incomes",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     "Total Amount": language === "ar" ? "إجمالي المبلغ" : "Total Amount",
     "Is Recurring": language === "ar" ? "متكرر" : "Is Recurring",
-    "Recurring Frequency": language === "ar" ? "تكرار التكرار" : "Recurring Frequency",
-    "Recurring End Date": language === "ar" ? "تاريخ انتهاء التكرار" : "Recurring End Date",
+    "Recurring Frequency":
+      language === "ar" ? "تكرار التكرار" : "Recurring Frequency",
+    "Recurring End Date":
+      language === "ar" ? "تاريخ انتهاء التكرار" : "Recurring End Date",
     "Vendor ID": language === "ar" ? "معرف البائع" : "Vendor ID",
     "Category ID": language === "ar" ? "معرف الفئة" : "Category ID",
-    "Journal Account ID": language === "ar" ? "معرف حساب اليومية" : "Journal Account ID",
+    "Journal Account ID":
+      language === "ar" ? "معرف حساب اليومية" : "Journal Account ID",
     "Supplier ID": language === "ar" ? "معرف المورد" : "Supplier ID",
-    "Attachment": language === "ar" ? "المرفق" : "Attachment",
+    Attachment: language === "ar" ? "المرفق" : "Attachment",
     Yes: language === "ar" ? "نعم" : "Yes",
     No: language === "ar" ? "لا" : "No",
-    "Download Attachment": language === "ar" ? "تحميل المرفق" : "Download Attachment",
+    "Download Attachment":
+      language === "ar" ? "تحميل المرفق" : "Download Attachment",
     Refresh: language === "ar" ? "تحديث" : "Refresh",
+    "Export successful":
+      language === "ar" ? "تم التصدير بنجاح" : "Export successful",
+    "Export failed": language === "ar" ? "فشل التصدير" : "Export failed",
+    "No data to export":
+      language === "ar" ? "لا توجد بيانات للتصدير" : "No data to export",
+    "Exporting...": language === "ar" ? "جاري التصدير..." : "Exporting...",
   };
 
   // Get finance context
@@ -104,6 +122,7 @@ const IncomeList = () => {
     searchIncomes,
     changeIncomePage,
     setIncomeFilters,
+    getAllIncomes, // Assuming this function exists to get all incomes for export
   } = useFinance();
 
   // Process incomes data from API response
@@ -127,6 +146,7 @@ const IncomeList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Statistics state
   const [statistics, setStatistics] = useState({
@@ -156,16 +176,25 @@ const IncomeList = () => {
     if (Array.isArray(incomesData) && incomesData.length > 0) {
       const stats = {
         totalIncomes: incomePagination?.TotalItems || incomesData.length,
-        totalAmount: incomesData.reduce((sum, income) => sum + (parseFloat(income.Amount) || 0), 0),
-        thisMonth: incomesData.filter(income => {
+        totalAmount: incomesData.reduce(
+          (sum, income) => sum + (parseFloat(income.Amount) || 0),
+          0
+        ),
+        thisMonth: incomesData.filter((income) => {
           const createdDate = new Date(income.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
-        averageAmount: incomesData.length > 0 
-          ? incomesData.reduce((sum, income) => sum + (parseFloat(income.Amount) || 0), 0) / incomesData.length 
-          : 0,
+        averageAmount:
+          incomesData.length > 0
+            ? incomesData.reduce(
+                (sum, income) => sum + (parseFloat(income.Amount) || 0),
+                0
+              ) / incomesData.length
+            : 0,
       };
       setStatistics(stats);
     }
@@ -193,6 +222,130 @@ const IncomeList = () => {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+
+  // CSV Export functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return "";
+
+    const headers = [
+      "ID",
+      "Description",
+      "Code Number",
+      "Amount",
+      "Currency",
+      "Date",
+      "Is Recurring",
+      "Recurring Frequency",
+      "Recurring End Date",
+      "Vendor ID",
+      "Category ID",
+      "Journal Account ID",
+      "Supplier ID",
+      "Attachment Path",
+      "Created At",
+      "Updated At",
+    ];
+
+    const csvRows = [];
+
+    // Add headers
+    csvRows.push(headers.join(","));
+
+    // Add data rows
+    data.forEach((income) => {
+      const row = [
+        income.Id || "",
+        `"${(income.Description || "").replace(/"/g, '""')}"`,
+        income.CodeNumber || "",
+        income.Amount || "",
+        income.Currency || "",
+        income.Date || "",
+        income.IsRecurring ? "Yes" : "No",
+        income.RecurringFrequency || "",
+        income.RecurringEndDate || "",
+        income.VendorId || "",
+        income.CategoryId || "",
+        income.JournalAccountId || "",
+        income.SupplierId || "",
+        income.AttachmentPath || "",
+        income.CreatedAt || "",
+        income.UpdatedAt || "",
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    return csvRows.join("\n");
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExport = async (exportType = "all") => {
+    setIsExporting(true);
+
+    try {
+      let dataToExport = [];
+      let filename = "";
+
+      if (exportType === "selected" && selectedIncomes.length > 0) {
+        // Export selected incomes
+        dataToExport = incomesData.filter((income) =>
+          selectedIncomes.includes(income.Id)
+        );
+        filename = `selected_incomes_${
+          new Date().toISOString().split("T")[0]
+        }.csv`;
+      } else if (exportType === "all") {
+        // For exporting all, we might need to fetch all data if pagination is involved
+        if (incomePagination && incomePagination.TotalPages > 1) {
+          // If there are multiple pages, we need to get all data
+          try {
+            const allIncomesResponse = await getAllIncomes?.(); // Assuming this function exists
+            dataToExport = allIncomesResponse?.Data?.$values || incomesData;
+          } catch (error) {
+            console.warn(
+              "Could not fetch all incomes, exporting current page only"
+            );
+            dataToExport = incomesData;
+          }
+        } else {
+          dataToExport = incomesData;
+        }
+        filename = `all_incomes_${new Date().toISOString().split("T")[0]}.csv`;
+      }
+
+      if (dataToExport.length === 0) {
+        alert(translations["No data to export"]);
+        return;
+      }
+
+      const csvContent = convertToCSV(dataToExport);
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(
+        `${translations["Export successful"]} - ${dataToExport.length} ${translations.Items}`
+      );
+    } catch (error) {
+      console.error("Export error:", error);
+      alert(translations["Export failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Search function
   const handleSearchIncomes = async () => {
@@ -347,27 +500,18 @@ const IncomeList = () => {
 
     try {
       setIncomeFilters({
-        searchTerm: '',
-        currency: '',
-        sortBy: 'Id',
+        searchTerm: "",
+        currency: "",
+        sortBy: "Id",
         sortAscending: false,
-        dateFrom: '',
-        dateTo: '',
+        dateFrom: "",
+        dateTo: "",
         isRecurring: null,
       });
       await getIncomes();
     } catch (error) {
       console.error("Error clearing filters:", error);
     }
-  };
-
-  // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export incomes:",
-      selectedIncomes.length > 0 ? selectedIncomes : "all"
-    );
-    alert("Export functionality to be implemented");
   };
 
   // Format currency
@@ -383,13 +527,20 @@ const IncomeList = () => {
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {isCurrency ? formatCurrency(value) : (value || 0)}
+            {isCurrency ? formatCurrency(value) : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -466,21 +617,65 @@ const IncomeList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            <FilledButton
-              isIcon={true}
-              icon={Download}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText={translations.Export}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={handleExport}
-            />
+            <Container className="relative">
+              {selectedIncomes.length > 0 ? (
+                <Container className="flex gap-2">
+                  <FilledButton
+                    isIcon={true}
+                    icon={Download}
+                    iconSize="w-4 h-4"
+                    bgColor="bg-blue-600 hover:bg-blue-700"
+                    textColor="text-white"
+                    rounded="rounded-lg"
+                    buttonText={`${translations["Export Selected"]} (${selectedIncomes.length})`}
+                    height="h-10"
+                    px="px-4"
+                    fontWeight="font-medium"
+                    fontSize="text-sm"
+                    isIconLeft={true}
+                    disabled={isExporting}
+                    onClick={() => handleExport("selected")}
+                  />
+                  <FilledButton
+                    isIcon={true}
+                    icon={Download}
+                    iconSize="w-4 h-4"
+                    bgColor="bg-gray-600 hover:bg-gray-700"
+                    textColor="text-white"
+                    rounded="rounded-lg"
+                    buttonText={translations["Export All"]}
+                    height="h-10"
+                    px="px-4"
+                    fontWeight="font-medium"
+                    fontSize="text-sm"
+                    isIconLeft={true}
+                    disabled={isExporting}
+                    onClick={() => handleExport("all")}
+                  />
+                </Container>
+              ) : (
+                <FilledButton
+                  isIcon={true}
+                  icon={Download}
+                  iconSize="w-4 h-4"
+                  bgColor="bg-gray-600 hover:bg-gray-700"
+                  textColor="text-white"
+                  rounded="rounded-lg"
+                  buttonText={
+                    isExporting
+                      ? translations["Exporting..."]
+                      : translations["Export All"]
+                  }
+                  height="h-10"
+                  px="px-4"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  isIconLeft={true}
+                  disabled={isExporting}
+                  onClick={() => handleExport("all")}
+                />
+              )}
+            </Container>
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -676,7 +871,9 @@ const IncomeList = () => {
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
-                            {income.IsRecurring ? translations.Yes : translations.No}
+                            {income.IsRecurring
+                              ? translations.Yes
+                              : translations.No}
                           </Span>
                         </td>
                         <td className="px-6 py-4">
@@ -725,77 +922,90 @@ const IncomeList = () => {
               </Container>
 
               {/* Pagination */}
-              {incomePagination && incomePagination.TotalPages && incomePagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(incomePagination.CurrentPage - 1) * incomePagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      incomePagination.CurrentPage * incomePagination.PageSize,
-                      incomePagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {incomePagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!incomePagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!incomePagination.HasPreviousPage}
-                      onClick={() => handlePageChange(incomePagination.CurrentPage - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {incomePagination.CurrentPage} / {incomePagination.TotalPages}
+              {incomePagination &&
+                incomePagination.TotalPages &&
+                incomePagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(incomePagination.CurrentPage - 1) *
+                        incomePagination.PageSize +
+                        1}{" "}
+                      -{" "}
+                      {Math.min(
+                        incomePagination.CurrentPage *
+                          incomePagination.PageSize,
+                        incomePagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {incomePagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!incomePagination.HasNextPage}
-                      onClick={() => handlePageChange(incomePagination.CurrentPage + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!incomePagination.HasNextPage}
-                      onClick={() => handlePageChange(incomePagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!incomePagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!incomePagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(incomePagination.CurrentPage - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {incomePagination.CurrentPage} /{" "}
+                        {incomePagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!incomePagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(incomePagination.CurrentPage + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!incomePagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(incomePagination.TotalPages)
+                        }
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -825,8 +1035,10 @@ const IncomeList = () => {
               <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Basic Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Description}
@@ -850,7 +1062,10 @@ const IncomeList = () => {
                       {translations.Amount}
                     </Span>
                     <Span className="text-sm text-green-600 font-medium block mt-1">
-                      {formatCurrency(selectedIncome.Amount, selectedIncome.Currency)}
+                      {formatCurrency(
+                        selectedIncome.Amount,
+                        selectedIncome.Currency
+                      )}
                     </Span>
                   </Container>
 
@@ -866,18 +1081,24 @@ const IncomeList = () => {
 
                 {/* Additional Information */}
                 <Container className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Additional Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
+                    Additional Information
+                  </h3>
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Is Recurring"]}
                     </Span>
-                    <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedIncome.IsRecurring
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}>
-                      {selectedIncome.IsRecurring ? translations.Yes : translations.No}
+                    <Span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                        selectedIncome.IsRecurring
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {selectedIncome.IsRecurring
+                        ? translations.Yes
+                        : translations.No}
                     </Span>
                   </Container>
 
@@ -921,7 +1142,9 @@ const IncomeList = () => {
                         fontWeight="font-medium"
                         fontSize="text-xs"
                         isIconLeft={true}
-                        onClick={() => window.open(selectedIncome.AttachmentPath, '_blank')}
+                        onClick={() =>
+                          window.open(selectedIncome.AttachmentPath, "_blank")
+                        }
                       />
                     </Container>
                   )}
@@ -990,8 +1213,8 @@ const IncomeList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the income{" "}
-              <strong>"{incomeToDelete?.Description}"</strong>{" "}
-              and all associated data.
+              <strong>"{incomeToDelete?.Description}"</strong> and all
+              associated data.
             </Span>
           </Container>
         }
@@ -1055,7 +1278,10 @@ const IncomeList = () => {
                     onChange={(e) =>
                       setFilterOptions({
                         ...filterOptions,
-                        isRecurring: e.target.value === "" ? null : e.target.value === "true",
+                        isRecurring:
+                          e.target.value === ""
+                            ? null
+                            : e.target.value === "true",
                       })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"

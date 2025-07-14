@@ -1,8 +1,23 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from "react";
 
-// Initial state
+// Initial state - Fixed to match API response structure
 const initialState = {
-  services: [],
+  services: {
+    Data: {
+      $values: [],
+    },
+    Pagination: null,
+    Success: false,
+    Message: null,
+    ValidationErrors: {
+      $values: [],
+    },
+  },
   currentService: null,
   loading: false,
   error: null,
@@ -13,126 +28,146 @@ const initialState = {
     TotalItems: 0,
     TotalPages: 0,
     HasPreviousPage: false,
-    HasNextPage: false
+    HasNextPage: false,
   },
   filters: {
-    searchTerm: '',
-    status: '',
-    sortBy: 'Id',
-    sortAscending: false
-  }
+    searchTerm: "",
+    status: "",
+    sortBy: "Id",
+    sortAscending: false,
+  },
 };
 
 // Action types
 const actionTypes = {
-  SET_LOADING: 'SET_LOADING',
-  SET_ERROR: 'SET_ERROR',
-  SET_SERVICES: 'SET_SERVICES',
-  SET_CURRENT_SERVICE: 'SET_CURRENT_SERVICE',
-  SET_PAGINATION: 'SET_PAGINATION',
-  SET_FILTERS: 'SET_FILTERS',
-  ADD_SERVICE: 'ADD_SERVICE',
-  UPDATE_SERVICE: 'UPDATE_SERVICE',
-  DELETE_SERVICE: 'DELETE_SERVICE',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  RESET_STATE: 'RESET_STATE'
+  SET_LOADING: "SET_LOADING",
+  SET_ERROR: "SET_ERROR",
+  SET_SERVICES: "SET_SERVICES",
+  SET_CURRENT_SERVICE: "SET_CURRENT_SERVICE",
+  SET_PAGINATION: "SET_PAGINATION",
+  SET_FILTERS: "SET_FILTERS",
+  ADD_SERVICE: "ADD_SERVICE",
+  UPDATE_SERVICE: "UPDATE_SERVICE",
+  DELETE_SERVICE: "DELETE_SERVICE",
+  CLEAR_ERROR: "CLEAR_ERROR",
+  RESET_STATE: "RESET_STATE",
 };
 
-// Reducer
+// Reducer - Fixed to handle null/undefined Data arrays
 const serviceReducer = (state, action) => {
   switch (action.type) {
     case actionTypes.SET_LOADING:
       return { ...state, loading: action.payload };
-    
+
     case actionTypes.SET_ERROR:
       return { ...state, error: action.payload, loading: false };
-    
+
     case actionTypes.SET_SERVICES:
-      return { 
-        ...state, 
-        services: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        services: action.payload,
+        loading: false,
+        error: null,
       };
-    
+
     case actionTypes.SET_CURRENT_SERVICE:
-      return { 
-        ...state, 
-        currentService: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        currentService: action.payload,
+        loading: false,
+        error: null,
       };
-    
+
     case actionTypes.SET_PAGINATION:
-      return { 
-        ...state, 
-        pagination: { ...state.pagination, ...action.payload } 
+      return {
+        ...state,
+        pagination: { ...state.pagination, ...action.payload },
       };
-    
+
     case actionTypes.SET_FILTERS:
-      return { 
-        ...state, 
-        filters: { ...state.filters, ...action.payload } 
+      return {
+        ...state,
+        filters: { ...state.filters, ...action.payload },
       };
-    
+
     case actionTypes.ADD_SERVICE:
-      // Handle adding service to the nested structure
-      { const currentServicesAdd = state.services?.Data || [];
+      // Fixed: Handle $values array structure
+      const currentServicesAdd = Array.isArray(state.services?.Data?.$values)
+        ? state.services.Data.$values
+        : [];
       const updatedServicesAdd = [...currentServicesAdd, action.payload];
-      return { 
-        ...state, 
+      return {
+        ...state,
         services: {
           ...state.services,
-          Data: updatedServicesAdd 
+          Data: {
+            ...state.services.Data,
+            $values: updatedServicesAdd,
+          },
+          Success: true,
         },
         loading: false,
-        error: null
-      }; }
-    
+        error: null,
+      };
+
     case actionTypes.UPDATE_SERVICE:
-      // Handle updating service in the nested structure
-      { const currentServicesUpdate = state.services?.Data || [];
-      const updatedServicesUpdate = currentServicesUpdate.map(service =>
+      // Fixed: Handle $values array structure
+      const currentServicesUpdate = Array.isArray(state.services?.Data?.$values)
+        ? state.services.Data.$values
+        : [];
+      const updatedServicesUpdate = currentServicesUpdate.map((service) =>
         service.Id === action.payload.Id ? action.payload : service
       );
       return {
         ...state,
         services: {
           ...state.services,
-          Data: updatedServicesUpdate
+          Data: {
+            ...state.services.Data,
+            $values: updatedServicesUpdate,
+          },
+          Success: true,
         },
-        currentService: state.currentService?.Id === action.payload.Id 
-          ? action.payload 
-          : state.currentService,
+        currentService:
+          state.currentService?.Id === action.payload.Id
+            ? action.payload
+            : state.currentService,
         loading: false,
-        error: null
-      }; }
-    
+        error: null,
+      };
+
     case actionTypes.DELETE_SERVICE:
-      // Handle deleting service from the nested structure
-      { const currentServicesDelete = state.services?.Data || [];
+      // Fixed: Handle $values array structure
+      const currentServicesDelete = Array.isArray(state.services?.Data?.$values)
+        ? state.services.Data.$values
+        : [];
       const updatedServicesDelete = currentServicesDelete.filter(
-        service => service.Id !== action.payload
+        (service) => service.Id !== action.payload
       );
       return {
         ...state,
         services: {
           ...state.services,
-          Data: updatedServicesDelete
+          Data: {
+            ...state.services.Data,
+            $values: updatedServicesDelete,
+          },
+          Success: true,
         },
-        currentService: state.currentService?.Id === action.payload 
-          ? null 
-          : state.currentService,
+        currentService:
+          state.currentService?.Id === action.payload
+            ? null
+            : state.currentService,
         loading: false,
-        error: null
-      }; }
-    
+        error: null,
+      };
+
     case actionTypes.CLEAR_ERROR:
       return { ...state, error: null };
-    
+
     case actionTypes.RESET_STATE:
       return initialState;
-    
+
     default:
       return state;
   }
@@ -142,51 +177,55 @@ const serviceReducer = (state, action) => {
 const ServiceContext = createContext();
 
 // API base URL
-const API_BASE_URL = 'https://api.speed-erp.com/api/Service';
+const API_BASE_URL = "https://api.speed-erp.com/api/Service";
 
 // Helper function to get auth token
 const getAuthToken = () => {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
+  return localStorage.getItem("token") || sessionStorage.getItem("token");
 };
 
 // Helper function to make API calls with better error handling
 const makeApiCall = async (url, options = {}) => {
   const token = getAuthToken();
-  
+
   const defaultOptions = {
     headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options.headers
-    }
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
   };
 
   try {
-    console.log('Making API call to:', url); // Debug log
+    console.log("Making API call to:", url);
     const response = await fetch(url, { ...defaultOptions, ...options });
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.Message || `HTTP error! status: ${response.status}`);
+      throw new Error(
+        errorData.Message || `HTTP error! status: ${response.status}`
+      );
     }
-    
+
     const data = await response.json();
-    console.log('API response:', data); // Debug log
+    console.log("API response:", data);
     return data;
   } catch (error) {
-    console.error('API call failed:', error); // Debug log
-    
+    console.error("API call failed:", error);
+
     // Handle specific network errors
-    if (error.message.includes('ERR_NAME_NOT_RESOLVED')) {
-      throw new Error('Cannot connect to API server. Please check your internet connection or contact administrator.');
+    if (error.message.includes("ERR_NAME_NOT_RESOLVED")) {
+      throw new Error(
+        "Cannot connect to API server. Please check your internet connection or contact administrator."
+      );
     }
-    if (error.message.includes('ERR_NETWORK')) {
-      throw new Error('Network error. Please check your internet connection.');
+    if (error.message.includes("ERR_NETWORK")) {
+      throw new Error("Network error. Please check your internet connection.");
     }
-    if (error.message.includes('ERR_CONNECTION_REFUSED')) {
-      throw new Error('Connection refused. The API server might be down.');
+    if (error.message.includes("ERR_CONNECTION_REFUSED")) {
+      throw new Error("Connection refused. The API server might be down.");
     }
-    
+
     throw error;
   }
 };
@@ -211,73 +250,107 @@ export const ServiceProvider = ({ children }) => {
   }, []);
 
   // Get services with pagination and filters
-  const getServices = useCallback(async (params = {}) => {
-    try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      const queryParams = new URLSearchParams();
-      
-      // Only add non-empty parameters
-      if (params.page || state.pagination.PageNumber) {
-        queryParams.append('page', params.page || state.pagination.PageNumber);
-      }
-      if (params.pageSize || state.pagination.PageSize) {
-        queryParams.append('pageSize', params.pageSize || state.pagination.PageSize);
-      }
+  const getServices = useCallback(
+    async (params = {}) => {
+      try {
+        dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-      const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
-      
-      if (response.Success) {
-        // Store the complete response to maintain the API structure
-        dispatch({ type: actionTypes.SET_SERVICES, payload: response });
-        
-        // Handle pagination from response
-        if (response.Pagination) {
-          dispatch({ type: actionTypes.SET_PAGINATION, payload: {
-            CurrentPage: response.Pagination.PageNumber,
-            PageNumber: response.Pagination.PageNumber,
-            PageSize: response.Pagination.PageSize,
-            TotalItems: response.Pagination.TotalItems,
-            TotalPages: response.Pagination.TotalPages,
-            HasPreviousPage: response.Pagination.PageNumber > 1,
-            HasNextPage: response.Pagination.PageNumber < response.Pagination.TotalPages
-          }});
-        } else {
-          // Calculate pagination from data if no pagination info from API
-          const servicesData = response.Data || [];
-          const currentPage = params.page || state.pagination.PageNumber || 1;
-          const pageSize = params.pageSize || state.pagination.PageSize || 10;
-          
-          dispatch({ type: actionTypes.SET_PAGINATION, payload: {
-            CurrentPage: currentPage,
-            PageNumber: currentPage,
-            PageSize: pageSize,
-            TotalItems: servicesData.length,
-            TotalPages: Math.ceil(servicesData.length / pageSize),
-            HasPreviousPage: currentPage > 1,
-            HasNextPage: currentPage < Math.ceil(servicesData.length / pageSize)
-          }});
+        const queryParams = new URLSearchParams();
+
+        // Only add non-empty parameters
+        if (params.page || state.pagination.PageNumber) {
+          queryParams.append(
+            "page",
+            params.page || state.pagination.PageNumber
+          );
         }
-      } else {
-        throw new Error(response.Message || 'Failed to fetch services');
+        if (params.pageSize || state.pagination.PageSize) {
+          queryParams.append(
+            "pageSize",
+            params.pageSize || state.pagination.PageSize
+          );
+        }
+
+        const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
+
+        if (response.Success) {
+          // Ensure Data.$values is always an array
+          const servicesResponse = {
+            ...response,
+            Data: {
+              ...response.Data,
+              $values: Array.isArray(response.Data?.$values)
+                ? response.Data.$values
+                : [],
+            },
+          };
+
+          dispatch({
+            type: actionTypes.SET_SERVICES,
+            payload: servicesResponse,
+          });
+
+          // Handle pagination from response
+          if (response.Pagination) {
+            dispatch({
+              type: actionTypes.SET_PAGINATION,
+              payload: {
+                CurrentPage: response.Pagination.PageNumber,
+                PageNumber: response.Pagination.PageNumber,
+                PageSize: response.Pagination.PageSize,
+                TotalItems: response.Pagination.TotalItems,
+                TotalPages: response.Pagination.TotalPages,
+                HasPreviousPage: response.Pagination.PageNumber > 1,
+                HasNextPage:
+                  response.Pagination.PageNumber <
+                  response.Pagination.TotalPages,
+              },
+            });
+          } else {
+            // Calculate pagination from data if no pagination info from API
+            const servicesData = servicesResponse.Data.$values;
+            const currentPage = params.page || state.pagination.PageNumber || 1;
+            const pageSize = params.pageSize || state.pagination.PageSize || 10;
+
+            dispatch({
+              type: actionTypes.SET_PAGINATION,
+              payload: {
+                CurrentPage: currentPage,
+                PageNumber: currentPage,
+                PageSize: pageSize,
+                TotalItems: servicesData.length,
+                TotalPages: Math.ceil(servicesData.length / pageSize),
+                HasPreviousPage: currentPage > 1,
+                HasNextPage:
+                  currentPage < Math.ceil(servicesData.length / pageSize),
+              },
+            });
+          }
+        } else {
+          throw new Error(response.Message || "Failed to fetch services");
+        }
+      } catch (error) {
+        dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       }
-    } catch (error) {
-      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-    }
-  }, [state.pagination.PageNumber, state.pagination.PageSize, state.filters]);
+    },
+    [state.pagination.PageNumber, state.pagination.PageSize, state.filters]
+  );
 
   // Get single service
   const getService = useCallback(async (id) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}`);
-      
+
       if (response.Success) {
-        dispatch({ type: actionTypes.SET_CURRENT_SERVICE, payload: response.Data });
+        dispatch({
+          type: actionTypes.SET_CURRENT_SERVICE,
+          payload: response.Data,
+        });
         return response.Data;
       } else {
-        throw new Error(response.Message || 'Failed to fetch service');
+        throw new Error(response.Message || "Failed to fetch service");
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
@@ -285,21 +358,21 @@ export const ServiceProvider = ({ children }) => {
     }
   }, []);
 
-  // Create service
+  // Create service - Fixed to handle the API response properly
   const createService = useCallback(async (serviceData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(API_BASE_URL, {
-        method: 'POST',
-        body: JSON.stringify(serviceData)
+        method: "POST",
+        body: JSON.stringify(serviceData),
       });
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.ADD_SERVICE, payload: response.Data });
         return response.Data;
       } else {
-        throw new Error(response.Message || 'Failed to create service');
+        throw new Error(response.Message || "Failed to create service");
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
@@ -311,17 +384,17 @@ export const ServiceProvider = ({ children }) => {
   const updateService = useCallback(async (id, serviceData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(serviceData)
+        method: "PUT",
+        body: JSON.stringify(serviceData),
       });
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.UPDATE_SERVICE, payload: response.Data });
         return response.Data;
       } else {
-        throw new Error(response.Message || 'Failed to update service');
+        throw new Error(response.Message || "Failed to update service");
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
@@ -333,16 +406,16 @@ export const ServiceProvider = ({ children }) => {
   const deleteService = useCallback(async (id) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.DELETE_SERVICE, payload: id });
         return true;
       } else {
-        throw new Error(response.Message || 'Failed to delete service');
+        throw new Error(response.Message || "Failed to delete service");
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
@@ -350,101 +423,163 @@ export const ServiceProvider = ({ children }) => {
     }
   }, []);
 
-  // Search services - client-side filtering since API doesn't support search parameters
-  const searchServices = useCallback(async (searchTerm) => {
-    const updatedFilters = { ...state.filters, searchTerm };
-    dispatch({ type: actionTypes.SET_FILTERS, payload: updatedFilters });
-    
-    // Since the API doesn't support search, we'll filter client-side
-    if (!searchTerm.trim()) {
-      // If empty search, get fresh data
-      await getServices({ page: 1 });
-    } else {
-      // Filter current data
-      const allServices = state.services?.Data || [];
-      const filteredServices = allServices.filter(service =>
-        service.Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.ServiceCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.Description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.DiscountType?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      dispatch({ type: actionTypes.SET_SERVICES, payload: {
-        ...state.services,
-        Data: filteredServices
-      }});
-    }
-  }, [state.filters, state.services, getServices]);
+  // Search services - Fixed to handle array properly
+  const searchServices = useCallback(
+    async (searchTerm) => {
+      const updatedFilters = { ...state.filters, searchTerm };
+      dispatch({ type: actionTypes.SET_FILTERS, payload: updatedFilters });
 
-  // Filter services by status - client-side filtering
-  const filterServicesByStatus = useCallback(async (status) => {
-    const updatedFilters = { ...state.filters, status };
-    dispatch({ type: actionTypes.SET_FILTERS, payload: updatedFilters });
-    
-    if (!status) {
-      // If no status filter, get fresh data
-      await getServices({ page: 1 });
-    } else {
-      // Filter current data by status
-      const allServices = state.services?.Data || [];
-      const filteredServices = allServices.filter(service => service.Status === status);
-      
-      dispatch({ type: actionTypes.SET_SERVICES, payload: {
-        ...state.services,
-        Data: filteredServices
-      }});
-    }
-  }, [state.filters, state.services, getServices]);
+      if (!searchTerm.trim()) {
+        await getServices({ page: 1 });
+      } else {
+        const allServices = Array.isArray(state.services?.Data?.$values)
+          ? state.services.Data.$values
+          : [];
+        const filteredServices = allServices.filter(
+          (service) =>
+            service.Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            service.ServiceCode?.toLowerCase().includes(
+              searchTerm.toLowerCase()
+            ) ||
+            service.Description?.toLowerCase().includes(
+              searchTerm.toLowerCase()
+            ) ||
+            service.DiscountType?.toLowerCase().includes(
+              searchTerm.toLowerCase()
+            )
+        );
 
-  // Sort services - client-side sorting
-  const sortServices = useCallback(async (sortBy, sortAscending = false) => {
-    const updatedFilters = { ...state.filters, sortBy, sortAscending };
-    dispatch({ type: actionTypes.SET_FILTERS, payload: updatedFilters });
-    
-    // Sort current data
-    const servicesToSort = [...(state.services?.Data || [])];
-    servicesToSort.sort((a, b) => {
-      let aValue = a[sortBy];
-      let bValue = b[sortBy];
-      
-      // Handle different data types
-      if (sortBy === 'CreatedAt' || sortBy === 'UpdatedAt') {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
-      } else if (sortBy === 'PurchasePrice' || sortBy === 'UnitPrice' || sortBy === 'MinimumPrice' || sortBy === 'Discount') {
-        aValue = parseFloat(aValue) || 0;
-        bValue = parseFloat(bValue) || 0;
-      } else {
-        aValue = aValue?.toString().toLowerCase() || '';
-        bValue = bValue?.toString().toLowerCase() || '';
+        dispatch({
+          type: actionTypes.SET_SERVICES,
+          payload: {
+            ...state.services,
+            Data: {
+              ...state.services.Data,
+              $values: filteredServices,
+            },
+          },
+        });
       }
-      
-      if (sortAscending) {
-        return aValue > bValue ? 1 : -1;
+    },
+    [state.filters, state.services, getServices]
+  );
+
+  // Filter services by status - Fixed to handle array properly
+  const filterServicesByStatus = useCallback(
+    async (status) => {
+      const updatedFilters = { ...state.filters, status };
+      dispatch({ type: actionTypes.SET_FILTERS, payload: updatedFilters });
+
+      if (!status) {
+        await getServices({ page: 1 });
       } else {
-        return aValue < bValue ? 1 : -1;
+        const allServices = Array.isArray(state.services?.Data?.$values)
+          ? state.services.Data.$values
+          : [];
+        const filteredServices = allServices.filter(
+          (service) => service.Status === status
+        );
+
+        dispatch({
+          type: actionTypes.SET_SERVICES,
+          payload: {
+            ...state.services,
+            Data: {
+              ...state.services.Data,
+              $values: filteredServices,
+            },
+          },
+        });
       }
-    });
-    
-    dispatch({ type: actionTypes.SET_SERVICES, payload: {
-      ...state.services,
-      Data: servicesToSort
-    }});
-  }, [state.filters, state.services]);
+    },
+    [state.filters, state.services, getServices]
+  );
+
+  // Sort services - Fixed to handle array properly
+  const sortServices = useCallback(
+    async (sortBy, sortAscending = false) => {
+      const updatedFilters = { ...state.filters, sortBy, sortAscending };
+      dispatch({ type: actionTypes.SET_FILTERS, payload: updatedFilters });
+
+      const servicesToSort = Array.isArray(state.services?.Data?.$values)
+        ? [...state.services.Data.$values]
+        : [];
+      servicesToSort.sort((a, b) => {
+        let aValue = a[sortBy];
+        let bValue = b[sortBy];
+
+        // Handle different data types
+        if (sortBy === "CreatedAt" || sortBy === "UpdatedAt") {
+          aValue = new Date(aValue);
+          bValue = new Date(bValue);
+        } else if (
+          sortBy === "PurchasePrice" ||
+          sortBy === "UnitPrice" ||
+          sortBy === "MinimumPrice" ||
+          sortBy === "Discount"
+        ) {
+          aValue = parseFloat(aValue) || 0;
+          bValue = parseFloat(bValue) || 0;
+        } else {
+          aValue = aValue?.toString().toLowerCase() || "";
+          bValue = bValue?.toString().toLowerCase() || "";
+        }
+
+        if (sortAscending) {
+          return aValue > bValue ? 1 : -1;
+        } else {
+          return aValue < bValue ? 1 : -1;
+        }
+      });
+
+      dispatch({
+        type: actionTypes.SET_SERVICES,
+        payload: {
+          ...state.services,
+          Data: {
+            ...state.services.Data,
+            $values: servicesToSort,
+          },
+        },
+      });
+    },
+    [state.filters, state.services]
+  );
 
   // Change page
-  const changePage = useCallback(async (page) => {
-    const updatedPagination = { ...state.pagination, CurrentPage: page, PageNumber: page };
-    dispatch({ type: actionTypes.SET_PAGINATION, payload: updatedPagination });
-    await getServices({ page });
-  }, [state.pagination, state.filters, getServices]);
+  const changePage = useCallback(
+    async (page) => {
+      const updatedPagination = {
+        ...state.pagination,
+        CurrentPage: page,
+        PageNumber: page,
+      };
+      dispatch({
+        type: actionTypes.SET_PAGINATION,
+        payload: updatedPagination,
+      });
+      await getServices({ page });
+    },
+    [state.pagination, state.filters, getServices]
+  );
 
   // Change page size
-  const changePageSize = useCallback(async (pageSize) => {
-    const updatedPagination = { ...state.pagination, PageSize: pageSize, CurrentPage: 1, PageNumber: 1 };
-    dispatch({ type: actionTypes.SET_PAGINATION, payload: updatedPagination });
-    await getServices({ pageSize, page: 1 });
-  }, [state.pagination, state.filters, getServices]);
+  const changePageSize = useCallback(
+    async (pageSize) => {
+      const updatedPagination = {
+        ...state.pagination,
+        PageSize: pageSize,
+        CurrentPage: 1,
+        PageNumber: 1,
+      };
+      dispatch({
+        type: actionTypes.SET_PAGINATION,
+        payload: updatedPagination,
+      });
+      await getServices({ pageSize, page: 1 });
+    },
+    [state.pagination, state.filters, getServices]
+  );
 
   // Reset state
   const resetState = useCallback(() => {
@@ -460,7 +595,7 @@ export const ServiceProvider = ({ children }) => {
     error: state.error,
     pagination: state.pagination,
     filters: state.filters,
-    
+
     // Actions
     getServices,
     getService,
@@ -475,13 +610,11 @@ export const ServiceProvider = ({ children }) => {
     setFilters,
     clearError,
     setLoading,
-    resetState
+    resetState,
   };
 
   return (
-    <ServiceContext.Provider value={value}>
-      {children}
-    </ServiceContext.Provider>
+    <ServiceContext.Provider value={value}>{children}</ServiceContext.Provider>
   );
 };
 
@@ -489,7 +622,7 @@ export const ServiceProvider = ({ children }) => {
 export const useService = () => {
   const context = useContext(ServiceContext);
   if (!context) {
-    throw new Error('useService must be used within a ServiceProvider');
+    throw new Error("useService must be used within a ServiceProvider");
   }
   return context;
 };

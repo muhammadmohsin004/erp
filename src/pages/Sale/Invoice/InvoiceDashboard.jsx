@@ -17,9 +17,11 @@ import {
   Users,
   Target,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const InvoiceDashboard = () => {
   // Sample data structure based on your API response
+  const navigate = useNavigate();
   const [invoicesData, setInvoicesData] = useState([
     {
       Id: 11,
@@ -27,16 +29,16 @@ const InvoiceDashboard = () => {
       InvoiceDate: "2025-07-07T15:14:47.74",
       DueDate: "2025-07-22T15:14:47.74",
       Status: "Unpaid",
-      SubTotal: 4000.00,
-      TaxAmount: 20.00,
-      DiscountAmount: 10.00,
-      ShippingAmount: 10.00,
-      TotalAmount: 4020.00,
-      PaidAmount: 10.00,
-      BalanceAmount: 4010.00,
+      SubTotal: 4000.0,
+      TaxAmount: 20.0,
+      DiscountAmount: 10.0,
+      ShippingAmount: 10.0,
+      TotalAmount: 4020.0,
+      PaidAmount: 10.0,
+      BalanceAmount: 4010.0,
       Currency: "EUR",
       BillingName: "Fayyaz",
-      CustomerName: "Fayyaz"
+      CustomerName: "Fayyaz",
     },
     {
       Id: 15,
@@ -44,16 +46,16 @@ const InvoiceDashboard = () => {
       InvoiceDate: "2025-07-08T14:10:15.88",
       DueDate: "2025-07-23T14:10:15.88",
       Status: "Unpaid",
-      SubTotal: 1000.00,
-      TaxAmount: 10.00,
-      DiscountAmount: 10.00,
-      ShippingAmount: 1000.00,
-      TotalAmount: 2000.00,
-      PaidAmount: 10000.00,
-      BalanceAmount: -8000.00,
+      SubTotal: 1000.0,
+      TaxAmount: 10.0,
+      DiscountAmount: 10.0,
+      ShippingAmount: 1000.0,
+      TotalAmount: 2000.0,
+      PaidAmount: 10000.0,
+      BalanceAmount: -8000.0,
       Currency: "EUR",
       BillingName: "Fayyaz",
-      CustomerName: "Fayyaz"
+      CustomerName: "Fayyaz",
     },
     {
       Id: 14,
@@ -61,16 +63,16 @@ const InvoiceDashboard = () => {
       InvoiceDate: "2025-07-08T08:15:38.619",
       DueDate: "2025-07-23T08:15:38.619",
       Status: "Paid",
-      SubTotal: 199329.00,
-      TaxAmount: 70.00,
-      DiscountAmount: 2.00,
-      ShippingAmount: 53.00,
-      TotalAmount: 199450.00,
-      PaidAmount: 100.00,
-      BalanceAmount: 199350.00,
+      SubTotal: 199329.0,
+      TaxAmount: 70.0,
+      DiscountAmount: 2.0,
+      ShippingAmount: 53.0,
+      TotalAmount: 199450.0,
+      PaidAmount: 100.0,
+      BalanceAmount: 199350.0,
       Currency: "USD",
       BillingName: "Moke Dev",
-      CustomerName: "Moke Dev"
+      CustomerName: "Moke Dev",
     },
     {
       Id: 16,
@@ -78,17 +80,17 @@ const InvoiceDashboard = () => {
       InvoiceDate: "2025-07-10T00:00:00",
       DueDate: "2025-07-12T00:00:00",
       Status: "Overdue",
-      SubTotal: 1196.00,
-      TaxAmount: 538.20,
-      DiscountAmount: 0.00,
-      ShippingAmount: 0.00,
-      TotalAmount: 1734.20,
-      PaidAmount: 0.00,
-      BalanceAmount: 0.00,
+      SubTotal: 1196.0,
+      TaxAmount: 538.2,
+      DiscountAmount: 0.0,
+      ShippingAmount: 0.0,
+      TotalAmount: 1734.2,
+      PaidAmount: 0.0,
+      BalanceAmount: 0.0,
       Currency: "USD",
       BillingName: "Unknown Customer",
-      CustomerName: "Unknown Customer"
-    }
+      CustomerName: "Unknown Customer",
+    },
   ]);
 
   const [language, setLanguage] = useState("en");
@@ -110,35 +112,38 @@ const InvoiceDashboard = () => {
       paid: 0,
       overdue: 0,
       unpaid: 0,
-      cancelled: 0
-    }
+      cancelled: 0,
+    },
   });
 
   // Translations
   const translations = {
-    "Invoice Dashboard": language === "ar" ? "لوحة تحكم الفواتير" : "Invoice Dashboard",
+    "Invoice Dashboard":
+      language === "ar" ? "لوحة تحكم الفواتير" : "Invoice Dashboard",
     "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
     "View All": language === "ar" ? "عرض الكل" : "View All",
     "Total Revenue": language === "ar" ? "إجمالي الإيرادات" : "Total Revenue",
     "Total Invoices": language === "ar" ? "إجمالي الفواتير" : "Total Invoices",
     "Paid Invoices": language === "ar" ? "الفواتير المدفوعة" : "Paid Invoices",
-    "Outstanding": language === "ar" ? "المستحقة" : "Outstanding",
-    "Overdue": language === "ar" ? "المتأخرة" : "Overdue",
-    "Draft": language === "ar" ? "المسودات" : "Draft",
+    Outstanding: language === "ar" ? "المستحقة" : "Outstanding",
+    Overdue: language === "ar" ? "المتأخرة" : "Overdue",
+    Draft: language === "ar" ? "المسودات" : "Draft",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
-    "Recent Invoices": language === "ar" ? "الفواتير الحديثة" : "Recent Invoices",
+    "Recent Invoices":
+      language === "ar" ? "الفواتير الحديثة" : "Recent Invoices",
     "Invoice Status": language === "ar" ? "حالة الفواتير" : "Invoice Status",
     "Revenue Trend": language === "ar" ? "اتجاه الإيرادات" : "Revenue Trend",
-    "vs last month": language === "ar" ? "مقارنة بالشهر الماضي" : "vs last month",
+    "vs last month":
+      language === "ar" ? "مقارنة بالشهر الماضي" : "vs last month",
     "Average Invoice": language === "ar" ? "متوسط الفاتورة" : "Average Invoice",
     "Collection Rate": language === "ar" ? "معدل التحصيل" : "Collection Rate",
-    "Growth": language === "ar" ? "النمو" : "Growth",
-    "Paid": language === "ar" ? "مدفوعة" : "Paid",
-    "Unpaid": language === "ar" ? "غير مدفوعة" : "Unpaid",
-    "Sent": language === "ar" ? "مرسلة" : "Sent",
-    "Cancelled": language === "ar" ? "ملغاة" : "Cancelled",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit"
+    Growth: language === "ar" ? "النمو" : "Growth",
+    Paid: language === "ar" ? "مدفوعة" : "Paid",
+    Unpaid: language === "ar" ? "غير مدفوعة" : "Unpaid",
+    Sent: language === "ar" ? "مرسلة" : "Sent",
+    Cancelled: language === "ar" ? "ملغاة" : "Cancelled",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
   };
 
   // Calculate dashboard statistics
@@ -161,10 +166,10 @@ const InvoiceDashboard = () => {
       paid: 0,
       overdue: 0,
       unpaid: 0,
-      cancelled: 0
+      cancelled: 0,
     };
 
-    invoicesData.forEach(invoice => {
+    invoicesData.forEach((invoice) => {
       const amount = parseFloat(invoice.TotalAmount) || 0;
       const invoiceDate = new Date(invoice.InvoiceDate);
       const invoiceMonth = invoiceDate.getMonth();
@@ -174,7 +179,7 @@ const InvoiceDashboard = () => {
       totalRevenue += amount;
 
       // Status breakdown
-      const status = invoice.Status?.toLowerCase() || 'draft';
+      const status = invoice.Status?.toLowerCase() || "draft";
       if (statusBreakdown.hasOwnProperty(status)) {
         statusBreakdown[status] += 1;
       } else {
@@ -182,17 +187,17 @@ const InvoiceDashboard = () => {
       }
 
       // Paid invoices count
-      if (status === 'paid') {
+      if (status === "paid") {
         paidInvoices += 1;
       }
 
       // Outstanding amount (unpaid + overdue)
-      if (status === 'unpaid') {
+      if (status === "unpaid") {
         outstandingAmount += amount;
       }
 
       // Overdue amount
-      if (status === 'overdue') {
+      if (status === "overdue") {
         overdueAmount += amount;
         outstandingAmount += amount; // Overdue is also outstanding
       }
@@ -213,8 +218,10 @@ const InvoiceDashboard = () => {
       .slice(0, 5);
 
     // Calculate derived metrics
-    const averageInvoice = invoicesData.length > 0 ? totalRevenue / invoicesData.length : 0;
-    const collectionRate = invoicesData.length > 0 ? (paidInvoices / invoicesData.length) * 100 : 0;
+    const averageInvoice =
+      invoicesData.length > 0 ? totalRevenue / invoicesData.length : 0;
+    const collectionRate =
+      invoicesData.length > 0 ? (paidInvoices / invoicesData.length) * 100 : 0;
 
     setDashboardData({
       totalRevenue,
@@ -228,7 +235,7 @@ const InvoiceDashboard = () => {
       averageInvoice,
       collectionRate,
       recentInvoices,
-      statusBreakdown
+      statusBreakdown,
     });
   };
 
@@ -238,64 +245,85 @@ const InvoiceDashboard = () => {
   }, [invoicesData]);
 
   // Utility functions
-  const formatCurrency = (value, currency = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+  const formatCurrency = (value, currency = "USD") => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency,
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
     }).format(value || 0);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'draft':
-        return 'bg-gray-100 text-gray-800';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800';
-      case 'paid':
-        return 'bg-green-100 text-green-800';
-      case 'overdue':
-        return 'bg-red-100 text-red-800';
-      case 'unpaid':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-gray-100 text-gray-800';
+      case "draft":
+        return "bg-gray-100 text-gray-800";
+      case "sent":
+        return "bg-blue-100 text-blue-800";
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "overdue":
+        return "bg-red-100 text-red-800";
+      case "unpaid":
+        return "bg-yellow-100 text-yellow-800";
+      case "cancelled":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const calculateGrowth = () => {
     if (dashboardData.lastMonthRevenue === 0) return 0;
-    return ((dashboardData.thisMonthRevenue - dashboardData.lastMonthRevenue) / dashboardData.lastMonthRevenue) * 100;
+    return (
+      ((dashboardData.thisMonthRevenue - dashboardData.lastMonthRevenue) /
+        dashboardData.lastMonthRevenue) *
+      100
+    );
   };
 
   // Dashboard Card Component
-  const DashboardCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false, growth = null, subtitle = null }) => (
+  const DashboardCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+    growth = null,
+    subtitle = null,
+  }) => (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-4">
         <div className={`${bgColor} p-3 rounded-lg`}>
           <Icon className={`w-6 h-6 ${iconColor}`} />
         </div>
         {growth !== null && (
-          <div className={`flex items-center gap-1 ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {growth >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          <div
+            className={`flex items-center gap-1 ${
+              growth >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {growth >= 0 ? (
+              <TrendingUp className="w-4 h-4" />
+            ) : (
+              <TrendingDown className="w-4 h-4" />
+            )}
             <span className="text-sm font-medium">
               {Math.abs(growth).toFixed(1)}%
             </span>
           </div>
         )}
       </div>
-      
+
       <div>
         <span className="text-2xl font-bold text-gray-900 block">
           {isCurrency ? formatCurrency(value) : value}
@@ -309,8 +337,14 @@ const InvoiceDashboard = () => {
   );
 
   // Quick Action Card Component
-  const QuickActionCard = ({ title, description, icon: Icon, bgColor, onClick }) => (
-    <div 
+  const QuickActionCard = ({
+    title,
+    description,
+    icon: Icon,
+    bgColor,
+    onClick,
+  }) => (
+    <div
       className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer hover:border-blue-300"
       onClick={onClick}
     >
@@ -342,19 +376,25 @@ const InvoiceDashboard = () => {
             </span>
           </div>
           <div className="flex gap-3 mt-4 lg:mt-0">
-            <button className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button
+              onClick={() => navigate("/admin/invoices")}
+              className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
               <Eye className="w-4 h-4" />
               {translations["View All"]}
             </button>
-            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button
+              onClick={() => navigate("/admin/new-invoice")}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
               <Plus className="w-4 h-4" />
               {translations["Create Invoice"]}
             </button>
           </div>
         </div>
 
-        {/* Language Toggle */}
-       
+        {/* Language Togglee */}
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <QuickActionCard
@@ -453,26 +493,42 @@ const InvoiceDashboard = () => {
                 {translations["Invoice Status"]}
               </h3>
             </div>
-            
+
             <div className="space-y-4">
-              {Object.entries(dashboardData.statusBreakdown).map(([status, count]) => (
-                <div key={status} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      status === 'paid' ? 'bg-green-500' :
-                      status === 'sent' ? 'bg-blue-500' :
-                      status === 'overdue' ? 'bg-red-500' :
-                      status === 'unpaid' ? 'bg-yellow-500' :
-                      status === 'draft' ? 'bg-gray-500' :
-                      'bg-gray-400'
-                    }`}></div>
-                    <span className="text-sm font-medium text-gray-700 capitalize">
-                      {translations[status.charAt(0).toUpperCase() + status.slice(1)] || status}
+              {Object.entries(dashboardData.statusBreakdown).map(
+                ([status, count]) => (
+                  <div
+                    key={status}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          status === "paid"
+                            ? "bg-green-500"
+                            : status === "sent"
+                            ? "bg-blue-500"
+                            : status === "overdue"
+                            ? "bg-red-500"
+                            : status === "unpaid"
+                            ? "bg-yellow-500"
+                            : status === "draft"
+                            ? "bg-gray-500"
+                            : "bg-gray-400"
+                        }`}
+                      ></div>
+                      <span className="text-sm font-medium text-gray-700 capitalize">
+                        {translations[
+                          status.charAt(0).toUpperCase() + status.slice(1)
+                        ] || status}
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">
+                      {count}
                     </span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">{count}</span>
-                </div>
-              ))}
+                )
+              )}
             </div>
           </div>
 
@@ -502,7 +558,9 @@ const InvoiceDashboard = () => {
                         {invoice.InvoiceNumber}
                       </span>
                       <span className="text-xs text-gray-500 block">
-                        {invoice.CustomerName || invoice.BillingName || "Unknown Customer"}
+                        {invoice.CustomerName ||
+                          invoice.BillingName ||
+                          "Unknown Customer"}
                       </span>
                     </div>
                   </div>
@@ -518,7 +576,9 @@ const InvoiceDashboard = () => {
                     </div>
 
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(invoice.Status)}`}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                        invoice.Status
+                      )}`}
                     >
                       {translations[invoice.Status] || invoice.Status}
                     </span>
@@ -560,7 +620,9 @@ const InvoiceDashboard = () => {
               <span className="text-3xl font-bold text-blue-600 block">
                 {formatCurrency(dashboardData.thisMonthRevenue)}
               </span>
-              <span className="text-gray-500 text-sm">{translations["This Month"]}</span>
+              <span className="text-gray-500 text-sm">
+                {translations["This Month"]}
+              </span>
             </div>
             <div className="text-center">
               <span className="text-3xl font-bold text-gray-600 block">
@@ -572,10 +634,18 @@ const InvoiceDashboard = () => {
 
           {growth !== 0 && (
             <div className="mt-4 text-center">
-              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                growth >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-                {growth >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+              <div
+                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  growth >= 0
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {growth >= 0 ? (
+                  <TrendingUp className="w-4 h-4" />
+                ) : (
+                  <TrendingDown className="w-4 h-4" />
+                )}
                 {Math.abs(growth).toFixed(1)}% {translations.Growth}
               </div>
             </div>

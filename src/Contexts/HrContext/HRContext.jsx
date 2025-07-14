@@ -339,7 +339,8 @@ export const HRProvider = ({ children }) => {
 
       const response = await apiPost(ADD_EMPLOYEE, formData);
 
-      if (response.data?.Status === 200 && response.data?.Data?.Id) {
+      // Fix: Check for Success field instead of Status
+      if (response.data?.Success === true && response.data?.Data?.Id) {
         dispatch({
           type: actionTypes.ADD_EMPLOYEE,
           payload: response.data.Data,
@@ -352,6 +353,8 @@ export const HRProvider = ({ children }) => {
       setError(error.message);
       console.error("Error creating employee:", error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false); // Don't forget to set loading to false
     }
   }, []);
 
@@ -379,7 +382,8 @@ export const HRProvider = ({ children }) => {
         formData
       );
 
-      if (response.data?.Status === 200) {
+      // Fix: Check for Success field instead of Status
+      if (response.data?.Success === true) {
         dispatch({
           type: actionTypes.UPDATE_EMPLOYEE,
           payload: response.data.Data,
@@ -392,6 +396,8 @@ export const HRProvider = ({ children }) => {
       setError(error.message);
       console.error("Error updating employee:", error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false); // Don't forget to set loading to false
     }
   }, []);
 

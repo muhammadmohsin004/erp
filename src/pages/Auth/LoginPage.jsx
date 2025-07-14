@@ -300,43 +300,53 @@ function LoginPage() {
           localStorage.removeItem("rememberedCredentials");
         }
 
+        // Show success toast
+        toast.success("Login successful! Redirecting...", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
         // Check for password change requirement
         if (authResponse.RequirePasswordChange) {
-          toast.info("Password change required");
-          navigate("/change-password", { replace: true });
+          setTimeout(() => {
+            navigate("/change-password", { replace: true });
+          }, 2000);
           return;
         }
 
         // Navigate based on role
         const redirectPath = getRedirectPath(authResponse.Role);
-        toast.success("Login successful, navigating to:", redirectPath);
 
-        // Small delay to ensure localStorage is written
+        // Small delay to allow toast to be seen before redirect
         setTimeout(() => {
           navigate(redirectPath, { replace: true });
-        }, 100);
+        }, 2000);
       } else {
         // Login failed
         const errorMessage =
           authResponse?.Message ||
           authResponse?.message ||
           "Login failed. Please check your credentials.";
-        toast.error("Login failed:", errorMessage);
+        toast.error(errorMessage);
         setFormError(errorMessage);
       }
     } catch (err) {
-      toast.error("Login error:", err);
       const errorMessage =
         err.response?.data?.Message ||
         err.response?.data?.message ||
         err.message ||
         "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
       setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />

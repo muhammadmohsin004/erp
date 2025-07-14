@@ -89,7 +89,8 @@ const WarehouseList = () => {
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Warehouse Details": language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
+    "Warehouse Details":
+      language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     Description: language === "ar" ? "الوصف" : "Description",
     Email: language === "ar" ? "البريد الإلكتروني" : "Email",
@@ -178,13 +179,18 @@ const WarehouseList = () => {
     if (Array.isArray(warehousesData) && warehousesData.length > 0) {
       const stats = {
         totalWarehouses: pagination?.TotalItems || warehousesData.length,
-        activeWarehouses: warehousesData.filter(w => w.Status === "Active").length,
-        primaryWarehouses: warehousesData.filter(w => w.Primary === "1" || w.Primary === "Yes").length,
-        warehousesThisMonth: warehousesData.filter(w => {
+        activeWarehouses: warehousesData.filter((w) => w.Status === "Active")
+          .length,
+        primaryWarehouses: warehousesData.filter(
+          (w) => w.Primary === "1" || w.Primary === "Yes"
+        ).length,
+        warehousesThisMonth: warehousesData.filter((w) => {
           const createdDate = new Date(w.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
       };
       setStatistics(stats);
@@ -591,6 +597,11 @@ const WarehouseList = () => {
               fontSize="text-sm"
               isIconLeft={true}
               onClick={handleExport}
+              disabled={
+                isExporting ||
+                !Array.isArray(warehousesData) ||
+                warehousesData.length === 0
+              }
             />
             <FilledButton
               isIcon={true}
@@ -742,7 +753,9 @@ const WarehouseList = () => {
                           <input
                             type="checkbox"
                             checked={selectedWarehouses.includes(warehouse.Id)}
-                            onChange={() => handleWarehouseSelection(warehouse.Id)}
+                            onChange={() =>
+                              handleWarehouseSelection(warehouse.Id)
+                            }
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -752,7 +765,8 @@ const WarehouseList = () => {
                               <Span className="text-sm font-medium text-gray-900">
                                 {warehouse.Name || "N/A"}
                               </Span>
-                              {(warehouse.Primary === "1" || warehouse.Primary === "Yes") && (
+                              {(warehouse.Primary === "1" ||
+                                warehouse.Primary === "Yes") && (
                                 <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                   {translations.Primary}
                                 </Span>
@@ -805,20 +819,31 @@ const WarehouseList = () => {
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {warehouse.Address || warehouse.ShippingAddress || warehouse.City ? (
+                          {warehouse.Address ||
+                          warehouse.ShippingAddress ||
+                          warehouse.City ? (
                             <Container className="flex items-start">
                               <MapPin className="w-4 h-4 text-gray-400 mr-1 mt-0.5 flex-shrink-0" />
                               <Container className="text-sm text-gray-900">
                                 {warehouse.Address && (
-                                  <Span className="block">{warehouse.Address}</Span>
-                                )}
-                                {warehouse.ShippingAddress && warehouse.ShippingAddress !== warehouse.Address && (
-                                  <Span className="block text-gray-600">
-                                    Ship: {warehouse.ShippingAddress}
+                                  <Span className="block">
+                                    {warehouse.Address}
                                   </Span>
                                 )}
+                                {warehouse.ShippingAddress &&
+                                  warehouse.ShippingAddress !==
+                                    warehouse.Address && (
+                                    <Span className="block text-gray-600">
+                                      Ship: {warehouse.ShippingAddress}
+                                    </Span>
+                                  )}
                                 <Span className="block">
-                                  {[warehouse.City, warehouse.State, warehouse.PostalCode, warehouse.Country]
+                                  {[
+                                    warehouse.City,
+                                    warehouse.State,
+                                    warehouse.PostalCode,
+                                    warehouse.Country,
+                                  ]
                                     .filter(Boolean)
                                     .join(", ")}
                                 </Span>
@@ -886,7 +911,9 @@ const WarehouseList = () => {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteWarehouse(warehouse.Id)}
+                              onClick={() =>
+                                handleDeleteWarehouse(warehouse.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -938,7 +965,9 @@ const WarehouseList = () => {
                       height="h-8"
                       width="w-8"
                       disabled={pagination.CurrentPage === 1}
-                      onClick={() => handlePageChange(pagination.CurrentPage - 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.CurrentPage - 1)
+                      }
                     />
                     <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
                       {pagination.CurrentPage} / {pagination.TotalPages}
@@ -953,8 +982,12 @@ const WarehouseList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.CurrentPage === pagination.TotalPages}
-                      onClick={() => handlePageChange(pagination.CurrentPage + 1)}
+                      disabled={
+                        pagination.CurrentPage === pagination.TotalPages
+                      }
+                      onClick={() =>
+                        handlePageChange(pagination.CurrentPage + 1)
+                      }
                     />
                     <FilledButton
                       isIcon={true}
@@ -966,7 +999,9 @@ const WarehouseList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.CurrentPage === pagination.TotalPages}
+                      disabled={
+                        pagination.CurrentPage === pagination.TotalPages
+                      }
                       onClick={() => handlePageChange(pagination.TotalPages)}
                     />
                   </Container>
@@ -1028,11 +1063,13 @@ const WarehouseList = () => {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {translations[selectedWarehouse.Status] || selectedWarehouse.Status}
+                    {translations[selectedWarehouse.Status] ||
+                      selectedWarehouse.Status}
                   </Span>
                 </Container>
 
-                {(selectedWarehouse.Primary === "1" || selectedWarehouse.Primary === "Yes") && (
+                {(selectedWarehouse.Primary === "1" ||
+                  selectedWarehouse.Primary === "Yes") && (
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       Type
@@ -1122,17 +1159,18 @@ const WarehouseList = () => {
                   </Container>
                 )}
 
-                {selectedWarehouse.ShippingAddress && 
-                 selectedWarehouse.ShippingAddress !== selectedWarehouse.Address && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["Shipping Address"]}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedWarehouse.ShippingAddress}
-                    </Span>
-                  </Container>
-                )}
+                {selectedWarehouse.ShippingAddress &&
+                  selectedWarehouse.ShippingAddress !==
+                    selectedWarehouse.Address && (
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations["Shipping Address"]}
+                      </Span>
+                      <Span className="text-sm text-gray-900 block mt-1">
+                        {selectedWarehouse.ShippingAddress}
+                      </Span>
+                    </Container>
+                  )}
 
                 <Container>
                   <Span className="text-sm font-medium text-gray-500 mb-2 block">
@@ -1150,7 +1188,9 @@ const WarehouseList = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {selectedWarehouse.ViewPermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.ViewPermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                     <Container className="flex items-center justify-between">
@@ -1164,7 +1204,9 @@ const WarehouseList = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {selectedWarehouse.CreateInvoicePermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.CreateInvoicePermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                     <Container className="flex items-center justify-between">
@@ -1178,7 +1220,9 @@ const WarehouseList = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {selectedWarehouse.UpdateStockPermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.UpdateStockPermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                   </Container>
@@ -1190,13 +1234,17 @@ const WarehouseList = () => {
                   <Container>
                     Created:{" "}
                     {selectedWarehouse.CreatedAt
-                      ? new Date(selectedWarehouse.CreatedAt).toLocaleDateString()
+                      ? new Date(
+                          selectedWarehouse.CreatedAt
+                        ).toLocaleDateString()
                       : "N/A"}
                   </Container>
                   {selectedWarehouse.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedWarehouse.UpdatedAt).toLocaleDateString()}
+                      {new Date(
+                        selectedWarehouse.UpdatedAt
+                      ).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -1233,8 +1281,8 @@ const WarehouseList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the warehouse{" "}
-              <strong>"{warehouseToDelete?.Name}"</strong>{" "}
-              and all associated data.
+              <strong>"{warehouseToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }
