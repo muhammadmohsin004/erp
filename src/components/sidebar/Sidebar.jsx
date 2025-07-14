@@ -70,9 +70,8 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           />
         ) : null}
         <span
-          className={`text-white font-bold text-sm ${
-            userData.LogoUrl ? "hidden" : "flex"
-          }`}
+          className={`text-white font-bold text-sm ${userData.LogoUrl ? "hidden" : "flex"
+            }`}
           style={{ display: userData.LogoUrl ? "none" : "flex" }}
         >
           {companyInitial}
@@ -91,29 +90,25 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         className={({ isActive }) => {
           const isCurrentActive =
             isActive || isPathActive(item.path, location.pathname);
-          return `flex items-center px-4 py-3 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${
-            isCurrentActive
+          return `flex items-center px-4 py-3 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 group relative ${isCurrentActive
               ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
               : "text-gray-700 hover:text-black"
-          } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
+            } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
         }}
       >
         <item.icon
-          className={`w-5 h-5 flex-shrink-0 ${
-            currentLanguage === "ar" ? "ml-3" : "mr-3"
-          } ${
-            isPathActive(item.path, location.pathname)
+          className={`w-5 h-5 flex-shrink-0 ${currentLanguage === "ar" ? "ml-3" : "mr-3"
+            } ${isPathActive(item.path, location.pathname)
               ? "text-white"
               : "group-hover:text-black"
-          }`}
+            }`}
         />
         {isOpen && (
           <span
-            className={`truncate ${
-              isPathActive(item.path, location.pathname)
+            className={`truncate ${isPathActive(item.path, location.pathname)
                 ? "text-white"
                 : "group-hover:text-black"
-            }`}
+              }`}
           >
             {item.label}
           </span>
@@ -122,17 +117,14 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         {/* Tooltip for collapsed sidebar */}
         {!isOpen && !isMobile && (
           <div
-            className={`absolute ${
-              currentLanguage === "ar" ? "right-16" : "left-16"
-            } top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none`}
+            className={`absolute ${currentLanguage === "ar" ? "right-16" : "left-16"
+              } top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none`}
           >
             {item.label}
             <div
-              className={`absolute ${
-                currentLanguage === "ar" ? "right-0" : "left-0"
-              } top-1/2 transform -translate-y-1/2 ${
-                currentLanguage === "ar" ? "translate-x-1" : "-translate-x-1"
-              } w-2 h-2 bg-gray-900 rotate-45`}
+              className={`absolute ${currentLanguage === "ar" ? "right-0" : "left-0 add-scroll"
+                } top-1/2 transform -translate-y-1/2 ${currentLanguage === "ar" ? "translate-x-1" : "-translate-x-1"
+                } w-2 h-2 bg-gray-900 rotate-45`}
             ></div>
           </div>
         )}
@@ -160,17 +152,15 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             className={({ isActive }) => {
               const isCurrentActive =
                 isActive || isPathActive(subItem.path, location.pathname);
-              return `flex items-center px-8 py-2 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 ${
-                isCurrentActive
+              return `flex items-center px-8 py-2 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 ${isCurrentActive
                   ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                   : "text-gray-600 hover:text-black"
-              } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
+                } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
             }}
           >
             <subItem.icon
-              className={`w-4 h-4 flex-shrink-0 ${
-                currentLanguage === "ar" ? "ml-2" : "mr-2"
-              }`}
+              className={`w-4 h-4 flex-shrink-0 ${currentLanguage === "ar" ? "ml-2" : "mr-2"
+                }`}
             />
             <span className="truncate">{subItem.label}</span>
           </NavLink>
@@ -184,9 +174,8 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
   const renderCollapsedSubmenu = useCallback(
     (item) => (
       <div
-        className={`absolute ${
-          currentLanguage === "ar" ? "right-16" : "left-16"
-        } top-0 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto min-w-48`}
+        className={`absolute ${currentLanguage === "ar" ? "right-16" : "left-16"
+          } top-0 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none group-hover:pointer-events-auto min-w-48`}
       >
         <div className="p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
           <span className="text-sm font-medium text-gray-700">
@@ -201,21 +190,17 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             className={({ isActive }) => {
               const isCurrentActive =
                 isActive || isPathActive(subItem.path, location.pathname);
-              return `flex items-center px-3 py-2 text-sm transition-all duration-200 ${
-                isCurrentActive
+              return `flex items-center px-3 py-2 text-sm transition-all duration-200 ${isCurrentActive
                   ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white"
                   : "text-gray-600 hover:text-black"
-              } ${currentLanguage === "ar" ? "flex-row-reverse" : ""} ${
-                subIndex === 0 ? "rounded-t-none" : ""
-              } ${
-                subIndex === item.submenuItems.length - 1 ? "rounded-b-lg" : ""
-              }`;
+                } ${currentLanguage === "ar" ? "flex-row-reverse" : ""} ${subIndex === 0 ? "rounded-t-none" : ""
+                } ${subIndex === item.submenuItems.length - 1 ? "rounded-b-lg" : ""
+                }`;
             }}
           >
             <subItem.icon
-              className={`w-4 h-4 flex-shrink-0 ${
-                currentLanguage === "ar" ? "ml-2" : "mr-2"
-              }`}
+              className={`w-4 h-4 flex-shrink-0 ${currentLanguage === "ar" ? "ml-2" : "mr-2"
+                }`}
             />
             <span className="truncate">{subItem.label}</span>
           </NavLink>
@@ -238,44 +223,39 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         <div key={index}>
           {/* Main menu item with submenu */}
           <div
-            className={`flex items-center px-4 py-3 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${
-              hasActiveSubmenu
+            className={`flex items-center px-4 py-3 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 cursor-pointer group relative ${hasActiveSubmenu
                 ? "bg-gradient-to-r from-purple-500 to-purple-600 border-r-4 border-purple-400 shadow-lg"
                 : "text-gray-700"
-            } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`}
+              } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`}
             onClick={() => toggleSubmenu(item.key)}
           >
             <item.icon
-              className={`w-5 h-5 flex-shrink-0 ${
-                hasActiveSubmenu
+              className={`w-5 h-5 flex-shrink-0 ${hasActiveSubmenu
                   ? "text-white"
                   : "text-gray-700 group-hover:text-black"
-              } ${currentLanguage === "ar" ? "ml-3" : "mr-3"}`}
+                } ${currentLanguage === "ar" ? "ml-3" : "mr-3"}`}
             />
             {isOpen && (
               <>
                 <span
-                  className={`truncate flex-1 ${
-                    hasActiveSubmenu ? "text-white" : "group-hover:text-black"
-                  }`}
+                  className={`truncate flex-1 ${hasActiveSubmenu ? "text-white" : "group-hover:text-black"
+                    }`}
                 >
                   {item.label}
                 </span>
                 {isExpanded ? (
                   <ChevronDown
-                    className={`w-4 h-4 ${
-                      hasActiveSubmenu
+                    className={`w-4 h-4 ${hasActiveSubmenu
                         ? "text-white"
                         : "text-gray-700 group-hover:text-black"
-                    } ${currentLanguage === "ar" ? "mr-2" : "ml-2"}`}
+                      } ${currentLanguage === "ar" ? "mr-2" : "ml-2"}`}
                   />
                 ) : (
                   <ChevronRight
-                    className={`w-4 h-4 ${
-                      hasActiveSubmenu
+                    className={`w-4 h-4 ${hasActiveSubmenu
                         ? "text-white"
                         : "text-gray-700 group-hover:text-black"
-                    } ${currentLanguage === "ar" ? "mr-2" : "ml-2"}`}
+                      } ${currentLanguage === "ar" ? "mr-2" : "ml-2"}`}
                   />
                 )}
               </>
@@ -284,19 +264,16 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             {/* Tooltip for collapsed sidebar */}
             {!isOpen && !isMobile && (
               <div
-                className={`absolute ${
-                  currentLanguage === "ar" ? "right-16" : "left-16"
-                } top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none`}
+                className={`absolute ${currentLanguage === "ar" ? "right-16" : "left-16"
+                  } top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none`}
               >
                 {item.label}
                 <div
-                  className={`absolute ${
-                    currentLanguage === "ar" ? "right-0" : "left-0"
-                  } top-1/2 transform -translate-y-1/2 ${
-                    currentLanguage === "ar"
+                  className={`absolute ${currentLanguage === "ar" ? "right-0" : "left-0"
+                    } top-1/2 transform -translate-y-1/2 ${currentLanguage === "ar"
                       ? "translate-x-1"
                       : "-translate-x-1"
-                  } w-2 h-2 bg-gray-900 rotate-45`}
+                    } w-2 h-2 bg-gray-900 rotate-45`}
                 ></div>
               </div>
             )}
@@ -343,24 +320,21 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - FIXED HEIGHT AND FLEX LAYOUT */}
       <div
-        className={`fixed ${
-          currentLanguage === "ar" ? "right-0" : "left-0"
-        } top-0 h-full bg-white shadow-2xl border-r border-gray-200 z-50 transition-all duration-300 ease-in-out ${
-          isOpen ? "w-60" : "w-16"
-        } ${
-          isMobile
+        className={`fixed ${currentLanguage === "ar" ? "right-0" : "left-0"
+          } top-0 h-full bg-white shadow-2xl border-r border-gray-200 z-50 transition-all duration-300 ease-in-out ${isOpen ? "w-60" : "w-16"
+          } ${isMobile
             ? isOpen
               ? "translate-x-0"
               : currentLanguage === "ar"
-              ? "translate-x-full"
-              : "-translate-x-full"
+                ? "translate-x-full"
+                : "-translate-x-full"
             : "translate-x-0"
-        } overflow-hidden`}
+          } overflow-hidden flex flex-col`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700">
+        {/* Header - FIXED HEIGHT */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700 flex-shrink-0">
           {isOpen ? (
             <div className="flex items-center">
               {CompanyLogo}
@@ -396,9 +370,9 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           )}
         </div>
 
-        {/* User Info */}
+        {/* User Info - FIXED HEIGHT */}
         {isOpen && (
-          <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+          <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mr-3 shadow-lg">
                 <User className="w-5 h-5 text-white" />
@@ -408,10 +382,10 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
                   {userData?.F_Name && userData?.L_Name
                     ? `${userData.F_Name} ${userData.L_Name}`
                     : userData?.F_Name ||
-                      userData?.Name ||
-                      userInfo?.F_Name ||
-                      userInfo?.Name ||
-                      "User"}
+                    userData?.Name ||
+                    userInfo?.F_Name ||
+                    userInfo?.Name ||
+                    "User"}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {userData?.Email || userInfo?.email || "No email"}
@@ -427,25 +401,27 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           </div>
         )}
 
-        {/* Navigation Menu */}
+        {/* Navigation Menu - SCROLLABLE AREA */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="py-2">
+            <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+                color: white;
+                              }
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
+            <div className="space-y-1">
+              {menuItems.map((item, index) => renderMenuItem(item, index))}
+            </div>
+          </nav>
+        </div>
 
-        <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
-          <style jsx>{`
-            .scrollbar-hide::-webkit-scrollbar {
-              display: none;
-            }
-            .scrollbar-hide {
-              -ms-overflow-style: none;
-              scrollbar-width: none;
-            }
-          `}</style>
-          <div className="space-y-1">
-            {menuItems.map((item, index) => renderMenuItem(item, index))}
-          </div>
-        </nav>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+        {/* Footer - FIXED HEIGHT */}
+        <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0">
           {isOpen ? (
             <div className="text-center">
               <p className="text-xs text-gray-500 mb-2">
@@ -462,9 +438,8 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           ) : (
             <div className="flex justify-center">
               <div
-                className={`w-2 h-2 ${
-                  userData?.IsActive ? "bg-green-500" : "bg-gray-400"
-                } rounded-full animate-pulse`}
+                className={`w-2 h-2 ${userData?.IsActive ? "bg-green-500" : "bg-gray-400"
+                  } rounded-full animate-pulse`}
               ></div>
             </div>
           )}
