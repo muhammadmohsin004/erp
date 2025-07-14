@@ -39,7 +39,7 @@ import Span from "../../components/elements/span/Span";
 const CompanyBranchList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Branch": language === "ar" ? "إضافة فرع" : "Add Branch",
@@ -158,11 +158,11 @@ const CompanyBranchList = () => {
     setSelectAll(false);
   }, [branchesData]);
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/admin-Login");
-    }
-  }, [token, navigate]);
+  // useEffect(() => {
+  //   if (!token) {
+  //     navigate("/admin-Login");
+  //   }
+  // }, [token, navigate]);
 
   // Search function
   const handleSearchBranches = async () => {
