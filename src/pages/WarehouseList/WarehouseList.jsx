@@ -24,6 +24,7 @@ import {
   Users,
   ToggleLeft,
   ToggleRight,
+  FileText,
 } from "lucide-react";
 import {
   AiOutlineEye, // Eye icon for view
@@ -54,8 +55,12 @@ const WarehouseList = () => {
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
+    "Export CSV": language === "ar" ? "تصدير CSV" : "Export CSV",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "Exporting": language === "ar" ? "جاري التصدير..." : "Exporting...",
     NoWarehouses: language === "ar" ? "لا يوجد مستودعات" : "No warehouses found",
     Name: language === "ar" ? "الاسم" : "Name",
     Code: language === "ar" ? "الكود" : "Code",
@@ -99,6 +104,10 @@ const WarehouseList = () => {
     "View Permission": language === "ar" ? "صلاحية العرض" : "View Permission",
     "Create Invoice Permission": language === "ar" ? "صلاحية إنشاء الفاتورة" : "Create Invoice Permission",
     "Update Stock Permission": language === "ar" ? "صلاحية تحديث المخزون" : "Update Stock Permission",
+    "Export successful": language === "ar" ? "تم التصدير بنجاح" : "Export successful",
+    "Export failed": language === "ar" ? "فشل التصدير" : "Export failed",
+    "No data to export": language === "ar" ? "لا توجد بيانات للتصدير" : "No data to export",
+    "Select warehouses to export": language === "ar" ? "اختر المستودعات للتصدير" : "Select warehouses to export",
   };
 
   // Get warehouse context
@@ -136,7 +145,9 @@ const WarehouseList = () => {
   const [warehouseToDelete, setWarehouseToDelete] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(null);
 
   // Mock statistics - you can replace this with actual API call
@@ -202,6 +213,137 @@ const WarehouseList = () => {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+
+  // CSV Export functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return '';
+
+    // Define the headers for CSV
+    const headers = [
+      'ID',
+      'Name',
+      'Code',
+      'Description',
+      'Manager Name',
+      'Email',
+      'Phone',
+      'Address',
+      'Shipping Address',
+      'City',
+      'State',
+      'Postal Code',
+      'Country',
+      'Status',
+      'Primary',
+      'Default',
+      'View Permission',
+      'Create Invoice Permission',
+      'Update Stock Permission',
+      'Created At',
+      'Updated At'
+    ];
+
+    // Convert data to CSV format
+    const csvRows = [headers.join(',')];
+    
+    data.forEach(warehouse => {
+      const values = [
+        warehouse.Id || '',
+        `"${(warehouse.Name || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Code || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Description || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.ManagerName || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Email || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Phone || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Address || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.ShippingAddress || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.City || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.State || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.PostalCode || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Country || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Status || '').replace(/"/g, '""')}"`,
+        warehouse.Primary === "1" || warehouse.Primary === "Yes" ? "Yes" : "No",
+        warehouse.IsDefault ? "Yes" : "No",
+        warehouse.ViewPermission === "1" ? "Yes" : "No",
+        warehouse.CreateInvoicePermission === "1" ? "Yes" : "No",
+        warehouse.UpdateStockPermission === "1" ? "Yes" : "No",
+        warehouse.CreatedAt ? new Date(warehouse.CreatedAt).toLocaleDateString() : '',
+        warehouse.UpdatedAt ? new Date(warehouse.UpdatedAt).toLocaleDateString() : ''
+      ];
+      csvRows.push(values.join(','));
+    });
+
+    return csvRows.join('\n');
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    try {
+      if (!Array.isArray(warehousesData) || warehousesData.length === 0) {
+        alert(translations["No data to export"]);
+        return;
+      }
+
+      const csvContent = convertToCSV(warehousesData);
+      const filename = `warehouses_all_${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csvContent, filename);
+      
+      setShowExportModal(false);
+      // You can add a success notification here
+    } catch (error) {
+      console.error("Error exporting all warehouses:", error);
+      alert(translations["Export failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportSelected = async () => {
+    setIsExporting(true);
+    try {
+      if (selectedWarehouses.length === 0) {
+        alert(translations["Select warehouses to export"]);
+        return;
+      }
+
+      const selectedData = warehousesData.filter(warehouse => 
+        selectedWarehouses.includes(warehouse.Id)
+      );
+
+      if (selectedData.length === 0) {
+        alert(translations["No data to export"]);
+        return;
+      }
+
+      const csvContent = convertToCSV(selectedData);
+      const filename = `warehouses_selected_${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csvContent, filename);
+      
+      setShowExportModal(false);
+      // You can add a success notification here
+    } catch (error) {
+      console.error("Error exporting selected warehouses:", error);
+      alert(translations["Export failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Search function
   const handleSearchWarehouses = async () => {
@@ -375,11 +517,7 @@ const WarehouseList = () => {
 
   // Export functionality
   const handleExport = () => {
-    console.log(
-      "Export warehouses:",
-      selectedWarehouses.length > 0 ? selectedWarehouses : "all"
-    );
-    alert("Export functionality to be implemented");
+    setShowExportModal(true);
   };
 
   // Statistics Card Component
@@ -443,8 +581,8 @@ const WarehouseList = () => {
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+              bgColor="bg-green-600 hover:bg-green-700"
+              textColor="text-white"
               rounded="rounded-lg"
               buttonText={translations.Export}
               height="h-10"
