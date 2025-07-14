@@ -18,7 +18,9 @@ import employeeSalaryTranslations from "../../translations/EmployeeSalaryTransla
 const EmployeeSalary = () => {
   const { language: currentLanguage } = useSelector((state) => state.language);
   const isArabic = currentLanguage === "ar";
-  const t = employeeSalaryTranslations[currentLanguage] || employeeSalaryTranslations.en;
+  const t =
+    employeeSalaryTranslations[currentLanguage] ||
+    employeeSalaryTranslations.en;
 
   const {
     fetchEmployeeSalaries,
@@ -192,7 +194,8 @@ const EmployeeSalary = () => {
       console.error("Error saving salary component:", error);
       setAlert({
         show: true,
-        message: error.message || (isEditMode ? t.failedToUpdate : t.failedToAdd),
+        message:
+          error.message || (isEditMode ? t.failedToUpdate : t.failedToAdd),
         variant: "danger",
       });
     }
@@ -310,7 +313,10 @@ const EmployeeSalary = () => {
   }
 
   return (
-    <Container className={`py-4 ${isArabic ? 'rtl' : 'ltr'}`} dir={isArabic ? 'rtl' : 'ltr'}>
+    <Container
+      className={`py-4 ${isArabic ? "rtl" : "ltr"}`}
+      dir={isArabic ? "rtl" : "ltr"}
+    >
       {alert.show && (
         <Alert
           variant={alert.variant}
@@ -321,18 +327,31 @@ const EmployeeSalary = () => {
       )}
 
       <Card>
-        <div className={`flex justify-between items-center p-4 border-b ${isArabic ? 'flex-row-reverse' : ''}`}>
-          <h2 className="text-xl font-bold text-gray-800">
-            {t.pageTitle}
-          </h2>
-          <button
+        <div
+          className={`flex justify-between items-center p-4 border-b ${
+            isArabic ? "flex-row-reverse" : ""
+          }`}
+        >
+          <h2 className="text-xl font-bold text-gray-800">{t.pageTitle}</h2>
+          <FilledButton
+            isIcon={true}
+            icon={Plus}
+            isIconLeft={!isArabic}
+            isIconRight={isArabic}
+            iconSize={`text-base`}
+            bgColor={`bg-gray-600 hover:bg-gray-700`}
+            textColor={`text-white`}
+            buttonText={t.addNewComponent}
+            height={`h-10`}
+            width={`w-auto`}
+            rounded={`rounded-md`}
+            fontWeight={`font-medium`}
+            fontSize={`text-sm`}
+            type={`button`}
             onClick={handleAddNew}
             disabled={!selectedEmployee || loading}
-            className={`bg-gray-600 hover:bg-gray-700 text-white h-10 px-4 flex items-center gap-2 ${isArabic ? 'flex-row-reverse' : ''}`}
-          >
-            <Plus size={16} />
-            {t.addNewComponent}
-          </button>
+            px="px-4"
+          />
         </div>
 
         <div className="p-4">
@@ -367,9 +386,7 @@ const EmployeeSalary = () => {
               </div>
             ) : employeeSalaries.length === 0 ? (
               <div className="p-8 text-center">
-                <div className="text-gray-500">
-                  {t.noSalaryComponents}
-                </div>
+                <div className="text-gray-500">{t.noSalaryComponents}</div>
                 <div className="mt-2 text-sm text-gray-400">
                   {t.clickAddNew}
                 </div>
@@ -379,25 +396,53 @@ const EmployeeSalary = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.componentName}
                       </th>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.type}
                       </th>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.amount}
                       </th>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.effectiveFrom}
                       </th>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.effectiveTo}
                       </th>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.status}
                       </th>
-                      <th className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${isArabic ? 'text-right' : 'text-left'}`}>
+                      <th
+                        className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                          isArabic ? "text-right" : "text-left"
+                        }`}
+                      >
                         {t.actions}
                       </th>
                     </tr>
@@ -405,32 +450,64 @@ const EmployeeSalary = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {employeeSalaries.map((salary) => (
                       <tr key={salary.Id} className="hover:bg-gray-50">
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
                           {salary.SalaryComponentName || t.notAvailable}
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${isArabic ? 'text-right' : 'text-left'}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
                           {salary.SalaryComponentType || t.notAvailable}
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
                           {formatCurrency(salary.Amount)}
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${isArabic ? 'text-right' : 'text-left'}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
                           {formatDate(salary.EffectiveFrom)}
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${isArabic ? 'text-right' : 'text-left'}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
                           {salary.EffectiveTo
                             ? formatDate(salary.EffectiveTo)
                             : t.notAvailable}
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap ${isArabic ? 'text-right' : 'text-left'}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
                           <Badge
                             variant={salary.IsActive ? "success" : "secondary"}
                           >
                             {salary.IsActive ? t.active : t.inactive}
                           </Badge>
                         </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isArabic ? 'text-right' : 'text-left'}`}>
-                          <div className={`flex space-x-2 ${isArabic ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
+                            isArabic ? "text-right" : "text-left"
+                          }`}
+                        >
+                          <div
+                            className={`flex space-x-2 ${
+                              isArabic ? "flex-row-reverse space-x-reverse" : ""
+                            }`}
+                          >
                             <button
                               onClick={() => handleEdit(salary)}
                               className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -453,9 +530,7 @@ const EmployeeSalary = () => {
             )
           ) : (
             <div className="p-8 text-center">
-              <div className="text-gray-500">
-                {t.selectEmployeeFirst}
-              </div>
+              <div className="text-gray-500">{t.selectEmployeeFirst}</div>
             </div>
           )}
         </div>
@@ -473,14 +548,25 @@ const EmployeeSalary = () => {
         okButtonDisabled={loading}
         width={600}
         body={
-          <div className={isArabic ? 'rtl' : 'ltr'} dir={isArabic ? 'rtl' : 'ltr'}>
+          <div
+            className={isArabic ? "rtl" : "ltr"}
+            dir={isArabic ? "rtl" : "ltr"}
+          >
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Employee Display (Read-only in modal) */}
               <div className="bg-gray-50 p-3 rounded-lg">
-                <label className={`block text-sm font-medium text-gray-700 mb-1 ${isArabic ? 'text-right' : 'text-left'}`}>
+                <label
+                  className={`block text-sm font-medium text-gray-700 mb-1 ${
+                    isArabic ? "text-right" : "text-left"
+                  }`}
+                >
                   {t.employee}
                 </label>
-                <div className={`text-sm text-gray-900 ${isArabic ? 'text-right' : 'text-left'}`}>
+                <div
+                  className={`text-sm text-gray-900 ${
+                    isArabic ? "text-right" : "text-left"
+                  }`}
+                >
                   {getSelectedEmployeeName()}
                 </div>
               </div>
@@ -513,7 +599,11 @@ const EmployeeSalary = () => {
                   placeholder={t.amountPlaceholder}
                 />
 
-                <div className={`flex items-center pt-6 ${isArabic ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`flex items-center pt-6 ${
+                    isArabic ? "justify-end" : "justify-start"
+                  }`}
+                >
                   <CheckboxField
                     name="IsActive"
                     label={t.active}

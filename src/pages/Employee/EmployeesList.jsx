@@ -34,10 +34,10 @@ const EmployeesList = () => {
 
   // Get current language from Redux store
   const { language: currentLanguage } = useSelector((state) => state.language);
-  
+
   // Get translations based on current language
   const t = employeeTranslations[currentLanguage] || employeeTranslations.en;
-  
+
   // Check if current language is Arabic for RTL support
   const isArabic = currentLanguage === "ar";
 
@@ -161,14 +161,15 @@ const EmployeesList = () => {
                               setSelectedEmployee(employee);
                               setFormMode("view");
                             }}
-                            borderColor="border-gray-300"
+                            borderColor="border-blue-300"
                             borderWidth="border"
                             rounded="rounded-md"
-                            bgColor="bg-white"
-                            textColor="text-gray-700"
+                            bgColor="bg-blue-50"
+                            textColor="text-blue-600"
                             height="h-8"
                             width="w-8"
                             px="px-0"
+                            hover="hover:bg-blue-100 hover:border-blue-400"
                           />
                           <OutlineButton
                             isIcon
@@ -177,27 +178,29 @@ const EmployeesList = () => {
                               setSelectedEmployee(employee);
                               setFormMode("edit");
                             }}
-                            borderColor="border-gray-300"
+                            borderColor="border-green-300"
                             borderWidth="border"
                             rounded="rounded-md"
-                            bgColor="bg-white"
-                            textColor="text-gray-700"
+                            bgColor="bg-green-50"
+                            textColor="text-green-600"
                             height="h-8"
                             width="w-8"
                             px="px-0"
+                            hover="hover:bg-green-100 hover:border-green-400"
                           />
                           <OutlineButton
                             isIcon
                             icon={Trash2}
                             onClick={() => handleDelete(employee.Id)}
-                            borderColor="border-gray-300"
+                            borderColor="border-red-300"
                             borderWidth="border"
                             rounded="rounded-md"
-                            bgColor="bg-white"
-                            textColor="text-gray-700"
+                            bgColor="bg-red-50"
+                            textColor="text-red-600"
                             height="h-8"
                             width="w-8"
                             px="px-0"
+                            hover="hover:bg-red-100 hover:border-red-400"
                           />
                         </div>
                       </TD>

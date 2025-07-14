@@ -27,7 +27,7 @@ import SalaryComponentTranslation from "../../translations/SalaryComponentTransl
 const SalaryComponent = () => {
   // Redux selector for language
   const { language: currentLanguage } = useSelector((state) => state.language);
-  
+
   // Get current translations
   const t = SalaryComponentTranslation[currentLanguage] || translations.en;
   const isArabic = currentLanguage === "ar";
@@ -151,14 +151,14 @@ const SalaryComponent = () => {
   const calculationTypeOptions =
     calculationTypes && calculationTypes.length > 0
       ? calculationTypes.map((type) => ({
-        value: type.Value || type.value || type,
-        label: type.Label || type.label || type.Value || type.value || type,
-      }))
+          value: type.Value || type.value || type,
+          label: type.Label || type.label || type.Value || type.value || type,
+        }))
       : [
-        { value: "Amount", label: t.fixedAmount },
-        { value: "Percentage", label: t.percentage },
-        { value: "Formula", label: t.formula },
-      ];
+          { value: "Amount", label: t.fixedAmount },
+          { value: "Percentage", label: t.percentage },
+          { value: "Formula", label: t.formula },
+        ];
 
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({
@@ -488,7 +488,7 @@ const SalaryComponent = () => {
   );
 
   return (
-    <Container className={`p-6 space-y-6 ${isArabic ? 'rtl' : 'ltr'}`}>
+    <Container className={`p-6 space-y-6 ${isArabic ? "rtl" : "ltr"}`}>
       {/* Alert */}
       {alert.show && (
         <Alert
@@ -505,19 +505,22 @@ const SalaryComponent = () => {
           subHeading={t.salaryComponentsSubHeading}
         />
         <FilledButton
-          buttonText={t.addComponent}
-          icon={Plus}
           isIcon={true}
+          icon={Plus}
           isIconLeft={!isArabic}
+          isIconRight={isArabic}
+          iconSize={`text-base`}
+          bgColor={`bg-gray-100 hover:bg-gray-200`}
+          textColor={`text-white`}
+          buttonText={t.addComponent}
+          height={`h-10`}
+          width={`w-auto`}
+          rounded={`rounded-lg`}
+          fontWeight={`font-medium`}
+          fontSize={`text-sm`}
+          type={`button`}
           onClick={handleAdd}
-          iconSize="w-4 h-4"
-          bgColor="bg-gray-100 hover:bg-gray-200"
-          textColor="text-gray-700"
-          rounded="rounded-lg"
-          height="h-10"
           px="px-4"
-          fontWeight="font-medium"
-          fontSize="text-sm"
         />
       </div>
 
@@ -599,19 +602,23 @@ const SalaryComponent = () => {
                       <div>
                         <div className="font-medium">
                           {component.CalculationType === "Amount"
-                            ? `$${component.DefaultAmount?.toFixed(2) || "0.00"
-                            }`
+                            ? `$${
+                                component.DefaultAmount?.toFixed(2) || "0.00"
+                              }`
                             : component.CalculationType === "Percentage"
-                              ? `${(component.DefaultPercentage * 100)?.toFixed(
-                                2
-                              ) || "0.00"
+                            ? `${
+                                (component.DefaultPercentage * 100)?.toFixed(
+                                  2
+                                ) || "0.00"
                               }%`
-                              : t.formula}
+                            : t.formula}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {component.CalculationType === "Amount" ? t.amount :
-                           component.CalculationType === "Percentage" ? t.percentage :
-                           t.formula}
+                          {component.CalculationType === "Amount"
+                            ? t.amount
+                            : component.CalculationType === "Percentage"
+                            ? t.percentage
+                            : t.formula}
                         </div>
                       </div>
                     </TD>
@@ -675,9 +682,7 @@ const SalaryComponent = () => {
       {/* Modal */}
       <Modall
         title={
-          editingComponent
-            ? t.editSalaryComponent
-            : t.addNewSalaryComponent
+          editingComponent ? t.editSalaryComponent : t.addNewSalaryComponent
         }
         modalOpen={showModal}
         setModalOpen={setShowModal}

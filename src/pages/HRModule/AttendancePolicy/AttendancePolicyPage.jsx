@@ -649,7 +649,7 @@ const AttendancePolicyPage = () => {
               icon={FiPlus}
               isIconLeft={true}
               onClick={openCreateModal}
-              disabled={isProcessing}
+              // disabled={isProcessing}
               isIconRight={false}
               iconSize={`text-lg`}
               bgColor={`bg-purple-500`}
