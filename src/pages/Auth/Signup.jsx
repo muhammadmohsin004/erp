@@ -138,7 +138,7 @@ function Signup() {
 
     const getProgressPercentage = () => {
         const requiredFields = [
-            'companyName', 'taxNumber', 'companyAddress', 'companyCity', 
+            'companyName', 'companyAddress', 'companyCity', 
             'companyState', 'companyCountry', 'companyPostalCode', 'companyPhone',
             'companyEmail', 'currency', 'timeZone', 'adminFirstName', 
             'adminLastName', 'adminEmail', 'adminPassword'
@@ -219,7 +219,6 @@ function Signup() {
                                     onChange={handleInputChange}
                                     placeholder="Enter tax number"
                                     className={`w-full px-4 py-3 border-0 bg-gray-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200 ${validated && !formData.taxNumber ? 'ring-2 ring-red-500' : ''}`}
-                                    required
                                 />
                                 {validated && !formData.taxNumber && (
                                     <p className="mt-1 text-sm text-red-600">Please enter your tax number.</p>

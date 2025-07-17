@@ -617,113 +617,120 @@ const ProductImages = () => {
     <Container className="min-h-screen bg-gray-50" onDrop={handleDrop} onDragOver={handleDragOver}>
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
-            <Container className="flex items-center gap-2">
-              <FilledButton
-                isIcon={true}
-                icon={ArrowLeft}
-                iconSize="w-4 h-4"
-                bgColor="bg-gray-100 hover:bg-gray-200"
-                textColor="text-gray-700"
-                rounded="rounded-lg"
-                buttonText=""
-                height="h-8"
-                width="w-8"
-                onClick={() => navigate("/admin/products")}
-                title={translations["Back to Products"]}
-              />
-              <ImageIcon className="w-6 h-6 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                {translations["Product Images"]}
-              </h1>
-            </Container>
-            {selectedImages.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {selectedImages.length} {translations.Selected}
-              </Span>
-            )}
-          </Container>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+  {/* Header Left Section */}
+  <div className="flex items-center gap-4 mb-4 lg:mb-0">
+    <div className="flex items-center gap-2">
+      <FilledButton
+        isIcon={true}
+        icon={ArrowLeft}
+        iconSize="w-4 h-4"
+        bgColor="bg-gray-100 hover:bg-gray-200"
+        textColor="text-gray-700"
+        rounded="rounded-lg"
+        buttonText=""
+        height="h-8"
+        width="w-8"
+        onClick={() => navigate("/admin/Products-Manager")}
+        title={translations["Back to Products"]}
+      />
+      <ImageIcon className="w-6 h-6 text-blue-600" />
+      <h1 className="text-2xl font-bold text-gray-900">
+        {translations["Product Images"]}
+      </h1>
+    </div>
 
-          <Container className="flex gap-3 flex-wrap">
-            {/* View Mode Toggle */}
-            <Container className="flex bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <Grid className="w-4 h-4" />
-                {translations["Grid View"]}
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === "list"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <List className="w-4 h-4" />
-                {translations["List View"]}
-              </button>
-            </Container>
+    {/* Selected Images Badge */}
+    {selectedImages.length > 0 && (
+      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+        {selectedImages.length} {translations.Selected}
+      </span>
+    )}
+  </div>
 
-            <FilledButton
-              isIcon={true}
-              icon={Filter}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText={translations.Filters}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => setShowFilters(true)}
-            />
+  {/* Header Right Actions */}
+  <div className="flex gap-3 flex-wrap">
+    {/* View Mode Toggle */}
+    <div className="flex bg-gray-100 w-auto rounded-lg p-1">
+      <button
+        onClick={() => setViewMode("grid")}
+        className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+          viewMode === "grid"
+            ? "bg-white text-gray-900 shadow-sm"
+            : "text-gray-600 hover:text-gray-900"
+        }`}
+      >
+        <Grid className="w-4 h-4" />
+        {translations["Grid View"]}
+      </button>
+      <button
+        onClick={() => setViewMode("list")}
+        className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+          viewMode === "list"
+            ? "bg-white text-gray-900 shadow-sm"
+            : "text-gray-600 hover:text-gray-900"
+        }`}
+      >
+        <List className="w-4 h-4" />
+        {translations["List View"]}
+      </button>
+    </div>
 
-            <FilledButton
-              isIcon={true}
-              icon={Upload}
-              iconSize="w-4 h-4"
-              bgColor="bg-green-600 hover:bg-green-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations["Upload Multiple"]}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => setShowMultipleUploadModal(true)}
-            />
+    {/* Filter Button */}
+    <FilledButton
+      isIcon={true}
+      icon={Filter}
+      iconSize="w-4 h-4"
+      bgColor="bg-gray-100 hover:bg-gray-200"
+      rounded="rounded-lg"
+      buttonText={translations["Filters"]}
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      isIconLeft={true}
+      onClick={() => setShowFilters(true)}
+    />
 
-            <FilledButton
-              isIcon={true}
-              icon={Plus}
-              iconSize="w-4 h-4"
-              bgColor="bg-blue-600 hover:bg-blue-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations["Upload Image"]}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => setShowUploadModal(true)}
-            />
-          </Container>
-        </Container>
+    {/* Upload Multiple Images */}
+    <FilledButton
+      isIcon={true}
+      icon={Upload}
+      iconSize="w-4 h-4"
+      bgColor="bg-green-600 hover:bg-green-700"
+      textColor="text-white"
+      rounded="rounded-lg"
+      buttonText={translations["Upload Multiple"]}
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      isIconLeft={true}
+      onClick={() => setShowMultipleUploadModal(true)}
+    />
+
+    {/* Upload Single Image */}
+    <FilledButton
+      isIcon={true}
+      icon={Plus}
+      iconSize="w-4 h-4"
+      bgColor="bg-blue-600 hover:bg-blue-700"
+      textColor="text-white"
+      rounded="rounded-lg"
+      buttonText={translations["Upload Image"]}
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      isIconLeft={true}
+      onClick={() => setShowUploadModal(true)}
+    />
+  </div>
+</div>
+
 
         {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-6">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
           <StatCard
             title={translations["Total Images"]}
             value={statistics?.totalImages || 0}
@@ -1273,11 +1280,10 @@ const ProductImages = () => {
                         {translations["Main Image"]}
                       </Span>
                       <Span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                          selectedImage.IsMain
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedImage.IsMain
                             ? "bg-yellow-100 text-yellow-800"
                             : "bg-gray-100 text-gray-800"
-                        }`}
+                          }`}
                       >
                         {selectedImage.IsMain ? translations.Yes : translations.No}
                       </Span>

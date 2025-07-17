@@ -95,7 +95,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             isCurrentActive
               ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
               : "text-gray-700 hover:text-black"
-          } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
+          } ${currentLanguage === "ar" ? "" : ""}`;
         }}
       >
         <item.icon
@@ -164,7 +164,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
                 isCurrentActive
                   ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                   : "text-gray-600 hover:text-black"
-              } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
+              } ${currentLanguage === "ar" ? "" : ""}`;
             }}
           >
             <subItem.icon
@@ -242,7 +242,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
               hasActiveSubmenu
                 ? "bg-gradient-to-r from-purple-500 to-purple-600 border-r-4 border-purple-400 shadow-lg"
                 : "text-gray-700"
-            } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`}
+            } ${currentLanguage === "ar" ? "" : ""}`}
             onClick={() => toggleSubmenu(item.key)}
           >
             <item.icon

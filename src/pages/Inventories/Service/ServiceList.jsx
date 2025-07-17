@@ -300,9 +300,8 @@ const ServiceList = () => {
       }
 
       const csvContent = convertToCSV(allServicesData);
-      const filename = `services_export_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
+      const filename = `services_export_${new Date().toISOString().split("T")[0]
+        }.csv`;
 
       downloadCSV(csvContent, filename);
 
@@ -332,9 +331,8 @@ const ServiceList = () => {
       );
 
       const csvContent = convertToCSV(selectedServicesData);
-      const filename = `selected_services_export_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
+      const filename = `selected_services_export_${new Date().toISOString().split("T")[0]
+        }.csv`;
 
       downloadCSV(csvContent, filename);
 
@@ -571,24 +569,25 @@ const ServiceList = () => {
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 relative">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations.Services}
             </h1>
             {selectedServices.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedServices.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap relative">
             <FilledButton
               isIcon={true}
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -599,56 +598,52 @@ const ServiceList = () => {
               onClick={() => setShowFilters(true)}
             />
 
-            {/* Export Dropdown */}
-            <Container className="relative export-dropdown flex flex-row">
-              <FilledButton
-                isIcon={true}
-                icon={Download}
-                iconSize="w-4 h-4"
-                bgColor={
-                  isExporting ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"
-                }
-                textColor="text-gray-700"
-                rounded="rounded-lg"
-                buttonText={
-                  isExporting
-                    ? translations["Exporting..."]
-                    : translations.Export
-                }
-                height="h-10"
-                px="px-4"
-                fontWeight="font-medium"
-                fontSize="text-sm"
-                isIconLeft={true}
-                disabled={isExporting}
-                onClick={() => setShowExportDropdown(!showExportDropdown)}
-              />
+            <FilledButton
+              isIcon={true}
+              icon={Download}
+              iconSize="w-4 h-4"
+              bgColor={isExporting ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"}
 
-              {/* Export Dropdown Menu */}
-              {showExportDropdown && (
-                <Container className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
-                  <Container className="py-1">
-                    <button
-                      onClick={handleExportAll}
-                      disabled={isExporting || servicesData.length === 0}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      {translations["Export All"]} ({servicesData.length})
-                    </button>
-                    <button
-                      onClick={handleExportSelected}
-                      disabled={isExporting || selectedServices.length === 0}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      {translations["Export Selected"]} (
-                      {selectedServices.length})
-                    </button>
-                  </Container>
-                </Container>
-              )}
-            </Container>
+              rounded="rounded-lg"
+              buttonText={
+                isExporting
+                  ? translations["Exporting..."]
+                  : translations.Export
+              }
+              height="h-10"
+              px="px-4"
+              fontWeight="font-medium"
+              fontSize="text-sm"
+              isIconLeft={true}
+              disabled={isExporting}
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+            />
+
+            {/* Export Dropdown Menu */}
+            {showExportDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                <div className="py-1">
+                  <button
+                    type="button"
+                    onClick={handleExportAll}
+                    disabled={isExporting || servicesData.length === 0}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    {translations["Export All"]} ({servicesData.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportSelected}
+                    disabled={isExporting || selectedServices.length === 0}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    {translations["Export Selected"]} ({selectedServices.length})
+                  </button>
+                </div>
+              </div>
+            )}
 
             <FilledButton
               isIcon={true}
@@ -665,8 +660,9 @@ const ServiceList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/new-service")}
             />
-          </Container>
-        </Container>
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -837,7 +833,7 @@ const ServiceList = () => {
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
                           {service.Discount &&
-                          parseFloat(service.Discount) > 0 ? (
+                            parseFloat(service.Discount) > 0 ? (
                             <Container className="flex items-center gap-1">
                               <Span className="text-sm text-orange-600">
                                 {formatCurrency(service.Discount)}
@@ -854,11 +850,10 @@ const ServiceList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              service.Status === "Active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${service.Status === "Active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                              }`}
                           >
                             {translations[service.Status] || service.Status}
                           </Span>
@@ -1051,11 +1046,10 @@ const ServiceList = () => {
                       {translations.Status}
                     </Span>
                     <Span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                        selectedService.Status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedService.Status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                        }`}
                     >
                       {translations[selectedService.Status] ||
                         selectedService.Status}

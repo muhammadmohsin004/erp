@@ -298,9 +298,8 @@ const StockMovementsList = () => {
       );
 
       const csvContent = convertToCSV(selectedData);
-      const filename = `stock_movements_selected_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
+      const filename = `stock_movements_selected_${new Date().toISOString().split("T")[0]
+        }.csv`;
 
       downloadCSV(csvContent, filename);
       setShowExportModal(false);
@@ -328,9 +327,8 @@ const StockMovementsList = () => {
       }
 
       const csvContent = convertToCSV(dataToExport);
-      const filename = `stock_movements_all_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
+      const filename = `stock_movements_all_${new Date().toISOString().split("T")[0]
+        }.csv`;
 
       downloadCSV(csvContent, filename);
       setShowExportModal(false);
@@ -442,24 +440,25 @@ const StockMovementsList = () => {
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations["Stock Movements"]}
             </h1>
             {selectedMovements.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedMovements.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <FilledButton
               isIcon={true}
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -469,18 +468,15 @@ const StockMovementsList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
+
             <FilledButton
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
-              buttonText={`${translations.Export} ${
-                selectedMovements.length > 0
-                  ? `(${selectedMovements.length})`
-                  : ""
-              }`}
+              buttonText={`${translations.Export}${selectedMovements.length > 0 ? ` (${selectedMovements.length})` : ""}`}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
@@ -489,6 +485,7 @@ const StockMovementsList = () => {
               onClick={handleExport}
               disabled={movementsData.length === 0}
             />
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -505,23 +502,27 @@ const StockMovementsList = () => {
               onClick={() => navigate("/admin/stock/transactions/new")}
             />
 
-            {/* <FilledButton
-              isIcon={true}
-              icon={FileText}
-              iconSize="w-4 h-4"
-              bgColor="bg-purple-600 hover:bg-purple-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText="View Report"
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => navigate("/admin/stock/movements/report")}
-            /> */}
-          </Container>
-        </Container>
+            {/* Uncomment if needed */}
+            {/* 
+    <FilledButton
+      isIcon={true}
+      icon={FileText}
+      iconSize="w-4 h-4"
+      bgColor="bg-purple-600 hover:bg-purple-700"
+      textColor="text-white"
+      rounded="rounded-lg"
+      buttonText="View Report"
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      isIconLeft={true}
+      onClick={() => navigate("/admin/stock/movements/report")}
+    /> 
+    */}
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -716,11 +717,10 @@ const StockMovementsList = () => {
                           </td>
                           <td className="px-6 py-4 hidden lg:table-cell">
                             <Span
-                              className={`text-sm font-medium ${
-                                movement.QuantityChange > 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }`}
+                              className={`text-sm font-medium ${movement.QuantityChange > 0
+                                ? "text-green-600"
+                                : "text-red-600"
+                                }`}
                             >
                               {movement.QuantityChange > 0 ? "+" : ""}
                               {movement.QuantityChange}
@@ -902,11 +902,10 @@ const StockMovementsList = () => {
                       {translations.Quantity}
                     </Span>
                     <Span
-                      className={`text-sm font-medium block mt-1 ${
-                        selectedMovement.QuantityChange > 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+                      className={`text-sm font-medium block mt-1 ${selectedMovement.QuantityChange > 0
+                        ? "text-green-600"
+                        : "text-red-600"
+                        }`}
                     >
                       {selectedMovement.QuantityChange > 0 ? "+" : ""}
                       {selectedMovement.QuantityChange}

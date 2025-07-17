@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Plus,
   ChevronLeft,
@@ -74,8 +74,8 @@ const ProductsList = () => {
   } = useProductsManager();
 
   // Process products data from API response
-  const productsData = products?.Data?.$values || [];
-
+  const parsedProducts = JSON.parse(products);
+  const productsData = parsedProducts?.Data?.$values || [];
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused] = useState(false);
@@ -95,7 +95,7 @@ const ProductsList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
+  const location = useLocation();
   // Statistics state
   const [statistics, setStatistics] = useState({
     totalProducts: 0,
@@ -251,13 +251,7 @@ const ProductsList = () => {
         await getProducts();
         await getCategoriesDropdown();
         await getBrandsDropdown();
-
-        // Get statistics
-        try {
-          await getStatisticsOverview();
-        } catch (error) {
-          console.error("Error fetching statistics:", error);
-        }
+        await getStatisticsOverview();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -266,7 +260,7 @@ const ProductsList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token]);
+  }, [token, location]);
 
   // Update local statistics when products change
   useEffect(() => {
@@ -726,9 +720,8 @@ const ProductsList = () => {
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Container className="flex items-center gap-2 mt-1">
             <Span
-              className={`text-2xl font-bold ${
-                isAlert && value > 0 ? "text-red-600" : "text-gray-900"
-              }`}
+              className={`text-2xl font-bold ${isAlert && value > 0 ? "text-red-600" : "text-gray-900"
+                }`}
             >
               {isCurrency ? `$${formatCurrency(value)}` : value || 0}
             </Span>
@@ -782,7 +775,7 @@ const ProductsList = () => {
               icon={Layers}
               iconSize="w-4 h-4"
               bgColor="bg-purple-100 hover:bg-purple-200"
-              textColor="text-purple-700"
+              // textColor="text-purple-700"
               rounded="rounded-lg"
               buttonText={translations["Manage Categories"]}
               height="h-10"
@@ -798,7 +791,7 @@ const ProductsList = () => {
               icon={Star}
               iconSize="w-4 h-4"
               bgColor="bg-yellow-100 hover:bg-yellow-200"
-              textColor="text-yellow-700"
+              // textColor="text-yellow-700"
               rounded="rounded-lg"
               buttonText={translations["Manage Brands"]}
               height="h-10"
@@ -814,7 +807,7 @@ const ProductsList = () => {
               icon={BarChart3}
               iconSize="w-4 h-4"
               bgColor="bg-green-100 hover:bg-green-200"
-              textColor="text-green-700"
+              // textColor="text-green-700"
               rounded="rounded-lg"
               buttonText={translations["View Statistics"]}
               height="h-10"
@@ -831,7 +824,7 @@ const ProductsList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -849,7 +842,7 @@ const ProductsList = () => {
               bgColor={
                 isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
               }
-              textColor={isExporting ? "text-gray-600" : "text-gray-700"}
+              // textColor={isExporting ? "text-gray-600" : "text-gray-700"}
               rounded="rounded-lg"
               buttonText={
                 isExporting ? translations.Exporting : translations.Export
@@ -882,7 +875,7 @@ const ProductsList = () => {
         </Container>
 
         {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 mb-6">
           <StatCard
             title={`${translations.Total} ${translations.Products}`}
             value={statistics?.totalProducts || 0}
@@ -930,6 +923,7 @@ const ProductsList = () => {
           />
         </Container>
 
+
         {/* Search Bar */}
         <Container className="mb-6">
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -937,9 +931,8 @@ const ProductsList = () => {
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${
-                translations.Search
-              } ${translations.Products.toLowerCase()}...`}
+              placeholder={`${translations.Search
+                } ${translations.Products.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -976,17 +969,17 @@ const ProductsList = () => {
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {searchTerm ||
-                filterOptions.status ||
-                filterOptions.categoryId ||
-                filterOptions.lowStockOnly
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly
                   ? translations["No results found"]
                   : translations.NoProducts}
               </h3>
               <p className="text-gray-500 mb-6">
                 {searchTerm ||
-                filterOptions.status ||
-                filterOptions.categoryId ||
-                filterOptions.lowStockOnly
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly
                   ? "Try adjusting your filters or search terms"
                   : "Get started by adding your first product"}
               </p>
@@ -995,18 +988,18 @@ const ProductsList = () => {
                   filterOptions.status ||
                   filterOptions.categoryId ||
                   filterOptions.lowStockOnly) && (
-                  <FilledButton
-                    bgColor="bg-gray-100 hover:bg-gray-200"
-                    textColor="text-gray-700"
-                    rounded="rounded-lg"
-                    buttonText={`${translations["Clear All"]} ${translations.Filters}`}
-                    height="h-10"
-                    px="px-4"
-                    fontWeight="font-medium"
-                    fontSize="text-sm"
-                    onClick={handleClearFilters}
-                  />
-                )}
+                    <FilledButton
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-lg"
+                      buttonText={`${translations["Clear All"]} ${translations.Filters}`}
+                      height="h-10"
+                      px="px-4"
+                      fontWeight="font-medium"
+                      fontSize="text-sm"
+                      onClick={handleClearFilters}
+                    />
+                  )}
                 <FilledButton
                   isIcon={true}
                   icon={Plus}
