@@ -276,7 +276,7 @@ function LoginPage() {
     try {
       console.log("Attempting login with:", { email });
 
-      // Call login function which should return the auth response
+      // Call login function which should return the full API response
       const authResponse = await login({ email, password });
 
       console.log("Login response received:", authResponse);
@@ -327,26 +327,39 @@ function LoginPage() {
           navigate(redirectPath, { replace: true });
         }, 2000);
       } else {
-        // Login failed
+        // Login failed - show message from API
         const errorMessage =
           authResponse?.Message ||
           authResponse?.message ||
           "Login failed. Please check your credentials.";
-        toast.error(errorMessage);
+
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+
         setFormError(errorMessage);
       }
     } catch (err) {
+      console.error("Login error caught:", err);
+
       const errorMessage =
-        err.response?.data?.Message ||
-        err.response?.data?.message ||
-        err.message ||
+        err?.response?.data?.Message || // Correct API message
+        err?.response?.data?.message || // Fallback lowercase
+        err?.message || // E.g. Axios "Request failed with status code 400"
         "An unexpected error occurred. Please try again.";
-      toast.error(errorMessage);
+
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
       setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />

@@ -42,6 +42,7 @@ const CompanyBranchList = () => {
   const token = localStorage.getItem("token");
 
   const translations = {
+    //somethings is here
     "Add Branch": language === "ar" ? "إضافة فرع" : "Add Branch",
     "Company Branches": language === "ar" ? "فروع الشركة" : "Company Branches",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
