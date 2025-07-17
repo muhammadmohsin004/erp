@@ -22,7 +22,7 @@ import {
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../../components/elements/container/Container";
 import Span from "../../../components/elements/span/Span";
-import { useInvoice } from "../../../Contexts/InvoiceContext/InvoiceContext";
+import { useInvoices } from "../../../Contexts/InvoiceContext/InvoiceContext";
 import { useClients } from "../../../Contexts/apiClientContext/apiClientContext";
 import { useService } from "../../../Contexts/ServiceContext/ServiceContext";
 import { useProductsManager } from "../../../Contexts/ProductsManagerContext/ProductsManagerContext";
@@ -33,7 +33,7 @@ const NewInvoice = () => {
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
-  const { createInvoice, updateInvoice, loading } = useInvoice();
+  const { createInvoice, updateInvoice, loading } = useInvoices();
 
   // Context hooks for dropdowns
   const {

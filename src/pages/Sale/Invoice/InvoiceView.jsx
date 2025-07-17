@@ -15,7 +15,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { usePDF } from "react-to-pdf";
-import { useInvoice } from "../../../Contexts/InvoiceContext/InvoiceContext";
+import { useInvoices } from "../../../Contexts/InvoiceContext/InvoiceContext";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../../components/elements/container/Container";
 import Span from "../../../components/elements/span/Span";
@@ -27,7 +27,7 @@ const InvoiceView = () => {
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
-  const { getInvoice, getInvoiceItems, loading } = useInvoice();
+  const { getInvoice, getInvoiceItems, loading } = useInvoices();
 
   // PDF generation hook
   const { toPDF, targetRef } = usePDF({

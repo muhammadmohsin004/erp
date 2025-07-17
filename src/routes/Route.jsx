@@ -43,13 +43,17 @@ import AccountSettings from "../pages/SuperAdmin/Settings/AccountSettings";
 import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
 import InvoiceDashboard from "../pages/Sale/Invoice/InvoiceDashboard";
-import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
+// import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
 import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
 import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
 import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
 import NewPriceList from "../pages/Inventories/PriceList/NewPriceList";
 import PriceListList from "../pages/Inventories/PriceList/PriceListList";
 import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
+import InvoicesList from "../pages/Sale/InvoicesList";
+import InvoiceForm from "../pages/Sale/InvoiceForm";
+import InvoiceDetails from "../pages/Sale/Invoice/InvoiceDetails";
+import PaymentTracking from "../pages/Sale/Invoice/Components/PaymentTracking";
 import ManageEmployees from "../pages/Employee/ManageEmployees";
 import CreateNewEmployee from "../pages/Employee/CreateNewEmployee";
 import EmployeeSalary from "../pages/Employee/EmployeeSalary";
@@ -497,12 +501,37 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-    {
-      path: "/admin/invoices",
-      component: InvoiceList,
+     {
+      path: "/admin/invoices/list",
+      component: InvoicesList,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
+     {
+      path: "/admin/invoices/new",
+      component: InvoiceForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/invoices/edit/:id",
+      component: InvoiceForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+     {
+      path: "/admin/invoices/:id",
+      component: InvoiceDetails,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+     {
+      path: "/admin/payments",
+      component: PaymentTracking,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+   
     {
       path: "/admin/new-invoice",
       component: NewInvoice,

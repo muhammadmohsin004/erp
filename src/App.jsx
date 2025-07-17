@@ -15,7 +15,7 @@ import { SuperDashboardProvider } from "./Contexts/superAdminDashborad/SuperAdmi
 import { HRProvider } from "./Contexts/HrContext/HrContext";
 import { RequisitionProvider } from "./Contexts/RequisitionContext/RequisitionContext";
 import { PriceListProvider } from "./Contexts/PriceListContext/PriceListContext";
-import { InvoiceProvider } from "./Contexts/InvoiceContext/InvoiceContext";
+import { InvoicesProvider } from "./Contexts/InvoiceContext/InvoiceContext";
 import { SalaryProvider } from "./Contexts/SalaryManagementContext/SalaryManagementContext";
 import { LeaveAttendanceProvider } from "./Contexts/LeaveContext/LeaveContext";
 import { CompanyBranchProvider } from "./Contexts/CompanyBranchContext/CompanyBranchContext";
@@ -39,7 +39,7 @@ function App() {
                         <HRProvider>
                           <RequisitionProvider>
                             <PriceListProvider>
-                              <InvoiceProvider>
+                              <InvoicesProvider>
                                 <SalaryProvider>
                                   <CompanyBranchProvider>
                                     <StockProvider>
@@ -57,7 +57,7 @@ function App() {
                                     </StockProvider>
                                   </CompanyBranchProvider>
                                 </SalaryProvider>
-                              </InvoiceProvider>
+                              </InvoicesProvider>
                             </PriceListProvider>
                           </RequisitionProvider>
                         </HRProvider>
