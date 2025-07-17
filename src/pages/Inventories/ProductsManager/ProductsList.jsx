@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Plus,
   ChevronLeft,
@@ -95,7 +95,7 @@ const ProductsList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
+  const location = useLocation();
   // Statistics state
   const [statistics, setStatistics] = useState({
     totalProducts: 0,
@@ -251,13 +251,7 @@ const ProductsList = () => {
         await getProducts();
         await getCategoriesDropdown();
         await getBrandsDropdown();
-
-        // Get statistics
-        try {
-          await getStatisticsOverview();
-        } catch (error) {
-          console.error("Error fetching statistics:", error);
-        }
+        await getStatisticsOverview();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -266,7 +260,7 @@ const ProductsList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token]);
+  }, [token, location]);
 
   // Update local statistics when products change
   useEffect(() => {
@@ -726,9 +720,8 @@ const ProductsList = () => {
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Container className="flex items-center gap-2 mt-1">
             <Span
-              className={`text-2xl font-bold ${
-                isAlert && value > 0 ? "text-red-600" : "text-gray-900"
-              }`}
+              className={`text-2xl font-bold ${isAlert && value > 0 ? "text-red-600" : "text-gray-900"
+                }`}
             >
               {isCurrency ? `$${formatCurrency(value)}` : value || 0}
             </Span>
@@ -937,9 +930,8 @@ const ProductsList = () => {
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${
-                translations.Search
-              } ${translations.Products.toLowerCase()}...`}
+              placeholder={`${translations.Search
+                } ${translations.Products.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -976,17 +968,17 @@ const ProductsList = () => {
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {searchTerm ||
-                filterOptions.status ||
-                filterOptions.categoryId ||
-                filterOptions.lowStockOnly
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly
                   ? translations["No results found"]
                   : translations.NoProducts}
               </h3>
               <p className="text-gray-500 mb-6">
                 {searchTerm ||
-                filterOptions.status ||
-                filterOptions.categoryId ||
-                filterOptions.lowStockOnly
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly
                   ? "Try adjusting your filters or search terms"
                   : "Get started by adding your first product"}
               </p>
@@ -995,18 +987,18 @@ const ProductsList = () => {
                   filterOptions.status ||
                   filterOptions.categoryId ||
                   filterOptions.lowStockOnly) && (
-                  <FilledButton
-                    bgColor="bg-gray-100 hover:bg-gray-200"
-                    textColor="text-gray-700"
-                    rounded="rounded-lg"
-                    buttonText={`${translations["Clear All"]} ${translations.Filters}`}
-                    height="h-10"
-                    px="px-4"
-                    fontWeight="font-medium"
-                    fontSize="text-sm"
-                    onClick={handleClearFilters}
-                  />
-                )}
+                    <FilledButton
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-lg"
+                      buttonText={`${translations["Clear All"]} ${translations.Filters}`}
+                      height="h-10"
+                      px="px-4"
+                      fontWeight="font-medium"
+                      fontSize="text-sm"
+                      onClick={handleClearFilters}
+                    />
+                  )}
                 <FilledButton
                   isIcon={true}
                   icon={Plus}
