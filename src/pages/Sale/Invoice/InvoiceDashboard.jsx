@@ -16,82 +16,28 @@ import {
   FileText,
   Users,
   Target,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useInvoice } from "../../../Contexts/InvoiceContext/InvoiceContext";
 
 const InvoiceDashboard = () => {
-  // Sample data structure based on your API response
   const navigate = useNavigate();
-  const [invoicesData, setInvoicesData] = useState([
-    {
-      Id: 11,
-      InvoiceNumber: "INV-20250707-451",
-      InvoiceDate: "2025-07-07T15:14:47.74",
-      DueDate: "2025-07-22T15:14:47.74",
-      Status: "Unpaid",
-      SubTotal: 4000.0,
-      TaxAmount: 20.0,
-      DiscountAmount: 10.0,
-      ShippingAmount: 10.0,
-      TotalAmount: 4020.0,
-      PaidAmount: 10.0,
-      BalanceAmount: 4010.0,
-      Currency: "EUR",
-      BillingName: "Fayyaz",
-      CustomerName: "Fayyaz",
-    },
-    {
-      Id: 15,
-      InvoiceNumber: "INV-20250708-161",
-      InvoiceDate: "2025-07-08T14:10:15.88",
-      DueDate: "2025-07-23T14:10:15.88",
-      Status: "Unpaid",
-      SubTotal: 1000.0,
-      TaxAmount: 10.0,
-      DiscountAmount: 10.0,
-      ShippingAmount: 1000.0,
-      TotalAmount: 2000.0,
-      PaidAmount: 10000.0,
-      BalanceAmount: -8000.0,
-      Currency: "EUR",
-      BillingName: "Fayyaz",
-      CustomerName: "Fayyaz",
-    },
-    {
-      Id: 14,
-      InvoiceNumber: "INV-20250708-854",
-      InvoiceDate: "2025-07-08T08:15:38.619",
-      DueDate: "2025-07-23T08:15:38.619",
-      Status: "Paid",
-      SubTotal: 199329.0,
-      TaxAmount: 70.0,
-      DiscountAmount: 2.0,
-      ShippingAmount: 53.0,
-      TotalAmount: 199450.0,
-      PaidAmount: 100.0,
-      BalanceAmount: 199350.0,
-      Currency: "USD",
-      BillingName: "Moke Dev",
-      CustomerName: "Moke Dev",
-    },
-    {
-      Id: 16,
-      InvoiceNumber: "Sapiente voluptatum",
-      InvoiceDate: "2025-07-10T00:00:00",
-      DueDate: "2025-07-12T00:00:00",
-      Status: "Overdue",
-      SubTotal: 1196.0,
-      TaxAmount: 538.2,
-      DiscountAmount: 0.0,
-      ShippingAmount: 0.0,
-      TotalAmount: 1734.2,
-      PaidAmount: 0.0,
-      BalanceAmount: 0.0,
-      Currency: "USD",
-      BillingName: "Unknown Customer",
-      CustomerName: "Unknown Customer",
-    },
-  ]);
+  const {
+    // State from context
+    loading,
+    error,
+    invoices,
+    invoiceStatistics,
+
+    // Methods from context
+    getInvoices,
+    getInvoiceStatistics,
+    clearError,
+    updateFilters,
+    resetFilters,
+  } = useInvoice();
 
   const [language, setLanguage] = useState("en");
   const [dashboardData, setDashboardData] = useState({
@@ -144,10 +90,71 @@ const InvoiceDashboard = () => {
     Cancelled: language === "ar" ? "ملغاة" : "Cancelled",
     View: language === "ar" ? "عرض" : "View",
     Edit: language === "ar" ? "تعديل" : "Edit",
+    Refresh: language === "ar" ? "تحديث" : "Refresh",
+    "No invoices found":
+      language === "ar" ? "لا توجد فواتير" : "No invoices found",
+    "Error loading data":
+      language === "ar" ? "خطأ في تحميل البيانات" : "Error loading data",
+    Retry: language === "ar" ? "إعادة المحاولة" : "Retry",
   };
 
-  // Calculate dashboard statistics
+  // Load initial data
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  // Recalculate dashboard stats when invoices data changes
+  useEffect(() => {
+    if (invoices?.Data) {
+      calculateDashboardStats();
+    }
+  }, [invoices]);
+
+  // Load dashboard data
+  const loadDashboardData = async () => {
+    try {
+      // Reset filters to get all invoices for dashboard
+      resetFilters();
+
+      // Get invoices with a larger page size to get more data for calculations
+      await getInvoices({ pageSize: 100 });
+
+      // Get invoice statistics if available
+      await getInvoiceStatistics();
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    }
+  };
+
+  // Calculate dashboard statistics from invoice data
   const calculateDashboardStats = () => {
+    const invoiceData = invoices?.Data || [];
+
+    if (invoiceData.length === 0) {
+      setDashboardData({
+        totalRevenue: 0,
+        totalInvoices: 0,
+        paidInvoices: 0,
+        outstandingAmount: 0,
+        overdueAmount: 0,
+        draftCount: 0,
+        thisMonthRevenue: 0,
+        lastMonthRevenue: 0,
+        averageInvoice: 0,
+        collectionRate: 0,
+        recentInvoices: [],
+        statusBreakdown: {
+          draft: 0,
+          sent: 0,
+          paid: 0,
+          overdue: 0,
+          unpaid: 0,
+          cancelled: 0,
+        },
+      });
+      return;
+    }
+
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -169,13 +176,16 @@ const InvoiceDashboard = () => {
       cancelled: 0,
     };
 
-    invoicesData.forEach((invoice) => {
+    invoiceData.forEach((invoice) => {
       const amount = parseFloat(invoice.TotalAmount) || 0;
+      const paidAmount = parseFloat(invoice.PaidAmount) || 0;
+      const balanceAmount = parseFloat(invoice.BalanceAmount) || 0;
       const invoiceDate = new Date(invoice.InvoiceDate);
       const invoiceMonth = invoiceDate.getMonth();
       const invoiceYear = invoiceDate.getFullYear();
+      const dueDate = new Date(invoice.DueDate);
 
-      // Total revenue calculation
+      // Total revenue calculation (sum of all invoice amounts)
       totalRevenue += amount;
 
       // Status breakdown
@@ -191,18 +201,24 @@ const InvoiceDashboard = () => {
         paidInvoices += 1;
       }
 
-      // Outstanding amount (unpaid + overdue)
-      if (status === "unpaid") {
-        outstandingAmount += amount;
+      // Outstanding amount calculation
+      if (status === "unpaid" || status === "sent") {
+        outstandingAmount +=
+          balanceAmount > 0 ? balanceAmount : amount - paidAmount;
       }
 
-      // Overdue amount
-      if (status === "overdue") {
-        overdueAmount += amount;
-        outstandingAmount += amount; // Overdue is also outstanding
+      // Overdue amount calculation
+      if (status === "overdue" || (status === "unpaid" && dueDate < now)) {
+        const overdueAmountForInvoice =
+          balanceAmount > 0 ? balanceAmount : amount - paidAmount;
+        overdueAmount += overdueAmountForInvoice;
+        if (status !== "overdue") {
+          // If it's unpaid but overdue, add to outstanding as well
+          outstandingAmount += overdueAmountForInvoice;
+        }
       }
 
-      // Monthly revenue calculations
+      // Monthly revenue calculations (based on invoice date)
       if (invoiceMonth === currentMonth && invoiceYear === currentYear) {
         thisMonthRevenue += amount;
       }
@@ -213,19 +229,19 @@ const InvoiceDashboard = () => {
     });
 
     // Recent invoices (last 5, sorted by date)
-    const recentInvoices = [...invoicesData]
+    const recentInvoices = [...invoiceData]
       .sort((a, b) => new Date(b.InvoiceDate) - new Date(a.InvoiceDate))
       .slice(0, 5);
 
     // Calculate derived metrics
     const averageInvoice =
-      invoicesData.length > 0 ? totalRevenue / invoicesData.length : 0;
+      invoiceData.length > 0 ? totalRevenue / invoiceData.length : 0;
     const collectionRate =
-      invoicesData.length > 0 ? (paidInvoices / invoicesData.length) * 100 : 0;
+      invoiceData.length > 0 ? (paidInvoices / invoiceData.length) * 100 : 0;
 
     setDashboardData({
       totalRevenue,
-      totalInvoices: invoicesData.length,
+      totalInvoices: invoiceData.length,
       paidInvoices,
       outstandingAmount,
       overdueAmount,
@@ -238,11 +254,6 @@ const InvoiceDashboard = () => {
       statusBreakdown,
     });
   };
-
-  // Calculate dashboard stats when data changes
-  useEffect(() => {
-    calculateDashboardStats();
-  }, [invoicesData]);
 
   // Utility functions
   const formatCurrency = (value, currency = "USD") => {
@@ -290,6 +301,21 @@ const InvoiceDashboard = () => {
     );
   };
 
+  // Handle refresh
+  const handleRefresh = async () => {
+    await loadDashboardData();
+  };
+
+  // Handle view invoice
+  const handleViewInvoice = (invoiceId) => {
+    navigate(`/admin/invoices/${invoiceId}`);
+  };
+
+  // Handle edit invoice
+  const handleEditInvoice = (invoiceId) => {
+    navigate(`/admin/invoices/edit/${invoiceId}`);
+  };
+
   // Dashboard Card Component
   const DashboardCard = ({
     title,
@@ -300,6 +326,7 @@ const InvoiceDashboard = () => {
     isCurrency = false,
     growth = null,
     subtitle = null,
+    isLoading = false,
   }) => (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-4">
@@ -325,9 +352,16 @@ const InvoiceDashboard = () => {
       </div>
 
       <div>
-        <span className="text-2xl font-bold text-gray-900 block">
-          {isCurrency ? formatCurrency(value) : value}
-        </span>
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+            <span className="text-2xl font-bold text-gray-400">--</span>
+          </div>
+        ) : (
+          <span className="text-2xl font-bold text-gray-900 block">
+            {isCurrency ? formatCurrency(value) : value}
+          </span>
+        )}
         <span className="text-gray-500 text-sm font-medium">{title}</span>
         {subtitle && (
           <span className="text-gray-400 text-xs block mt-1">{subtitle}</span>
@@ -360,7 +394,35 @@ const InvoiceDashboard = () => {
     </div>
   );
 
+  // Error Component
+  const ErrorDisplay = ({ message, onRetry }) => (
+    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+      <h3 className="text-lg font-semibold text-red-800 mb-2">
+        {translations["Error loading data"]}
+      </h3>
+      <p className="text-red-600 mb-4">{message}</p>
+      <button
+        onClick={onRetry}
+        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+      >
+        {translations.Retry}
+      </button>
+    </div>
+  );
+
   const growth = calculateGrowth();
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <ErrorDisplay message={error} onRetry={handleRefresh} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -376,6 +438,16 @@ const InvoiceDashboard = () => {
             </span>
           </div>
           <div className="flex gap-3 mt-4 lg:mt-0">
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
+              {translations.Refresh}
+            </button>
             <button
               onClick={() => navigate("/admin/invoices")}
               className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -393,8 +465,6 @@ const InvoiceDashboard = () => {
           </div>
         </div>
 
-        {/* Language Togglee */}
-
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <QuickActionCard
@@ -402,14 +472,14 @@ const InvoiceDashboard = () => {
             description="Generate a new invoice for your customers"
             icon={Receipt}
             bgColor="bg-blue-600"
-            onClick={() => console.log("Create invoice clicked")}
+            onClick={() => navigate("/admin/new-invoice")}
           />
           <QuickActionCard
             title="Manage Invoices"
             description="View, edit, and track all your invoices"
             icon={FileText}
             bgColor="bg-green-600"
-            onClick={() => console.log("Manage invoices clicked")}
+            onClick={() => navigate("/admin/invoices")}
           />
         </div>
 
@@ -424,6 +494,7 @@ const InvoiceDashboard = () => {
             isCurrency={true}
             growth={growth}
             subtitle={translations["vs last month"]}
+            isLoading={loading}
           />
           <DashboardCard
             title={translations["Total Invoices"]}
@@ -431,6 +502,7 @@ const InvoiceDashboard = () => {
             icon={Receipt}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
+            isLoading={loading}
           />
           <DashboardCard
             title={translations["Paid Invoices"]}
@@ -438,6 +510,7 @@ const InvoiceDashboard = () => {
             icon={CheckCircle}
             bgColor="bg-green-50"
             iconColor="text-green-600"
+            isLoading={loading}
           />
           <DashboardCard
             title={translations.Outstanding}
@@ -446,6 +519,7 @@ const InvoiceDashboard = () => {
             bgColor="bg-yellow-50"
             iconColor="text-yellow-600"
             isCurrency={true}
+            isLoading={loading}
           />
         </div>
 
@@ -458,6 +532,7 @@ const InvoiceDashboard = () => {
             bgColor="bg-red-50"
             iconColor="text-red-600"
             isCurrency={true}
+            isLoading={loading}
           />
           <DashboardCard
             title={translations.Draft}
@@ -465,6 +540,7 @@ const InvoiceDashboard = () => {
             icon={FileText}
             bgColor="bg-gray-50"
             iconColor="text-gray-600"
+            isLoading={loading}
           />
           <DashboardCard
             title={translations["Average Invoice"]}
@@ -473,6 +549,7 @@ const InvoiceDashboard = () => {
             bgColor="bg-purple-50"
             iconColor="text-purple-600"
             isCurrency={true}
+            isLoading={loading}
           />
           <DashboardCard
             title={translations["Collection Rate"]}
@@ -480,6 +557,7 @@ const InvoiceDashboard = () => {
             icon={TrendingUp}
             bgColor="bg-indigo-50"
             iconColor="text-indigo-600"
+            isLoading={loading}
           />
         </div>
 
@@ -494,42 +572,52 @@ const InvoiceDashboard = () => {
               </h3>
             </div>
 
-            <div className="space-y-4">
-              {Object.entries(dashboardData.statusBreakdown).map(
-                ([status, count]) => (
-                  <div
-                    key={status}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-3 h-3 rounded-full ${
-                          status === "paid"
-                            ? "bg-green-500"
-                            : status === "sent"
-                            ? "bg-blue-500"
-                            : status === "overdue"
-                            ? "bg-red-500"
-                            : status === "unpaid"
-                            ? "bg-yellow-500"
-                            : status === "draft"
-                            ? "bg-gray-500"
-                            : "bg-gray-400"
-                        }`}
-                      ></div>
-                      <span className="text-sm font-medium text-gray-700 capitalize">
-                        {translations[
-                          status.charAt(0).toUpperCase() + status.slice(1)
-                        ] || status}
+            {loading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Object.entries(dashboardData.statusBreakdown).map(
+                  ([status, count]) => (
+                    <div
+                      key={status}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            status === "paid"
+                              ? "bg-green-500"
+                              : status === "sent"
+                              ? "bg-blue-500"
+                              : status === "overdue"
+                              ? "bg-red-500"
+                              : status === "unpaid"
+                              ? "bg-yellow-500"
+                              : status === "draft"
+                              ? "bg-gray-500"
+                              : "bg-gray-400"
+                          }`}
+                        ></div>
+                        <span className="text-sm font-medium text-gray-700 capitalize">
+                          {translations[
+                            status.charAt(0).toUpperCase() + status.slice(1)
+                          ] || status}
+                        </span>
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">
+                        {count}
                       </span>
                     </div>
-                    <span className="text-sm font-bold text-gray-900">
-                      {count}
-                    </span>
-                  </div>
-                )
-              )}
-            </div>
+                  )
+                )}
+              </div>
+            )}
           </div>
 
           {/* Recent Invoices */}
@@ -541,68 +629,88 @@ const InvoiceDashboard = () => {
                   {translations["Recent Invoices"]}
                 </h3>
               </div>
-              <button className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+              <button
+                onClick={() => navigate("/admin/invoices")}
+                className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+              >
                 {translations["View All"]}
               </button>
             </div>
 
-            <div className="space-y-3">
-              {dashboardData.recentInvoices.map((invoice) => (
-                <div
-                  key={invoice.Id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <span className="text-sm font-medium text-gray-900">
-                        {invoice.InvoiceNumber}
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-16 bg-gray-200 rounded-lg"></div>
+                  </div>
+                ))}
+              </div>
+            ) : dashboardData.recentInvoices.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                {translations["No invoices found"]}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {dashboardData.recentInvoices.map((invoice) => (
+                  <div
+                    key={invoice.Id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">
+                          {invoice.InvoiceNumber}
+                        </span>
+                        <span className="text-xs text-gray-500 block">
+                          {invoice.CustomerName ||
+                            invoice.BillingName ||
+                            "Unknown Customer"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatCurrency(
+                            invoice.TotalAmount,
+                            invoice.Currency
+                          )}
+                        </span>
+                        <span className="text-xs text-gray-500 block">
+                          {formatDate(invoice.InvoiceDate)}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          invoice.Status
+                        )}`}
+                      >
+                        {translations[invoice.Status] || invoice.Status}
                       </span>
-                      <span className="text-xs text-gray-500 block">
-                        {invoice.CustomerName ||
-                          invoice.BillingName ||
-                          "Unknown Customer"}
-                      </span>
+
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleViewInvoice(invoice.Id)}
+                          className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                          title={translations.View}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleEditInvoice(invoice.Id)}
+                          className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
+                          title={translations.Edit}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <span className="text-sm font-medium text-gray-900">
-                        {formatCurrency(invoice.TotalAmount, invoice.Currency)}
-                      </span>
-                      <span className="text-xs text-gray-500 block">
-                        {formatDate(invoice.InvoiceDate)}
-                      </span>
-                    </div>
-
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        invoice.Status
-                      )}`}
-                    >
-                      {translations[invoice.Status] || invoice.Status}
-                    </span>
-
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => console.log("View invoice:", invoice.Id)}
-                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-                        title={translations.View}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => console.log("Edit invoice:", invoice.Id)}
-                        className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded transition-colors"
-                        title={translations.Edit}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -615,24 +723,35 @@ const InvoiceDashboard = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="text-center">
-              <span className="text-3xl font-bold text-blue-600 block">
-                {formatCurrency(dashboardData.thisMonthRevenue)}
-              </span>
-              <span className="text-gray-500 text-sm">
-                {translations["This Month"]}
-              </span>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="text-center animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
+                </div>
+              ))}
             </div>
-            <div className="text-center">
-              <span className="text-3xl font-bold text-gray-600 block">
-                {formatCurrency(dashboardData.lastMonthRevenue)}
-              </span>
-              <span className="text-gray-500 text-sm">Last Month</span>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="text-center">
+                <span className="text-3xl font-bold text-blue-600 block">
+                  {formatCurrency(dashboardData.thisMonthRevenue)}
+                </span>
+                <span className="text-gray-500 text-sm">
+                  {translations["This Month"]}
+                </span>
+              </div>
+              <div className="text-center">
+                <span className="text-3xl font-bold text-gray-600 block">
+                  {formatCurrency(dashboardData.lastMonthRevenue)}
+                </span>
+                <span className="text-gray-500 text-sm">Last Month</span>
+              </div>
             </div>
-          </div>
+          )}
 
-          {growth !== 0 && (
+          {!loading && growth !== 0 && (
             <div className="mt-4 text-center">
               <div
                 className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${

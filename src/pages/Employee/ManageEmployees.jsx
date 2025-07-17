@@ -10,13 +10,13 @@ import employeeTranslations from "../../translations/employeeTranslations";
 const ManageEmployees = () => {
   const { formMode, setFormMode, setSelectedEmployee } = useHR();
   const [showForm, setShowForm] = useState(false);
-  
+
   // Get current language from Redux store
   const { language: currentLanguage } = useSelector((state) => state.language);
-  
+
   // Get translations based on current language
   const t = employeeTranslations[currentLanguage] || employeeTranslations.en;
-  
+
   // Check if current language is Arabic for RTL support
   const isArabic = currentLanguage === "ar";
 
@@ -28,13 +28,29 @@ const ManageEmployees = () => {
 
   const handleBackToList = () => {
     setShowForm(false);
+    setFormMode("list"); // Reset form mode to a neutral state
+    setSelectedEmployee(null); // Clear selected employee
   };
 
+  // Show form when explicitly set to show or when in view/edit/create modes
+  const shouldShowForm =
+    showForm ||
+    formMode === "view" ||
+    formMode === "edit" ||
+    formMode === "create";
+
   return (
-    <div dir={isArabic ? "rtl" : "ltr"} className={isArabic ? "font-arabic" : ""}>
-      {!showForm && formMode !== "view" && formMode !== "edit" ? (
+    <div
+      dir={isArabic ? "rtl" : "ltr"}
+      className={isArabic ? "font-arabic" : ""}
+    >
+      {!shouldShowForm ? (
         <>
-          <div className={`flex mb-4 ${isArabic ? "justify-start" : "justify-end"}`}>
+          <div
+            className={`flex mb-4 ${
+              isArabic ? "justify-start" : "justify-end"
+            }`}
+          >
             <FilledButton
               isIcon
               icon={Plus}
@@ -53,7 +69,11 @@ const ManageEmployees = () => {
         </>
       ) : (
         <>
-          <div className={`flex mb-4 ${isArabic ? "justify-end" : "justify-start"}`}>
+          <div
+            className={`flex mb-4 ${
+              isArabic ? "justify-end" : "justify-start"
+            }`}
+          >
             <FilledButton
               buttonText={t.backToList}
               onClick={handleBackToList}

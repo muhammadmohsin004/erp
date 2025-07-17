@@ -275,15 +275,7 @@ export const ServiceProvider = ({ children }) => {
 
         if (response.Success) {
           // Ensure Data.$values is always an array
-          const servicesResponse = {
-            ...response,
-            Data: {
-              ...response.Data,
-              $values: Array.isArray(response.Data?.$values)
-                ? response.Data.$values
-                : [],
-            },
-          };
+          const servicesResponse = response?.Data?.$values;
 
           dispatch({
             type: actionTypes.SET_SERVICES,

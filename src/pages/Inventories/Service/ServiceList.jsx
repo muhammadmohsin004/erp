@@ -120,7 +120,8 @@ const ServiceList = () => {
 
   // Process services data from API response
   console.log("services================>", services);
-  const servicesData = services?.Data?.$values || [];
+  const servicesData = services || [];
+  console.log("ServicesData", servicesData);
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");

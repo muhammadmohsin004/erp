@@ -689,7 +689,8 @@ export const ProductsManagerProvider = ({ children }) => {
         );
 
         if (response.Success) {
-          dispatch({ type: actionTypes.SET_PRODUCTS, payload: response });
+          dispatch({ type: actionTypes.SET_PRODUCTS, payload: response.data });
+          console.log("p=>responce.data", response.data);
 
           if (response.Paginations) {
             dispatch({

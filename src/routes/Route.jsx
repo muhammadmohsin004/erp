@@ -513,6 +513,7 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
+    //update new
     {
       path: "/admin/company-branches",
       component: CompanyBranchList,
