@@ -242,15 +242,13 @@ const SupplierList = () => {
           `"${supplier.Status || ""}"`,
           `"${supplier.TaxId || ""}"`,
           `"${supplier.Notes || ""}"`,
-          `"${
-            supplier.CreatedAt
-              ? new Date(supplier.CreatedAt).toLocaleDateString()
-              : ""
+          `"${supplier.CreatedAt
+            ? new Date(supplier.CreatedAt).toLocaleDateString()
+            : ""
           }"`,
-          `"${
-            supplier.UpdatedAt
-              ? new Date(supplier.UpdatedAt).toLocaleDateString()
-              : ""
+          `"${supplier.UpdatedAt
+            ? new Date(supplier.UpdatedAt).toLocaleDateString()
+            : ""
           }"`,
         ].join(",")
       ),
@@ -495,24 +493,25 @@ const SupplierList = () => {
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations.Suppliers}
             </h1>
             {selectedSuppliers.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedSuppliers.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <FilledButton
               isIcon={true}
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -522,6 +521,7 @@ const SupplierList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
+
             <FilledButton
               isIcon={true}
               icon={Download}
@@ -529,14 +529,13 @@ const SupplierList = () => {
               bgColor={
                 isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
               }
-              textColor={isExporting ? "text-gray-600" : "text-gray-700"}
               rounded="rounded-lg"
               buttonText={
                 isExporting
                   ? "Exporting..."
                   : selectedSuppliers.length > 0
-                  ? `${translations.Export} (${selectedSuppliers.length})`
-                  : translations.Export
+                    ? `${translations.Export} (${selectedSuppliers.length})`
+                    : translations.Export
               }
               height="h-10"
               px="px-4"
@@ -546,6 +545,7 @@ const SupplierList = () => {
               disabled={isExporting}
               onClick={handleExport}
             />
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -561,8 +561,9 @@ const SupplierList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/new-supplier")}
             />
-          </Container>
-        </Container>
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -740,11 +741,10 @@ const SupplierList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              supplier.Status === "Active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${supplier.Status === "Active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                              }`}
                           >
                             {translations[supplier.Status] || supplier.Status}
                           </Span>
@@ -920,11 +920,10 @@ const SupplierList = () => {
                     {translations.Status}
                   </Span>
                   <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedSupplier.Status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedSupplier.Status === "Active"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                      }`}
                   >
                     {translations[selectedSupplier.Status] ||
                       selectedSupplier.Status}
@@ -975,29 +974,29 @@ const SupplierList = () => {
                 {(selectedSupplier.Address ||
                   selectedSupplier.City ||
                   selectedSupplier.Country) && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Address}
-                    </Span>
-                    <Container className="mt-1">
-                      {selectedSupplier.Address && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedSupplier.Address}
-                        </Span>
-                      )}
-                      <Span className="text-sm text-gray-900 block">
-                        {[
-                          selectedSupplier.City,
-                          selectedSupplier.State,
-                          selectedSupplier.ZipCode,
-                          selectedSupplier.Country,
-                        ]
-                          .filter(Boolean)
-                          .join(", ")}
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations.Address}
                       </Span>
+                      <Container className="mt-1">
+                        {selectedSupplier.Address && (
+                          <Span className="text-sm text-gray-900 block">
+                            {selectedSupplier.Address}
+                          </Span>
+                        )}
+                        <Span className="text-sm text-gray-900 block">
+                          {[
+                            selectedSupplier.City,
+                            selectedSupplier.State,
+                            selectedSupplier.ZipCode,
+                            selectedSupplier.Country,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </Span>
+                      </Container>
                     </Container>
-                  </Container>
-                )}
+                  )}
 
                 {selectedSupplier.Notes && (
                   <Container>
@@ -1017,8 +1016,8 @@ const SupplierList = () => {
                     Created:{" "}
                     {selectedSupplier.CreatedAt
                       ? new Date(
-                          selectedSupplier.CreatedAt
-                        ).toLocaleDateString()
+                        selectedSupplier.CreatedAt
+                      ).toLocaleDateString()
                       : "N/A"}
                   </Container>
                   {selectedSupplier.UpdatedAt && (

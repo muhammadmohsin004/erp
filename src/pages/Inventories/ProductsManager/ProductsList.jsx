@@ -74,8 +74,8 @@ const ProductsList = () => {
   } = useProductsManager();
 
   // Process products data from API response
-  const productsData = products?.Data?.$values || [];
-
+  const parsedProducts = JSON.parse(products);
+  const productsData = parsedProducts?.Data?.$values || [];
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused] = useState(false);
@@ -775,7 +775,7 @@ const ProductsList = () => {
               icon={Layers}
               iconSize="w-4 h-4"
               bgColor="bg-purple-100 hover:bg-purple-200"
-              textColor="text-purple-700"
+              // textColor="text-purple-700"
               rounded="rounded-lg"
               buttonText={translations["Manage Categories"]}
               height="h-10"
@@ -791,7 +791,7 @@ const ProductsList = () => {
               icon={Star}
               iconSize="w-4 h-4"
               bgColor="bg-yellow-100 hover:bg-yellow-200"
-              textColor="text-yellow-700"
+              // textColor="text-yellow-700"
               rounded="rounded-lg"
               buttonText={translations["Manage Brands"]}
               height="h-10"
@@ -807,7 +807,7 @@ const ProductsList = () => {
               icon={BarChart3}
               iconSize="w-4 h-4"
               bgColor="bg-green-100 hover:bg-green-200"
-              textColor="text-green-700"
+              // textColor="text-green-700"
               rounded="rounded-lg"
               buttonText={translations["View Statistics"]}
               height="h-10"
@@ -824,7 +824,7 @@ const ProductsList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -842,7 +842,7 @@ const ProductsList = () => {
               bgColor={
                 isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
               }
-              textColor={isExporting ? "text-gray-600" : "text-gray-700"}
+              // textColor={isExporting ? "text-gray-600" : "text-gray-700"}
               rounded="rounded-lg"
               buttonText={
                 isExporting ? translations.Exporting : translations.Export
@@ -875,7 +875,7 @@ const ProductsList = () => {
         </Container>
 
         {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 mb-6">
           <StatCard
             title={`${translations.Total} ${translations.Products}`}
             value={statistics?.totalProducts || 0}
@@ -922,6 +922,7 @@ const ProductsList = () => {
             isCurrency={true}
           />
         </Container>
+
 
         {/* Search Bar */}
         <Container className="mb-6">
