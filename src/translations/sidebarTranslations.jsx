@@ -72,6 +72,9 @@ export const sidebarTranslations = {
     expenses: "Expenses",
     balanceSheet: "Balance Sheet",
 
+    //vendor
+    vendor: "Vendors",
+
     // Other
     bills: "Bills",
     accounting: "Accounting",

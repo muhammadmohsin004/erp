@@ -73,6 +73,8 @@ import AttendanceModule from "../pages/HRModule/Attendance/AttendanceModule";
 import AttendancePolicyPage from "../pages/HRModule/AttendancePolicy/AttendancePolicyPage";
 import AdminLeaveManagement from "../pages/HRModule/LeaveMangement/AdminLeaveManagement";
 import EmployeeLeaveManagement from "../pages/HRModule/LeaveMangement/EmployeeLeaveManagement";
+import VendorsManagement from "../pages/Vendors/VendorsManagement";
+import BankAccountManagement from "../pages/BankAccountManagement/BankAccountManagement";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -626,6 +628,12 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
+      path: "/admin/bank-accounts",
+      component: BankAccountManagement,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
       path: "/admin/finance/incomes",
       component: IncomeList,
       roles: ["Admin", "Manager", "Employee"],
@@ -658,6 +666,12 @@ const getRouteConfig = () => {
     {
       path: "/admin/finance/reports",
       component: FinancialReports,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/vendors",
+      component: VendorsManagement,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

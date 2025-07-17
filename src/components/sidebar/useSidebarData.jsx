@@ -455,6 +455,11 @@ export const useSidebarData = () => {
             icon: BarChart3,
           },
           {
+            label: t.bankAccount,
+            path: getRoleBasedPath("/bank-accounts"),
+            icon: BarChart3,
+          },
+          {
             label: t.incomes,
             path: getRoleBasedPath("/finance/incomes"),
             icon: TrendingUp,
@@ -475,6 +480,12 @@ export const useSidebarData = () => {
             icon: FileText,
           },
         ],
+      },
+      {
+        icon: Building,
+        label: t.vendor,
+        path: getRoleBasedPath("/vendors"),
+        roles: ["Admin"],
       },
       {
         icon: FileText,
@@ -604,12 +615,12 @@ export const useSidebarData = () => {
     isMobile,
     currentLanguage,
     location,
-    
+
     // Data
     menuItems,
     userInfo,
     t,
-    
+
     // Functions
     toggleSubmenu,
     isPathActive,
