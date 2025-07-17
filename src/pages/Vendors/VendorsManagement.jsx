@@ -241,7 +241,7 @@ const VendorManagement = () => {
     if (selectAll) {
       setSelectedVendors([]);
     } else {
-      setSelectedVendors(vendors?.Data?.map((vendor) => vendor.id) || []);
+      setSelectedVendors(vendors?.map((vendor) => vendor.id) || []);
     }
     setSelectAll(!selectAll);
   };
@@ -457,8 +457,8 @@ const VendorManagement = () => {
     getVendors();
   };
 
-  // Get vendors data
-  const vendorsData = vendors?.Data || [];
+  // Get vendors data - Updated to handle the context structure
+  const vendorsData = Array.isArray(vendors) ? vendors : [];
 
   // Render vendor form
   const renderVendorForm = () => (
@@ -896,8 +896,8 @@ const VendorManagement = () => {
                     <td className="px-6 py-4">
                       <input
                         type="checkbox"
-                        checked={selectedVendors.includes(vendor.id)}
-                        onChange={() => handleVendorSelection(vendor.id)}
+                        checked={selectedVendors.includes(vendor.Id)}
+                        onChange={() => handleVendorSelection(vendor.Id)}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </td>
@@ -905,15 +905,15 @@ const VendorManagement = () => {
                       <Container>
                         <Container className="flex items-center gap-2">
                           <Span className="text-sm font-medium text-gray-900">
-                            {vendor.name || "N/A"}
+                            {vendor.Name || "N/A"}
                           </Span>
                         </Container>
                         {vendor.email && (
                           <a
-                            href={`mailto:${vendor.email}`}
+                            href={`mailto:${vendor.Email}`}
                             className="text-sm text-blue-600 hover:text-blue-800"
                           >
-                            {vendor.email}
+                            {vendor.Email}
                           </a>
                         )}
                       </Container>
@@ -925,17 +925,17 @@ const VendorManagement = () => {
                     </td>
                     <td className="px-6 py-4 hidden lg:table-cell">
                       <Container>
-                        {vendor.contactPerson ? (
+                        {vendor.ContactPerson ? (
                           <Container>
                             <Span className="text-sm text-gray-900 block">
-                              {vendor.contactPerson}
+                              {vendor.ContactPerson}
                             </Span>
                             {vendor.phone && (
                               <a
-                                href={`tel:${vendor.phone}`}
+                                href={`tel:${vendor.Phone}`}
                                 className="text-xs text-blue-600 hover:text-blue-800"
                               >
-                                {vendor.phone}
+                                {vendor.Phone}
                               </a>
                             )}
                           </Container>
@@ -945,11 +945,11 @@ const VendorManagement = () => {
                       </Container>
                     </td>
                     <td className="px-6 py-4 hidden xl:table-cell">
-                      {vendor.address || vendor.city ? (
+                      {vendor.Address || vendor.City ? (
                         <Container className="flex items-start">
                           <MapPin className="w-4 h-4 text-gray-400 mr-1 mt-0.5 flex-shrink-0" />
                           <Container className="text-sm text-gray-900">
-                            {vendor.address && (
+                            {vendor.Address && (
                               <>
                                 <Span className="block"></Span>
                                 <Span className="block">{vendor.address}</Span>
@@ -957,8 +957,8 @@ const VendorManagement = () => {
                             )}
                             {vendor.city && (
                               <Span className="block text-gray-600">
-                                {vendor.city}
-                                {vendor.state && `, ${vendor.state}`}
+                                {vendor.City}
+                                {vendor.State && `, ${vendor.State}`}
                               </Span>
                             )}
                           </Container>
@@ -969,7 +969,7 @@ const VendorManagement = () => {
                     </td>
                     <td className="px-6 py-4">
                       <Container className="flex items-center">
-                        {vendor.isActive ? (
+                        {vendor.IsActive ? (
                           <Container className="flex items-center gap-2">
                             <Container className="w-2 h-2 bg-green-500 rounded-full"></Container>
                             <Span className="text-sm text-green-600 font-medium">
@@ -989,7 +989,7 @@ const VendorManagement = () => {
                     <td className="px-6 py-4">
                       <Container className="flex items-center justify-center gap-2">
                         <OutlineButton
-                          buttonText=""
+                          buttonText="Eye"
                           onClick={() => handleViewVendor(vendor.id)}
                           borderColor="border-blue-200"
                           borderWidth="border"
@@ -1003,7 +1003,7 @@ const VendorManagement = () => {
                           title={translations.View}
                         />
                         <OutlineButton
-                          buttonText=""
+                          buttonText="Edit"
                           onClick={() => handleEditVendor(vendor.id)}
                           borderColor="border-green-200"
                           borderWidth="border"
@@ -1017,7 +1017,7 @@ const VendorManagement = () => {
                           title={translations.Edit}
                         />
                         <OutlineButton
-                          buttonText=""
+                          buttonText="Copy"
                           onClick={() => handleCloneVendor(vendor.id)}
                           borderColor="border-purple-200"
                           borderWidth="border"
@@ -1041,24 +1041,24 @@ const VendorManagement = () => {
                           borderWidth="border"
                           rounded="rounded-lg"
                           bgColor={
-                            vendor.isActive
+                            vendor.IsActive
                               ? "bg-orange-50 hover:bg-orange-100"
                               : "bg-gray-50 hover:bg-gray-100"
                           }
                           textColor={
-                            vendor.isActive
+                            vendor.IsActive
                               ? "text-orange-600"
                               : "text-gray-600"
                           }
                           height="h-8"
                           width="w-8"
-                          icon={vendor.isActive ? ToggleRight : ToggleLeft}
+                          icon={vendor.IsActive ? ToggleRight : ToggleLeft}
                           iconSize="w-4 h-4"
                           disabled={isTogglingStatus === vendor.id}
                           title={translations.Toggle}
                         />
                         <OutlineButton
-                          buttonText=""
+                          buttonText="Trash"
                           onClick={() => handleDeleteVendor(vendor.id)}
                           borderColor="border-red-200"
                           borderWidth="border"
