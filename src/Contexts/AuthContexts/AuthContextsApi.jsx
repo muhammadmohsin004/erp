@@ -488,6 +488,7 @@ export const AuthProvider = ({ children }) => {
 
         // Update localStorage
         localStorage.setItem('company', JSON.stringify(response.data.data));
+        
 
         return response.data;
       } catch (error) {

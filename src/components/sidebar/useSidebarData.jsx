@@ -465,10 +465,21 @@ export const useSidebarData = () => {
             icon: TrendingUp,
           },
           {
+            label: t.incomescatagories,
+            path: getRoleBasedPath("/finance/incomes/categories"),
+            icon: TrendingUp,
+          },
+          {
             label: t.expenses,
             path: getRoleBasedPath("/finance/expenses"),
             icon: TrendingDown,
           },
+          {
+            label: t.expensescatagories,
+            path: getRoleBasedPath("/finance/expenses/catagories"),
+            icon: TrendingDown,
+          },
+          
           {
             label: t.balanceSheet,
             path: getRoleBasedPath("/finance/balance"),

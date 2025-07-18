@@ -167,9 +167,11 @@ const NewClient = () => {
     "Postal Code": language === "ar" ? "الرمز البريدي" : "Postal Code",
     "Country": language === "ar" ? "البلد" : "Country",
     "VAT Number": language === "ar" ? "الرقم الضريبي" : "VAT Number",
+    "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
     "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
     "Currency": language === "ar" ? "العملة" : "Currency",
     "Category": language === "ar" ? "الفئة" : "Category",
+    "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
     "Invoicing Method": language === "ar" ? "طريقة الفوترة" : "Invoicing Method",
     "Notes": language === "ar" ? "ملاحظات" : "Notes",
     "First Name": language === "ar" ? "الاسم الأول" : "First Name",
@@ -192,7 +194,7 @@ const NewClient = () => {
   const cloneData = location.state?.cloneData;
   const editData = location.state?.editData;
 
-  // Form state
+  // Form state - Updated with required backend fields
   const [formData, setFormData] = useState({
     ClientType: "Individual",
     FullName: "",
@@ -210,9 +212,11 @@ const NewClient = () => {
     PostalCode: "",
     Country: "",
     VatNumber: "",
+    TaxNumber: "", // Added for backend compatibility
     CodeNumber: "",
     Currency: "USD",
     Category: "",
+    PaymentTerms: "", // Added for backend compatibility
     InvoicingMethod: "Email",
     Notes: "",
     DisplayLanguage: "en",
@@ -227,19 +231,49 @@ const NewClient = () => {
   // Initialize form data if editing or cloning
   useEffect(() => {
     if (cloneData) {
-      setFormData({
+      // Ensure all required fields are strings when cloning
+      const sanitizedCloneData = {
         ...cloneData,
         Id: undefined,
         CodeNumber: "",
         Email: "",
-      });
+        // Ensure required NOT NULL fields are strings
+        Mobile: cloneData.Mobile || "",
+        Telephone: cloneData.Telephone || "",
+        TaxNumber: cloneData.TaxNumber || "",
+        PaymentTerms: cloneData.PaymentTerms || "",
+        Currency: cloneData.Currency || "USD",
+        ClientType: cloneData.ClientType || "Individual",
+        DisplayLanguage: cloneData.DisplayLanguage || "en",
+      };
+      
+      setFormData(sanitizedCloneData);
+      
       if (cloneData.Contacts && Array.isArray(cloneData.Contacts.$values)) {
         setContacts(cloneData.Contacts.$values);
+      } else if (cloneData.Contacts && Array.isArray(cloneData.Contacts)) {
+        setContacts(cloneData.Contacts);
       }
     } else if (editData) {
-      setFormData(editData);
+      // Ensure all required fields are strings when editing
+      const sanitizedEditData = {
+        ...editData,
+        // Ensure required NOT NULL fields are strings
+        Mobile: editData.Mobile || "",
+        Telephone: editData.Telephone || "",
+        TaxNumber: editData.TaxNumber || "",
+        PaymentTerms: editData.PaymentTerms || "",
+        Currency: editData.Currency || "USD",
+        ClientType: editData.ClientType || "Individual",
+        DisplayLanguage: editData.DisplayLanguage || "en",
+      };
+      
+      setFormData(sanitizedEditData);
+      
       if (editData.Contacts && Array.isArray(editData.Contacts.$values)) {
         setContacts(editData.Contacts.$values);
+      } else if (editData.Contacts && Array.isArray(editData.Contacts)) {
+        setContacts(editData.Contacts);
       }
     }
   }, [cloneData, editData]);
@@ -254,7 +288,7 @@ const NewClient = () => {
   const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value || "" // Ensure values are never null/undefined
     }));
     
     // Clear error when user starts typing
@@ -274,7 +308,7 @@ const NewClient = () => {
       const newContacts = [...prev];
       newContacts[index] = {
         ...newContacts[index],
-        [field]: value
+        [field]: value || "" // Ensure values are never null/undefined
       };
       return newContacts;
     });
@@ -299,7 +333,33 @@ const NewClient = () => {
   // Handle file uploads
   const handleFileUpload = useCallback((event) => {
     const files = Array.from(event.target.files);
-    setAttachments(prev => [...prev, ...files]);
+    
+    // Validate file types and sizes
+    const validFiles = files.filter(file => {
+      const allowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 
+        'application/pdf', 
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain'
+      ];
+      
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert(`File ${file.name} has invalid type. Allowed types: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, TXT`);
+        return false;
+      }
+      
+      if (file.size > maxSize) {
+        alert(`File ${file.name} exceeds size limit of 10MB`);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    setAttachments(prev => [...prev, ...validFiles]);
   }, []);
 
   // Remove attachment
@@ -307,27 +367,82 @@ const NewClient = () => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Validate form
+  // Validate form - Updated to match backend requirements
   const validateForm = useCallback(() => {
     const newErrors = {};
 
+    // Required field validation based on client type
     if (formData.ClientType === "Individual") {
-      if (!formData.FullName.trim()) {
+      if (!formData.FullName?.trim()) {
         newErrors.FullName = translations.Required;
       }
-    } else {
-      if (!formData.BusinessName.trim()) {
+    } else if (formData.ClientType === "Business") {
+      if (!formData.BusinessName?.trim()) {
         newErrors.BusinessName = translations.Required;
       }
     }
 
+    // Email validation
     if (formData.Email && !/\S+@\S+\.\S+/.test(formData.Email)) {
       newErrors.Email = "Invalid email format";
+    }
+
+    // Website validation
+    if (formData.Website && !/^https?:\/\/.+/.test(formData.Website)) {
+      newErrors.Website = "Website must start with http:// or https://";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData, translations]);
+
+  // Sanitize form data before submission - Match backend expectations
+  const sanitizeFormData = useCallback(() => {
+    const sanitized = {
+      ...formData,
+      // Ensure all required NOT NULL fields are strings
+      Mobile: formData.Mobile || "",
+      Telephone: formData.Telephone || "",
+      TaxNumber: formData.TaxNumber || "",
+      PaymentTerms: formData.PaymentTerms || "",
+      Currency: formData.Currency || "USD",
+      ClientType: formData.ClientType || "Individual",
+      DisplayLanguage: formData.DisplayLanguage || "en",
+      
+      // Clean up optional fields
+      Email: formData.Email?.trim() || "",
+      Website: formData.Website?.trim() || "",
+      StreetAddress1: formData.StreetAddress1?.trim() || "",
+      StreetAddress2: formData.StreetAddress2?.trim() || "",
+      City: formData.City?.trim() || "",
+      State: formData.State?.trim() || "",
+      PostalCode: formData.PostalCode?.trim() || "",
+      Country: formData.Country?.trim() || "",
+      VatNumber: formData.VatNumber?.trim() || "",
+      CodeNumber: formData.CodeNumber?.trim() || "",
+      Category: formData.Category?.trim() || "",
+      Notes: formData.Notes?.trim() || "",
+      
+      // Handle names based on client type
+      FullName: formData.ClientType === "Individual" ? formData.FullName?.trim() || "" : formData.FullName?.trim() || "",
+      BusinessName: formData.ClientType === "Business" ? formData.BusinessName?.trim() || "" : formData.BusinessName?.trim() || "",
+      FirstName: formData.FirstName?.trim() || "",
+      LastName: formData.LastName?.trim() || "",
+      
+      // Boolean fields
+      HasSecondaryAddress: Boolean(formData.HasSecondaryAddress),
+    };
+
+    // Filter out empty strings for optional fields to avoid unnecessary data
+    Object.keys(sanitized).forEach(key => {
+      if (sanitized[key] === "" && !['Mobile', 'Telephone', 'TaxNumber', 'PaymentTerms', 'Currency', 'ClientType', 'DisplayLanguage'].includes(key)) {
+        // Keep required fields as empty strings, set others to null
+        sanitized[key] = null;
+      }
+    });
+
+    return sanitized;
+  }, [formData]);
 
   // Handle form submission
   const handleSubmit = useCallback(async (e) => {
@@ -339,27 +454,46 @@ const NewClient = () => {
 
     setIsSaving(true);
     try {
+      const sanitizedData = sanitizeFormData();
+      
+      // Filter contacts to only include those with at least one field filled
+      const validContacts = contacts.filter(contact => 
+        contact.FirstName?.trim() || contact.LastName?.trim() || contact.Email?.trim() || contact.Mobile?.trim() || contact.Telephone?.trim()
+      ).map(contact => ({
+        FirstName: contact.FirstName?.trim() || "",
+        LastName: contact.LastName?.trim() || "",
+        Email: contact.Email?.trim() || "",
+        Mobile: contact.Mobile?.trim() || "",
+        Telephone: contact.Telephone?.trim() || "",
+      }));
+
       const submitData = {
-        ...formData,
-        contacts: contacts.filter(contact => 
-          contact.FirstName || contact.LastName || contact.Email
-        )
+        ...sanitizedData,
+        contacts: validContacts
       };
 
+      let response;
       if (isEditing && editData?.Id) {
-        await updateClient(editData.Id, submitData, attachments);
+        response = await updateClient(editData.Id, submitData, attachments);
       } else {
-        await createClient(submitData, attachments);
+        response = await createClient(submitData, attachments);
       }
 
-      navigate("/admin/clients");
+      if (response && response.Success !== false) {
+        navigate("/admin/clients");
+      } else {
+        throw new Error(response?.Message || "Failed to save client");
+      }
     } catch (error) {
       console.error("Error saving client:", error);
-      alert("Failed to save client. Please try again.");
+      
+      // Show specific error message if available
+      const errorMessage = error.message || "Failed to save client. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsSaving(false);
     }
-  }, [formData, contacts, attachments, isEditing, editData, validateForm, updateClient, createClient, navigate]);
+  }, [formData, contacts, attachments, isEditing, editData, validateForm, sanitizeFormData, updateClient, createClient, navigate]);
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -551,6 +685,7 @@ const NewClient = () => {
                 placeholder="https://example.com"
                 value={formData.Website}
                 onChange={handleInputChange}
+                error={errors.Website}
               />
             </Container>
           </Section>
@@ -628,6 +763,14 @@ const NewClient = () => {
                 icon={CreditCard}
               />
               <InputField
+                label={translations["Tax Number"]}
+                name="TaxNumber"
+                placeholder="Enter tax number"
+                value={formData.TaxNumber}
+                onChange={handleInputChange}
+                icon={CreditCard}
+              />
+              <InputField
                 label={translations["Currency"]}
                 name="Currency"
                 as="select"
@@ -639,6 +782,13 @@ const NewClient = () => {
                 name="Category"
                 placeholder="Enter category (e.g., Premium, Corporate)"
                 value={formData.Category}
+                onChange={handleInputChange}
+              />
+              <InputField
+                label={translations["Payment Terms"]}
+                name="PaymentTerms"
+                placeholder="Enter payment terms (e.g., Net 30)"
+                value={formData.PaymentTerms}
                 onChange={handleInputChange}
               />
               <InputField
@@ -760,13 +910,13 @@ const NewClient = () => {
                   onChange={handleFileUpload}
                   className="hidden"
                   id="file-upload"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
                 />
                 <label htmlFor="file-upload">
                   <Container className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 cursor-pointer transition-colors">
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                     <Span className="text-gray-600">{translations["Choose Files"]}</Span>
-                    <Span className="text-sm text-gray-400 block">PDF, DOC, XLS, Images</Span>
+                    <Span className="text-sm text-gray-400 block">PDF, DOC, XLS, Images (Max 10MB each)</Span>
                   </Container>
                 </label>
               </Container>

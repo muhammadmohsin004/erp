@@ -160,8 +160,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             className={({ isActive }) => {
               const isCurrentActive =
                 isActive || isPathActive(subItem.path, location.pathname);
-              return `flex items-center px-8 py-2 text-sm hover:border-r-2 hover:border-purple-300 transition-all duration-200 ${
-                isCurrentActive
+              return `flex items-center px-8 py-2 text-sm hover:border-r-2 my-2 hover:border-purple-300 transition-all duration-200 ${isCurrentActive
                   ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                   : "text-gray-600 hover:text-black"
               } ${currentLanguage === "ar" ? "" : ""}`;
@@ -434,16 +433,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
         {/* Navigation Menu - SCROLLABLE AREA */}
         <div className="flex-1 overflow-y-auto">
           <nav className="py-2">
-            <style jsx>{`
-              .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-                color: white;
-              }
-              .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-            `}</style>
+         
             <div className="space-y-1">
               {menuItems.map((item, index) => renderMenuItem(item, index))}
             </div>
