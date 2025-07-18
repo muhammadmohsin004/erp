@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Plus, Download, Filter, Search, Tag, TrendingUp, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical, ToggleLeft, ToggleRight, Palette, Users } from 'lucide-react';
+import { Plus, Download, Filter, Search, Tag, TrendingUp, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical, ToggleLeft, ToggleRight, Palette, Users, AlertCircle } from 'lucide-react';
 import { useIncomeCategory } from '../../Contexts/IncomeCategoryContext/IncomeCategoryContext';
 import Badge from '../../components/elements/Badge/Badge';
 import Container from '../../components/elements/container/Container';
@@ -56,14 +56,15 @@ const IncomeCategories = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [viewingCategory, setViewingCategory] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
+  // Simplified form state to match API payload
   const [categoryForm, setCategoryForm] = useState({
     Name: '',
     Description: '',
-    Color: '#3B82F6',
-    Icon: '',
-    IsActive: true,
-    DisplayOrder: 0
+    Color: '#3498db',
+    IsActive: true
   });
 
   const [dateRange, setDateRange] = useState({
@@ -88,6 +89,34 @@ const IncomeCategories = () => {
     return () => clearTimeout(delayedSearch);
   }, [searchValue]);
 
+  // Clear error when component unmounts or modals close
+  useEffect(() => {
+    if (!showAddModal && !showEditModal && error) {
+      clearError();
+    }
+  }, [showAddModal, showEditModal, error, clearError]);
+
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!categoryForm.Name.trim()) {
+      errors.Name = 'Category name is required';
+    }
+    
+    if (!categoryForm.Color.trim()) {
+      errors.Color = 'Color is required';
+    }
+    
+    // Validate color format (should be hex color)
+    const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    if (categoryForm.Color && !colorRegex.test(categoryForm.Color)) {
+      errors.Color = 'Please enter a valid hex color (e.g., #3498db)';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleStatusFilter = (status) => {
     setSelectedStatus(status);
     if (status === '') {
@@ -98,33 +127,58 @@ const IncomeCategories = () => {
   };
 
   const handleAddCategory = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
     try {
       await createIncomeCategory(categoryForm);
       setShowAddModal(false);
       resetForm();
-      getIncomeCategories();
+      await getIncomeCategories(); // Refresh the list
+      
+      // Show success message (you might want to implement a toast notification)
+      console.log('Category created successfully!');
     } catch (error) {
       console.error('Error adding category:', error);
+      // Error is already handled in context, so it will show in the error state
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleEditCategory = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
     try {
       await updateIncomeCategory(editingCategory.Id, categoryForm);
       setShowEditModal(false);
       setEditingCategory(null);
       resetForm();
-      getIncomeCategories();
+      await getIncomeCategories(); // Refresh the list
+      
+      // Show success message
+      console.log('Category updated successfully!');
     } catch (error) {
       console.error('Error updating category:', error);
+      // Error is already handled in context
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteCategory = async (id) => {
     if (window.confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
       try {
-        await deleteIncomeCategory(id);
-        getIncomeCategories();
+        const success = await deleteIncomeCategory(id);
+        if (success) {
+          await getIncomeCategories(); // Refresh the list
+          console.log('Category deleted successfully!');
+        }
       } catch (error) {
         console.error('Error deleting category:', error);
       }
@@ -133,8 +187,11 @@ const IncomeCategories = () => {
 
   const handleToggleStatus = async (id) => {
     try {
-      await toggleIncomeCategoryStatus(id);
-      getIncomeCategories();
+      const success = await toggleIncomeCategoryStatus(id);
+      if (success) {
+        await getIncomeCategories(); // Refresh the list
+        console.log('Category status updated successfully!');
+      }
     } catch (error) {
       console.error('Error toggling status:', error);
     }
@@ -145,11 +202,10 @@ const IncomeCategories = () => {
     setCategoryForm({
       Name: category.Name || '',
       Description: category.Description || '',
-      Color: category.Color || '#3B82F6',
-      Icon: category.Icon || '',
-      IsActive: category.IsActive || true,
-      DisplayOrder: category.DisplayOrder || 0
+      Color: category.Color || '#3498db',
+      IsActive: category.IsActive !== undefined ? category.IsActive : true
     });
+    setFormErrors({});
     setShowEditModal(true);
   };
 
@@ -164,11 +220,25 @@ const IncomeCategories = () => {
     setCategoryForm({
       Name: '',
       Description: '',
-      Color: '#3B82F6',
-      Icon: '',
-      IsActive: true,
-      DisplayOrder: 0
+      Color: '#3498db',
+      IsActive: true
     });
+    setFormErrors({});
+  };
+
+  const handleModalClose = (modalType) => {
+    if (modalType === 'add') {
+      setShowAddModal(false);
+      resetForm();
+    } else if (modalType === 'edit') {
+      setShowEditModal(false);
+      setEditingCategory(null);
+      resetForm();
+    } else if (modalType === 'details') {
+      setShowDetailsModal(false);
+      setViewingCategory(null);
+    }
+    clearError();
   };
 
   const statusOptions = [
@@ -210,6 +280,23 @@ const IncomeCategories = () => {
 
   return (
     <Container className="p-6 space-y-6">
+      {/* Error Display */}
+      {error && (
+        <Card className="p-4 bg-red-50 border-red-200">
+          <div className="flex items-center space-x-2 text-red-700">
+            <AlertCircle size={20} />
+            <span className="font-medium">Error:</span>
+            <span>{error}</span>
+            <button 
+              onClick={clearError}
+              className="ml-auto text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        </Card>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <BodyHeader heading="Income Categories" subHeading="Manage and organize your income categories" />
@@ -239,118 +326,7 @@ const IncomeCategories = () => {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Categories</p>
-              <p className="text-2xl font-bold text-gray-900">{totalCategories}</p>
-            </div>
-            <div className="p-3 rounded-full bg-blue-500">
-              <Tag size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Active Categories</p>
-              <p className="text-2xl font-bold text-gray-900">{activeCategories}</p>
-            </div>
-            <div className="p-3 rounded-full bg-green-500">
-              <Users size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Income</p>
-              <p className="text-2xl font-bold text-gray-900">
-                ${totalIncomeFromCategories.toLocaleString()}
-              </p>
-            </div>
-            <div className="p-3 rounded-full bg-purple-500">
-              <DollarSign size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Top Category</p>
-              <p className="text-lg font-bold text-gray-900">{topPerformingCategory}</p>
-            </div>
-            <div className="p-3 rounded-full bg-yellow-500">
-              <TrendingUp size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Performance</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryPerformance?.CategoryBreakdown || []}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="categoryName" />
-              <YAxis />
-              <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Income']} />
-              <Bar dataKey="totalIncome" fill="#3B82F6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Income Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoryPerformance?.CategoryBreakdown || []}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
-                dataKey="totalIncome"
-              >
-                {(categoryPerformance?.CategoryBreakdown || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Income']} />
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      {/* Monthly Trends */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Income Trends by Category</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={categoryPerformance?.MonthlyTrends || []}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Income']} />
-            {(categoryPerformance?.CategoryBreakdown || []).map((category, index) => (
-              <Line
-                key={category.categoryName}
-                type="monotone"
-                dataKey={category.categoryName}
-                stroke={category.color || COLORS[index % COLORS.length]}
-                strokeWidth={2}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </Card>
+    
 
       {/* Filters */}
       <Card className="p-6">
@@ -394,7 +370,6 @@ const IncomeCategories = () => {
                 <TH>Total Income</TH>
                 <TH>Income Count</TH>
                 <TH>Status</TH>
-                <TH>Display Order</TH>
                 <TH>Actions</TH>
               </TR>
             </Thead>
@@ -405,7 +380,7 @@ const IncomeCategories = () => {
                     <div className="flex items-center space-x-2">
                       <div 
                         className="w-4 h-4 rounded-full" 
-                        style={{ backgroundColor: category.Color || '#3B82F6' }}
+                        style={{ backgroundColor: category.Color || '#3498db' }}
                       />
                       <span>{category.Name}</span>
                     </div>
@@ -417,7 +392,7 @@ const IncomeCategories = () => {
                     <div className="flex items-center space-x-2">
                       <div 
                         className="w-6 h-6 rounded-md border" 
-                        style={{ backgroundColor: category.Color || '#3B82F6' }}
+                        style={{ backgroundColor: category.Color || '#3498db' }}
                       />
                       <span className="text-sm text-gray-500">{category.Color}</span>
                     </div>
@@ -429,7 +404,6 @@ const IncomeCategories = () => {
                     <Badge variant="info">{category.IncomeCount || 0}</Badge>
                   </TD>
                   <TD>{getStatusBadge(category.IsActive)}</TD>
-                  <TD className="text-center">{category.DisplayOrder || 0}</TD>
                   <TD>
                     <div className="flex items-center space-x-2">
                       <button
@@ -480,64 +454,61 @@ const IncomeCategories = () => {
       <Modall
         title="Add New Income Category"
         modalOpen={showAddModal}
-        setModalOpen={setShowAddModal}
-        okText="Add Category"
+        setModalOpen={() => handleModalClose('add')}
+        okText={isSubmitting ? "Creating..." : "Add Category"}
         cancelText="Cancel"
         okAction={handleAddCategory}
-        cancelAction={() => setShowAddModal(false)}
+        cancelAction={() => handleModalClose('add')}
+        okDisabled={isSubmitting}
         width={600}
         body={
           <div className="space-y-4">
-            <InputField
-              label="Category Name"
-              placeholder="Enter category name"
-              value={categoryForm.Name}
-              onChange={(e) => setCategoryForm({...categoryForm, Name: e.target.value})}
-              width="w-full"
-            />
+            <div>
+              <InputField
+                label="Category Name *"
+                placeholder="Enter category name"
+                value={categoryForm.Name}
+                onChange={(e) => setCategoryForm({...categoryForm, Name: e.target.value})}
+                width="w-full"
+                error={formErrors.Name}
+              />
+              {formErrors.Name && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.Name}</p>
+              )}
+            </div>
+            
             <InputField
               label="Description"
-              placeholder="Enter category description"
+              placeholder="Enter category description (optional)"
               value={categoryForm.Description}
               onChange={(e) => setCategoryForm({...categoryForm, Description: e.target.value})}
               width="w-full"
             />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Color
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    className="w-12 h-10 border border-gray-300 rounded-md"
-                  />
-                  <InputField
-                    placeholder="#3B82F6"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    width="w-full"
-                  />
-                </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category Color *
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="color"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  className="w-12 h-10 border border-gray-300 rounded-md"
+                />
+                <InputField
+                  placeholder="#3498db"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  width="w-full"
+                  error={formErrors.Color}
+                />
               </div>
-              <InputField
-                label="Display Order"
-                type="number"
-                placeholder="0"
-                value={categoryForm.DisplayOrder}
-                onChange={(e) => setCategoryForm({...categoryForm, DisplayOrder: parseInt(e.target.value) || 0})}
-                width="w-full"
-              />
+              {formErrors.Color && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.Color}</p>
+              )}
             </div>
-            <InputField
-              label="Icon (Optional)"
-              placeholder="Icon name or unicode"
-              value={categoryForm.Icon}
-              onChange={(e) => setCategoryForm({...categoryForm, Icon: e.target.value})}
-              width="w-full"
-            />
+            
             <div className="flex items-center space-x-3">
               <CheckboxField
                 name="IsActive"
@@ -547,6 +518,15 @@ const IncomeCategories = () => {
                 errors={{}}
               />
             </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-center space-x-2 text-red-700">
+                  <AlertCircle size={16} />
+                  <span className="text-sm">{error}</span>
+                </div>
+              </div>
+            )}
           </div>
         }
       />
@@ -555,64 +535,61 @@ const IncomeCategories = () => {
       <Modall
         title="Edit Income Category"
         modalOpen={showEditModal}
-        setModalOpen={setShowEditModal}
-        okText="Update Category"
+        setModalOpen={() => handleModalClose('edit')}
+        okText={isSubmitting ? "Updating..." : "Update Category"}
         cancelText="Cancel"
         okAction={handleEditCategory}
-        cancelAction={() => setShowEditModal(false)}
+        cancelAction={() => handleModalClose('edit')}
+        okDisabled={isSubmitting}
         width={600}
         body={
           <div className="space-y-4">
-            <InputField
-              label="Category Name"
-              placeholder="Enter category name"
-              value={categoryForm.Name}
-              onChange={(e) => setCategoryForm({...categoryForm, Name: e.target.value})}
-              width="w-full"
-            />
+            <div>
+              <InputField
+                label="Category Name *"
+                placeholder="Enter category name"
+                value={categoryForm.Name}
+                onChange={(e) => setCategoryForm({...categoryForm, Name: e.target.value})}
+                width="w-full"
+                error={formErrors.Name}
+              />
+              {formErrors.Name && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.Name}</p>
+              )}
+            </div>
+            
             <InputField
               label="Description"
-              placeholder="Enter category description"
+              placeholder="Enter category description (optional)"
               value={categoryForm.Description}
               onChange={(e) => setCategoryForm({...categoryForm, Description: e.target.value})}
               width="w-full"
             />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Color
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    className="w-12 h-10 border border-gray-300 rounded-md"
-                  />
-                  <InputField
-                    placeholder="#3B82F6"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    width="w-full"
-                  />
-                </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category Color *
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="color"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  className="w-12 h-10 border border-gray-300 rounded-md"
+                />
+                <InputField
+                  placeholder="#3498db"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  width="w-full"
+                  error={formErrors.Color}
+                />
               </div>
-              <InputField
-                label="Display Order"
-                type="number"
-                placeholder="0"
-                value={categoryForm.DisplayOrder}
-                onChange={(e) => setCategoryForm({...categoryForm, DisplayOrder: parseInt(e.target.value) || 0})}
-                width="w-full"
-              />
+              {formErrors.Color && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.Color}</p>
+              )}
             </div>
-            <InputField
-              label="Icon (Optional)"
-              placeholder="Icon name or unicode"
-              value={categoryForm.Icon}
-              onChange={(e) => setCategoryForm({...categoryForm, Icon: e.target.value})}
-              width="w-full"
-            />
+            
             <div className="flex items-center space-x-3">
               <CheckboxField
                 name="IsActive"
@@ -622,6 +599,15 @@ const IncomeCategories = () => {
                 errors={{}}
               />
             </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-center space-x-2 text-red-700">
+                  <AlertCircle size={16} />
+                  <span className="text-sm">{error}</span>
+                </div>
+              </div>
+            )}
           </div>
         }
       />
@@ -630,11 +616,11 @@ const IncomeCategories = () => {
       <Modall
         title={`Category Details: ${viewingCategory?.Name || ''}`}
         modalOpen={showDetailsModal}
-        setModalOpen={setShowDetailsModal}
+        setModalOpen={() => handleModalClose('details')}
         okText="Close"
         cancelText=""
-        okAction={() => setShowDetailsModal(false)}
-        cancelAction={() => setShowDetailsModal(false)}
+        okAction={() => handleModalClose('details')}
+        cancelAction={() => handleModalClose('details')}
         width={800}
         body={
           <div className="space-y-6">
@@ -654,7 +640,6 @@ const IncomeCategories = () => {
                       <p className="text-sm text-gray-600">{currentIncomeCategory.Description}</p>
                       <div className="flex items-center space-x-4 text-sm">
                         <span>Status: {getStatusBadge(currentIncomeCategory.IsActive)}</span>
-                        <span>Order: {currentIncomeCategory.DisplayOrder}</span>
                       </div>
                     </div>
                   </div>

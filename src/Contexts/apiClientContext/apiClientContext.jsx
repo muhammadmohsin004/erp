@@ -90,27 +90,27 @@ const CLIENTS_ACTIONS = {
   RESET_FILTERS: "RESET_FILTERS",
 };
 
-  // Reducer function
-  const clientsReducer = (state, action) => {
-    switch (action.type) {
-      case CLIENTS_ACTIONS.SET_LOADING:
-        return {
-          ...state,
-          isLoading: action.payload,
-        };
+// Reducer function
+const clientsReducer = (state, action) => {
+  switch (action.type) {
+    case CLIENTS_ACTIONS.SET_LOADING:
+      return {
+        ...state,
+        isLoading: action.payload,
+      };
 
-      case CLIENTS_ACTIONS.SET_ERROR:
-        return {
-          ...state,
-          error: action.payload,
-          isLoading: false,
-        };
+    case CLIENTS_ACTIONS.SET_ERROR:
+      return {
+        ...state,
+        error: action.payload,
+        isLoading: false,
+      };
 
-      case CLIENTS_ACTIONS.CLEAR_ERROR:
-        return {
-          ...state,
-          error: null,
-        };
+    case CLIENTS_ACTIONS.CLEAR_ERROR:
+      return {
+        ...state,
+        error: null,
+      };
 
     case CLIENTS_ACTIONS.SET_CLIENTS:
       // Handle the API response format - Updated to match backend response
@@ -146,31 +146,31 @@ const CLIENTS_ACTIONS = {
         error: null,
       };
 
-      case CLIENTS_ACTIONS.SET_CURRENT_CLIENT:
-        return {
-          ...state,
-          currentClient: action.payload,
-          isLoading: false,
-          error: null,
-        };
+    case CLIENTS_ACTIONS.SET_CURRENT_CLIENT:
+      return {
+        ...state,
+        currentClient: action.payload,
+        isLoading: false,
+        error: null,
+      };
 
-      case CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT:
-        return {
-          ...state,
-          currentClient: null,
-        };
+    case CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT:
+      return {
+        ...state,
+        currentClient: null,
+      };
 
-      case CLIENTS_ACTIONS.ADD_CLIENT:
-        return {
-          ...state,
-          clients: [action.payload, ...state.clients],
-          pagination: {
-            ...state.pagination,
-            totalItems: state.pagination.totalItems + 1,
-          },
-          isLoading: false,
-          error: null,
-        };
+    case CLIENTS_ACTIONS.ADD_CLIENT:
+      return {
+        ...state,
+        clients: [action.payload, ...state.clients],
+        pagination: {
+          ...state.pagination,
+          totalItems: state.pagination.totalItems + 1,
+        },
+        isLoading: false,
+        error: null,
+      };
 
     case CLIENTS_ACTIONS.UPDATE_CLIENT:
       return {
@@ -202,41 +202,41 @@ const CLIENTS_ACTIONS = {
         error: null,
       };
 
-      case CLIENTS_ACTIONS.SET_SEARCH_TERM:
-        return {
-          ...state,
-          searchTerm: action.payload,
-          pagination: { ...state.pagination, page: 1 },
-        };
+    case CLIENTS_ACTIONS.SET_SEARCH_TERM:
+      return {
+        ...state,
+        searchTerm: action.payload,
+        pagination: { ...state.pagination, page: 1 },
+      };
 
-      case CLIENTS_ACTIONS.SET_CLIENT_TYPE:
-        return {
-          ...state,
-          clientType: action.payload,
-          pagination: { ...state.pagination, page: 1 },
-        };
+    case CLIENTS_ACTIONS.SET_CLIENT_TYPE:
+      return {
+        ...state,
+        clientType: action.payload,
+        pagination: { ...state.pagination, page: 1 },
+      };
 
-      case CLIENTS_ACTIONS.SET_SORT:
-        return {
-          ...state,
-          sortBy: action.payload.sortBy,
-          sortAscending: action.payload.sortAscending,
-          pagination: { ...state.pagination, page: 1 },
-        };
+    case CLIENTS_ACTIONS.SET_SORT:
+      return {
+        ...state,
+        sortBy: action.payload.sortBy,
+        sortAscending: action.payload.sortAscending,
+        pagination: { ...state.pagination, page: 1 },
+      };
 
-      case CLIENTS_ACTIONS.SET_PAGINATION:
-        return {
-          ...state,
-          pagination: { ...state.pagination, ...action.payload },
-        };
+    case CLIENTS_ACTIONS.SET_PAGINATION:
+      return {
+        ...state,
+        pagination: { ...state.pagination, ...action.payload },
+      };
 
-      case CLIENTS_ACTIONS.SET_STATISTICS:
-        return {
-          ...state,
-          statistics: action.payload,
-          isLoading: false,
-          error: null,
-        };
+    case CLIENTS_ACTIONS.SET_STATISTICS:
+      return {
+        ...state,
+        statistics: action.payload,
+        isLoading: false,
+        error: null,
+      };
 
     case CLIENTS_ACTIONS.RESET_FILTERS:
       return {
@@ -248,17 +248,17 @@ const CLIENTS_ACTIONS = {
         pagination: { ...state.pagination, page: 1 },
       };
 
-      default:
-        return state;
-    }
-  };
+    default:
+      return state;
+  }
+};
 
-  // Create context
-  const ClientsContext = createContext();
+// Create context
+const ClientsContext = createContext();
 
-  // ClientsProvider component
-  export const ClientsProvider = ({ children }) => {
-    const [state, dispatch] = useReducer(clientsReducer, initialState);
+// ClientsProvider component
+export const ClientsProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(clientsReducer, initialState);
 
   // Helper function to handle API errors - Updated to match backend error format
   const handleApiError = useCallback((error) => {
@@ -272,17 +272,29 @@ const CLIENTS_ACTIONS = {
       errorMessage = error.response.data.ValidationErrors.join(", ");
     } else if (error.response?.data?.validationErrors) {
       errorMessage = error.response.data.validationErrors.join(", ");
+    } else if (error.response?.data?.errors) {
+      // Handle the new error format
+      const errors = error.response.data.errors;
+      const errorMessages = [];
+      Object.keys(errors).forEach(key => {
+        if (Array.isArray(errors[key])) {
+          errorMessages.push(...errors[key]);
+        } else {
+          errorMessages.push(errors[key]);
+        }
+      });
+      errorMessage = errorMessages.join(", ");
     } else if (error.message) {
       errorMessage = error.message;
     }
 
-      dispatch({
-        type: CLIENTS_ACTIONS.SET_ERROR,
-        payload: errorMessage,
-      });
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_ERROR,
+      payload: errorMessage,
+    });
 
-      throw new Error(errorMessage);
-    }, []);
+    throw new Error(errorMessage);
+  }, []);
 
   // Calculate statistics from client data
   const calculateStatisticsFromClients = useCallback((clients) => {
@@ -315,13 +327,13 @@ const CLIENTS_ACTIONS = {
       return false;
     }).length;
 
-      return {
-        totalClients: total,
-        individualClients: individual,
-        businessClients: business,
-        clientsThisMonth: thisMonth,
-      };
-    }, []);
+    return {
+      totalClients: total,
+      individualClients: individual,
+      businessClients: business,
+      clientsThisMonth: thisMonth,
+    };
+  }, []);
 
   // Ensure required fields are strings (to match backend requirements)
   const sanitizeClientData = useCallback((clientData) => {
@@ -339,13 +351,13 @@ const CLIENTS_ACTIONS = {
     };
   }, []);
 
-    // Clients API methods
-    const clientsApi = {
-      // Get clients with pagination, search, and filters
-      getClients: async (options = {}) => {
-        try {
-          dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-          dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+  // Clients API methods
+  const clientsApi = {
+    // Get clients with pagination, search, and filters
+    getClients: async (options = {}) => {
+      try {
+        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const params = {
           page: options.page || state.pagination.page,
@@ -401,17 +413,17 @@ const CLIENTS_ACTIONS = {
           });
         }
 
-          return response.data;
-        } catch (error) {
-          handleApiError(error);
-        }
-      },
+        return response.data.Data.$values;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
 
-      // Get single client by ID
-      getClient: async (clientId) => {
-        try {
-          dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-          dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+    // Get single client by ID
+    getClient: async (clientId) => {
+      try {
+        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const response = await apiClient.get(`/clients/${clientId}`);
 
@@ -423,17 +435,17 @@ const CLIENTS_ACTIONS = {
           payload: clientData,
         });
 
-          return { data: clientData };
-        } catch (error) {
-          handleApiError(error);
-        }
-      },
+        return { data: clientData };
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
 
-      // Create new client - Updated to match backend FormData expectations
-      createClient: async (clientData, attachments = []) => {
-        try {
-          dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-          dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+    // Create new client - Updated to match backend FormData expectations
+    createClient: async (clientData, attachments = []) => {
+      try {
+        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const formData = new FormData();
 
@@ -470,10 +482,12 @@ const CLIENTS_ACTIONS = {
           }
         });
 
-        // Append attachments
-        attachments.forEach((file) => {
-          formData.append("Attachments", file);
-        });
+        // Append attachments only if they exist
+        if (attachments && attachments.length > 0) {
+          attachments.forEach((file) => {
+            formData.append("Attachments", file);
+          });
+        }
 
         const response = await apiClient.post("/clients", formData, {
           headers: {
@@ -484,73 +498,113 @@ const CLIENTS_ACTIONS = {
         const newClient =
           response.data.Data || response.data.data || response.data;
 
-          dispatch({
-            type: CLIENTS_ACTIONS.ADD_CLIENT,
-            payload: newClient,
-          });
+        dispatch({
+          type: CLIENTS_ACTIONS.ADD_CLIENT,
+          payload: newClient,
+        });
 
-          return response.data;
-        } catch (error) {
-          handleApiError(error);
-        }
-      },
+        return response.data;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
 
-      // Update existing client - Updated to match backend FormData expectations
-    // Update existing client - Fixed to include AttachmentsToRemove field
-// Update existing client - Updated to include required AttachmentsToRemove field
+    // Update existing client - COMPLETELY FIXED VERSION
+  // Update existing client - Simplest solution with no backend changes
 updateClient: async (clientId, clientData, attachments = []) => {
   try {
     dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
     dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-        const formData = new FormData();
+    const formData = new FormData();
+    
+    // Prepare ALL fields that backend expects with proper defaults
+    const completeData = {
+      // Required fields with defaults
+      ClientType: clientData.ClientType || "Individual",
+      FullName: clientData.FullName || "",
+      BusinessName: clientData.BusinessName || "",
+      FirstName: clientData.FirstName || "",
+      LastName: clientData.LastName || "",
+      Email: clientData.Email || "",
+      Mobile: clientData.Mobile || "",
+      Telephone: clientData.Telephone || "",
+      Website: clientData.Website || "",
+      StreetAddress1: clientData.StreetAddress1 || "",
+      StreetAddress2: clientData.StreetAddress2 || "",
+      City: clientData.City || "",
+      State: clientData.State || "",
+      PostalCode: clientData.PostalCode || "",
+      Country: clientData.Country || "",
+      VatNumber: clientData.VatNumber || "",
+      TaxNumber: clientData.TaxNumber || "",
+      CodeNumber: clientData.CodeNumber || "",
+      Currency: clientData.Currency || "USD",
+      Category: clientData.Category || "",
+      PaymentTerms: clientData.PaymentTerms || "",
+      InvoicingMethod: clientData.InvoicingMethod || "Email",
+      Notes: clientData.Notes || "",
+      DisplayLanguage: clientData.DisplayLanguage || "en",
+      HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
+      
+      // Backend specific required fields
+      MobileNumber: clientData.Mobile || "",
+      Phone: clientData.Telephone || "",
+      Address: "",
+    };
 
-        // Sanitize and append client data
-        const sanitizedData = sanitizeClientData(clientData);
+    // Append ALL fields to FormData
+    Object.keys(completeData).forEach(key => {
+      const value = completeData[key];
+      if (typeof value === 'boolean') {
+        formData.append(key, value.toString());
+      } else {
+        formData.append(key, value || "");
+      }
+    });
 
-        Object.keys(sanitizedData).forEach((key) => {
-          if (
-            sanitizedData[key] !== null &&
-            sanitizedData[key] !== undefined &&
-            sanitizedData[key] !== ""
-          ) {
-            if (key === "contacts" && Array.isArray(sanitizedData[key])) {
-              // Handle contacts array - match backend expected format
-              sanitizedData[key].forEach((contact, index) => {
-                Object.keys(contact).forEach((contactKey) => {
-                  if (
-                    contact[contactKey] !== null &&
-                    contact[contactKey] !== undefined &&
-                    contact[contactKey] !== ""
-                  ) {
-                    formData.append(
-                      `Contacts[${index}].${contactKey}`,
-                      contact[contactKey]
-                    );
-                  }
-                });
-              });
-            } else {
-              // Use PascalCase for backend compatibility
-              const backendKey = key.charAt(0).toUpperCase() + key.slice(1);
-              formData.append(backendKey, sanitizedData[key]);
-            }
-          }
-        });
+    // Handle contacts
+    if (clientData.contacts && Array.isArray(clientData.contacts)) {
+      clientData.contacts.forEach((contact, index) => {
+        formData.append(`Contacts[${index}].FirstName`, contact.FirstName || "");
+        formData.append(`Contacts[${index}].LastName`, contact.LastName || "");
+        formData.append(`Contacts[${index}].Email`, contact.Email || "");
+        formData.append(`Contacts[${index}].Mobile`, contact.Mobile || "");
+        formData.append(`Contacts[${index}].Telephone`, contact.Telephone || "");
+      });
+    }
 
-        // Append new attachments
-        attachments.forEach((file) => {
-          formData.append("Attachments", file);
-        });
+    // Handle attachments - Don't send empty files if no attachments
+    if (attachments && attachments.length > 0) {
+      attachments.forEach((file) => {
+        if (file instanceof File) {
+          formData.append('Attachments', file);
+        }
+      });
+    }
 
-        const response = await apiClient.put(`/clients/${clientId}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+    // Handle attachments to remove - Only send if there are valid IDs
+    const attachmentsToRemove = clientData.attachmentsToRemove || [];
+    if (attachmentsToRemove.length > 0) {
+      attachmentsToRemove.forEach((attachmentId, index) => {
+        if (attachmentId && parseInt(attachmentId) > 0) {
+          formData.append(`AttachmentsToRemove[${index}]`, attachmentId.toString());
+        }
+      });
+    }
 
-        const updatedClient =
-          response.data.Data || response.data.data || response.data;
+    console.log('FormData being sent:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    const response = await apiClient.put(`/clients/${clientId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    const updatedClient = response.data.Data || response.data.data || response.data;
 
     dispatch({
       type: CLIENTS_ACTIONS.UPDATE_CLIENT,
@@ -562,11 +616,12 @@ updateClient: async (clientId, clientData, attachments = []) => {
     handleApiError(error);
   }
 },
-      // Delete client - Updated to match backend signature
-      deleteClient: async (clientId, hardDelete = false) => {
-        try {
-          dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-          dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+    // Delete client - Updated to match backend signature
+    deleteClient: async (clientId, hardDelete = false) => {
+      try {
+        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const params = hardDelete ? { hardDelete: true } : {};
         const response = await apiClient.delete(`/clients/${clientId}`, {
@@ -578,18 +633,18 @@ updateClient: async (clientId, clientData, attachments = []) => {
           payload: clientId,
         });
 
-          return response.data;
-        } catch (error) {
-          handleApiError(error);
-        }
-      },
+        return response.data;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
 
-      // Get client statistics - Updated to match backend response
-      getStatistics: async (options = {}) => {
-        try {
-          const params = {};
-          if (options.startDate) params.startDate = options.startDate;
-          if (options.endDate) params.endDate = options.endDate;
+    // Get client statistics - Updated to match backend response
+    getStatistics: async (options = {}) => {
+      try {
+        const params = {};
+        if (options.startDate) params.startDate = options.startDate;
+        if (options.endDate) params.endDate = options.endDate;
 
         // If we have clients data, calculate statistics from it first
         if (
@@ -605,9 +660,9 @@ updateClient: async (clientId, clientData, attachments = []) => {
           return { data: stats };
         }
 
-          // Otherwise try to fetch from API
-          dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-          dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+        // Otherwise try to fetch from API
+        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         try {
           const response = await apiClient.get("/clients/statistics", {
@@ -634,101 +689,101 @@ updateClient: async (clientId, clientData, attachments = []) => {
             payload: stats,
           });
 
-            return { data: stats };
-          }
-        } catch (error) {
-          // Fallback to calculating from current state
-          const stats = calculateStatisticsFromClients(state.clients);
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
           return { data: stats };
         }
-      },
-
-      // Clear current client
-      clearCurrentClient: () => {
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT });
-      },
-
-      // Clear error manually
-      clearError: () => {
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-      },
-
-      // Set search term
-      setSearchTerm: (searchTerm) => {
+      } catch (error) {
+        // Fallback to calculating from current state
+        const stats = calculateStatisticsFromClients(state.clients);
         dispatch({
-          type: CLIENTS_ACTIONS.SET_SEARCH_TERM,
-          payload: searchTerm,
+          type: CLIENTS_ACTIONS.SET_STATISTICS,
+          payload: stats,
         });
-      },
+        return { data: stats };
+      }
+    },
 
-      // Set client type filter
-      setClientType: (clientType) => {
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_CLIENT_TYPE,
-          payload: clientType,
-        });
-      },
+    // Clear current client
+    clearCurrentClient: () => {
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT });
+    },
 
-      // Set sorting
-      setSort: (sortBy, sortAscending) => {
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_SORT,
-          payload: { sortBy, sortAscending },
-        });
-      },
+    // Clear error manually
+    clearError: () => {
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+    },
 
-      // Set pagination
-      setPagination: (paginationData) => {
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_PAGINATION,
-          payload: paginationData,
-        });
-      },
+    // Set search term
+    setSearchTerm: (searchTerm) => {
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_SEARCH_TERM,
+        payload: searchTerm,
+      });
+    },
 
-      // Reset all filters
-      resetFilters: () => {
-        dispatch({ type: CLIENTS_ACTIONS.RESET_FILTERS });
-      },
+    // Set client type filter
+    setClientType: (clientType) => {
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_CLIENT_TYPE,
+        payload: clientType,
+      });
+    },
 
-      // Refresh clients (reload with current filters)
-      refreshClients: async () => {
-        return await clientsApi.getClients();
-      },
+    // Set sorting
+    setSort: (sortBy, sortAscending) => {
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_SORT,
+        payload: { sortBy, sortAscending },
+      });
+    },
 
-      // Search clients (convenience method)
-      searchClients: async (searchTerm) => {
-        clientsApi.setSearchTerm(searchTerm);
-        return await clientsApi.getClients({ searchTerm, page: 1 });
-      },
+    // Set pagination
+    setPagination: (paginationData) => {
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_PAGINATION,
+        payload: paginationData,
+      });
+    },
 
-      // Filter by client type (convenience method)
-      filterByClientType: async (clientType) => {
-        clientsApi.setClientType(clientType);
-        return await clientsApi.getClients({ clientType, page: 1 });
-      },
+    // Reset all filters
+    resetFilters: () => {
+      dispatch({ type: CLIENTS_ACTIONS.RESET_FILTERS });
+    },
 
-      // Sort clients (convenience method)
-      sortClients: async (sortBy, sortAscending = true) => {
-        clientsApi.setSort(sortBy, sortAscending);
-        return await clientsApi.getClients({ sortBy, sortAscending, page: 1 });
-      },
+    // Refresh clients (reload with current filters)
+    refreshClients: async () => {
+      return await clientsApi.getClients();
+    },
 
-      // Go to specific page
-      goToPage: async (page) => {
-        clientsApi.setPagination({ page });
-        return await clientsApi.getClients({ page });
-      },
+    // Search clients (convenience method)
+    searchClients: async (searchTerm) => {
+      clientsApi.setSearchTerm(searchTerm);
+      return await clientsApi.getClients({ searchTerm, page: 1 });
+    },
 
-      // Change page size
-      changePageSize: async (pageSize) => {
-        clientsApi.setPagination({ pageSize, page: 1 });
-        return await clientsApi.getClients({ pageSize, page: 1 });
-      },
-    };
+    // Filter by client type (convenience method)
+    filterByClientType: async (clientType) => {
+      clientsApi.setClientType(clientType);
+      return await clientsApi.getClients({ clientType, page: 1 });
+    },
+
+    // Sort clients (convenience method)
+    sortClients: async (sortBy, sortAscending = true) => {
+      clientsApi.setSort(sortBy, sortAscending);
+      return await clientsApi.getClients({ sortBy, sortAscending, page: 1 });
+    },
+
+    // Go to specific page
+    goToPage: async (page) => {
+      clientsApi.setPagination({ page });
+      return await clientsApi.getClients({ page });
+    },
+
+    // Change page size
+    changePageSize: async (pageSize) => {
+      clientsApi.setPagination({ pageSize, page: 1 });
+      return await clientsApi.getClients({ pageSize, page: 1 });
+    },
+  };
 
   // Context value
   const contextValue = {
@@ -760,12 +815,12 @@ updateClient: async (clientId, clientData, attachments = []) => {
     },
   };
 
-    return (
-      <ClientsContext.Provider value={contextValue}>
-        {children}
-      </ClientsContext.Provider>
-    );
-  };
+  return (
+    <ClientsContext.Provider value={contextValue}>
+      {children}
+    </ClientsContext.Provider>
+  );
+};
 
 // Custom hook to use clients context
 export const useClients = () => {
@@ -776,8 +831,8 @@ export const useClients = () => {
   return context;
 };
 
-  // Export context for advanced usage
-  export { ClientsContext };
+// Export context for advanced usage
+export { ClientsContext };
 
 // Export API client for direct usage if needed
 export { apiClient };

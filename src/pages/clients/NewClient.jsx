@@ -225,6 +225,8 @@ const NewClient = () => {
 
   const [contacts, setContacts] = useState([]);
   const [attachments, setAttachments] = useState([]);
+  const [existingAttachments, setExistingAttachments] = useState([]);
+  const [attachmentsToRemove, setAttachmentsToRemove] = useState([]);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -274,6 +276,13 @@ const NewClient = () => {
         setContacts(editData.Contacts.$values);
       } else if (editData.Contacts && Array.isArray(editData.Contacts)) {
         setContacts(editData.Contacts);
+      }
+
+      // Handle existing attachments
+      if (editData.Attachments && Array.isArray(editData.Attachments.$values)) {
+        setExistingAttachments(editData.Attachments.$values);
+      } else if (editData.Attachments && Array.isArray(editData.Attachments)) {
+        setExistingAttachments(editData.Attachments);
       }
     }
   }, [cloneData, editData]);
@@ -362,9 +371,15 @@ const NewClient = () => {
     setAttachments(prev => [...prev, ...validFiles]);
   }, []);
 
-  // Remove attachment
+  // Remove new attachment
   const removeAttachment = useCallback((index) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Remove existing attachment
+  const removeExistingAttachment = useCallback((attachment) => {
+    setExistingAttachments(prev => prev.filter(att => att.Id !== attachment.Id));
+    setAttachmentsToRemove(prev => [...prev, attachment.Id]);
   }, []);
 
   // Validate form - Updated to match backend requirements
@@ -469,8 +484,14 @@ const NewClient = () => {
 
       const submitData = {
         ...sanitizedData,
-        contacts: validContacts
+        contacts: validContacts,
+        // Include attachments to remove only for updates
+        ...(isEditing && { attachmentsToRemove: attachmentsToRemove })
       };
+
+      console.log('Submitting data:', submitData);
+      console.log('Attachments:', attachments);
+      console.log('Attachments to remove:', attachmentsToRemove);
 
       let response;
       if (isEditing && editData?.Id) {
@@ -493,7 +514,7 @@ const NewClient = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [formData, contacts, attachments, isEditing, editData, validateForm, sanitizeFormData, updateClient, createClient, navigate]);
+  }, [formData, contacts, attachments, attachmentsToRemove, isEditing, editData, validateForm, sanitizeFormData, updateClient, createClient, navigate]);
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -921,16 +942,47 @@ const NewClient = () => {
                 </label>
               </Container>
 
+              {/* Existing Attachments (for editing) */}
+              {existingAttachments.length > 0 && (
+                <Container className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">Existing Attachments</h4>
+                  {existingAttachments.map((attachment) => (
+                    <Container key={attachment.Id} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
+                      <Container className="flex items-center gap-3">
+                        <FileIcon className="w-5 h-5 text-blue-400" />
+                        <Span className="text-sm text-gray-900">{attachment.FileName || attachment.File}</Span>
+                        <Span className="text-xs text-blue-600">(Existing)</Span>
+                      </Container>
+                      <FilledButton
+                        isIcon={true}
+                        icon={X}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-red-100 hover:bg-red-200"
+                        textColor="text-red-600"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        onClick={() => removeExistingAttachment(attachment)}
+                      />
+                    </Container>
+                  ))}
+                </Container>
+              )}
+
+              {/* New Attachments */}
               {attachments.length > 0 && (
                 <Container className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">New Attachments</h4>
                   {attachments.map((file, index) => (
-                    <Container key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <Container key={index} className="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-200">
                       <Container className="flex items-center gap-3">
-                        <FileIcon className="w-5 h-5 text-gray-400" />
+                        <FileIcon className="w-5 h-5 text-green-400" />
                         <Span className="text-sm text-gray-900">{file.name}</Span>
                         <Span className="text-xs text-gray-500">
                           ({(file.size / 1024 / 1024).toFixed(2)} MB)
                         </Span>
+                        <Span className="text-xs text-green-600">(New)</Span>
                       </Container>
                       <FilledButton
                         isIcon={true}
