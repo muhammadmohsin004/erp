@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts';
 import { Plus, Download, Filter, Search, CreditCard, TrendingDown, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical, ToggleLeft, ToggleRight, Palette, Users, AlertCircle, Target } from 'lucide-react';
 import { useExpenseCategory } from '../../Contexts/ExpenseCategoryContext/ExpenseCategoryContext';
@@ -146,6 +145,8 @@ const ExpenseCategories = () => {
 
   const handleEditCategory = async () => {
     try {
+      if (!editingCategory?.Id) return;
+      
       await updateExpenseCategory(editingCategory.Id, categoryForm);
       setShowEditModal(false);
       setEditingCategory(null);
@@ -183,7 +184,7 @@ const ExpenseCategories = () => {
       Description: category.Description || '',
       Color: category.Color || '#EF4444',
       Icon: category.Icon || '',
-      IsActive: category.IsActive || true,
+      IsActive: category.IsActive !== false,
       DisplayOrder: category.DisplayOrder || 0,
       BudgetLimit: category.BudgetLimit || 0,
       AllowOverBudget: category.AllowOverBudget !== false
@@ -340,74 +341,6 @@ const ExpenseCategories = () => {
         </Card>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Expense Performance</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryPerformance?.CategoryBreakdown || []}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="categoryName" />
-              <YAxis />
-              <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Expenses']} />
-              <Bar dataKey="totalExpenses" fill="#EF4444" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoryPerformance?.CategoryBreakdown || []}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
-                dataKey="totalExpenses"
-              >
-                {(categoryPerformance?.CategoryBreakdown || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Expenses']} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-4 space-y-2">
-            {(categoryPerformance?.CategoryBreakdown || []).slice(0, 4).map((category, index) => (
-              <div key={category.categoryName} className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: category.color || COLORS[index % COLORS.length] }}
-                  />
-                  <span className="text-gray-600">{category.categoryName}</span>
-                </div>
-                <span className="font-medium">${category.totalExpenses?.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* Monthly Trends */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Expense Trends by Category</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={categoryPerformance?.MonthlyTrends || []}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Expenses']} />
-            <Area type="monotone" dataKey="Office" stackId="1" stroke="#EF4444" fill="#EF4444" />
-            <Area type="monotone" dataKey="Travel" stackId="1" stroke="#F97316" fill="#F97316" />
-            <Area type="monotone" dataKey="Marketing" stackId="1" stroke="#F59E0B" fill="#F59E0B" />
-            <Area type="monotone" dataKey="Utilities" stackId="1" stroke="#84CC16" fill="#84CC16" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Card>
 
       {/* Budget Overview */}
       <Card className="p-6">
@@ -602,6 +535,7 @@ const ExpenseCategories = () => {
               value={categoryForm.Name}
               onChange={(e) => setCategoryForm({...categoryForm, Name: e.target.value})}
               width="w-full"
+              required
             />
             <InputField
               label="Description"
@@ -647,6 +581,8 @@ const ExpenseCategories = () => {
                 value={categoryForm.BudgetLimit}
                 onChange={(e) => setCategoryForm({...categoryForm, BudgetLimit: parseFloat(e.target.value) || 0})}
                 width="w-full"
+                min="0"
+                step="0.01"
               />
               <InputField
                 label="Icon (Optional)"
@@ -694,6 +630,7 @@ const ExpenseCategories = () => {
               value={categoryForm.Name}
               onChange={(e) => setCategoryForm({...categoryForm, Name: e.target.value})}
               width="w-full"
+              required
             />
             <InputField
               label="Description"
@@ -739,6 +676,8 @@ const ExpenseCategories = () => {
                 value={categoryForm.BudgetLimit}
                 onChange={(e) => setCategoryForm({...categoryForm, BudgetLimit: parseFloat(e.target.value) || 0})}
                 width="w-full"
+                min="0"
+                step="0.01"
               />
               <InputField
                 label="Icon (Optional)"

@@ -2,22 +2,24 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 
 // Initial state
 const initialState = {
-  expenseCategories: [],
+  expenseCategories: {
+    Data: [],
+    Paginations: {
+      CurrentPage: 1,
+      PageNumber: 1,
+      PageSize: 50,
+      TotalItems: 0,
+      TotalPages: 0,
+      HasPreviousPage: false,
+      HasNextPage: false
+    }
+  },
   currentExpenseCategory: null,
   categoryExpenses: [],
   categoryStatistics: null,
   recentExpenses: [],
   loading: false,
   error: null,
-  pagination: {
-    CurrentPage: 1,
-    PageNumber: 1,
-    PageSize: 50,
-    TotalItems: 0,
-    TotalPages: 0,
-    HasPreviousPage: false,
-    HasNextPage: false
-  },
   filters: {
     search: '',
     isActive: null,
@@ -97,7 +99,13 @@ const expenseCategoryReducer = (state, action) => {
     case actionTypes.SET_PAGINATION:
       return { 
         ...state, 
-        pagination: { ...state.pagination, ...action.payload } 
+        expenseCategories: {
+          ...state.expenseCategories,
+          Paginations: { 
+            ...state.expenseCategories.Paginations, 
+            ...action.payload 
+          }
+        }
       };
     
     case actionTypes.SET_FILTERS:
@@ -107,77 +115,65 @@ const expenseCategoryReducer = (state, action) => {
       };
     
     case actionTypes.ADD_EXPENSE_CATEGORY:
-      // Handle adding expense category to the nested structure
-      { const currentCategories = state.expenseCategories?.Data || [];
-      const updatedCategoriesAdd = [...currentCategories, action.payload];
       return { 
         ...state, 
         expenseCategories: {
           ...state.expenseCategories,
-          Data: updatedCategoriesAdd
+          Data: [...state.expenseCategories.Data, action.payload]
         },
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.UPDATE_EXPENSE_CATEGORY:
-      // Handle updating expense category in the nested structure
-      { const currentCategoriesUpdate = state.expenseCategories?.Data || [];
-      const updatedCategoriesUpdate = currentCategoriesUpdate.map(category =>
-        category.Id === action.payload.Id ? action.payload : category
-      );
       return {
         ...state,
         expenseCategories: {
           ...state.expenseCategories,
-          Data: updatedCategoriesUpdate
+          Data: state.expenseCategories.Data.map(category =>
+            category.Id === action.payload.Id ? action.payload : category
+          )
         },
         currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload.Id 
           ? action.payload 
           : state.currentExpenseCategory,
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.DELETE_EXPENSE_CATEGORY:
-      // Handle deleting expense category from the nested structure
-      { const currentCategoriesDelete = state.expenseCategories?.Data || [];
-      const updatedCategoriesDelete = currentCategoriesDelete.filter(
-        category => category.Id !== action.payload
-      );
       return {
         ...state,
         expenseCategories: {
           ...state.expenseCategories,
-          Data: updatedCategoriesDelete
+          Data: state.expenseCategories.Data.filter(
+            category => category.Id !== action.payload
+          )
         },
         currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload 
           ? null 
           : state.currentExpenseCategory,
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.TOGGLE_EXPENSE_CATEGORY_STATUS:
-      // Handle toggling expense category status
-      { const currentCategoriesToggle = state.expenseCategories?.Data || [];
-      const updatedCategoriesToggle = currentCategoriesToggle.map(category =>
-        category.Id === action.payload.id 
-          ? { ...category, IsActive: action.payload.isActive }
-          : category
-      );
       return {
         ...state,
         expenseCategories: {
           ...state.expenseCategories,
-          Data: updatedCategoriesToggle
+          Data: state.expenseCategories.Data.map(category =>
+            category.Id === action.payload.id 
+              ? { ...category, IsActive: action.payload.isActive }
+              : category
+          )
         },
         currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload.id 
           ? { ...state.currentExpenseCategory, IsActive: action.payload.isActive }
           : state.currentExpenseCategory,
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.CLEAR_ERROR:
       return { ...state, error: null };
@@ -195,11 +191,6 @@ const ExpenseCategoryContext = createContext();
 
 // API base URL - Update this with your correct API URL
 const API_BASE_URL = 'https://api.speed-erp.com/api/ExpenseCategories';
-
-// Alternative API URLs to try if the main one doesn't work
-// const API_BASE_URL = 'http://localhost:5000/api/ExpenseCategories';
-// const API_BASE_URL = 'https://speed-erp-api.herokuapp.com/api/ExpenseCategories';
-// const API_BASE_URL = 'https://your-actual-domain.com/api/ExpenseCategories';
 
 // Helper function to get auth token
 const getAuthToken = () => {
@@ -219,7 +210,7 @@ const makeApiCall = async (url, options = {}) => {
   };
 
   try {
-    console.log('Making API call to:', url); // Debug log
+    console.log('Making API call to:', url, options); // Debug log
     const response = await fetch(url, { ...defaultOptions, ...options });
     
     if (!response.ok) {
@@ -231,19 +222,7 @@ const makeApiCall = async (url, options = {}) => {
     console.log('API response:', data); // Debug log
     return data;
   } catch (error) {
-    console.error('API call failed:', error); // Debug log
-    
-    // Handle specific network errors
-    if (error.message.includes('ERR_NAME_NOT_RESOLVED')) {
-      throw new Error('Cannot connect to API server. Please check your internet connection or contact administrator.');
-    }
-    if (error.message.includes('ERR_NETWORK')) {
-      throw new Error('Network error. Please check your internet connection.');
-    }
-    if (error.message.includes('ERR_CONNECTION_REFUSED')) {
-      throw new Error('Connection refused. The API server might be down.');
-    }
-    
+    console.error('API call failed:', error);
     throw error;
   }
 };
@@ -274,41 +253,48 @@ export const ExpenseCategoryProvider = ({ children }) => {
       
       const queryParams = new URLSearchParams();
       
-      // Only add non-empty parameters
-      if (params.page || state.pagination.CurrentPage) {
-        queryParams.append('page', params.page || state.pagination.CurrentPage);
+      // Add parameters with proper naming (PascalCase as per your API)
+      if (params.page || state.expenseCategories.Paginations.CurrentPage) {
+        queryParams.append('Page', params.page || state.expenseCategories.Paginations.CurrentPage);
       }
-      if (params.pageSize || state.pagination.PageSize) {
-        queryParams.append('pageSize', params.pageSize || state.pagination.PageSize);
+      if (params.pageSize || state.expenseCategories.Paginations.PageSize) {
+        queryParams.append('PageSize', params.pageSize || state.expenseCategories.Paginations.PageSize);
       }
       if (params.search || state.filters.search) {
-        queryParams.append('search', params.search || state.filters.search);
+        queryParams.append('Search', params.search || state.filters.search);
       }
       if (params.isActive !== undefined || state.filters.isActive !== undefined) {
-        queryParams.append('isActive', params.isActive !== undefined ? params.isActive : state.filters.isActive);
+        queryParams.append('IsActive', params.isActive !== undefined ? params.isActive : state.filters.isActive);
       }
       if (params.sortBy || state.filters.sortBy) {
-        queryParams.append('sortBy', params.sortBy || state.filters.sortBy);
+        queryParams.append('SortBy', params.sortBy || state.filters.sortBy);
       }
       if (params.sortAscending !== undefined || state.filters.sortAscending !== undefined) {
-        queryParams.append('sortAscending', params.sortAscending !== undefined ? params.sortAscending : state.filters.sortAscending);
+        queryParams.append('SortAscending', params.sortAscending !== undefined ? params.sortAscending : state.filters.sortAscending);
       }
 
       const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
       
       if (response.Success) {
-        // Store the complete response to maintain the API structure
-        dispatch({ type: actionTypes.SET_EXPENSE_CATEGORIES, payload: response });
-        if (response.Paginations) {
-          dispatch({ type: actionTypes.SET_PAGINATION, payload: response.Paginations });
-        }
+        dispatch({ 
+          type: actionTypes.SET_EXPENSE_CATEGORIES, 
+          payload: {
+            Data: response.Data || [],
+            Paginations: response.Paginations || {
+              CurrentPage: 1,
+              PageSize: 10,
+              TotalItems: 0,
+              TotalPages: 0
+            }
+          }
+        });
       } else {
         throw new Error(response.Message || 'Failed to fetch expense categories');
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
     }
-  }, [state.pagination.CurrentPage, state.pagination.PageSize, state.filters]);
+  }, [state.expenseCategories.Paginations, state.filters]);
 
   // Get single expense category
   const getExpenseCategory = useCallback(async (id) => {
@@ -318,13 +304,7 @@ export const ExpenseCategoryProvider = ({ children }) => {
       const response = await makeApiCall(`${API_BASE_URL}/${id}`);
       
       if (response.Success) {
-        dispatch({ type: actionTypes.SET_CURRENT_EXPENSE_CATEGORY, payload: response.Data.Category });
-        if (response.Data.RecentExpenses) {
-          dispatch({ type: actionTypes.SET_RECENT_EXPENSES, payload: response.Data.RecentExpenses });
-        }
-        if (response.Data.Statistics) {
-          dispatch({ type: actionTypes.SET_CATEGORY_STATISTICS, payload: response.Data.Statistics });
-        }
+        dispatch({ type: actionTypes.SET_CURRENT_EXPENSE_CATEGORY, payload: response.Data });
         return response.Data;
       } else {
         throw new Error(response.Message || 'Failed to fetch expense category');
@@ -340,9 +320,21 @@ export const ExpenseCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
+      // Ensure payload matches exactly what API expects (PascalCase)
+      const payload = {
+        Name: categoryData.name,
+        Description: categoryData.description,
+        Color: categoryData.color,
+        Icon: categoryData.icon || null,
+        IsActive: categoryData.isActive !== false,
+        DisplayOrder: categoryData.displayOrder || 0,
+        BudgetLimit: categoryData.budgetLimit || 0,
+        AllowOverBudget: categoryData.allowOverBudget !== false
+      };
+      
       const response = await makeApiCall(API_BASE_URL, {
         method: 'POST',
-        body: JSON.stringify(categoryData)
+        body: JSON.stringify(payload)
       });
       
       if (response.Success) {
@@ -362,9 +354,21 @@ export const ExpenseCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
+      // Ensure payload matches exactly what API expects (PascalCase)
+      const payload = {
+        Name: categoryData.name,
+        Description: categoryData.description,
+        Color: categoryData.color,
+        Icon: categoryData.icon || null,
+        IsActive: categoryData.isActive !== false,
+        DisplayOrder: categoryData.displayOrder || 0,
+        BudgetLimit: categoryData.budgetLimit || 0,
+        AllowOverBudget: categoryData.allowOverBudget !== false
+      };
+      
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(categoryData)
+        body: JSON.stringify(payload)
       });
       
       if (response.Success) {
@@ -406,17 +410,16 @@ export const ExpenseCategoryProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
       const response = await makeApiCall(`${API_BASE_URL}/${id}/toggle-status`, {
-        method: 'POST'
+        method: 'PATCH'
       });
       
       if (response.Success) {
-        // Get the current category to determine new status
-        const currentCategory = state.expenseCategories?.Data?.find(cat => cat.Id === id);
-        const newStatus = !currentCategory?.IsActive;
-        
         dispatch({ 
           type: actionTypes.TOGGLE_EXPENSE_CATEGORY_STATUS, 
-          payload: { id, isActive: newStatus } 
+          payload: { 
+            id, 
+            isActive: response.Data.IsActive 
+          } 
         });
         return true;
       } else {
@@ -426,7 +429,7 @@ export const ExpenseCategoryProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       return false;
     }
-  }, [state.expenseCategories]);
+  }, []);
 
   // Get category statistics
   const getCategoryStatistics = useCallback(async (id, startDate = null, endDate = null) => {
@@ -434,8 +437,8 @@ export const ExpenseCategoryProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
       const queryParams = new URLSearchParams();
-      if (startDate) queryParams.append('startDate', startDate);
-      if (endDate) queryParams.append('endDate', endDate);
+      if (startDate) queryParams.append('StartDate', startDate);
+      if (endDate) queryParams.append('EndDate', endDate);
       
       const response = await makeApiCall(`${API_BASE_URL}/${id}/statistics?${queryParams}`);
       
@@ -457,11 +460,11 @@ export const ExpenseCategoryProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
       const queryParams = new URLSearchParams();
-      if (params.page) queryParams.append('page', params.page);
-      if (params.pageSize) queryParams.append('pageSize', params.pageSize);
-      if (params.startDate) queryParams.append('startDate', params.startDate);
-      if (params.endDate) queryParams.append('endDate', params.endDate);
-      if (params.status) queryParams.append('status', params.status);
+      if (params.page) queryParams.append('Page', params.page);
+      if (params.pageSize) queryParams.append('PageSize', params.pageSize);
+      if (params.startDate) queryParams.append('StartDate', params.startDate);
+      if (params.endDate) queryParams.append('EndDate', params.endDate);
+      if (params.status) queryParams.append('Status', params.status);
       
       const response = await makeApiCall(`${API_BASE_URL}/${id}/expenses?${queryParams}`);
       
@@ -500,17 +503,21 @@ export const ExpenseCategoryProvider = ({ children }) => {
 
   // Change page
   const changePage = useCallback(async (page) => {
-    const updatedPagination = { ...state.pagination, CurrentPage: page };
-    dispatch({ type: actionTypes.SET_PAGINATION, payload: updatedPagination });
+    dispatch({ 
+      type: actionTypes.SET_PAGINATION, 
+      payload: { CurrentPage: page } 
+    });
     await getExpenseCategories({ page });
-  }, [state.pagination, state.filters, getExpenseCategories]);
+  }, [getExpenseCategories]);
 
   // Change page size
   const changePageSize = useCallback(async (pageSize) => {
-    const updatedPagination = { ...state.pagination, PageSize: pageSize, CurrentPage: 1 };
-    dispatch({ type: actionTypes.SET_PAGINATION, payload: updatedPagination });
+    dispatch({ 
+      type: actionTypes.SET_PAGINATION, 
+      payload: { PageSize: pageSize, CurrentPage: 1 } 
+    });
     await getExpenseCategories({ pageSize, page: 1 });
-  }, [state.pagination, state.filters, getExpenseCategories]);
+  }, [getExpenseCategories]);
 
   // Reset state
   const resetState = useCallback(() => {
@@ -519,35 +526,20 @@ export const ExpenseCategoryProvider = ({ children }) => {
 
   // Get active expense categories (helper function)
   const getActiveExpenseCategories = useCallback(() => {
-    return state.expenseCategories?.Data?.filter(category => category.IsActive) || [];
-  }, [state.expenseCategories]);
-
-  // Get expense categories dropdown (helper function)
-  const getExpenseCategoriesDropdown = useCallback(() => {
-    return state.expenseCategories?.Data?.filter(category => category.IsActive)
-      .map(category => ({
-        Id: category.Id,
-        Name: category.Name,
-        Color: category.Color
-      })) || [];
-  }, [state.expenseCategories]);
-
-  // Get category by ID (helper function)
-  const getCategoryById = useCallback((id) => {
-    return state.expenseCategories?.Data?.find(category => category.Id === id) || null;
+    return state.expenseCategories.Data.filter(category => category.IsActive) || [];
   }, [state.expenseCategories]);
 
   // Context value
   const value = {
     // State
-    expenseCategories: state.expenseCategories,
+    expenseCategories: state.expenseCategories.Data,
     currentExpenseCategory: state.currentExpenseCategory,
     categoryExpenses: state.categoryExpenses,
     categoryStatistics: state.categoryStatistics,
     recentExpenses: state.recentExpenses,
     loading: state.loading,
     error: state.error,
-    pagination: state.pagination,
+    pagination: state.expenseCategories.Paginations,
     filters: state.filters,
     
     // Actions
@@ -570,9 +562,7 @@ export const ExpenseCategoryProvider = ({ children }) => {
     resetState,
     
     // Helper functions
-    getActiveExpenseCategories,
-    getExpenseCategoriesDropdown,
-    getCategoryById
+    getActiveExpenseCategories
   };
 
   return (
@@ -591,5 +581,4 @@ export const useExpenseCategory = () => {
   return context;
 };
 
-// Export context for direct access if needed
 export { ExpenseCategoryContext };
