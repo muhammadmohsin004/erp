@@ -50,7 +50,7 @@ const initialState = {
   error: null,
   pagination: {
     page: 1,
-    pageSize: 10,
+    pageSize: 25,
     totalItems: 0,
     totalPages: 0,
   },
@@ -108,16 +108,16 @@ const clientsReducer = (state, action) => {
       };
 
     case CLIENTS_ACTIONS.SET_CLIENTS:
-      // Handle the API response format with Data.$values
-      const clientsData = action.payload.Data?.$values || action.payload.data || action.payload;
+      // Handle the API response format - Updated to match backend response
+      const clientsData = action.payload.Data || action.payload.data || action.payload;
       return {
         ...state,
         clients: Array.isArray(clientsData) ? clientsData : [],
         pagination: {
-          page: action.payload.page || state.pagination.page,
-          pageSize: action.payload.pageSize || state.pagination.pageSize,
-          totalItems: action.payload.totalItems || clientsData.length,
-          totalPages: action.payload.totalPages || Math.ceil((action.payload.totalItems || clientsData.length) / (action.payload.pageSize || state.pagination.pageSize)),
+          page: action.payload.Page || action.payload.page || state.pagination.page,
+          pageSize: action.payload.PageSize || action.payload.pageSize || state.pagination.pageSize,
+          totalItems: action.payload.TotalItems || action.payload.totalItems || (Array.isArray(clientsData) ? clientsData.length : 0),
+          totalPages: action.payload.Paginations?.TotalPages || action.payload.totalPages || Math.ceil((action.payload.TotalItems || action.payload.totalItems || (Array.isArray(clientsData) ? clientsData.length : 0)) / (action.payload.PageSize || action.payload.pageSize || state.pagination.pageSize)),
         },
         isLoading: false,
         error: null,
@@ -231,12 +231,16 @@ const ClientsContext = createContext();
 export const ClientsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(clientsReducer, initialState);
 
-  // Helper function to handle API errors
+  // Helper function to handle API errors - Updated to match backend error format
   const handleApiError = useCallback((error) => {
     let errorMessage = 'An unexpected error occurred';
     
-    if (error.response?.data?.message) {
+    if (error.response?.data?.Message) {
+      errorMessage = error.response.data.Message;
+    } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
+    } else if (error.response?.data?.ValidationErrors) {
+      errorMessage = error.response.data.ValidationErrors.join(', ');
     } else if (error.response?.data?.validationErrors) {
       errorMessage = error.response.data.validationErrors.join(', ');
     } else if (error.message) {
@@ -285,6 +289,22 @@ export const ClientsProvider = ({ children }) => {
     };
   }, []);
 
+  // Ensure required fields are strings (to match backend requirements)
+  const sanitizeClientData = useCallback((clientData) => {
+    return {
+      ...clientData,
+      // Ensure required NOT NULL fields are strings
+      MobileNumber: clientData.Mobile || clientData.MobileNumber || '',
+      PaymentTerms: clientData.PaymentTerms || '',
+      Phone: clientData.Telephone || clientData.Phone || '',
+      TaxNumber: clientData.TaxNumber || '',
+      Address: clientData.Address || '',
+      Currency: clientData.Currency || 'USD',
+      ClientType: clientData.ClientType || 'Individual',
+      DisplayLanguage: clientData.DisplayLanguage || 'en',
+    };
+  }, []);
+
   // Clients API methods
   const clientsApi = {
     // Get clients with pagination, search, and filters
@@ -296,11 +316,25 @@ export const ClientsProvider = ({ children }) => {
         const params = {
           page: options.page || state.pagination.page,
           pageSize: options.pageSize || state.pagination.pageSize,
-          searchTerm: options.searchTerm !== undefined ? options.searchTerm : state.searchTerm,
+          search: options.searchTerm !== undefined ? options.searchTerm : state.searchTerm,
           clientType: options.clientType !== undefined ? options.clientType : state.clientType,
           sortBy: options.sortBy || state.sortBy,
           sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sortAscending,
+          // Add other filter options to match backend
+          category: options.category || '',
+          currency: options.currency || '',
+          country: options.country || '',
+          city: options.city || '',
+          startDate: options.startDate || null,
+          endDate: options.endDate || null,
         };
+
+        // Remove empty params
+        Object.keys(params).forEach(key => {
+          if (params[key] === '' || params[key] === null || params[key] === undefined) {
+            delete params[key];
+          }
+        });
 
         const response = await apiClient.get('/clients', { params });
         
@@ -310,7 +344,7 @@ export const ClientsProvider = ({ children }) => {
         });
 
         // Calculate and set statistics from the received data
-        const clientsData = response.data.Data?.$values || response.data.data || response.data;
+        const clientsData = response.data.Data || response.data.data || response.data;
         if (Array.isArray(clientsData)) {
           const stats = calculateStatisticsFromClients(clientsData);
           dispatch({
@@ -346,7 +380,7 @@ export const ClientsProvider = ({ children }) => {
       }
     },
 
-    // Create new client
+    // Create new client - Updated to match backend FormData expectations
     createClient: async (clientData, attachments = []) => {
       try {
         dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
@@ -354,27 +388,31 @@ export const ClientsProvider = ({ children }) => {
 
         const formData = new FormData();
         
-        // Append client data
-        Object.keys(clientData).forEach(key => {
-          if (clientData[key] !== null && clientData[key] !== undefined && clientData[key] !== '') {
-            if (key === 'contacts' && Array.isArray(clientData[key])) {
-              // Handle contacts array
-              clientData[key].forEach((contact, index) => {
+        // Sanitize and append client data
+        const sanitizedData = sanitizeClientData(clientData);
+        
+        Object.keys(sanitizedData).forEach(key => {
+          if (sanitizedData[key] !== null && sanitizedData[key] !== undefined && sanitizedData[key] !== '') {
+            if (key === 'contacts' && Array.isArray(sanitizedData[key])) {
+              // Handle contacts array - match backend expected format
+              sanitizedData[key].forEach((contact, index) => {
                 Object.keys(contact).forEach(contactKey => {
                   if (contact[contactKey] !== null && contact[contactKey] !== undefined && contact[contactKey] !== '') {
-                    formData.append(`contacts[${index}].${contactKey}`, contact[contactKey]);
+                    formData.append(`Contacts[${index}].${contactKey}`, contact[contactKey]);
                   }
                 });
               });
             } else {
-              formData.append(key, clientData[key]);
+              // Use PascalCase for backend compatibility
+              const backendKey = key.charAt(0).toUpperCase() + key.slice(1);
+              formData.append(backendKey, sanitizedData[key]);
             }
           }
         });
 
         // Append attachments
         attachments.forEach((file) => {
-          formData.append('attachments', file);
+          formData.append('Attachments', file);
         });
 
         const response = await apiClient.post('/clients', formData, {
@@ -396,7 +434,7 @@ export const ClientsProvider = ({ children }) => {
       }
     },
 
-    // Update existing client
+    // Update existing client - Updated to match backend FormData expectations
     updateClient: async (clientId, clientData, attachments = []) => {
       try {
         dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
@@ -404,27 +442,31 @@ export const ClientsProvider = ({ children }) => {
 
         const formData = new FormData();
         
-        // Append client data
-        Object.keys(clientData).forEach(key => {
-          if (clientData[key] !== null && clientData[key] !== undefined && clientData[key] !== '') {
-            if (key === 'contacts' && Array.isArray(clientData[key])) {
-              // Handle contacts array
-              clientData[key].forEach((contact, index) => {
+        // Sanitize and append client data
+        const sanitizedData = sanitizeClientData(clientData);
+        
+        Object.keys(sanitizedData).forEach(key => {
+          if (sanitizedData[key] !== null && sanitizedData[key] !== undefined && sanitizedData[key] !== '') {
+            if (key === 'contacts' && Array.isArray(sanitizedData[key])) {
+              // Handle contacts array - match backend expected format
+              sanitizedData[key].forEach((contact, index) => {
                 Object.keys(contact).forEach(contactKey => {
                   if (contact[contactKey] !== null && contact[contactKey] !== undefined && contact[contactKey] !== '') {
-                    formData.append(`contacts[${index}].${contactKey}`, contact[contactKey]);
+                    formData.append(`Contacts[${index}].${contactKey}`, contact[contactKey]);
                   }
                 });
               });
             } else {
-              formData.append(key, clientData[key]);
+              // Use PascalCase for backend compatibility
+              const backendKey = key.charAt(0).toUpperCase() + key.slice(1);
+              formData.append(backendKey, sanitizedData[key]);
             }
           }
         });
 
         // Append new attachments
         attachments.forEach((file) => {
-          formData.append('attachments', file);
+          formData.append('Attachments', file);
         });
 
         const response = await apiClient.put(`/clients/${clientId}`, formData, {
@@ -446,13 +488,14 @@ export const ClientsProvider = ({ children }) => {
       }
     },
 
-    // Delete client
-    deleteClient: async (clientId) => {
+    // Delete client - Updated to match backend signature
+    deleteClient: async (clientId, hardDelete = false) => {
       try {
         dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-        const response = await apiClient.delete(`/clients/${clientId}`);
+        const params = hardDelete ? { hardDelete: true } : {};
+        const response = await apiClient.delete(`/clients/${clientId}`, { params });
         
         dispatch({
           type: CLIENTS_ACTIONS.DELETE_CLIENT,
@@ -465,11 +508,15 @@ export const ClientsProvider = ({ children }) => {
       }
     },
 
-    // Get client statistics
-    getStatistics: async () => {
+    // Get client statistics - Updated to match backend response
+    getStatistics: async (options = {}) => {
       try {
-        // If we have clients data, calculate statistics from it
-        if (state.clients.length > 0) {
+        const params = {};
+        if (options.startDate) params.startDate = options.startDate;
+        if (options.endDate) params.endDate = options.endDate;
+
+        // If we have clients data, calculate statistics from it first
+        if (state.clients.length > 0 && !options.startDate && !options.endDate) {
           const stats = calculateStatisticsFromClients(state.clients);
           dispatch({
             type: CLIENTS_ACTIONS.SET_STATISTICS,
@@ -483,7 +530,7 @@ export const ClientsProvider = ({ children }) => {
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         try {
-          const response = await apiClient.get('/clients/statistics');
+          const response = await apiClient.get('/clients/statistics', { params });
           const statsData = response.data.Data || response.data.data || response.data;
           
           dispatch({
@@ -495,7 +542,7 @@ export const ClientsProvider = ({ children }) => {
         } catch (error) {
           // If statistics endpoint doesn't exist, calculate from clients
           const allClientsResponse = await apiClient.get('/clients');
-          const allClients = allClientsResponse.data.Data?.$values || allClientsResponse.data.data || [];
+          const allClients = allClientsResponse.data.Data || allClientsResponse.data.data || [];
           const stats = calculateStatisticsFromClients(allClients);
           
           dispatch({

@@ -50,7 +50,7 @@ import Skeleton from "../../components/elements/skeleton/Skeleton";
 import Badge from "../../components/elements/Badge/Badge";
 import { useBankAccount } from "../../Contexts/BankAccountContext/BankAccountContext";
 
-// Translations - you can move this to a separate file
+// Translations
 const translations = {
   "Bank Account Management": "Bank Account Management",
   "Add New Account": "Add New Account",
@@ -96,6 +96,7 @@ const translations = {
   "Enter IBAN": "Enter IBAN",
   "Enter Swift code": "Enter Swift code",
   "Enter description": "Enter description",
+  "Enter balance": "Enter balance",
   "Select account type": "Select account type",
   "Select currency": "Select currency",
   "Account Information": "Account Information",
@@ -118,7 +119,7 @@ const translations = {
 };
 
 // Bank Account Form Component
-const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
+const BankAccountForm = React.forwardRef(({ account, onSubmit, isEditing = false }, ref) => {
   const [formData, setFormData] = useState({
     BankName: "",
     AccountNumber: "",
@@ -128,6 +129,7 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
     IBAN: "",
     SwiftCode: "",
     Description: "",
+    Balance: "",
     IsActive: true,
     IsDefault: false,
     ...account,
@@ -148,17 +150,36 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
     { value: "PKR", label: "PKR" },
   ];
 
-  const handleInputChange = (field, value) => {
+  // Handle input change for regular inputs
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [name]: value,
     }));
 
     // Clear error when user starts typing
-    if (errors[field]) {
+    if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
-        [field]: "",
+        [name]: "",
+      }));
+    }
+  };
+
+  // Handle select change for dropdowns
+  const handleSelectChange = (value) => {
+    const name = arguments[1]?.name || arguments[1]; // Handle different select implementations
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear error when user makes selection
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
       }));
     }
   };
@@ -182,25 +203,24 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
       newErrors.Currency = "Currency is required";
     }
 
+    if (formData.Balance && isNaN(parseFloat(formData.Balance))) {
+      newErrors.Balance = "Balance must be a valid number";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // This function will be called when the form is submitted via modal's OK button
   const handleFormSubmit = () => {
     if (!validateForm()) return false;
-
     onSubmit(formData);
     return true;
   };
 
   // Expose the handleFormSubmit function to parent component
-  React.useImperativeHandle(
-    React.forwardRef(() => ({})),
-    () => ({
-      handleFormSubmit,
-    })
-  );
+  React.useImperativeHandle(ref, () => ({
+    handleFormSubmit,
+  }));
 
   return (
     <Container className="space-y-6">
@@ -217,45 +237,52 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
           <InputField
             label={translations["Bank Name"]}
             name="BankName"
-            required
             placeholder={translations["Enter bank name"]}
             value={formData.BankName}
             onChange={handleInputChange}
-            error={errors.BankName}
+            errors={errors}
             icon={Building2}
           />
 
           <InputField
             label={translations["Account Number"]}
             name="AccountNumber"
-            required
             placeholder={translations["Enter account number"]}
             value={formData.AccountNumber}
             onChange={handleInputChange}
-            error={errors.AccountNumber}
+            errors={errors}
             icon={CreditCard}
           />
 
           <SelectBox
             label={translations["Account Type"]}
             name="AccountType"
-            required
             value={formData.AccountType}
-            onChange={handleInputChange}
-            error={errors.AccountType}
-            options={accountTypes}
+            handleChange={(value) => handleSelectChange(value, "AccountType")}
+            errors={errors}
+            optionList={accountTypes}
             placeholder={translations["Select account type"]}
           />
 
           <SelectBox
             label={translations["Currency"]}
             name="Currency"
-            required
             value={formData.Currency}
-            onChange={handleInputChange}
-            error={errors.Currency}
-            options={currencies}
+            handleChange={(value) => handleSelectChange(value, "Currency")}
+            errors={errors}
+            optionList={currencies}
             placeholder={translations["Select currency"]}
+          />
+
+          <InputField
+            label={translations["Balance"]}
+            name="Balance"
+            type="number"
+            placeholder={translations["Enter balance"]}
+            value={formData.Balance}
+            onChange={handleInputChange}
+            errors={errors}
+            icon={DollarSign}
           />
         </Container>
       </Container>
@@ -276,6 +303,7 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
             placeholder={translations["Enter branch name"]}
             value={formData.Branch}
             onChange={handleInputChange}
+            errors={errors}
           />
 
           <InputField
@@ -284,6 +312,7 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
             placeholder={translations["Enter IBAN"]}
             value={formData.IBAN}
             onChange={handleInputChange}
+            errors={errors}
           />
 
           <InputField
@@ -292,6 +321,7 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
             placeholder={translations["Enter Swift code"]}
             value={formData.SwiftCode}
             onChange={handleInputChange}
+            errors={errors}
           />
 
           <Container className="md:col-span-2">
@@ -302,13 +332,14 @@ const BankAccountForm = ({ account, onSubmit, isEditing = false }) => {
               placeholder={translations["Enter description"]}
               value={formData.Description}
               onChange={handleInputChange}
+              errors={errors}
             />
           </Container>
         </Container>
       </Container>
     </Container>
   );
-};
+});
 
 // Main Bank Account Management Component
 const BankAccountManagement = () => {
@@ -497,8 +528,11 @@ const BankAccountManagement = () => {
     }).format(amount);
   };
 
-  // Get account data safely
-  const accountData = bankAccounts || [];
+  // Get account data safely - handle both array and nested object structure
+  const accountData = Array.isArray(bankAccounts) 
+    ? bankAccounts 
+    : (bankAccounts?.Data?.$values || bankAccounts?.Data || []);
+  
   const activeBankAccounts = getActiveBankAccounts();
   const defaultBankAccount = getDefaultBankAccount();
 
@@ -529,16 +563,42 @@ const BankAccountManagement = () => {
               <OutlineButton
                 buttonText={translations.Export}
                 icon={Download}
+                isIcon={true}
+                isIconLeft={true}
+                bgColor="bg-white"
+                textColor="text-gray-700"
+                borderColor="border-gray-300"
+                borderWidth="border"
+                rounded="rounded-md"
+                height="h-10"
+                px="px-4"
+                fontSize="text-sm"
+                fontWeight="font-medium"
+                hover="hover:bg-gray-50"
                 onClick={() => console.log("Export")}
               />
               <OutlineButton
                 buttonText={translations.Import}
                 icon={Upload}
+                isIcon={true}
+                isIconLeft={true}
+                bgColor="bg-white"
+                textColor="text-gray-700"
+                borderColor="border-gray-300"
+                borderWidth="border"
+                rounded="rounded-md"
+                height="h-10"
+                px="px-4"
+                fontSize="text-sm"
+                fontWeight="font-medium"
+                hover="hover:bg-gray-50"
                 onClick={() => console.log("Import")}
               />
               <FilledButton
                 buttonText={translations["Add New Account"]}
                 icon={Plus}
+                isIcon={true}
+                isIconLeft={true}
                 onClick={() => {
                   setSelectedAccount(null);
                   setIsEditing(false);
@@ -729,6 +789,8 @@ const BankAccountManagement = () => {
                         <FilledButton
                           buttonText={translations["Add New Account"]}
                           icon={Plus}
+                          isIcon={true}
+                          isIconLeft={true}
                           onClick={() => {
                             setSelectedAccount(null);
                             setIsEditing(false);
