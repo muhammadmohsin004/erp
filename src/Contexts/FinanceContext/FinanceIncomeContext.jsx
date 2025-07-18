@@ -129,7 +129,8 @@ const financeIncomesReducer = (state, action) => {
 const FinanceIncomesContext = createContext();
 
 // API Base URL - adjust according to your setup
-const API_BASE_URL = '/api/financeincomes';
+const API_BASE_URL = 'https://api.speed-erp.com/api/FinanceIncomes';
+const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
 // Utility function for API calls
 const apiCall = async (url, options = {}) => {
@@ -137,7 +138,7 @@ const apiCall = async (url, options = {}) => {
     headers: {
       'Content-Type': 'application/json',
       // Add authorization header if needed
-      // 'Authorization': `Bearer ${getAuthToken()}`
+      'Authorization': `Bearer ${getAuthToken()}`
     },
     ...options
   };

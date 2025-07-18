@@ -1,11 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
-
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Plus, Download, Filter, Search, TrendingUp, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical } from 'lucide-react';
-
+import { Plus, Download, Filter, Search, TrendingUp, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical, AlertCircle } from 'lucide-react';
 
 import { useFinanceIncomes } from '../../Contexts/FinanceContext/FinanceIncomeContext';
+import { useIncomeCategory } from '../../Contexts/IncomeCategoryContext/IncomeCategoryContext';
 import Container from '../../components/elements/container/Container';
 import BodyHeader from '../../components/elements/bodyHeader/BodyHeader';
 import FilledButton from '../../components/elements/elements/buttons/filledButton/FilledButton';
@@ -27,11 +25,11 @@ import SearchAndFilters from '../../components/elements/searchAndFilters/SearchA
 import Skeleton from '../../components/elements/skeleton/Skeleton';
 
 const FinanceIncome = () => {
+  // Finance Income Context
   const {
     incomes,
     statistics,
     comparison,
-    categories,
     pagination,
     filters,
     loading,
@@ -39,7 +37,6 @@ const FinanceIncome = () => {
     getIncomes,
     getIncomeStatistics,
     getIncomeVsExpenseComparison,
-    getIncomeCategories,
     createIncome,
     updateIncome,
     deleteIncome,
@@ -51,6 +48,16 @@ const FinanceIncome = () => {
     changePageSize
   } = useFinanceIncomes();
 
+  // Income Category Context
+  const {
+    incomeCategories,
+    loading: categoriesLoading,
+    error: categoriesError,
+    getIncomeCategories,
+    getIncomeCategoriesDropdown,
+    getActiveIncomeCategories
+  } = useIncomeCategory();
+
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -58,6 +65,8 @@ const FinanceIncome = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingIncome, setEditingIncome] = useState(null);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const [incomeForm, setIncomeForm] = useState({
     description: '',
@@ -71,11 +80,29 @@ const FinanceIncome = () => {
   });
 
   useEffect(() => {
-    getIncomes();
-    getIncomeStatistics();
-    getIncomeVsExpenseComparison();
-    getIncomeCategories();
+    // Load both income data and categories
+    const loadData = async () => {
+      try {
+        console.log("Loading income data and categories...");
+        await getIncomes();
+        await getIncomeStatistics();
+        await getIncomeVsExpenseComparison();
+        await getIncomeCategories(); // Load income categories from IncomeCategoryContext
+        console.log("Data loading completed");
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    };
+    
+    loadData();
   }, []);
+
+  // Debug useEffect to monitor category changes
+  useEffect(() => {
+    console.log("Categories updated:", incomeCategories);
+    console.log("Categories loading:", categoriesLoading);
+    console.log("Categories error:", categoriesError);
+  }, [incomeCategories, categoriesLoading, categoriesError]);
 
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
@@ -88,6 +115,64 @@ const FinanceIncome = () => {
 
     return () => clearTimeout(delayedSearch);
   }, [searchValue]);
+
+  // Get categories for dropdown from IncomeCategoryContext
+  const getCategoryOptions = () => {
+    const activeCategories = getActiveIncomeCategories();
+    return [
+      { value: '', label: 'All Categories' },
+      ...activeCategories.map(cat => ({ 
+        value: cat.Id, 
+        label: cat.Name,
+        color: cat.Color 
+      }))
+    ];
+  };
+
+  // Get categories for form selection (excluding "All Categories" option)
+  const getFormCategoryOptions = () => {
+    const activeCategories = getActiveIncomeCategories();
+    return activeCategories.map(cat => ({ 
+      value: cat.Id, 
+      label: cat.Name,
+      color: cat.Color 
+    }));
+  };
+
+  // Get category name by ID
+  const getCategoryNameById = (categoryId) => {
+    const activeCategories = getActiveIncomeCategories();
+    const category = activeCategories.find(cat => cat.Id === categoryId);
+    return category ? category.Name : 'Uncategorized';
+  };
+
+  // Form validation
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!incomeForm.description.trim()) {
+      errors.description = 'Description is required';
+    }
+    
+    if (!incomeForm.amount || parseFloat(incomeForm.amount) <= 0) {
+      errors.amount = 'Amount must be greater than 0';
+    }
+    
+    if (!incomeForm.incomeDate) {
+      errors.incomeDate = 'Date is required';
+    }
+    
+    if (!incomeForm.categoryId) {
+      errors.categoryId = 'Category is required';
+    }
+    
+    if (!incomeForm.paymentMethod) {
+      errors.paymentMethod = 'Payment method is required';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleCategoryFilter = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -106,43 +191,41 @@ const FinanceIncome = () => {
   };
 
   const handleAddIncome = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await createIncome(incomeForm);
       setShowAddModal(false);
-      setIncomeForm({
-        description: '',
-        amount: '',
-        incomeDate: '',
-        categoryId: '',
-        customerId: '',
-        paymentMethod: '',
-        isRecurring: false,
-        notes: ''
-      });
-      getIncomes();
+      resetForm();
+      await getIncomes();
+      console.log('Income added successfully!');
     } catch (error) {
       console.error('Error adding income:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleEditIncome = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await updateIncome(editingIncome.id, incomeForm);
       setShowEditModal(false);
       setEditingIncome(null);
-      setIncomeForm({
-        description: '',
-        amount: '',
-        incomeDate: '',
-        categoryId: '',
-        customerId: '',
-        paymentMethod: '',
-        isRecurring: false,
-        notes: ''
-      });
-      getIncomes();
+      resetForm();
+      await getIncomes();
+      console.log('Income updated successfully!');
     } catch (error) {
       console.error('Error updating income:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,7 +233,8 @@ const FinanceIncome = () => {
     if (window.confirm('Are you sure you want to delete this income record?')) {
       try {
         await deleteIncome(id);
-        getIncomes();
+        await getIncomes();
+        console.log('Income deleted successfully!');
       } catch (error) {
         console.error('Error deleting income:', error);
       }
@@ -169,7 +253,32 @@ const FinanceIncome = () => {
       isRecurring: income.isRecurring || false,
       notes: income.notes || ''
     });
+    setFormErrors({});
     setShowEditModal(true);
+  };
+
+  const resetForm = () => {
+    setIncomeForm({
+      description: '',
+      amount: '',
+      incomeDate: '',
+      categoryId: '',
+      customerId: '',
+      paymentMethod: '',
+      isRecurring: false,
+      notes: ''
+    });
+    setFormErrors({});
+  };
+
+  const handleModalClose = (modalType) => {
+    if (modalType === 'add') {
+      setShowAddModal(false);
+    } else if (modalType === 'edit') {
+      setShowEditModal(false);
+      setEditingIncome(null);
+    }
+    resetForm();
   };
 
   const statusOptions = [
@@ -177,11 +286,6 @@ const FinanceIncome = () => {
     { value: 'Confirmed', label: 'Confirmed' },
     { value: 'Pending', label: 'Pending' },
     { value: 'Cancelled', label: 'Cancelled' }
-  ];
-
-  const categoryOptions = [
-    { value: '', label: 'All Categories' },
-    ...categories.map(cat => ({ value: cat.id, label: cat.name }))
   ];
 
   const paymentMethodOptions = [
@@ -220,6 +324,17 @@ const FinanceIncome = () => {
 
   return (
     <Container className="p-6 space-y-6">
+      {/* Error Display */}
+      {(error || categoriesError) && (
+        <Card className="p-4 bg-red-50 border-red-200">
+          <div className="flex items-center space-x-2 text-red-700">
+            <AlertCircle size={20} />
+            <span className="font-medium">Error:</span>
+            <span>{error || categoriesError}</span>
+          </div>
+        </Card>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <BodyHeader heading="Income Management" subHeading="Track and manage your income sources" />
@@ -249,104 +364,6 @@ const FinanceIncome = () => {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Income</p>
-              <p className="text-2xl font-bold text-gray-900">
-                ${statistics?.totalIncome?.toLocaleString() || '0'}
-              </p>
-            </div>
-            <div className="p-3 rounded-full bg-green-500">
-              <DollarSign size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">This Month</p>
-              <p className="text-2xl font-bold text-gray-900">
-                ${statistics?.monthlyIncome?.toLocaleString() || '0'}
-              </p>
-            </div>
-            <div className="p-3 rounded-full bg-blue-500">
-              <Calendar size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Average Income</p>
-              <p className="text-2xl font-bold text-gray-900">
-                ${statistics?.averageIncome?.toLocaleString() || '0'}
-              </p>
-            </div>
-            <div className="p-3 rounded-full bg-purple-500">
-              <TrendingUp size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Growth Rate</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {statistics?.growthRate ? `${statistics.growthRate}%` : '0%'}
-              </p>
-            </div>
-            <div className="p-3 rounded-full bg-indigo-500">
-              <TrendingUp size={24} className="text-white" />
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Income vs Expenses</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={comparison?.monthlyData || []}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Amount']} />
-              <Bar dataKey="income" fill="#10B981" name="Income" />
-              <Bar dataKey="expenses" fill="#EF4444" name="Expenses" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Income by Category</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={statistics?.categoryBreakdown || []}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
-                dataKey="amount"
-              >
-                {(statistics?.categoryBreakdown || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => [`$${value?.toLocaleString()}`, 'Amount']} />
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
       {/* Filters */}
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
@@ -362,7 +379,7 @@ const FinanceIncome = () => {
             placeholder="Filter by Category"
             value={selectedCategory}
             handleChange={handleCategoryFilter}
-            optionList={categoryOptions}
+            optionList={getCategoryOptions()}
             width="w-full"
           />
           
@@ -414,7 +431,15 @@ const FinanceIncome = () => {
                   </TD>
                   <TD>{new Date(income.incomeDate).toLocaleDateString()}</TD>
                   <TD>
-                    <Badge variant="info">{income.categoryName || 'Uncategorized'}</Badge>
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: income.categoryColor || '#6B7280' }}
+                      />
+                      <Badge variant="info">
+                        {income.categoryName || getCategoryNameById(income.categoryId)}
+                      </Badge>
+                    </div>
                   </TD>
                   <TD>{income.paymentMethod}</TD>
                   <TD>{getStatusBadge(income.status)}</TD>
@@ -457,52 +482,91 @@ const FinanceIncome = () => {
       <Modall
         title="Add New Income"
         modalOpen={showAddModal}
-        setModalOpen={setShowAddModal}
-        okText="Add Income"
+        setModalOpen={() => handleModalClose('add')}
+        okText={isSubmitting ? "Adding..." : "Add Income"}
         cancelText="Cancel"
         okAction={handleAddIncome}
-        cancelAction={() => setShowAddModal(false)}
+        cancelAction={() => handleModalClose('add')}
+        okDisabled={isSubmitting}
         width={600}
         body={
           <div className="space-y-4">
-            <InputField
-              label="Description"
-              placeholder="Enter income description"
-              value={incomeForm.description}
-              onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
-              width="w-full"
-            />
-            <InputField
-              label="Amount"
-              type="number"
-              placeholder="Enter amount"
-              value={incomeForm.amount}
-              onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
-              width="w-full"
-            />
-            <InputField
-              label="Date"
-              type="date"
-              value={incomeForm.incomeDate}
-              onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
-              width="w-full"
-            />
-            <SelectBox
-              label="Category"
-              placeholder="Select category"
-              value={incomeForm.categoryId}
-              handleChange={(value) => setIncomeForm({...incomeForm, categoryId: value})}
-              optionList={categoryOptions.filter(opt => opt.value !== '')}
-              width="w-full"
-            />
-            <SelectBox
-              label="Payment Method"
-              placeholder="Select payment method"
-              value={incomeForm.paymentMethod}
-              handleChange={(value) => setIncomeForm({...incomeForm, paymentMethod: value})}
-              optionList={paymentMethodOptions}
-              width="w-full"
-            />
+            <div>
+              <InputField
+                label="Description *"
+                placeholder="Enter income description"
+                value={incomeForm.description}
+                onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
+                width="w-full"
+              />
+              {formErrors.description && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
+              )}
+            </div>
+
+            <div>
+              <InputField
+                label="Amount *"
+                type="number"
+                step="0.01"
+                placeholder="Enter amount"
+                value={incomeForm.amount}
+                onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
+                width="w-full"
+              />
+              {formErrors.amount && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.amount}</p>
+              )}
+            </div>
+
+            <div>
+              <InputField
+                label="Date *"
+                type="date"
+                value={incomeForm.incomeDate}
+                onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
+                width="w-full"
+              />
+              {formErrors.incomeDate && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.incomeDate}</p>
+              )}
+            </div>
+
+            <div>
+              <SelectBox
+                label="Category *"
+                placeholder={categoriesLoading ? "Loading categories..." : "Select category"}
+                value={incomeForm.categoryId}
+                handleChange={(value) => setIncomeForm({...incomeForm, categoryId: value})}
+                optionList={categoriesLoading ? [] : getFormCategoryOptions()}
+                width="w-full"
+                disabled={categoriesLoading}
+              />
+              {formErrors.categoryId && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.categoryId}</p>
+              )}
+              {categoriesLoading && (
+                <p className="text-blue-500 text-sm mt-1">Loading categories...</p>
+              )}
+              {!categoriesLoading && getFormCategoryOptions().length === 0 && (
+                <p className="text-yellow-600 text-sm mt-1">No active categories found. Please create categories first.</p>
+              )}
+            </div>
+
+            <div>
+              <SelectBox
+                label="Payment Method *"
+                placeholder="Select payment method"
+                value={incomeForm.paymentMethod}
+                handleChange={(value) => setIncomeForm({...incomeForm, paymentMethod: value})}
+                optionList={paymentMethodOptions}
+                width="w-full"
+              />
+              {formErrors.paymentMethod && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.paymentMethod}</p>
+              )}
+            </div>
+
             <InputField
               label="Notes"
               placeholder="Additional notes (optional)"
@@ -510,6 +574,15 @@ const FinanceIncome = () => {
               onChange={(e) => setIncomeForm({...incomeForm, notes: e.target.value})}
               width="w-full"
             />
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-center space-x-2 text-red-700">
+                  <AlertCircle size={16} />
+                  <span className="text-sm">{error}</span>
+                </div>
+              </div>
+            )}
           </div>
         }
       />
@@ -518,52 +591,91 @@ const FinanceIncome = () => {
       <Modall
         title="Edit Income"
         modalOpen={showEditModal}
-        setModalOpen={setShowEditModal}
-        okText="Update Income"
+        setModalOpen={() => handleModalClose('edit')}
+        okText={isSubmitting ? "Updating..." : "Update Income"}
         cancelText="Cancel"
         okAction={handleEditIncome}
-        cancelAction={() => setShowEditModal(false)}
+        cancelAction={() => handleModalClose('edit')}
+        okDisabled={isSubmitting}
         width={600}
         body={
           <div className="space-y-4">
-            <InputField
-              label="Description"
-              placeholder="Enter income description"
-              value={incomeForm.description}
-              onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
-              width="w-full"
-            />
-            <InputField
-              label="Amount"
-              type="number"
-              placeholder="Enter amount"
-              value={incomeForm.amount}
-              onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
-              width="w-full"
-            />
-            <InputField
-              label="Date"
-              type="date"
-              value={incomeForm.incomeDate}
-              onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
-              width="w-full"
-            />
-            <SelectBox
-              label="Category"
-              placeholder="Select category"
-              value={incomeForm.categoryId}
-              handleChange={(value) => setIncomeForm({...incomeForm, categoryId: value})}
-              optionList={categoryOptions.filter(opt => opt.value !== '')}
-              width="w-full"
-            />
-            <SelectBox
-              label="Payment Method"
-              placeholder="Select payment method"
-              value={incomeForm.paymentMethod}
-              handleChange={(value) => setIncomeForm({...incomeForm, paymentMethod: value})}
-              optionList={paymentMethodOptions}
-              width="w-full"
-            />
+            <div>
+              <InputField
+                label="Description *"
+                placeholder="Enter income description"
+                value={incomeForm.description}
+                onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
+                width="w-full"
+              />
+              {formErrors.description && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
+              )}
+            </div>
+
+            <div>
+              <InputField
+                label="Amount *"
+                type="number"
+                step="0.01"
+                placeholder="Enter amount"
+                value={incomeForm.amount}
+                onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
+                width="w-full"
+              />
+              {formErrors.amount && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.amount}</p>
+              )}
+            </div>
+
+            <div>
+              <InputField
+                label="Date *"
+                type="date"
+                value={incomeForm.incomeDate}
+                onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
+                width="w-full"
+              />
+              {formErrors.incomeDate && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.incomeDate}</p>
+              )}
+            </div>
+
+            <div>
+              <SelectBox
+                label="Category *"
+                placeholder={categoriesLoading ? "Loading categories..." : "Select category"}
+                value={incomeForm.categoryId}
+                handleChange={(value) => setIncomeForm({...incomeForm, categoryId: value})}
+                optionList={categoriesLoading ? [] : getFormCategoryOptions()}
+                width="w-full"
+                disabled={categoriesLoading}
+              />
+              {formErrors.categoryId && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.categoryId}</p>
+              )}
+              {categoriesLoading && (
+                <p className="text-blue-500 text-sm mt-1">Loading categories...</p>
+              )}
+              {!categoriesLoading && getFormCategoryOptions().length === 0 && (
+                <p className="text-yellow-600 text-sm mt-1">No active categories found. Please create categories first.</p>
+              )}
+            </div>
+
+            <div>
+              <SelectBox
+                label="Payment Method *"
+                placeholder="Select payment method"
+                value={incomeForm.paymentMethod}
+                handleChange={(value) => setIncomeForm({...incomeForm, paymentMethod: value})}
+                optionList={paymentMethodOptions}
+                width="w-full"
+              />
+              {formErrors.paymentMethod && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.paymentMethod}</p>
+              )}
+            </div>
+
             <InputField
               label="Notes"
               placeholder="Additional notes (optional)"
@@ -571,6 +683,15 @@ const FinanceIncome = () => {
               onChange={(e) => setIncomeForm({...incomeForm, notes: e.target.value})}
               width="w-full"
             />
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-center space-x-2 text-red-700">
+                  <AlertCircle size={16} />
+                  <span className="text-sm">{error}</span>
+                </div>
+              </div>
+            )}
           </div>
         }
       />

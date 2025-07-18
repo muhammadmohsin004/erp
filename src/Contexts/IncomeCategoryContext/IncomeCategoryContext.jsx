@@ -21,7 +21,7 @@ const initialState = {
   },
   filters: {
     search: '',
-    isActive: null,
+    isActive: undefined,
     sortBy: 'Name',
     sortAscending: true
   }
@@ -117,8 +117,7 @@ const incomeCategoryReducer = (state, action) => {
       };
     
     case actionTypes.ADD_INCOME_CATEGORY:
-      // Handle adding income category to the nested structure
-      { const currentCategories = state.incomeCategories?.Data || [];
+      const currentCategories = state.incomeCategories?.Data || [];
       const updatedCategoriesAdd = [...currentCategories, action.payload];
       return { 
         ...state, 
@@ -128,11 +127,10 @@ const incomeCategoryReducer = (state, action) => {
         },
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.UPDATE_INCOME_CATEGORY:
-      // Handle updating income category in the nested structure
-      { const currentCategoriesUpdate = state.incomeCategories?.Data || [];
+      const currentCategoriesUpdate = state.incomeCategories?.Data || [];
       const updatedCategoriesUpdate = currentCategoriesUpdate.map(category =>
         category.Id === action.payload.Id ? action.payload : category
       );
@@ -147,11 +145,10 @@ const incomeCategoryReducer = (state, action) => {
           : state.currentIncomeCategory,
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.DELETE_INCOME_CATEGORY:
-      // Handle deleting income category from the nested structure
-      { const currentCategoriesDelete = state.incomeCategories?.Data || [];
+      const currentCategoriesDelete = state.incomeCategories?.Data || [];
       const updatedCategoriesDelete = currentCategoriesDelete.filter(
         category => category.Id !== action.payload
       );
@@ -166,11 +163,10 @@ const incomeCategoryReducer = (state, action) => {
           : state.currentIncomeCategory,
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.TOGGLE_INCOME_CATEGORY_STATUS:
-      // Handle toggling income category status
-      { const currentCategoriesToggle = state.incomeCategories?.Data || [];
+      const currentCategoriesToggle = state.incomeCategories?.Data || [];
       const updatedCategoriesToggle = currentCategoriesToggle.map(category =>
         category.Id === action.payload.id 
           ? { ...category, IsActive: action.payload.isActive }
@@ -187,7 +183,7 @@ const incomeCategoryReducer = (state, action) => {
           : state.currentIncomeCategory,
         loading: false,
         error: null
-      }; }
+      };
     
     case actionTypes.CLEAR_ERROR:
       return { ...state, error: null };
@@ -203,17 +199,23 @@ const incomeCategoryReducer = (state, action) => {
 // Create context
 const IncomeCategoryContext = createContext();
 
-// API base URL - Update this with your correct API URL
+// API base URL
 const API_BASE_URL = 'https://api.speed-erp.com/api/IncomeCategories';
-
-// Alternative API URLs to try if the main one doesn't work
-// const API_BASE_URL = 'http://localhost:5000/api/IncomeCategories';
-// const API_BASE_URL = 'https://speed-erp-api.herokuapp.com/api/IncomeCategories';
-// const API_BASE_URL = 'https://your-actual-domain.com/api/IncomeCategories';
 
 // Helper function to get auth token
 const getAuthToken = () => {
   return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
+// Helper function to prepare payload for API
+const prepareApiPayload = (categoryData) => {
+  // Only send the fields that the API expects
+  return {
+    Name: categoryData.Name || '',
+    Description: categoryData.Description || '',
+    Color: categoryData.Color || '#3498db',
+    IsActive: categoryData.IsActive !== undefined ? categoryData.IsActive : true
+  };
 };
 
 // Helper function to make API calls with better error handling
@@ -223,25 +225,34 @@ const makeApiCall = async (url, options = {}) => {
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
+      'accept': 'text/plain',
       ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers
     }
   };
 
   try {
-    console.log('Making API call to:', url); // Debug log
+    console.log('Making API call to:', url);
+    console.log('Request options:', { ...defaultOptions, ...options });
+    
     const response = await fetch(url, { ...defaultOptions, ...options });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.Message || `HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.Message || errorData.message || errorMessage;
+      } catch (e) {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
-    console.log('API response:', data); // Debug log
+    console.log('API response:', data);
     return data;
   } catch (error) {
-    console.error('API call failed:', error); // Debug log
+    console.error('API call failed:', error);
     
     // Handle specific network errors
     if (error.message.includes('ERR_NAME_NOT_RESOLVED')) {
@@ -284,31 +295,38 @@ export const IncomeCategoryProvider = ({ children }) => {
       
       const queryParams = new URLSearchParams();
       
-      // Only add non-empty parameters
-      if (params.page || state.pagination.CurrentPage) {
-        queryParams.append('page', params.page || state.pagination.CurrentPage);
+      // Helper function to safely add query parameters
+      const addQueryParam = (key, value, fallbackValue) => {
+        const finalValue = value !== undefined ? value : fallbackValue;
+        if (finalValue !== null && finalValue !== undefined && finalValue !== '') {
+          queryParams.append(key, finalValue);
+        }
+      };
+      
+      // Add parameters with proper null checking
+      addQueryParam('page', params.page, state.pagination.CurrentPage);
+      addQueryParam('pageSize', params.pageSize, state.pagination.PageSize);
+      addQueryParam('search', params.search, state.filters.search);
+      
+      // Special handling for isActive
+      const isActiveValue = params.isActive !== undefined ? params.isActive : state.filters.isActive;
+      if (isActiveValue === true || isActiveValue === false) {
+        queryParams.append('isActive', isActiveValue);
       }
-      if (params.pageSize || state.pagination.PageSize) {
-        queryParams.append('pageSize', params.pageSize || state.pagination.PageSize);
-      }
-      if (params.search || state.filters.search) {
-        queryParams.append('search', params.search || state.filters.search);
-      }
-      if (params.isActive !== undefined || state.filters.isActive !== undefined) {
-        queryParams.append('isActive', params.isActive !== undefined ? params.isActive : state.filters.isActive);
-      }
-      if (params.sortBy || state.filters.sortBy) {
-        queryParams.append('sortBy', params.sortBy || state.filters.sortBy);
-      }
-      if (params.sortAscending !== undefined || state.filters.sortAscending !== undefined) {
-        queryParams.append('sortAscending', params.sortAscending !== undefined ? params.sortAscending : state.filters.sortAscending);
+      
+      addQueryParam('sortBy', params.sortBy, state.filters.sortBy);
+      
+      // Special handling for sortAscending
+      const sortAscendingValue = params.sortAscending !== undefined ? params.sortAscending : state.filters.sortAscending;
+      if (sortAscendingValue === true || sortAscendingValue === false) {
+        queryParams.append('sortAscending', sortAscendingValue);
       }
 
       const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
       
       if (response.Success) {
-        // Store the complete response to maintain the API structure
-        dispatch({ type: actionTypes.SET_INCOME_CATEGORIES, payload: response });
+        console.log('Received income categories:', response.data.Data.$values);
+        dispatch({ type: actionTypes.SET_INCOME_CATEGORIES, payload: response.data.Data.$values });
         if (response.Paginations) {
           dispatch({ type: actionTypes.SET_PAGINATION, payload: response.Paginations });
         }
@@ -350,9 +368,14 @@ export const IncomeCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
+      // Prepare the payload according to API specification
+      const apiPayload = prepareApiPayload(categoryData);
+      
+      console.log('Creating income category with payload:', apiPayload);
+      
       const response = await makeApiCall(API_BASE_URL, {
         method: 'POST',
-        body: JSON.stringify(categoryData)
+        body: JSON.stringify(apiPayload)
       });
       
       if (response.Success) {
@@ -363,7 +386,7 @@ export const IncomeCategoryProvider = ({ children }) => {
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
+      throw error; // Re-throw to handle in component
     }
   }, []);
 
@@ -372,9 +395,14 @@ export const IncomeCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       
+      // Prepare the payload according to API specification
+      const apiPayload = prepareApiPayload(categoryData);
+      
+      console.log('Updating income category with payload:', apiPayload);
+      
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(categoryData)
+        body: JSON.stringify(apiPayload)
       });
       
       if (response.Success) {
@@ -385,7 +413,7 @@ export const IncomeCategoryProvider = ({ children }) => {
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
+      throw error; // Re-throw to handle in component
     }
   }, []);
 
