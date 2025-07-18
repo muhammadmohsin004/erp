@@ -24,6 +24,7 @@ import {
   Users,
   ToggleLeft,
   ToggleRight,
+  FileText,
 } from "lucide-react";
 import {
   AiOutlineEye, // Eye icon for view
@@ -54,8 +55,12 @@ const WarehouseList = () => {
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
+    "Export CSV": language === "ar" ? "تصدير CSV" : "Export CSV",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "Exporting": language === "ar" ? "جاري التصدير..." : "Exporting...",
     NoWarehouses: language === "ar" ? "لا يوجد مستودعات" : "No warehouses found",
     Name: language === "ar" ? "الاسم" : "Name",
     Code: language === "ar" ? "الكود" : "Code",
@@ -84,7 +89,8 @@ const WarehouseList = () => {
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Warehouse Details": language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
+    "Warehouse Details":
+      language === "ar" ? "تفاصيل المستودع" : "Warehouse Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     Description: language === "ar" ? "الوصف" : "Description",
     Email: language === "ar" ? "البريد الإلكتروني" : "Email",
@@ -99,6 +105,10 @@ const WarehouseList = () => {
     "View Permission": language === "ar" ? "صلاحية العرض" : "View Permission",
     "Create Invoice Permission": language === "ar" ? "صلاحية إنشاء الفاتورة" : "Create Invoice Permission",
     "Update Stock Permission": language === "ar" ? "صلاحية تحديث المخزون" : "Update Stock Permission",
+    "Export successful": language === "ar" ? "تم التصدير بنجاح" : "Export successful",
+    "Export failed": language === "ar" ? "فشل التصدير" : "Export failed",
+    "No data to export": language === "ar" ? "لا توجد بيانات للتصدير" : "No data to export",
+    "Select warehouses to export": language === "ar" ? "اختر المستودعات للتصدير" : "Select warehouses to export",
   };
 
   // Get warehouse context
@@ -136,7 +146,9 @@ const WarehouseList = () => {
   const [warehouseToDelete, setWarehouseToDelete] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(null);
 
   // Mock statistics - you can replace this with actual API call
@@ -167,13 +179,18 @@ const WarehouseList = () => {
     if (Array.isArray(warehousesData) && warehousesData.length > 0) {
       const stats = {
         totalWarehouses: pagination?.TotalItems || warehousesData.length,
-        activeWarehouses: warehousesData.filter(w => w.Status === "Active").length,
-        primaryWarehouses: warehousesData.filter(w => w.Primary === "1" || w.Primary === "Yes").length,
-        warehousesThisMonth: warehousesData.filter(w => {
+        activeWarehouses: warehousesData.filter((w) => w.Status === "Active")
+          .length,
+        primaryWarehouses: warehousesData.filter(
+          (w) => w.Primary === "1" || w.Primary === "Yes"
+        ).length,
+        warehousesThisMonth: warehousesData.filter((w) => {
           const createdDate = new Date(w.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
       };
       setStatistics(stats);
@@ -202,6 +219,137 @@ const WarehouseList = () => {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+
+  // CSV Export functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return '';
+
+    // Define the headers for CSV
+    const headers = [
+      'ID',
+      'Name',
+      'Code',
+      'Description',
+      'Manager Name',
+      'Email',
+      'Phone',
+      'Address',
+      'Shipping Address',
+      'City',
+      'State',
+      'Postal Code',
+      'Country',
+      'Status',
+      'Primary',
+      'Default',
+      'View Permission',
+      'Create Invoice Permission',
+      'Update Stock Permission',
+      'Created At',
+      'Updated At'
+    ];
+
+    // Convert data to CSV format
+    const csvRows = [headers.join(',')];
+
+    data.forEach(warehouse => {
+      const values = [
+        warehouse.Id || '',
+        `"${(warehouse.Name || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Code || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Description || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.ManagerName || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Email || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Phone || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Address || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.ShippingAddress || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.City || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.State || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.PostalCode || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Country || '').replace(/"/g, '""')}"`,
+        `"${(warehouse.Status || '').replace(/"/g, '""')}"`,
+        warehouse.Primary === "1" || warehouse.Primary === "Yes" ? "Yes" : "No",
+        warehouse.IsDefault ? "Yes" : "No",
+        warehouse.ViewPermission === "1" ? "Yes" : "No",
+        warehouse.CreateInvoicePermission === "1" ? "Yes" : "No",
+        warehouse.UpdateStockPermission === "1" ? "Yes" : "No",
+        warehouse.CreatedAt ? new Date(warehouse.CreatedAt).toLocaleDateString() : '',
+        warehouse.UpdatedAt ? new Date(warehouse.UpdatedAt).toLocaleDateString() : ''
+      ];
+      csvRows.push(values.join(','));
+    });
+
+    return csvRows.join('\n');
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    try {
+      if (!Array.isArray(warehousesData) || warehousesData.length === 0) {
+        alert(translations["No data to export"]);
+        return;
+      }
+
+      const csvContent = convertToCSV(warehousesData);
+      const filename = `warehouses_all_${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csvContent, filename);
+
+      setShowExportModal(false);
+      // You can add a success notification here
+    } catch (error) {
+      console.error("Error exporting all warehouses:", error);
+      alert(translations["Export failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportSelected = async () => {
+    setIsExporting(true);
+    try {
+      if (selectedWarehouses.length === 0) {
+        alert(translations["Select warehouses to export"]);
+        return;
+      }
+
+      const selectedData = warehousesData.filter(warehouse =>
+        selectedWarehouses.includes(warehouse.Id)
+      );
+
+      if (selectedData.length === 0) {
+        alert(translations["No data to export"]);
+        return;
+      }
+
+      const csvContent = convertToCSV(selectedData);
+      const filename = `warehouses_selected_${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csvContent, filename);
+
+      setShowExportModal(false);
+      // You can add a success notification here
+    } catch (error) {
+      console.error("Error exporting selected warehouses:", error);
+      alert(translations["Export failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Search function
   const handleSearchWarehouses = async () => {
@@ -375,11 +523,7 @@ const WarehouseList = () => {
 
   // Export functionality
   const handleExport = () => {
-    console.log(
-      "Export warehouses:",
-      selectedWarehouses.length > 0 ? selectedWarehouses : "all"
-    );
-    alert("Export functionality to be implemented");
+    setShowExportModal(true);
   };
 
   // Statistics Card Component
@@ -412,18 +556,21 @@ const WarehouseList = () => {
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <Container className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+          {/* Left Column: Title and Selected Count */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations.Warehouses}
             </h1>
             {selectedWarehouses.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedWarehouses.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          {/* Right Column: Buttons */}
+          <div className="flex flex-wrap gap-3">
             <FilledButton
               isIcon={true}
               icon={Filter}
@@ -443,8 +590,8 @@ const WarehouseList = () => {
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+              bgColor="bg-green-600 hover:bg-green-700"
+              textColor="text-white"
               rounded="rounded-lg"
               buttonText={translations.Export}
               height="h-10"
@@ -453,6 +600,11 @@ const WarehouseList = () => {
               fontSize="text-sm"
               isIconLeft={true}
               onClick={handleExport}
+              disabled={
+                isExporting ||
+                !Array.isArray(warehousesData) ||
+                warehousesData.length === 0
+              }
             />
             <FilledButton
               isIcon={true}
@@ -469,8 +621,9 @@ const WarehouseList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/new-warehouse")}
             />
-          </Container>
+          </div>
         </Container>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -604,7 +757,9 @@ const WarehouseList = () => {
                           <input
                             type="checkbox"
                             checked={selectedWarehouses.includes(warehouse.Id)}
-                            onChange={() => handleWarehouseSelection(warehouse.Id)}
+                            onChange={() =>
+                              handleWarehouseSelection(warehouse.Id)
+                            }
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -614,11 +769,12 @@ const WarehouseList = () => {
                               <Span className="text-sm font-medium text-gray-900">
                                 {warehouse.Name || "N/A"}
                               </Span>
-                              {(warehouse.Primary === "1" || warehouse.Primary === "Yes") && (
-                                <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                  {translations.Primary}
-                                </Span>
-                              )}
+                              {(warehouse.Primary === "1" ||
+                                warehouse.Primary === "Yes") && (
+                                  <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    {translations.Primary}
+                                  </Span>
+                                )}
                               {warehouse.IsDefault && (
                                 <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                                   Default
@@ -667,20 +823,31 @@ const WarehouseList = () => {
                           </Container>
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
-                          {warehouse.Address || warehouse.ShippingAddress || warehouse.City ? (
+                          {warehouse.Address ||
+                            warehouse.ShippingAddress ||
+                            warehouse.City ? (
                             <Container className="flex items-start">
                               <MapPin className="w-4 h-4 text-gray-400 mr-1 mt-0.5 flex-shrink-0" />
                               <Container className="text-sm text-gray-900">
                                 {warehouse.Address && (
-                                  <Span className="block">{warehouse.Address}</Span>
-                                )}
-                                {warehouse.ShippingAddress && warehouse.ShippingAddress !== warehouse.Address && (
-                                  <Span className="block text-gray-600">
-                                    Ship: {warehouse.ShippingAddress}
+                                  <Span className="block">
+                                    {warehouse.Address}
                                   </Span>
                                 )}
+                                {warehouse.ShippingAddress &&
+                                  warehouse.ShippingAddress !==
+                                  warehouse.Address && (
+                                    <Span className="block text-gray-600">
+                                      Ship: {warehouse.ShippingAddress}
+                                    </Span>
+                                  )}
                                 <Span className="block">
-                                  {[warehouse.City, warehouse.State, warehouse.PostalCode, warehouse.Country]
+                                  {[
+                                    warehouse.City,
+                                    warehouse.State,
+                                    warehouse.PostalCode,
+                                    warehouse.Country,
+                                  ]
                                     .filter(Boolean)
                                     .join(", ")}
                                 </Span>
@@ -692,11 +859,10 @@ const WarehouseList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              warehouse.Status === "Active"
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${warehouse.Status === "Active"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
-                            }`}
+                              }`}
                           >
                             {translations[warehouse.Status] || warehouse.Status}
                           </Span>
@@ -748,7 +914,9 @@ const WarehouseList = () => {
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteWarehouse(warehouse.Id)}
+                              onClick={() =>
+                                handleDeleteWarehouse(warehouse.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -800,7 +968,9 @@ const WarehouseList = () => {
                       height="h-8"
                       width="w-8"
                       disabled={pagination.CurrentPage === 1}
-                      onClick={() => handlePageChange(pagination.CurrentPage - 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.CurrentPage - 1)
+                      }
                     />
                     <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
                       {pagination.CurrentPage} / {pagination.TotalPages}
@@ -815,8 +985,12 @@ const WarehouseList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.CurrentPage === pagination.TotalPages}
-                      onClick={() => handlePageChange(pagination.CurrentPage + 1)}
+                      disabled={
+                        pagination.CurrentPage === pagination.TotalPages
+                      }
+                      onClick={() =>
+                        handlePageChange(pagination.CurrentPage + 1)
+                      }
                     />
                     <FilledButton
                       isIcon={true}
@@ -828,7 +1002,9 @@ const WarehouseList = () => {
                       buttonText=""
                       height="h-8"
                       width="w-8"
-                      disabled={pagination.CurrentPage === pagination.TotalPages}
+                      disabled={
+                        pagination.CurrentPage === pagination.TotalPages
+                      }
                       onClick={() => handlePageChange(pagination.TotalPages)}
                     />
                   </Container>
@@ -884,26 +1060,27 @@ const WarehouseList = () => {
                     {translations.Status}
                   </Span>
                   <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedWarehouse.Status === "Active"
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedWarehouse.Status === "Active"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
-                    }`}
+                      }`}
                   >
-                    {translations[selectedWarehouse.Status] || selectedWarehouse.Status}
+                    {translations[selectedWarehouse.Status] ||
+                      selectedWarehouse.Status}
                   </Span>
                 </Container>
 
-                {(selectedWarehouse.Primary === "1" || selectedWarehouse.Primary === "Yes") && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Type
-                    </Span>
-                    <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 bg-yellow-100 text-yellow-800">
-                      {translations.Primary}
-                    </Span>
-                  </Container>
-                )}
+                {(selectedWarehouse.Primary === "1" ||
+                  selectedWarehouse.Primary === "Yes") && (
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        Type
+                      </Span>
+                      <Span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 bg-yellow-100 text-yellow-800">
+                        {translations.Primary}
+                      </Span>
+                    </Container>
+                  )}
 
                 {selectedWarehouse.Description && (
                   <Container>
@@ -960,41 +1137,42 @@ const WarehouseList = () => {
                 {(selectedWarehouse.Address ||
                   selectedWarehouse.City ||
                   selectedWarehouse.Country) && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Address}
-                    </Span>
-                    <Container className="mt-1">
-                      {selectedWarehouse.Address && (
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations.Address}
+                      </Span>
+                      <Container className="mt-1">
+                        {selectedWarehouse.Address && (
+                          <Span className="text-sm text-gray-900 block">
+                            {selectedWarehouse.Address}
+                          </Span>
+                        )}
                         <Span className="text-sm text-gray-900 block">
-                          {selectedWarehouse.Address}
+                          {[
+                            selectedWarehouse.City,
+                            selectedWarehouse.State,
+                            selectedWarehouse.PostalCode,
+                            selectedWarehouse.Country,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
                         </Span>
-                      )}
-                      <Span className="text-sm text-gray-900 block">
-                        {[
-                          selectedWarehouse.City,
-                          selectedWarehouse.State,
-                          selectedWarehouse.PostalCode,
-                          selectedWarehouse.Country,
-                        ]
-                          .filter(Boolean)
-                          .join(", ")}
+                      </Container>
+                    </Container>
+                  )}
+
+                {selectedWarehouse.ShippingAddress &&
+                  selectedWarehouse.ShippingAddress !==
+                  selectedWarehouse.Address && (
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations["Shipping Address"]}
+                      </Span>
+                      <Span className="text-sm text-gray-900 block mt-1">
+                        {selectedWarehouse.ShippingAddress}
                       </Span>
                     </Container>
-                  </Container>
-                )}
-
-                {selectedWarehouse.ShippingAddress && 
-                 selectedWarehouse.ShippingAddress !== selectedWarehouse.Address && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["Shipping Address"]}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedWarehouse.ShippingAddress}
-                    </Span>
-                  </Container>
-                )}
+                  )}
 
                 <Container>
                   <Span className="text-sm font-medium text-gray-500 mb-2 block">
@@ -1006,13 +1184,14 @@ const WarehouseList = () => {
                         {translations["View Permission"]}
                       </Span>
                       <Span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          selectedWarehouse.ViewPermission === "1"
+                        className={`px-2 py-1 text-xs rounded-full ${selectedWarehouse.ViewPermission === "1"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
-                        {selectedWarehouse.ViewPermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.ViewPermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                     <Container className="flex items-center justify-between">
@@ -1020,13 +1199,14 @@ const WarehouseList = () => {
                         {translations["Create Invoice Permission"]}
                       </Span>
                       <Span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          selectedWarehouse.CreateInvoicePermission === "1"
+                        className={`px-2 py-1 text-xs rounded-full ${selectedWarehouse.CreateInvoicePermission === "1"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
-                        {selectedWarehouse.CreateInvoicePermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.CreateInvoicePermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                     <Container className="flex items-center justify-between">
@@ -1034,13 +1214,14 @@ const WarehouseList = () => {
                         {translations["Update Stock Permission"]}
                       </Span>
                       <Span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          selectedWarehouse.UpdateStockPermission === "1"
+                        className={`px-2 py-1 text-xs rounded-full ${selectedWarehouse.UpdateStockPermission === "1"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
-                        {selectedWarehouse.UpdateStockPermission === "1" ? "Yes" : "No"}
+                        {selectedWarehouse.UpdateStockPermission === "1"
+                          ? "Yes"
+                          : "No"}
                       </Span>
                     </Container>
                   </Container>
@@ -1052,13 +1233,17 @@ const WarehouseList = () => {
                   <Container>
                     Created:{" "}
                     {selectedWarehouse.CreatedAt
-                      ? new Date(selectedWarehouse.CreatedAt).toLocaleDateString()
+                      ? new Date(
+                        selectedWarehouse.CreatedAt
+                      ).toLocaleDateString()
                       : "N/A"}
                   </Container>
                   {selectedWarehouse.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedWarehouse.UpdatedAt).toLocaleDateString()}
+                      {new Date(
+                        selectedWarehouse.UpdatedAt
+                      ).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -1095,8 +1280,8 @@ const WarehouseList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the warehouse{" "}
-              <strong>"{warehouseToDelete?.Name}"</strong>{" "}
-              and all associated data.
+              <strong>"{warehouseToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }

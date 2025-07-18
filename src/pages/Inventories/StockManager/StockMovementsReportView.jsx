@@ -18,7 +18,7 @@ import {
   StickyNote,
   Printer,
   Edit,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { useStock } from "../../../Contexts/StockContext/StockContext";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -32,15 +32,19 @@ const StockMovementView = () => {
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Stock Movement Details": language === "ar" ? "تفاصيل حركة المخزون" : "Stock Movement Details",
+    "Stock Movement Details":
+      language === "ar" ? "تفاصيل حركة المخزون" : "Stock Movement Details",
     "Back to List": language === "ar" ? "العودة للقائمة" : "Back to List",
     "Download PDF": language === "ar" ? "تحميل PDF" : "Download PDF",
     "Print Report": language === "ar" ? "طباعة التقرير" : "Print Report",
     "Edit Movement": language === "ar" ? "تعديل الحركة" : "Edit Movement",
     "Delete Movement": language === "ar" ? "حذف الحركة" : "Delete Movement",
-    "Company Information": language === "ar" ? "معلومات الشركة" : "Company Information",
-    "Movement Information": language === "ar" ? "معلومات الحركة" : "Movement Information",
-    "Additional Details": language === "ar" ? "تفاصيل إضافية" : "Additional Details",
+    "Company Information":
+      language === "ar" ? "معلومات الشركة" : "Company Information",
+    "Movement Information":
+      language === "ar" ? "معلومات الحركة" : "Movement Information",
+    "Additional Details":
+      language === "ar" ? "تفاصيل إضافية" : "Additional Details",
     Product: language === "ar" ? "المنتج" : "Product",
     Warehouse: language === "ar" ? "المستودع" : "Warehouse",
     "Movement Type": language === "ar" ? "نوع الحركة" : "Movement Type",
@@ -57,8 +61,12 @@ const StockMovementView = () => {
     "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
     "Not Available": language === "ar" ? "غير متوفر" : "Not Available",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Confirmation": language === "ar" ? "تأكيد الحذف" : "Delete Confirmation",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone"
+    "Delete Confirmation":
+      language === "ar" ? "تأكيد الحذف" : "Delete Confirmation",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
   };
 
   // Get stock context
@@ -67,16 +75,16 @@ const StockMovementView = () => {
     loading: stockLoading,
     error,
     getStockMovements,
-    deleteStockMovement
+    deleteStockMovement,
   } = useStock();
 
   // Get company data from localStorage
   const getCompanyData = () => {
     try {
-      const companyData = localStorage.getItem('company');
+      const companyData = localStorage.getItem("company");
       return companyData ? JSON.parse(companyData) : null;
     } catch (error) {
-      console.error('Error parsing company data:', error);
+      console.error("Error parsing company data:", error);
       return null;
     }
   };
@@ -88,7 +96,9 @@ const StockMovementView = () => {
   // Find the specific movement
   useEffect(() => {
     if (stockMovements?.Data?.$values && id) {
-      const movement = stockMovements.Data.$values.find(m => m.Id === parseInt(id));
+      const movement = stockMovements.Data.$values.find(
+        (m) => m.Id === parseInt(id)
+      );
       setCurrentMovement(movement);
     } else if (token && id) {
       // If movements not loaded yet, fetch them
@@ -99,7 +109,11 @@ const StockMovementView = () => {
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return translations["Not Available"];
-    return new Date(dateString).toLocaleDateString() + " " + new Date(dateString).toLocaleTimeString();
+    return (
+      new Date(dateString).toLocaleDateString() +
+      " " +
+      new Date(dateString).toLocaleTimeString()
+    );
   };
 
   const formatDateOnly = (dateString) => {
@@ -110,34 +124,42 @@ const StockMovementView = () => {
   // Get movement type icon and style
   const getMovementTypeStyle = (type) => {
     const lowerType = type?.toLowerCase() || "";
-    
-    if (lowerType.includes("in") || lowerType.includes("purchase") || lowerType.includes("adjustment +")) {
+
+    if (
+      lowerType.includes("in") ||
+      lowerType.includes("purchase") ||
+      lowerType.includes("adjustment +")
+    ) {
       return {
         icon: TrendingUp,
         bgColor: "bg-green-100",
         textColor: "text-green-800",
-        iconColor: "text-green-600"
+        iconColor: "text-green-600",
       };
-    } else if (lowerType.includes("out") || lowerType.includes("sale") || lowerType.includes("adjustment -")) {
+    } else if (
+      lowerType.includes("out") ||
+      lowerType.includes("sale") ||
+      lowerType.includes("adjustment -")
+    ) {
       return {
         icon: TrendingDown,
         bgColor: "bg-red-100",
         textColor: "text-red-800",
-        iconColor: "text-red-600"
+        iconColor: "text-red-600",
       };
     } else if (lowerType.includes("transfer")) {
       return {
         icon: ArrowUpDown,
         bgColor: "bg-blue-100",
         textColor: "text-blue-800",
-        iconColor: "text-blue-600"
+        iconColor: "text-blue-600",
       };
     } else {
       return {
         icon: Activity,
         bgColor: "bg-gray-100",
         textColor: "text-gray-800",
-        iconColor: "text-gray-600"
+        iconColor: "text-gray-600",
       };
     }
   };
@@ -147,7 +169,7 @@ const StockMovementView = () => {
     if (!currentMovement) return;
 
     const typeStyle = getMovementTypeStyle(currentMovement.MovementType);
-    
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -294,12 +316,18 @@ const StockMovementView = () => {
         <body>
           <!-- Company Header -->
           <div class="header">
-            <div class="company-name">${companyInfo?.Name || 'Company Name'}</div>
+            <div class="company-name">${
+              companyInfo?.Name || "Company Name"
+            }</div>
             <div class="company-details">
-              ${companyInfo?.Address ? `${companyInfo.Address}` : ''}
-              ${companyInfo?.Phone ? ` | Phone: ${companyInfo.Phone}` : ''}
-              ${companyInfo?.Email ? ` | Email: ${companyInfo.Email}` : ''}
-              ${companyInfo?.TaxNumber ? ` | Tax Number: ${companyInfo.TaxNumber}` : ''}
+              ${companyInfo?.Address ? `${companyInfo.Address}` : ""}
+              ${companyInfo?.Phone ? ` | Phone: ${companyInfo.Phone}` : ""}
+              ${companyInfo?.Email ? ` | Email: ${companyInfo.Email}` : ""}
+              ${
+                companyInfo?.TaxNumber
+                  ? ` | Tax Number: ${companyInfo.TaxNumber}`
+                  : ""
+              }
             </div>
           </div>
           
@@ -318,28 +346,43 @@ const StockMovementView = () => {
               
               <div class="info-item">
                 <span class="info-label">Product:</span>
-                <span class="info-value">${currentMovement.ProductName || 'N/A'}</span>
+                <span class="info-value">${
+                  currentMovement.ProductName || "N/A"
+                }</span>
               </div>
               
               <div class="info-item">
                 <span class="info-label">Warehouse:</span>
-                <span class="info-value">${currentMovement.WarehouseName || 'N/A'}</span>
+                <span class="info-value">${
+                  currentMovement.WarehouseName || "N/A"
+                }</span>
               </div>
               
               <div class="info-item">
                 <span class="info-label">Movement Type:</span>
                 <span class="info-value">
-                  <span class="movement-type ${currentMovement.QuantityChange > 0 ? 'type-in' : 
-                    currentMovement.QuantityChange < 0 ? 'type-out' : 'type-transfer'}">
-                    ${currentMovement.MovementType || 'N/A'}
+                  <span class="movement-type ${
+                    currentMovement.QuantityChange > 0
+                      ? "type-in"
+                      : currentMovement.QuantityChange < 0
+                      ? "type-out"
+                      : "type-transfer"
+                  }">
+                    ${currentMovement.MovementType || "N/A"}
                   </span>
                 </span>
               </div>
               
               <div class="info-item">
                 <span class="info-label">Quantity Change:</span>
-                <span class="info-value ${currentMovement.QuantityChange > 0 ? 'quantity-positive' : 'quantity-negative'}">
-                  ${currentMovement.QuantityChange > 0 ? '+' : ''}${currentMovement.QuantityChange || 0}
+                <span class="info-value ${
+                  currentMovement.QuantityChange > 0
+                    ? "quantity-positive"
+                    : "quantity-negative"
+                }">
+                  ${currentMovement.QuantityChange > 0 ? "+" : ""}${
+      currentMovement.QuantityChange || 0
+    }
                 </span>
               </div>
             </div>
@@ -349,22 +392,30 @@ const StockMovementView = () => {
               
               <div class="info-item">
                 <span class="info-label">Reference:</span>
-                <span class="info-value">${currentMovement.Reference || 'N/A'}</span>
+                <span class="info-value">${
+                  currentMovement.Reference || "N/A"
+                }</span>
               </div>
               
               <div class="info-item">
                 <span class="info-label">Date:</span>
-                <span class="info-value">${formatDate(currentMovement.CreatedAt)}</span>
+                <span class="info-value">${formatDate(
+                  currentMovement.CreatedAt
+                )}</span>
               </div>
               
               <div class="info-item">
                 <span class="info-label">Created By:</span>
-                <span class="info-value">User ID: ${currentMovement.CreatedByUserId || 'N/A'}</span>
+                <span class="info-value">User ID: ${
+                  currentMovement.CreatedByUserId || "N/A"
+                }</span>
               </div>
               
               <div class="info-item">
                 <span class="info-label">Notes:</span>
-                <span class="info-value">${currentMovement.Notes || 'N/A'}</span>
+                <span class="info-value">${
+                  currentMovement.Notes || "N/A"
+                }</span>
               </div>
             </div>
           </div>
@@ -377,11 +428,11 @@ const StockMovementView = () => {
         </body>
       </html>
     `;
-    
-    const printWindow = window.open('', '_blank');
+
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    
+
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.print();
@@ -398,8 +449,8 @@ const StockMovementView = () => {
         navigate("/admin/stock/movements", {
           state: {
             message: "Stock movement deleted successfully",
-            type: "success"
-          }
+            type: "success",
+          },
         });
       }
     } catch (error) {
@@ -432,7 +483,9 @@ const StockMovementView = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
@@ -484,7 +537,7 @@ const StockMovementView = () => {
               </Span>
             </Container>
           </Container>
-          
+
           <Container className="flex gap-3 flex-wrap">
             <FilledButton
               isIcon={true}
@@ -550,7 +603,10 @@ const StockMovementView = () => {
         </Container>
 
         {/* Movement Details Content */}
-        <Container id="movement-content" className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <Container
+          id="movement-content"
+          className="bg-white rounded-lg shadow-sm border border-gray-200"
+        >
           <Container className="p-8">
             {/* Company Information */}
             {companyInfo && (
@@ -564,14 +620,20 @@ const StockMovementView = () => {
                   )}
                   <Container className="flex justify-center gap-4 flex-wrap">
                     {companyInfo.Phone && (
-                      <Span>{translations.Phone}: {companyInfo.Phone}</Span>
+                      <Span>
+                        {translations.Phone}: {companyInfo.Phone}
+                      </Span>
                     )}
                     {companyInfo.Email && (
-                      <Span>{translations.Email}: {companyInfo.Email}</Span>
+                      <Span>
+                        {translations.Email}: {companyInfo.Email}
+                      </Span>
                     )}
                   </Container>
                   {companyInfo.TaxNumber && (
-                    <Span className="block">{translations["Tax Number"]}: {companyInfo.TaxNumber}</Span>
+                    <Span className="block">
+                      {translations["Tax Number"]}: {companyInfo.TaxNumber}
+                    </Span>
                   )}
                 </Container>
               </Container>
@@ -592,7 +654,7 @@ const StockMovementView = () => {
                   <Package className="w-5 h-5" />
                   {translations["Movement Information"]}
                 </h3>
-                
+
                 <Container className="space-y-4">
                   <Container className="flex justify-between items-start">
                     <Span className="text-gray-600 flex items-center gap-2">
@@ -607,7 +669,10 @@ const StockMovementView = () => {
                       <Package className="w-4 h-4" />
                       {translations.Product}:
                     </Span>
-                    <Span className="font-semibold text-right">{currentMovement.ProductName || translations["Not Available"]}</Span>
+                    <Span className="font-semibold text-right">
+                      {currentMovement.ProductName ||
+                        translations["Not Available"]}
+                    </Span>
                   </Container>
 
                   <Container className="flex justify-between items-start">
@@ -615,7 +680,10 @@ const StockMovementView = () => {
                       <Warehouse className="w-4 h-4" />
                       {translations.Warehouse}:
                     </Span>
-                    <Span className="font-semibold text-right">{currentMovement.WarehouseName || translations["Not Available"]}</Span>
+                    <Span className="font-semibold text-right">
+                      {currentMovement.WarehouseName ||
+                        translations["Not Available"]}
+                    </Span>
                   </Container>
 
                   <Container className="flex justify-between items-start">
@@ -624,10 +692,15 @@ const StockMovementView = () => {
                       {translations["Movement Type"]}:
                     </Span>
                     <Container className="text-right">
-                      <Container className={`inline-flex items-center gap-2 ${typeStyle.bgColor} px-3 py-1 rounded-lg`}>
-                        <TypeIcon className={`w-4 h-4 ${typeStyle.iconColor}`} />
+                      <Container
+                        className={`inline-flex items-center gap-2 ${typeStyle.bgColor} px-3 py-1 rounded-lg`}
+                      >
+                        <TypeIcon
+                          className={`w-4 h-4 ${typeStyle.iconColor}`}
+                        />
                         <Span className={`font-medium ${typeStyle.textColor}`}>
-                          {currentMovement.MovementType || translations["Not Available"]}
+                          {currentMovement.MovementType ||
+                            translations["Not Available"]}
                         </Span>
                       </Container>
                     </Container>
@@ -638,8 +711,15 @@ const StockMovementView = () => {
                       <ArrowUpDown className="w-4 h-4" />
                       {translations.Quantity}:
                     </Span>
-                    <Span className={`font-bold text-lg ${currentMovement.QuantityChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {currentMovement.QuantityChange > 0 ? '+' : ''}{currentMovement.QuantityChange || 0}
+                    <Span
+                      className={`font-bold text-lg ${
+                        currentMovement.QuantityChange > 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {currentMovement.QuantityChange > 0 ? "+" : ""}
+                      {currentMovement.QuantityChange || 0}
                     </Span>
                   </Container>
                 </Container>
@@ -651,14 +731,17 @@ const StockMovementView = () => {
                   <FileText className="w-5 h-5" />
                   {translations["Additional Details"]}
                 </h3>
-                
+
                 <Container className="space-y-4">
                   <Container className="flex justify-between items-start">
                     <Span className="text-gray-600 flex items-center gap-2">
                       <Hash className="w-4 h-4" />
                       {translations.Reference}:
                     </Span>
-                    <Span className="font-semibold text-right">{currentMovement.Reference || translations["Not Available"]}</Span>
+                    <Span className="font-semibold text-right">
+                      {currentMovement.Reference ||
+                        translations["Not Available"]}
+                    </Span>
                   </Container>
 
                   <Container className="flex justify-between items-start">
@@ -667,8 +750,14 @@ const StockMovementView = () => {
                       {translations.Date}:
                     </Span>
                     <Container className="text-right">
-                      <Span className="font-semibold block">{formatDateOnly(currentMovement.CreatedAt)}</Span>
-                      <Span className="text-sm text-gray-500">{new Date(currentMovement.CreatedAt).toLocaleTimeString()}</Span>
+                      <Span className="font-semibold block">
+                        {formatDateOnly(currentMovement.CreatedAt)}
+                      </Span>
+                      <Span className="text-sm text-gray-500">
+                        {new Date(
+                          currentMovement.CreatedAt
+                        ).toLocaleTimeString()}
+                      </Span>
                     </Container>
                   </Container>
 
@@ -677,7 +766,11 @@ const StockMovementView = () => {
                       <User className="w-4 h-4" />
                       {translations["Created By"]}:
                     </Span>
-                    <Span className="font-semibold text-right">User ID: {currentMovement.CreatedByUserId || translations["Not Available"]}</Span>
+                    <Span className="font-semibold text-right">
+                      User ID:{" "}
+                      {currentMovement.CreatedByUserId ||
+                        translations["Not Available"]}
+                    </Span>
                   </Container>
 
                   <Container className="flex justify-between items-start">
@@ -685,7 +778,9 @@ const StockMovementView = () => {
                       <StickyNote className="w-4 h-4" />
                       {translations.Notes}:
                     </Span>
-                    <Span className="font-semibold text-right max-w-xs">{currentMovement.Notes || translations["Not Available"]}</Span>
+                    <Span className="font-semibold text-right max-w-xs">
+                      {currentMovement.Notes || translations["Not Available"]}
+                    </Span>
                   </Container>
                 </Container>
               </Container>
@@ -693,7 +788,10 @@ const StockMovementView = () => {
 
             {/* Document Footer */}
             <Container className="border-t border-gray-200 pt-6 text-center text-sm text-gray-500">
-              <p>This document was generated automatically by the Stock Management System.</p>
+              <p>
+                This document was generated automatically by the Stock
+                Management System.
+              </p>
               <p>Generated on {new Date().toLocaleString()}</p>
             </Container>
           </Container>
@@ -704,8 +802,11 @@ const StockMovementView = () => {
       {showDeleteModal && (
         <Container className="fixed inset-0 z-50 overflow-y-auto">
           <Container className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <Container className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowDeleteModal(false)}></Container>
-            
+            <Container
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+              onClick={() => setShowDeleteModal(false)}
+            ></Container>
+
             <Container className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <Container className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <Container className="sm:flex sm:items-start">
@@ -718,7 +819,8 @@ const StockMovementView = () => {
                     </h3>
                     <Container className="mt-2">
                       <p className="text-sm text-gray-500">
-                        {translations["Are you sure?"]} {translations["This action cannot be undone"]}.
+                        {translations["Are you sure?"]}{" "}
+                        {translations["This action cannot be undone"]}.
                       </p>
                     </Container>
                   </Container>
@@ -759,48 +861,48 @@ const StockMovementView = () => {
           .no-print {
             display: none !important;
           }
-          
+
           #movement-content {
             box-shadow: none !important;
             border: none !important;
           }
-          
+
           .bg-gray-50 {
             background: #f9fafb !important;
           }
-          
+
           .bg-green-100 {
             background: #dcfce7 !important;
           }
-          
+
           .bg-red-100 {
             background: #fee2e2 !important;
           }
-          
+
           .bg-blue-100 {
             background: #dbeafe !important;
           }
-          
+
           .bg-gray-100 {
             background: #f3f4f6 !important;
           }
-          
+
           .text-green-600 {
             color: #059669 !important;
           }
-          
+
           .text-red-600 {
             color: #dc2626 !important;
           }
-          
+
           .text-blue-800 {
             color: #1e40af !important;
           }
-          
+
           .text-green-800 {
             color: #166534 !important;
           }
-          
+
           .text-red-800 {
             color: #991b1b !important;
           }

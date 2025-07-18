@@ -271,7 +271,7 @@ const AttendanceModule = () => {
     { id: "attendance", label: t("attendanceRecords"), icon: Calendar },
     { id: "checkin", label: t("checkInOut"), icon: Clock },
   ];
-
+  console.log("filteredAttendances", filteredAttendances);
   const renderDashboard = () => (
     <Container className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

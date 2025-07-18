@@ -40,7 +40,8 @@ const PriceListList = () => {
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Add Price List": language === "ar" ? "إضافة قائمة أسعار" : "Add Price List",
+    "Add Price List":
+      language === "ar" ? "إضافة قائمة أسعار" : "Add Price List",
     "Price Lists": language === "ar" ? "قوائم الأسعار" : "Price Lists",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
     Search: language === "ar" ? "بحث" : "Search",
@@ -48,7 +49,8 @@ const PriceListList = () => {
     Export: language === "ar" ? "تصدير" : "Export",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No Price Lists": language === "ar" ? "لا توجد قوائم أسعار" : "No price lists found",
+    "No Price Lists":
+      language === "ar" ? "لا توجد قوائم أسعار" : "No price lists found",
     Name: language === "ar" ? "الاسم" : "Name",
     Description: language === "ar" ? "الوصف" : "Description",
     Status: language === "ar" ? "الحالة" : "Status",
@@ -66,13 +68,15 @@ const PriceListList = () => {
     Delete: language === "ar" ? "حذف" : "Delete",
     Copy: language === "ar" ? "نسخ" : "Copy",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Price List": language === "ar" ? "حذف قائمة الأسعار" : "Delete Price List",
+    "Delete Price List":
+      language === "ar" ? "حذف قائمة الأسعار" : "Delete Price List",
     "This action cannot be undone":
       language === "ar"
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Price List Details": language === "ar" ? "تفاصيل قائمة الأسعار" : "Price List Details",
+    "Price List Details":
+      language === "ar" ? "تفاصيل قائمة الأسعار" : "Price List Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
     "No results found":
@@ -80,7 +84,8 @@ const PriceListList = () => {
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
     "Created At": language === "ar" ? "تاريخ الإنشاء" : "Created At",
     "Updated At": language === "ar" ? "تاريخ التحديث" : "Updated At",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
     "No description": language === "ar" ? "لا يوجد وصف" : "No description",
     "No items": language === "ar" ? "لا توجد عناصر" : "No items",
     Item: language === "ar" ? "العنصر" : "Item",
@@ -184,7 +189,7 @@ const PriceListList = () => {
     if (selectAll) {
       setSelectedPriceLists([]);
     } else {
-      const priceListIds = Array.isArray(priceLists) 
+      const priceListIds = Array.isArray(priceLists)
         ? priceLists.map((priceList) => priceList.Id)
         : [];
       setSelectedPriceLists(priceListIds);
@@ -193,64 +198,77 @@ const PriceListList = () => {
   }, [selectAll, priceLists]);
 
   // Price list actions
-  const handleViewPriceList = useCallback(async (priceListId) => {
-    try {
-      const priceListData = await getPriceList(priceListId);
-      if (priceListData && priceListData.Data) {
-        setSelectedPriceList(priceListData.Data);
-        setShowViewModal(true);
+  const handleViewPriceList = useCallback(
+    async (priceListId) => {
+      try {
+        const priceListData = await getPriceList(priceListId);
+        if (priceListData && priceListData.Data) {
+          setSelectedPriceList(priceListData.Data);
+          setShowViewModal(true);
+        }
+      } catch (error) {
+        console.error("Error fetching price list details:", error);
+        alert("Failed to fetch price list details");
       }
-    } catch (error) {
-      console.error("Error fetching price list details:", error);
-      alert("Failed to fetch price list details");
-    }
-  }, [getPriceList]);
+    },
+    [getPriceList]
+  );
 
-  const handleEditPriceList = useCallback(async (priceListId) => {
-    try {
-      const priceListData = await getPriceList(priceListId);
-      if (priceListData && priceListData.Data) {
-        navigate("/admin/new-price-list", {
-          state: {
-            editData: priceListData.Data,
-            isEditing: true,
-          },
-        });
+  const handleEditPriceList = useCallback(
+    async (priceListId) => {
+      try {
+        const priceListData = await getPriceList(priceListId);
+        if (priceListData && priceListData.Data) {
+          navigate("/admin/new-price-list", {
+            state: {
+              editData: priceListData.Data,
+              isEditing: true,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching price list for edit:", error);
+        alert("Failed to fetch price list details for editing");
       }
-    } catch (error) {
-      console.error("Error fetching price list for edit:", error);
-      alert("Failed to fetch price list details for editing");
-    }
-  }, [getPriceList, navigate]);
+    },
+    [getPriceList, navigate]
+  );
 
-  const handleCopyPriceList = useCallback(async (priceListId) => {
-    try {
-      const priceListData = await getPriceList(priceListId);
-      if (priceListData && priceListData.Data) {
-        navigate("/admin/new-price-list", {
-          state: {
-            cloneData: priceListData.Data,
-            isCloning: true,
-          },
-        });
+  const handleCopyPriceList = useCallback(
+    async (priceListId) => {
+      try {
+        const priceListData = await getPriceList(priceListId);
+        if (priceListData && priceListData.Data) {
+          navigate("/admin/new-price-list", {
+            state: {
+              cloneData: priceListData.Data,
+              isCloning: true,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching price list for copy:", error);
+        alert("Failed to fetch price list details for copying");
       }
-    } catch (error) {
-      console.error("Error fetching price list for copy:", error);
-      alert("Failed to fetch price list details for copying");
-    }
-  }, [getPriceList, navigate]);
+    },
+    [getPriceList, navigate]
+  );
+  const priceListsData = Array.isArray(priceLists) ? priceLists : [];
 
-  const handleDeletePriceList = useCallback((priceListId) => {
-    const priceList = Array.isArray(priceLists) 
-      ? priceLists.find((pl) => pl.Id === priceListId)
-      : null;
-    if (priceList) {
-      setPriceListToDelete(priceList);
-      setShowDeleteModal(true);
-    } else {
-      alert("Price list not found");
-    }
-  }, [priceLists]);
+  const handleDeletePriceList = useCallback(
+    (priceListId) => {
+      const priceList = Array.isArray(priceLists)
+        ? priceLists.find((pl) => pl.Id === priceListId)
+        : null;
+      if (priceList) {
+        setPriceListToDelete(priceList);
+        setShowDeleteModal(true);
+      } else {
+        alert("Price list not found");
+      }
+    },
+    [priceLists]
+  );
 
   const confirmDeletePriceList = useCallback(async () => {
     if (!priceListToDelete) return;
@@ -272,15 +290,18 @@ const PriceListList = () => {
   }, [priceListToDelete, deletePriceList, getPriceLists, getStatistics]);
 
   // Pagination handler
-  const handlePageChange = useCallback(async (newPage) => {
-    if (!pagination || newPage < 1 || newPage > pagination.TotalPages) return;
+  const handlePageChange = useCallback(
+    async (newPage) => {
+      if (!pagination || newPage < 1 || newPage > pagination.TotalPages) return;
 
-    try {
-      await changePage(newPage);
-    } catch (error) {
-      console.error("Error changing page:", error);
-    }
-  }, [pagination, changePage]);
+      try {
+        await changePage(newPage);
+      } catch (error) {
+        console.error("Error changing page:", error);
+      }
+    },
+    [pagination, changePage]
+  );
 
   // Filter handlers
   const handleApplyFilters = useCallback(async () => {
@@ -309,10 +330,10 @@ const PriceListList = () => {
 
     try {
       setFilters({
-        searchTerm: '',
-        status: '',
-        sortBy: 'CreatedAt',
-        sortAscending: false
+        searchTerm: "",
+        status: "",
+        sortBy: "CreatedAt",
+        sortAscending: false,
       });
       await getPriceLists();
     } catch (error) {
@@ -343,29 +364,29 @@ const PriceListList = () => {
 
   const getItemCount = useCallback((priceList) => {
     if (!priceList.Items) return 0;
-    
+
     if (priceList.Items.$values) {
       return priceList.Items.$values.length;
     }
-    
+
     if (Array.isArray(priceList.Items)) {
       return priceList.Items.length;
     }
-    
+
     return 0;
   }, []);
 
   const getItemsArray = useCallback((priceList) => {
     if (!priceList.Items) return [];
-    
+
     if (priceList.Items.$values) {
       return priceList.Items.$values;
     }
-    
+
     if (Array.isArray(priceList.Items)) {
       return priceList.Items;
     }
-    
+
     return [];
   }, []);
 
@@ -395,57 +416,197 @@ const PriceListList = () => {
     );
   }
 
+  // Filter function to apply all active filters
+  const applyAllFilters = useCallback(() => {
+    let filteredData = [...priceListsData];
+
+    // Apply status filter
+    if (filterOptions.status) {
+      filteredData = filteredData.filter(
+        (priceList) => priceList.Status === filterOptions.status
+      );
+    }
+
+    // Apply sorting
+    if (filterOptions.sortBy) {
+      filteredData.sort((a, b) => {
+        let comparison = 0;
+        if (filterOptions.sortBy === "CreatedAt") {
+          comparison =
+            new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime();
+        } else if (filterOptions.sortBy === "Name") {
+          comparison = a.Name.localeCompare(b.Name);
+        } else if (filterOptions.sortBy === "Status") {
+          comparison = a.Status.localeCompare(b.Status);
+        }
+
+        return filterOptions.sortAscending ? comparison : -comparison;
+      });
+    }
+
+    return filteredData;
+  }, [priceListsData, filterOptions]);
+
+  // Get filtered price lists
+  const filteredPriceLists = applyAllFilters();
+
+  // Function to export to CSV
+  const handleExportToCSV = useCallback(() => {
+    if (filteredPriceLists.length === 0) {
+      alert(translations["No Price Lists to export"]);
+      return;
+    }
+
+    // Prepare CSV headers
+    const headers = [
+      translations.Name,
+      translations.Description,
+      translations.Status,
+      translations["Total Items"],
+      translations["Created At"],
+      translations["Updated At"],
+    ];
+
+    // Prepare CSV rows
+    const rows = filteredPriceLists.map((priceList) => [
+      `"${priceList.Name || ""}"`,
+      `"${priceList.Description || ""}"`,
+      `"${priceList.Status || ""}"`,
+      `"${getItemCount(priceList)}"`,
+      `"${formatDate(priceList.CreatedAt)}"`,
+      `"${formatDate(priceList.UpdatedAt)}"`,
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `price_lists_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [filteredPriceLists, translations]);
+
+  // Function to export selected items to CSV
+  const handleExportSelectedToCSV = useCallback(() => {
+    if (selectedPriceLists.length === 0) {
+      alert(translations["No items selected to export"]);
+      return;
+    }
+
+    const selectedData = priceListsData.filter((priceList) =>
+      selectedPriceLists.includes(priceList.Id)
+    );
+
+    // Prepare CSV headers
+    const headers = [
+      translations.Name,
+      translations.Description,
+      translations.Status,
+      translations["Total Items"],
+      translations["Created At"],
+      translations["Updated At"],
+    ];
+
+    // Prepare CSV rows
+    const rows = selectedData.map((priceList) => [
+      `"${priceList.Name || ""}"`,
+      `"${priceList.Description || ""}"`,
+      `"${priceList.Status || ""}"`,
+      `"${getItemCount(priceList)}"`,
+      `"${formatDate(priceList.CreatedAt)}"`,
+      `"${formatDate(priceList.UpdatedAt)}"`,
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `selected_price_lists_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [selectedPriceLists, priceListsData, translations]);
+
   // Ensure priceLists is an array
-  const priceListsData = Array.isArray(priceLists) ? priceLists : [];
 
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations["Price Lists"]}
             </h1>
             {selectedPriceLists.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedPriceLists.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <FilledButton
-              isIcon={true}
+              isIcon
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
+              isIconLeft
               onClick={() => setShowFilters(true)}
             />
+
             <FilledButton
-              isIcon={true}
+              isIcon
               icon={Download}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Export}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => alert("Export functionality to be implemented")}
+              isIconLeft
+              onClick={() =>
+                selectedPriceLists.length > 0
+                  ? handleExportSelectedToCSV()
+                  : handleExportToCSV()
+              }
             />
+
             <FilledButton
-              isIcon={true}
+              isIcon
               icon={Plus}
               iconSize="w-4 h-4"
               bgColor="bg-blue-600 hover:bg-blue-700"
@@ -456,11 +617,12 @@ const PriceListList = () => {
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
+              isIconLeft
               onClick={() => navigate("/admin/new-price-list")}
             />
-          </Container>
-        </Container>
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -597,7 +759,9 @@ const PriceListList = () => {
                           <input
                             type="checkbox"
                             checked={selectedPriceLists.includes(priceList.Id)}
-                            onChange={() => handlePriceListSelection(priceList.Id)}
+                            onChange={() =>
+                              handlePriceListSelection(priceList.Id)
+                            }
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -611,7 +775,8 @@ const PriceListList = () => {
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
                           <Span className="text-sm text-gray-500 truncate max-w-xs block">
-                            {priceList.Description || translations["No description"]}
+                            {priceList.Description ||
+                              translations["No description"]}
                           </Span>
                         </td>
                         <td className="px-6 py-4">
@@ -666,7 +831,9 @@ const PriceListList = () => {
                             </button>
 
                             <button
-                              onClick={() => handleDeletePriceList(priceList.Id)}
+                              onClick={() =>
+                                handleDeletePriceList(priceList.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
                               title={translations.Delete}
                             >
@@ -681,77 +848,83 @@ const PriceListList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.PageNumber * pagination.PageSize,
-                      pagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {pagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.PageNumber} / {pagination.TotalPages}
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
+                      {Math.min(
+                        pagination.PageNumber * pagination.PageSize,
+                        pagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {pagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {pagination.PageNumber} / {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -786,7 +959,7 @@ const PriceListList = () => {
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     {translations["Basic Information"]}
                   </h3>
-                  
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Name}
@@ -805,7 +978,8 @@ const PriceListList = () => {
                         selectedPriceList.Status
                       )}`}
                     >
-                      {translations[selectedPriceList.Status] || selectedPriceList.Status}
+                      {translations[selectedPriceList.Status] ||
+                        selectedPriceList.Status}
                     </Span>
                   </Container>
 
@@ -814,7 +988,8 @@ const PriceListList = () => {
                       {translations.Description}
                     </Span>
                     <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedPriceList.Description || translations["No description"]}
+                      {selectedPriceList.Description ||
+                        translations["No description"]}
                     </Span>
                   </Container>
                 </Container>
@@ -824,7 +999,7 @@ const PriceListList = () => {
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     Additional Information
                   </h3>
-                  
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Total Items"]}
@@ -866,9 +1041,15 @@ const PriceListList = () => {
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-3 py-2 text-left">{translations.Item}</th>
-                          <th className="px-3 py-2 text-left">{translations["Selling Price"]}</th>
-                          <th className="px-3 py-2 text-left">{translations.Description}</th>
+                          <th className="px-3 py-2 text-left">
+                            {translations.Item}
+                          </th>
+                          <th className="px-3 py-2 text-left">
+                            {translations["Selling Price"]}
+                          </th>
+                          <th className="px-3 py-2 text-left">
+                            {translations.Description}
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -881,12 +1062,14 @@ const PriceListList = () => {
                             </td>
                             <td className="px-3 py-2">
                               <Span className="text-sm text-green-600 font-medium">
-                                {item.SellingPrice ? `${item.SellingPrice}` : '-'}
+                                {item.SellingPrice
+                                  ? `${item.SellingPrice}`
+                                  : "-"}
                               </Span>
                             </td>
                             <td className="px-3 py-2">
                               <Span className="text-sm text-gray-500">
-                                {item.Description || '-'}
+                                {item.Description || "-"}
                               </Span>
                             </td>
                           </tr>
@@ -900,7 +1083,9 @@ const PriceListList = () => {
               {getItemCount(selectedPriceList) === 0 && (
                 <Container className="mt-6 pt-4 border-t border-gray-200 text-center py-4">
                   <Package className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <Span className="text-gray-500 text-sm">{translations["No items"]}</Span>
+                  <Span className="text-gray-500 text-sm">
+                    {translations["No items"]}
+                  </Span>
                 </Container>
               )}
             </Container>
@@ -935,8 +1120,8 @@ const PriceListList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the price list{" "}
-              <strong>"{priceListToDelete?.Name}"</strong>{" "}
-              and all associated items.
+              <strong>"{priceListToDelete?.Name}"</strong> and all associated
+              items.
             </Span>
           </Container>
         }

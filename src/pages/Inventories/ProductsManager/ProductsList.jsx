@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Plus,
   ChevronLeft,
@@ -52,6 +52,59 @@ const ProductsList = () => {
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
+  // Get products context
+  const {
+    products,
+    currentProduct,
+    loading: productsLoading,
+    error,
+    pagination,
+    filters,
+    dropdowns,
+    getProducts,
+    getProduct,
+    deleteProduct,
+    changePage,
+    changePageSize,
+    setFilters,
+    getCategoriesDropdown,
+    getBrandsDropdown,
+    getProductsDropdown,
+    getStatisticsOverview,
+  } = useProductsManager();
+
+  // Process products data from API response
+  const parsedProducts = JSON.parse(products);
+  const productsData = parsedProducts?.Data?.$values || [];
+  // Local state management
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isFocused] = useState(false);
+  const [filterOptions, setFilterOptions] = useState({
+    status: "",
+    categoryId: null,
+    sortBy: "name",
+    sortAscending: true,
+    lowStockOnly: false,
+  });
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const location = useLocation();
+  // Statistics state
+  const [statistics, setStatistics] = useState({
+    totalProducts: 0,
+    activeProducts: 0,
+    productsThisMonth: 0,
+    lowStockItems: 0,
+    totalInventoryValue: 0,
+    totalStockValue: 0,
+  });
   const translations = {
     "Add Product": language === "ar" ? "إضافة منتج" : "Add Product",
     Products: language === "ar" ? "المنتجات" : "Products",
@@ -90,12 +143,16 @@ const ProductsList = () => {
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Product": language === "ar" ? "حذف المنتج" : "Delete Product",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Product Details": language === "ar" ? "تفاصيل المنتج" : "Product Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
     "All Categories": language === "ar" ? "جميع الفئات" : "All Categories",
     Categories: language === "ar" ? "الفئات" : "Categories",
@@ -103,126 +160,89 @@ const ProductsList = () => {
     Tags: language === "ar" ? "العلامات" : "Tags",
     Images: language === "ar" ? "الصور" : "Images",
     Taxes: language === "ar" ? "الضرائب" : "Taxes",
-    "Minimum Stock": language === "ar" ? "الحد الأدنى للمخزون" : "Minimum Stock",
+    "Minimum Stock":
+      language === "ar" ? "الحد الأدنى للمخزون" : "Minimum Stock",
     "Tracking Type": language === "ar" ? "نوع التتبع" : "Tracking Type",
-    "Product Statistics": language === "ar" ? "إحصائيات المنتجات" : "Product Statistics",
+    "Product Statistics":
+      language === "ar" ? "إحصائيات المنتجات" : "Product Statistics",
     "Inventory Value": language === "ar" ? "قيمة المخزون" : "Inventory Value",
-    "Low Stock Items": language === "ar" ? "عناصر مخزون منخفض" : "Low Stock Items",
-    "Show Low Stock Only": language === "ar" ? "عرض المخزون المنخفض فقط" : "Show Low Stock Only",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Pricing Information": language === "ar" ? "معلومات التسعير" : "Pricing Information",
-    "Inventory Information": language === "ar" ? "معلومات المخزون" : "Inventory Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
+    "Low Stock Items":
+      language === "ar" ? "عناصر مخزون منخفض" : "Low Stock Items",
+    "Show Low Stock Only":
+      language === "ar" ? "عرض المخزون المنخفض فقط" : "Show Low Stock Only",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Pricing Information":
+      language === "ar" ? "معلومات التسعير" : "Pricing Information",
+    "Inventory Information":
+      language === "ar" ? "معلومات المخزون" : "Inventory Information",
+    "Additional Information":
+      language === "ar" ? "معلومات إضافية" : "Additional Information",
     "Created At": language === "ar" ? "تاريخ الإنشاء" : "Created At",
     "Updated At": language === "ar" ? "تاريخ التحديث" : "Updated At",
     "Sort by": language === "ar" ? "ترتيب حسب" : "Sort by",
     "Sort Ascending": language === "ar" ? "ترتيب تصاعدي" : "Sort Ascending",
     "Date Created": language === "ar" ? "تاريخ الإنشاء" : "Date Created",
-    "Management": language === "ar" ? "إدارة" : "Management",
-    "Manage Categories": language === "ar" ? "إدارة الفئات" : "Manage Categories",
-    "Manage Brands": language === "ar" ? "إدارة العلامات التجارية" : "Manage Brands",
+    Management: language === "ar" ? "إدارة" : "Management",
+    "Manage Categories":
+      language === "ar" ? "إدارة الفئات" : "Manage Categories",
+    "Manage Brands":
+      language === "ar" ? "إدارة العلامات التجارية" : "Manage Brands",
     "Manage Images": language === "ar" ? "إدارة الصور" : "Manage Images",
     "View Statistics": language === "ar" ? "عرض الإحصائيات" : "View Statistics",
-    "Uncategorized": language === "ar" ? "غير مصنف" : "Uncategorized",
+    Uncategorized: language === "ar" ? "غير مصنف" : "Uncategorized",
     "No Category": language === "ar" ? "بدون فئة" : "No Category",
     "No Brand": language === "ar" ? "بدون علامة تجارية" : "No Brand",
     "No Image": language === "ar" ? "بدون صورة" : "No Image",
     "Multiple Images": language === "ar" ? "صور متعددة" : "Multiple Images",
-    "Quantity": language === "ar" ? "الكمية" : "Quantity",
+    Quantity: language === "ar" ? "الكمية" : "Quantity",
     "No Description": language === "ar" ? "بدون وصف" : "No Description",
     "Recently Added": language === "ar" ? "مضاف حديثاً" : "Recently Added",
-    "Featured": language === "ar" ? "مميز" : "Featured",
-    "Discount": language === "ar" ? "خصم" : "Discount",
+    Featured: language === "ar" ? "مميز" : "Featured",
+    Discount: language === "ar" ? "خصم" : "Discount",
     "Minimum Price": language === "ar" ? "الحد الأدنى للسعر" : "Minimum Price",
     "Internal Notes": language === "ar" ? "ملاحظات داخلية" : "Internal Notes",
-    "Supplier": language === "ar" ? "المورد" : "Supplier",
-    "Manufacturer": language === "ar" ? "الشركة المصنعة" : "Manufacturer",
+    Supplier: language === "ar" ? "المورد" : "Supplier",
+    Manufacturer: language === "ar" ? "الشركة المصنعة" : "Manufacturer",
     "Price List": language === "ar" ? "قائمة الأسعار" : "Price List",
     "Related Data": language === "ar" ? "البيانات المرتبطة" : "Related Data",
     "Stock Alert": language === "ar" ? "تنبيه المخزون" : "Stock Alert",
     "Stock Alerts": language === "ar" ? "تنبيهات المخزون" : "Stock Alerts",
-    "items need attention": language === "ar" ? "عناصر تحتاج لانتباه" : "items need attention",
-    "Retry": language === "ar" ? "إعادة المحاولة" : "Retry",
-    "Go to Dashboard": language === "ar" ? "انتقل إلى لوحة التحكم" : "Go to Dashboard",
+    "items need attention":
+      language === "ar" ? "عناصر تحتاج لانتباه" : "items need attention",
+    Retry: language === "ar" ? "إعادة المحاولة" : "Retry",
+    "Go to Dashboard":
+      language === "ar" ? "انتقل إلى لوحة التحكم" : "Go to Dashboard",
     "Quick Actions": language === "ar" ? "إجراءات سريعة" : "Quick Actions",
-    "Inventory Management": language === "ar" ? "إدارة المخزون" : "Inventory Management",
-    "Advanced Options": language === "ar" ? "خيارات متقدمة" : "Advanced Options",
+    "Inventory Management":
+      language === "ar" ? "إدارة المخزون" : "Inventory Management",
+    "Advanced Options":
+      language === "ar" ? "خيارات متقدمة" : "Advanced Options",
     "Bulk Actions": language === "ar" ? "الإجراءات المجمعة" : "Bulk Actions",
     "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
     "Export All": language === "ar" ? "تصدير الكل" : "Export All",
     "Delete Selected": language === "ar" ? "حذف المحدد" : "Delete Selected",
     "Update Status": language === "ar" ? "تحديث الحالة" : "Update Status",
     "Batch Edit": language === "ar" ? "تحرير مجمع" : "Batch Edit",
-    "Import Products": language === "ar" ? "استيراد المنتجات" : "Import Products",
-    "Product Templates": language === "ar" ? "قوالب المنتجات" : "Product Templates",
+    "Import Products":
+      language === "ar" ? "استيراد المنتجات" : "Import Products",
+    "Product Templates":
+      language === "ar" ? "قوالب المنتجات" : "Product Templates",
     "Pricing Rules": language === "ar" ? "قواعد التسعير" : "Pricing Rules",
     "Stock Movements": language === "ar" ? "حركات المخزون" : "Stock Movements",
-    "Popular": language === "ar" ? "شائع" : "Popular",
-    "New": language === "ar" ? "جديد" : "New",
-    "Sale": language === "ar" ? "تخفيض" : "Sale",
-    "Hot": language === "ar" ? "مطلوب" : "Hot",
-    "pages": language === "ar" ? "صفحات" : "pages",
+    Popular: language === "ar" ? "شائع" : "Popular",
+    New: language === "ar" ? "جديد" : "New",
+    Sale: language === "ar" ? "تخفيض" : "Sale",
+    Hot: language === "ar" ? "مطلوب" : "Hot",
+    pages: language === "ar" ? "صفحات" : "pages",
     "Go to page": language === "ar" ? "انتقل إلى الصفحة" : "Go to page",
     "items per page": language === "ar" ? "عنصر في الصفحة" : "items per page",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "First": language === "ar" ? "الأول" : "First",
-    "Last": language === "ar" ? "الأخير" : "Last",
-    "Page": language === "ar" ? "صفحة" : "Page"
+    Previous: language === "ar" ? "السابق" : "Previous",
+    Next: language === "ar" ? "التالي" : "Next",
+    First: language === "ar" ? "الأول" : "First",
+    Last: language === "ar" ? "الأخير" : "Last",
+    Page: language === "ar" ? "صفحة" : "Page",
   };
-
-  // Get products context
-  const {
-    products,
-    currentProduct,
-    loading: productsLoading,
-    error,
-    pagination,
-    filters,
-    dropdowns,
-    getProducts,
-    getProduct,
-    deleteProduct,
-    changePage,
-    changePageSize,
-    setFilters,
-    getCategoriesDropdown,
-    getBrandsDropdown,
-    getProductsDropdown,
-    getStatisticsOverview,
-  } = useProductsManager();
-
-  // Process products data from API response
-  const productsData = products?.Data?.$values || [];
-
-  // Local state management
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isFocused] = useState(false);
-  const [filterOptions, setFilterOptions] = useState({
-    status: "",
-    categoryId: null,
-    sortBy: "name",
-    sortAscending: true,
-    lowStockOnly: false,
-  });
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [productToDelete, setProductToDelete] = useState(null);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Statistics state
-  const [statistics, setStatistics] = useState({
-    totalProducts: 0,
-    activeProducts: 0,
-    productsThisMonth: 0,
-    lowStockItems: 0,
-    totalInventoryValue: 0,
-    totalStockValue: 0,
-  });
 
   // Fetch products on component mount
   useEffect(() => {
@@ -231,13 +251,7 @@ const ProductsList = () => {
         await getProducts();
         await getCategoriesDropdown();
         await getBrandsDropdown();
-        
-        // Get statistics
-        try {
-          await getStatisticsOverview();
-        } catch (error) {
-          console.error("Error fetching statistics:", error);
-        }
+        await getStatisticsOverview();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -246,7 +260,7 @@ const ProductsList = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token]);
+  }, [token, location]);
 
   // Update local statistics when products change
   useEffect(() => {
@@ -254,15 +268,27 @@ const ProductsList = () => {
       const now = new Date();
       const stats = {
         totalProducts: pagination?.TotalItems || productsData.length,
-        activeProducts: productsData.filter(p => p.Status === "Active").length,
-        productsThisMonth: productsData.filter(p => {
+        activeProducts: productsData.filter((p) => p.Status === "Active")
+          .length,
+        productsThisMonth: productsData.filter((p) => {
           const createdDate = new Date(p.CreatedAt);
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
-        lowStockItems: productsData.filter(p => p.StockStatus === "Low Stock" || p.StockStatus === "Out of Stock").length,
-        totalInventoryValue: productsData.reduce((sum, p) => sum + (p.StockValue || 0), 0),
-        totalStockValue: productsData.reduce((sum, p) => sum + (parseFloat(p.UnitPrice) || 0), 0),
+        lowStockItems: productsData.filter(
+          (p) =>
+            p.StockStatus === "Low Stock" || p.StockStatus === "Out of Stock"
+        ).length,
+        totalInventoryValue: productsData.reduce(
+          (sum, p) => sum + (p.StockValue || 0),
+          0
+        ),
+        totalStockValue: productsData.reduce(
+          (sum, p) => sum + (parseFloat(p.UnitPrice) || 0),
+          0
+        ),
       };
       setStatistics(stats);
     }
@@ -300,7 +326,7 @@ const ProductsList = () => {
         searchTerm: searchTerm.trim(),
       };
       setFilters(newFilters);
-      
+
       await getProducts({
         page: 1,
         search: searchTerm.trim(),
@@ -451,7 +477,7 @@ const ProductsList = () => {
         lowStockOnly: filterOptions.lowStockOnly,
       };
       setFilters(newFilters);
-      
+
       await getProducts({
         page: 1,
         search: searchTerm.trim(),
@@ -461,7 +487,7 @@ const ProductsList = () => {
         sortAscending: filterOptions.sortAscending,
         lowStockOnly: filterOptions.lowStockOnly,
       });
-      
+
       setShowFilters(false);
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -481,10 +507,10 @@ const ProductsList = () => {
 
     try {
       const newFilters = {
-        searchTerm: '',
-        status: '',
+        searchTerm: "",
+        status: "",
         categoryId: null,
-        sortBy: 'name',
+        sortBy: "name",
         sortAscending: true,
         lowStockOnly: false,
       };
@@ -495,10 +521,138 @@ const ProductsList = () => {
     }
   };
 
+  // CSV Export functionality
+  const convertToCSV = (data) => {
+    const headers = [
+      "ID",
+      "Name",
+      "Item Code",
+      "Barcode",
+      "Description",
+      "Category",
+      "Brand",
+      "Unit Price",
+      "Purchase Price",
+      "Minimum Price",
+      "Current Stock",
+      "Minimum Stock",
+      "Stock Status",
+      "Status",
+      "Discount",
+      "Discount Type",
+      "Stock Value",
+      "Created At",
+      "Updated At",
+    ];
+
+    const csvContent = [
+      headers.join(","),
+      ...data.map((product) =>
+        [
+          product.Id || "",
+          `"${(product.Name || "").replace(/"/g, '""')}"`,
+          product.ItemCode || "",
+          product.Barcode || "",
+          `"${(product.Description || "").replace(/"/g, '""')}"`,
+          `"${getCategoryName(product.CategoryId)}"`,
+          `"${getBrandName(product.BrandId)}"`,
+          formatCurrency(product.UnitPrice),
+          formatCurrency(product.PurchasePrice),
+          formatCurrency(product.MinimumPrice),
+          formatStock(product.CurrentStock),
+          formatStock(product.MinimumStock),
+          product.StockStatus || "",
+          product.Status || "",
+          product.Discount || "",
+          product.DiscountType || "",
+          formatCurrency(product.StockValue),
+          product.CreatedAt
+            ? new Date(product.CreatedAt).toLocaleDateString()
+            : "",
+          product.UpdatedAt
+            ? new Date(product.UpdatedAt).toLocaleDateString()
+            : "",
+        ].join(",")
+      ),
+    ].join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const fetchAllProductsForExport = async () => {
+    try {
+      // Fetch all products without pagination
+      const allProductsResponse = await getProducts({
+        page: 1,
+        pageSize: 999999, // Large number to get all products
+        search: searchTerm.trim(),
+        status: filterOptions.status,
+        categoryId: filterOptions.categoryId,
+        sortBy: filterOptions.sortBy,
+        sortAscending: filterOptions.sortAscending,
+        lowStockOnly: filterOptions.lowStockOnly,
+      });
+
+      return allProductsResponse?.Data?.$values || productsData;
+    } catch (error) {
+      console.error("Error fetching all products:", error);
+      return productsData; // Fallback to current page data
+    }
+  };
+
   // Export functionality
-  const handleExport = () => {
-    console.log("Export products:", selectedProducts.length > 0 ? selectedProducts : "all");
-    alert("Export functionality to be implemented");
+  const handleExport = async () => {
+    if (isExporting) return;
+
+    setIsExporting(true);
+    try {
+      let dataToExport = [];
+
+      if (selectedProducts.length > 0) {
+        // Export selected products
+        dataToExport = productsData.filter((product) =>
+          selectedProducts.includes(product.Id)
+        );
+      } else {
+        // Export all products (fetch all pages)
+        dataToExport = await fetchAllProductsForExport();
+      }
+
+      if (dataToExport.length === 0) {
+        alert("No products to export");
+        return;
+      }
+
+      const csvContent = convertToCSV(dataToExport);
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename =
+        selectedProducts.length > 0
+          ? `selected_products_${timestamp}.csv`
+          : `all_products_${timestamp}.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(`Successfully exported ${dataToExport.length} products to CSV`);
+    } catch (error) {
+      console.error("Error exporting products:", error);
+      alert("Failed to export products. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Utility functions
@@ -525,27 +679,51 @@ const ProductsList = () => {
   };
 
   const getStatusColor = (status) => {
-    return status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+    return status === "Active"
+      ? "bg-green-100 text-green-800"
+      : "bg-red-100 text-red-800";
   };
 
   const getCategoryName = (categoryId) => {
-  if (!categoryId) return translations["No Category"];
-  
-  // Ensure categories is an array before calling find
-  const categories = Array.isArray(dropdowns?.categories) ? dropdowns.categories : [];
-  const category = categories.find(c => c.Id === categoryId);
-  return category?.Name || translations["Uncategorized"];
-};
+    if (!categoryId) return translations["No Category"];
+
+    // Ensure categories is an array before calling find
+    const categories = Array.isArray(dropdowns?.categories)
+      ? dropdowns.categories
+      : [];
+    const category = categories.find((c) => c.Id === categoryId);
+    return category?.Name || translations["Uncategorized"];
+  };
+
+  const getBrandName = (brandId) => {
+    if (!brandId) return translations["No Brand"];
+
+    // Ensure brands is an array before calling find
+    const brands = Array.isArray(dropdowns?.brands) ? dropdowns.brands : [];
+    const brand = brands.find((b) => b.Id === brandId);
+    return brand?.Name || translations["No Brand"];
+  };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isCurrency = false, isAlert = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isCurrency = false,
+    isAlert = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Container className="flex items-center gap-2 mt-1">
-            <Span className={`text-2xl font-bold ${isAlert && value > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-              {isCurrency ? `$${formatCurrency(value)}` : (value || 0)}
+            <Span
+              className={`text-2xl font-bold ${isAlert && value > 0 ? "text-red-600" : "text-gray-900"
+                }`}
+            >
+              {isCurrency ? `$${formatCurrency(value)}` : value || 0}
             </Span>
             {isAlert && value > 0 && (
               <AlertTriangle className="w-5 h-5 text-red-500" />
@@ -589,7 +767,7 @@ const ProductsList = () => {
               </Span>
             )}
           </Container>
-          
+
           <Container className="flex gap-3 flex-wrap">
             {/* Management Buttons */}
             <FilledButton
@@ -597,7 +775,7 @@ const ProductsList = () => {
               icon={Layers}
               iconSize="w-4 h-4"
               bgColor="bg-purple-100 hover:bg-purple-200"
-              textColor="text-purple-700"
+              // textColor="text-purple-700"
               rounded="rounded-lg"
               buttonText={translations["Manage Categories"]}
               height="h-10"
@@ -607,13 +785,13 @@ const ProductsList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/product-categories")}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Star}
               iconSize="w-4 h-4"
               bgColor="bg-yellow-100 hover:bg-yellow-200"
-              textColor="text-yellow-700"
+              // textColor="text-yellow-700"
               rounded="rounded-lg"
               buttonText={translations["Manage Brands"]}
               height="h-10"
@@ -629,7 +807,7 @@ const ProductsList = () => {
               icon={BarChart3}
               iconSize="w-4 h-4"
               bgColor="bg-green-100 hover:bg-green-200"
-              textColor="text-green-700"
+              // textColor="text-green-700"
               rounded="rounded-lg"
               buttonText={translations["View Statistics"]}
               height="h-10"
@@ -639,14 +817,14 @@ const ProductsList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/product-statistics")}
             />
-            
+
             {/* Action Buttons */}
             <FilledButton
               isIcon={true}
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -656,23 +834,28 @@ const ProductsList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+              bgColor={
+                isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
+              }
+              // textColor={isExporting ? "text-gray-600" : "text-gray-700"}
               rounded="rounded-lg"
-              buttonText={translations.Export}
+              buttonText={
+                isExporting ? translations.Exporting : translations.Export
+              }
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
               onClick={handleExport}
+              disabled={isExporting}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -692,7 +875,7 @@ const ProductsList = () => {
         </Container>
 
         {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 mb-6">
           <StatCard
             title={`${translations.Total} ${translations.Products}`}
             value={statistics?.totalProducts || 0}
@@ -740,6 +923,7 @@ const ProductsList = () => {
           />
         </Container>
 
+
         {/* Search Bar */}
         <Container className="mb-6">
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -747,7 +931,8 @@ const ProductsList = () => {
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${translations.Search} ${translations.Products.toLowerCase()}...`}
+              placeholder={`${translations.Search
+                } ${translations.Products.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -783,29 +968,38 @@ const ProductsList = () => {
             <Container className="text-center py-12">
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm || filterOptions.status || filterOptions.categoryId || filterOptions.lowStockOnly
+                {searchTerm ||
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly
                   ? translations["No results found"]
                   : translations.NoProducts}
               </h3>
               <p className="text-gray-500 mb-6">
-                {searchTerm || filterOptions.status || filterOptions.categoryId || filterOptions.lowStockOnly
+                {searchTerm ||
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly
                   ? "Try adjusting your filters or search terms"
                   : "Get started by adding your first product"}
               </p>
               <Container className="flex gap-3 justify-center">
-                {(searchTerm || filterOptions.status || filterOptions.categoryId || filterOptions.lowStockOnly) && (
-                  <FilledButton
-                    bgColor="bg-gray-100 hover:bg-gray-200"
-                    textColor="text-gray-700"
-                    rounded="rounded-lg"
-                    buttonText={`${translations["Clear All"]} ${translations.Filters}`}
-                    height="h-10"
-                    px="px-4"
-                    fontWeight="font-medium"
-                    fontSize="text-sm"
-                    onClick={handleClearFilters}
-                  />
-                )}
+                {(searchTerm ||
+                  filterOptions.status ||
+                  filterOptions.categoryId ||
+                  filterOptions.lowStockOnly) && (
+                    <FilledButton
+                      bgColor="bg-gray-100 hover:bg-gray-200"
+                      textColor="text-gray-700"
+                      rounded="rounded-lg"
+                      buttonText={`${translations["Clear All"]} ${translations.Filters}`}
+                      height="h-10"
+                      px="px-4"
+                      fontWeight="font-medium"
+                      fontSize="text-sm"
+                      onClick={handleClearFilters}
+                    />
+                  )}
                 <FilledButton
                   isIcon={true}
                   icon={Plus}
@@ -862,7 +1056,10 @@ const ProductsList = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {productsData.map((product) => (
-                      <tr key={product.Id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <tr
+                        key={product.Id}
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
@@ -880,8 +1077,8 @@ const ProductsList = () => {
                                   alt={product.Name}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
+                                    e.target.style.display = "none";
+                                    e.target.nextSibling.style.display = "flex";
                                   }}
                                 />
                                 <Container className="w-full h-full flex items-center justify-center hidden">
@@ -913,7 +1110,9 @@ const ProductsList = () => {
                               {product.Barcode && (
                                 <Container className="flex items-center gap-1 mt-1">
                                   <AiOutlineBarcode className="w-3 h-3 text-gray-400" />
-                                  <Span className="text-xs text-gray-500">{product.Barcode}</Span>
+                                  <Span className="text-xs text-gray-500">
+                                    {product.Barcode}
+                                  </Span>
                                 </Container>
                               )}
                             </Container>
@@ -948,13 +1147,22 @@ const ProductsList = () => {
                             <Span className="text-sm text-gray-900">
                               {formatStock(product.CurrentStock)}
                             </Span>
-                            <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStockStatusColor(product.StockStatus)}`}>
-                              {translations[product.StockStatus] || product.StockStatus}
+                            <Span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStockStatusColor(
+                                product.StockStatus
+                              )}`}
+                            >
+                              {translations[product.StockStatus] ||
+                                product.StockStatus}
                             </Span>
                           </Container>
                         </td>
                         <td className="px-6 py-4">
-                          <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(product.Status)}`}>
+                          <Span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                              product.Status
+                            )}`}
+                          >
                             {translations[product.Status] || product.Status}
                           </Span>
                         </td>
@@ -1000,94 +1208,110 @@ const ProductsList = () => {
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
-                  <Container className="flex items-center gap-4">
-                    <Span className="text-sm text-gray-500">
-                      {translations.Showing}{" "}
-                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                      {Math.min(pagination.PageNumber * pagination.PageSize, pagination.TotalItems)}{" "}
-                      {translations.Of} {pagination.TotalItems} {translations.Items}
-                    </Span>
-                    
-                    <Container className="flex items-center gap-2">
-                      <Span className="text-sm text-gray-500">{translations["items per page"]}:</Span>
-                      <select
-                        value={pagination.PageSize}
-                        onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-                        className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                      </select>
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
+                    <Container className="flex items-center gap-4">
+                      <Span className="text-sm text-gray-500">
+                        {translations.Showing}{" "}
+                        {(pagination.PageNumber - 1) * pagination.PageSize + 1}{" "}
+                        -{" "}
+                        {Math.min(
+                          pagination.PageNumber * pagination.PageSize,
+                          pagination.TotalItems
+                        )}{" "}
+                        {translations.Of} {pagination.TotalItems}{" "}
+                        {translations.Items}
+                      </Span>
+
+                      <Container className="flex items-center gap-2">
+                        <Span className="text-sm text-gray-500">
+                          {translations["items per page"]}:
+                        </Span>
+                        <select
+                          value={pagination.PageSize}
+                          onChange={(e) =>
+                            handlePageSizeChange(parseInt(e.target.value))
+                          }
+                          className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value={10}>10</option>
+                          <option value={25}>25</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
+                        </select>
+                      </Container>
+                    </Container>
+
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                        title={translations.First}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                        title={translations.Previous}
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {translations.Page} {pagination.PageNumber}{" "}
+                        {translations.Of} {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                        title={translations.Next}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                        title={translations.Last}
+                      />
                     </Container>
                   </Container>
-                  
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                      title={translations.First}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                      title={translations.Previous}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {translations.Page} {pagination.PageNumber} {translations.Of} {pagination.TotalPages}
-                    </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                      title={translations.Next}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                      title={translations.Last}
-                    />
-                  </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -1120,7 +1344,7 @@ const ProductsList = () => {
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     {translations["Basic Information"]}
                   </h3>
-                  
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Name}
@@ -1153,7 +1377,8 @@ const ProductsList = () => {
                       {translations.Description}
                     </Span>
                     <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedProduct.Description || translations["No Description"]}
+                      {selectedProduct.Description ||
+                        translations["No Description"]}
                     </Span>
                   </Container>
 
@@ -1161,8 +1386,13 @@ const ProductsList = () => {
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Status}
                     </Span>
-                    <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${getStatusColor(selectedProduct.Status)}`}>
-                      {translations[selectedProduct.Status] || selectedProduct.Status}
+                    <Span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${getStatusColor(
+                        selectedProduct.Status
+                      )}`}
+                    >
+                      {translations[selectedProduct.Status] ||
+                        selectedProduct.Status}
                     </Span>
                   </Container>
                 </Container>
@@ -1172,7 +1402,7 @@ const ProductsList = () => {
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     {translations["Pricing Information"]}
                   </h3>
-                  
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Purchase Price"]}
@@ -1206,7 +1436,9 @@ const ProductsList = () => {
                         {translations.Discount}
                       </Span>
                       <Span className="text-sm text-orange-600 block mt-1">
-                        {selectedProduct.DiscountType === "percentage" ? `${selectedProduct.Discount}%` : `$${formatCurrency(selectedProduct.Discount)}`}
+                        {selectedProduct.DiscountType === "percentage"
+                          ? `${selectedProduct.Discount}%`
+                          : `$${formatCurrency(selectedProduct.Discount)}`}
                       </Span>
                     </Container>
                   )}
@@ -1218,7 +1450,7 @@ const ProductsList = () => {
                 <h3 className="text-lg font-medium text-gray-900 border-b pb-2 mb-4">
                   {translations["Inventory Information"]}
                 </h3>
-                
+
                 <Container className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
@@ -1242,8 +1474,13 @@ const ProductsList = () => {
                     <Span className="text-sm font-medium text-gray-500">
                       {translations["Stock Status"]}
                     </Span>
-                    <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${getStockStatusColor(selectedProduct.StockStatus)}`}>
-                      {translations[selectedProduct.StockStatus] || selectedProduct.StockStatus}
+                    <Span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${getStockStatusColor(
+                        selectedProduct.StockStatus
+                      )}`}
+                    >
+                      {translations[selectedProduct.StockStatus] ||
+                        selectedProduct.StockStatus}
                     </Span>
                   </Container>
                 </Container>
@@ -1254,7 +1491,7 @@ const ProductsList = () => {
                 <h3 className="text-lg font-medium text-gray-900 border-b pb-2 mb-4">
                   {translations["Related Data"]}
                 </h3>
-                
+
                 <Container className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Container className="text-center">
                     <Span className="text-lg font-bold text-blue-600">
@@ -1335,8 +1572,10 @@ const ProductsList = () => {
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the product{" "}
-              <strong>"{productToDelete?.Name}"</strong> and all associated data.
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the product{" "}
+              <strong>"{productToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }
@@ -1376,7 +1615,12 @@ const ProductsList = () => {
                   </label>
                   <select
                     value={filterOptions.status}
-                    onChange={(e) => setFilterOptions({...filterOptions, status: e.target.value})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        status: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">{translations["All Status"]}</option>
@@ -1391,11 +1635,18 @@ const ProductsList = () => {
                   </label>
                   <select
                     value={filterOptions.categoryId || ""}
-                    onChange={(e) => setFilterOptions({...filterOptions, categoryId: e.target.value ? parseInt(e.target.value) : null})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        categoryId: e.target.value
+                          ? parseInt(e.target.value)
+                          : null,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">{translations["All Categories"]}</option>
-                    {dropdowns?.categories?.map(category => (
+                    {dropdowns?.categories?.map((category) => (
                       <option key={category.Id} value={category.Id}>
                         {category.Name}
                       </option>
@@ -1409,15 +1660,28 @@ const ProductsList = () => {
                   </label>
                   <select
                     value={filterOptions.sortBy}
-                    onChange={(e) => setFilterOptions({...filterOptions, sortBy: e.target.value})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        sortBy: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="name">{translations.Name}</option>
-                    <option value="itemcode">{translations["Item Code"]}</option>
-                    <option value="unitprice">{translations["Unit Price"]}</option>
-                    <option value="currentstock">{translations["Current Stock"]}</option>
+                    <option value="itemcode">
+                      {translations["Item Code"]}
+                    </option>
+                    <option value="unitprice">
+                      {translations["Unit Price"]}
+                    </option>
+                    <option value="currentstock">
+                      {translations["Current Stock"]}
+                    </option>
                     <option value="status">{translations.Status}</option>
-                    <option value="createdat">{translations["Date Created"]}</option>
+                    <option value="createdat">
+                      {translations["Date Created"]}
+                    </option>
                   </select>
                 </Container>
 
@@ -1426,7 +1690,12 @@ const ProductsList = () => {
                     <input
                       type="checkbox"
                       checked={filterOptions.sortAscending}
-                      onChange={(e) => setFilterOptions({...filterOptions, sortAscending: e.target.checked})}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          sortAscending: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <Span className="ml-2 text-sm text-gray-700">
@@ -1440,7 +1709,12 @@ const ProductsList = () => {
                     <input
                       type="checkbox"
                       checked={filterOptions.lowStockOnly}
-                      onChange={(e) => setFilterOptions({...filterOptions, lowStockOnly: e.target.checked})}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          lowStockOnly: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <Span className="ml-2 text-sm text-gray-700">

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { logout } from "../../store/slices/authSlice";
 import { setLanguage } from "../../store/slices/languageSlice";
+import { useNavigate } from "react-router-dom";
 
 // Translation data for English and Arabic
 const translations = {
@@ -328,6 +329,7 @@ const UserProfileDropdown = ({
   isRTL,
   onLogout,
 }) => {
+  const navigate = useNavigate();
   const getRoleIcon = (role) => {
     switch (role?.toLowerCase()) {
       case "admin":
@@ -521,6 +523,7 @@ const UserProfileDropdown = ({
 // Main Header Component
 const Header = ({ toggleSidebar, sidebarOpen }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { language: currentLanguage } = useSelector((state) => state.language);
 
@@ -548,6 +551,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
   const handleLogout = () => {
     dispatch(logout());
     setShowProfile(false);
+    navigate("/");
   };
 
   const unreadNotificationCount = mockNotifications.filter(

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -14,11 +14,18 @@ import {
   Calculator,
   Percent,
   Tags,
+  Building,
+  Package,
+  Wrench,
 } from "lucide-react";
-import { useInvoice } from "../../../Contexts/InvoiceContext/InvoiceContext";
+
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../../components/elements/container/Container";
 import Span from "../../../components/elements/span/Span";
+import { useInvoices } from "../../../Contexts/InvoiceContext/InvoiceContext";
+import { useClients } from "../../../Contexts/apiClientContext/apiClientContext";
+import { useService } from "../../../Contexts/ServiceContext/ServiceContext";
+import { useProductsManager } from "../../../Contexts/ProductsManagerContext/ProductsManagerContext";
 
 const NewInvoice = () => {
   const navigate = useNavigate();
@@ -26,7 +33,23 @@ const NewInvoice = () => {
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
-  const { createInvoice, updateInvoice, createInvoiceItem, loading } = useInvoice();
+  const { createInvoice, updateInvoice, loading } = useInvoices();
+
+  // Context hooks for dropdowns
+  const {
+    clients,
+    isLoading: clientsLoading,
+    error: clientsError,
+    getClients,
+  } = useClients();
+
+  const { services, loading: servicesLoading, getServices } = useService();
+
+  const {
+    products,
+    loading: productsLoading,
+    getProducts,
+  } = useProductsManager();
 
   // Check if we're editing or cloning
   const editData = location.state?.editData;
@@ -34,72 +57,11 @@ const NewInvoice = () => {
   const isEditing = location.state?.isEditing || false;
   const isCloning = !!cloneData;
 
-  const translations = {
-    "Add Invoice": language === "ar" ? "إضافة فاتورة" : "Add Invoice",
-    "Edit Invoice": language === "ar" ? "تعديل فاتورة" : "Edit Invoice",
-    "Clone Invoice": language === "ar" ? "نسخ فاتورة" : "Clone Invoice",
-    "Back": language === "ar" ? "رجوع" : "Back",
-    "Save": language === "ar" ? "حفظ" : "Save",
-    "Save Changes": language === "ar" ? "حفظ التغييرات" : "Save Changes",
-    "Invoice Information": language === "ar" ? "معلومات الفاتورة" : "Invoice Information",
-    "Customer Information": language === "ar" ? "معلومات العميل" : "Customer Information",
-    "Invoice Items": language === "ar" ? "عناصر الفاتورة" : "Invoice Items",
-    "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
-    "Invoice Date": language === "ar" ? "تاريخ الفاتورة" : "Invoice Date",
-    "Due Date": language === "ar" ? "تاريخ الاستحقاق" : "Due Date",
-    "Customer Name": language === "ar" ? "اسم العميل" : "Customer Name",
-    "Customer Email": language === "ar" ? "بريد العميل الإلكتروني" : "Customer Email",
-    "Customer Phone": language === "ar" ? "هاتف العميل" : "Customer Phone",
-    "Customer Address": language === "ar" ? "عنوان العميل" : "Customer Address",
-    "Description": language === "ar" ? "الوصف" : "Description",
-    "Notes": language === "ar" ? "ملاحظات" : "Notes",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Draft": language === "ar" ? "مسودة" : "Draft",
-    "Sent": language === "ar" ? "مرسلة" : "Sent",
-    "Paid": language === "ar" ? "مدفوعة" : "Paid",
-    "Overdue": language === "ar" ? "متأخرة" : "Overdue",
-    "Cancelled": language === "ar" ? "ملغاة" : "Cancelled",
-    "Item Name": language === "ar" ? "اسم العنصر" : "Item Name",
-    "Quantity": language === "ar" ? "الكمية" : "Quantity",
-    "Unit Price": language === "ar" ? "سعر الوحدة" : "Unit Price",
-    "Tax Rate": language === "ar" ? "معدل الضريبة" : "Tax Rate",
-    "Total": language === "ar" ? "المجموع" : "Total",
-    "Add Item": language === "ar" ? "إضافة عنصر" : "Add Item",
-    "Remove Item": language === "ar" ? "إزالة العنصر" : "Remove Item",
-    "Sub Total": language === "ar" ? "المجموع الفرعي" : "Sub Total",
-    "Tax Amount": language === "ar" ? "مبلغ الضريبة" : "Tax Amount",
-    "Total Amount": language === "ar" ? "المبلغ الإجمالي" : "Total Amount",
-    "Enter invoice number": language === "ar" ? "أدخل رقم الفاتورة" : "Enter invoice number",
-    "Enter customer name": language === "ar" ? "أدخل اسم العميل" : "Enter customer name",
-    "Enter customer email": language === "ar" ? "أدخل بريد العميل" : "Enter customer email",
-    "Enter customer phone": language === "ar" ? "أدخل هاتف العميل" : "Enter customer phone",
-    "Enter customer address": language === "ar" ? "أدخل عنوان العميل" : "Enter customer address",
-    "Enter description": language === "ar" ? "أدخل الوصف" : "Enter description",
-    "Enter notes": language === "ar" ? "أدخل الملاحظات" : "Enter notes",
-    "Enter item name": language === "ar" ? "أدخل اسم العنصر" : "Enter item name",
-    "Enter quantity": language === "ar" ? "أدخل الكمية" : "Enter quantity",
-    "Enter unit price": language === "ar" ? "أدخل سعر الوحدة" : "Enter unit price",
-    "Invoice number is required": language === "ar" ? "رقم الفاتورة مطلوب" : "Invoice number is required",
-    "Customer name is required": language === "ar" ? "اسم العميل مطلوب" : "Customer name is required",
-    "At least one item is required": language === "ar" ? "مطلوب عنصر واحد على الأقل" : "At least one item is required",
-    "Invalid price format": language === "ar" ? "تنسيق السعر غير صحيح" : "Invalid price format",
-    "Invalid quantity": language === "ar" ? "كمية غير صحيحة" : "Invalid quantity",
-    "Invoice created successfully": language === "ar" ? "تم إنشاء الفاتورة بنجاح" : "Invoice created successfully",
-    "Invoice updated successfully": language === "ar" ? "تم تحديث الفاتورة بنجاح" : "Invoice updated successfully",
-    "Failed to create invoice": language === "ar" ? "فشل في إنشاء الفاتورة" : "Failed to create invoice",
-    "Failed to update invoice": language === "ar" ? "فشل في تحديث الفاتورة" : "Failed to update invoice",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-  };
-
   // Form state
   const [formData, setFormData] = useState({
-    InvoiceNumber: "",
-    InvoiceDate: new Date().toISOString().split('T')[0],
+    InvoiceDate: new Date().toISOString().split("T")[0],
     DueDate: "",
-    CustomerName: "",
-    CustomerEmail: "",
-    CustomerPhone: "",
-    CustomerAddress: "",
+    ClientId: "",
     Description: "",
     Notes: "",
     Status: "Draft",
@@ -111,58 +73,120 @@ const NewInvoice = () => {
   const [invoiceItems, setInvoiceItems] = useState([
     {
       id: Date.now(),
-      ItemName: "",
+      ItemType: "",
+      ProductId: "",
+      ServiceId: "",
       Quantity: 1,
       UnitPrice: 0,
       TaxRate: 0,
       LineTotal: 0,
-    }
+    },
   ]);
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // FIXED: Remove the dependencies that were causing the infinite loop
+  const loadInitialData = useCallback(async () => {
+    try {
+      // Load clients first since they're most critical
+      await getClients();
+
+      // Then load services and products in parallel
+      await Promise.all([getServices(), getProducts()]);
+
+      setInitialLoadComplete(true);
+    } catch (error) {
+      console.error("Error loading initial data:", error);
+    }
+  }, []); // FIXED: Empty dependency array to prevent infinite loop
+
+  const productsData = products?.Data?.$values || [];
+
+  // FIXED: Load initial data only once when component mounts and token is available
+  useEffect(() => {
+    getProducts();
+    if (token && !initialLoadComplete) {
+      loadInitialData();
+    }
+  }, [token, initialLoadComplete]); // FIXED: Removed loadInitialData from dependencies
 
   // Initialize form data
+
+  console.log("services===>", services);
   useEffect(() => {
-    if (editData && isEditing) {
+    if (initialLoadComplete && (editData || cloneData)) {
+      const dataToUse = editData || cloneData;
+
       setFormData({
-        InvoiceNumber: editData.InvoiceNumber || "",
-        InvoiceDate: editData.InvoiceDate ? editData.InvoiceDate.split('T')[0] : new Date().toISOString().split('T')[0],
-        DueDate: editData.DueDate ? editData.DueDate.split('T')[0] : "",
-        CustomerName: editData.CustomerName || "",
-        CustomerEmail: editData.CustomerEmail || "",
-        CustomerPhone: editData.CustomerPhone || "",
-        CustomerAddress: editData.CustomerAddress || "",
-        Description: editData.Description || "",
-        Notes: editData.Notes || "",
-        Status: editData.Status || "Draft",
-        SubTotal: editData.SubTotal || 0,
-        TaxAmount: editData.TaxAmount || 0,
-        TotalAmount: editData.TotalAmount || 0,
+        InvoiceNumber: dataToUse.InvoiceNumber || "",
+        InvoiceDate: dataToUse.InvoiceDate
+          ? dataToUse.InvoiceDate.split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        DueDate: dataToUse.DueDate ? dataToUse.DueDate.split("T")[0] : "",
+        ClientId: dataToUse.ClientId || "",
+        Description: dataToUse.Description || "",
+        Notes: dataToUse.Notes || "",
+        Status: isEditing ? dataToUse.Status || "Draft" : "Draft",
+        SubTotal: isEditing ? dataToUse.SubTotal || 0 : 0,
+        TaxAmount: isEditing ? dataToUse.TaxAmount || 0 : 0,
+        TotalAmount: isEditing ? dataToUse.TotalAmount || 0 : 0,
       });
-    } else if (cloneData && isCloning) {
-      setFormData({
-        InvoiceNumber: cloneData.InvoiceNumber || "",
-        InvoiceDate: new Date().toISOString().split('T')[0],
-        DueDate: cloneData.DueDate ? cloneData.DueDate.split('T')[0] : "",
-        CustomerName: cloneData.CustomerName || "",
-        CustomerEmail: cloneData.CustomerEmail || "",
-        CustomerPhone: cloneData.CustomerPhone || "",
-        CustomerAddress: cloneData.CustomerAddress || "",
-        Description: cloneData.Description || "",
-        Notes: cloneData.Notes || "",
-        Status: "Draft",
-        SubTotal: 0,
-        TaxAmount: 0,
-        TotalAmount: 0,
-      });
+
+      // Set invoice items if available
+      if (dataToUse.InvoiceItems && dataToUse.InvoiceItems.length > 0) {
+        const items = dataToUse.InvoiceItems.map((item) => ({
+          id: item.Id || Date.now() + Math.random(),
+          ItemType: item.ProductId ? "Product" : "Service",
+          ProductId: item.ProductId || "",
+          ServiceId: item.ServiceId || "",
+          Quantity: item.Quantity || 1,
+          UnitPrice: item.UnitPrice || 0,
+          TaxRate: item.TaxRate || 0,
+          LineTotal: isEditing ? item.LineTotal || 0 : 0,
+        }));
+
+        setInvoiceItems(items);
+
+        // If cloning, we need to reset the line totals
+        if (isCloning) {
+          setTimeout(() => {
+            calculateTotals();
+          }, 100);
+        }
+      }
     }
-  }, [editData, cloneData, isEditing, isCloning]);
+  }, [editData, cloneData, isEditing, isCloning, initialLoadComplete]);
+
+  // FIXED: Calculate totals function - moved outside useEffect to prevent dependencies issue
+  const calculateTotals = useCallback(() => {
+    const subTotal = invoiceItems.reduce((sum, item) => {
+      return sum + (parseFloat(item.LineTotal) || 0);
+    }, 0);
+
+    const taxAmount = invoiceItems.reduce((sum, item) => {
+      const lineTotal = parseFloat(item.LineTotal) || 0;
+      const taxRate = parseFloat(item.TaxRate) || 0;
+      return sum + (lineTotal * taxRate) / 100;
+    }, 0);
+
+    const totalAmount = subTotal + taxAmount;
+
+    setFormData((prev) => ({
+      ...prev,
+      SubTotal: subTotal,
+      TaxAmount: taxAmount,
+      TotalAmount: totalAmount,
+    }));
+  }, [invoiceItems]);
 
   // Calculate totals when items change
   useEffect(() => {
-    calculateTotals();
-  }, [invoiceItems]);
+    if (initialLoadComplete) {
+      calculateTotals();
+    }
+  }, [invoiceItems, initialLoadComplete, calculateTotals]);
 
   // Redirect if no token
   useEffect(() => {
@@ -173,32 +197,63 @@ const NewInvoice = () => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ""
+        [field]: "",
       }));
     }
   };
 
   // Handle item changes
-  const handleItemChange = (index, field, value) => {
+  const handleItemChange = async (index, field, value) => {
     const updatedItems = [...invoiceItems];
     updatedItems[index] = {
       ...updatedItems[index],
-      [field]: value
+      [field]: value,
     };
 
+    // Handle item type change
+    if (field === "ItemType") {
+      updatedItems[index].ProductId = "";
+      updatedItems[index].ServiceId = "";
+      updatedItems[index].UnitPrice = 0;
+    }
+
+    // Auto-populate price when product or service is selected
+    if (field === "ProductId" && value) {
+      try {
+        const product = productsData.find((p) => p.Id === value);
+        if (product && product.Price) {
+          updatedItems[index].UnitPrice = product.Price;
+        }
+      } catch (error) {
+        console.error("Error finding product:", error);
+      }
+    }
+
+    if (field === "ServiceId" && value) {
+      const service = services.find((s) => s.Id === value);
+      if (service && service.Price) {
+        updatedItems[index].UnitPrice = service.Price;
+      }
+    }
+
     // Calculate line total
-    if (field === 'Quantity' || field === 'UnitPrice') {
-      const quantity = field === 'Quantity' ? parseFloat(value) || 0 : parseFloat(updatedItems[index].Quantity) || 0;
-      const unitPrice = field === 'UnitPrice' ? parseFloat(value) || 0 : parseFloat(updatedItems[index].UnitPrice) || 0;
+    if (
+      field === "Quantity" ||
+      field === "UnitPrice" ||
+      field === "ProductId" ||
+      field === "ServiceId"
+    ) {
+      const quantity = parseFloat(updatedItems[index].Quantity) || 0;
+      const unitPrice = parseFloat(updatedItems[index].UnitPrice) || 0;
       updatedItems[index].LineTotal = quantity * unitPrice;
     }
 
@@ -211,12 +266,14 @@ const NewInvoice = () => {
       ...invoiceItems,
       {
         id: Date.now(),
-        ItemName: "",
+        ItemType: "",
+        ProductId: "",
+        ServiceId: "",
         Quantity: 1,
         UnitPrice: 0,
         TaxRate: 0,
         LineTotal: 0,
-      }
+      },
     ]);
   };
 
@@ -228,59 +285,47 @@ const NewInvoice = () => {
     }
   };
 
-  // Calculate totals
-  const calculateTotals = () => {
-    const subTotal = invoiceItems.reduce((sum, item) => {
-      return sum + (parseFloat(item.LineTotal) || 0);
-    }, 0);
-
-    const taxAmount = invoiceItems.reduce((sum, item) => {
-      const lineTotal = parseFloat(item.LineTotal) || 0;
-      const taxRate = parseFloat(item.TaxRate) || 0;
-      return sum + (lineTotal * taxRate / 100);
-    }, 0);
-
-    const totalAmount = subTotal + taxAmount;
-
-    setFormData(prev => ({
-      ...prev,
-      SubTotal: subTotal,
-      TaxAmount: taxAmount,
-      TotalAmount: totalAmount,
-    }));
-  };
-
   // Validate form
   const validateForm = () => {
     const newErrors = {};
 
-    // Required fields
-    if (!formData.InvoiceNumber.trim()) {
-      newErrors.InvoiceNumber = translations["Invoice number is required"];
-    }
-
-    if (!formData.CustomerName.trim()) {
-      newErrors.CustomerName = translations["Customer name is required"];
+    if (!formData.ClientId) {
+      newErrors.ClientId = "Client is required";
     }
 
     // Validate items
-    if (invoiceItems.length === 0 || invoiceItems.every(item => !item.ItemName.trim())) {
-      newErrors.items = translations["At least one item is required"];
+    if (
+      invoiceItems.length === 0 ||
+      invoiceItems.every((item) => !item.ItemType)
+    ) {
+      newErrors.items = "At least one item is required";
     }
 
     // Validate item data
     invoiceItems.forEach((item, index) => {
-      if (item.ItemName.trim()) {
+      if (item.ItemType) {
+        if (!item.ItemType) {
+          newErrors[`item_${index}_type`] = "Item type is required";
+        }
+
+        if (item.ItemType === "Product" && !item.ProductId) {
+          newErrors[`item_${index}_product`] = "Product is required";
+        }
+
+        if (item.ItemType === "Service" && !item.ServiceId) {
+          newErrors[`item_${index}_service`] = "Service is required";
+        }
+
         const quantity = parseFloat(item.Quantity);
         const unitPrice = parseFloat(item.UnitPrice);
         const taxRate = parseFloat(item.TaxRate);
 
-        if (isNaN(quantity) || quantity < 0) {
-          newErrors[`item_${index}_quantity`] = translations["Invalid quantity"];
+        if (isNaN(quantity) || quantity <= 0) {
+          newErrors[`item_${index}_quantity`] = "Invalid quantity";
         }
 
         if (isNaN(unitPrice) || unitPrice < 0) {
-          newErrors[`item_${index}_price`] = translations["Invalid price format"];
+          newErrors[`item_${index}_price`] = "Invalid price format";
         }
 
         if (isNaN(taxRate) || taxRate < 0 || taxRate > 100) {
@@ -304,67 +349,79 @@ const NewInvoice = () => {
     setIsSubmitting(true);
 
     try {
+      // Prepare invoice data
+      const invoiceData = {
+        ...formData,
+        InvoiceItems: invoiceItems
+          .filter((item) => item.ItemType)
+          .map((item) => ({
+            ItemType: item.ItemType,
+            ProductId: item.ItemType === "Product" ? item.ProductId : null,
+            ServiceId: item.ItemType === "Service" ? item.ServiceId : null,
+            Quantity: parseFloat(item.Quantity),
+            UnitPrice: parseFloat(item.UnitPrice),
+            TaxRate: parseFloat(item.TaxRate),
+            LineTotal: parseFloat(item.LineTotal),
+          })),
+      };
+
       let result;
-      
+
       if (isEditing && editData) {
         // Update existing invoice
-        result = await updateInvoice(editData.Id, formData);
+        result = await updateInvoice(editData.Id, invoiceData);
         if (result) {
-          alert(translations["Invoice updated successfully"]);
+          alert("Invoice updated successfully");
           navigate("/admin/invoices");
         } else {
-          alert(translations["Failed to update invoice"]);
+          alert("Failed to update invoice");
         }
       } else {
         // Create new invoice
-        result = await createInvoice(formData);
+        result = await createInvoice(invoiceData);
         if (result) {
-          // Create invoice items
-          for (const item of invoiceItems) {
-            if (item.ItemName.trim()) {
-              await createInvoiceItem({
-                InvoiceId: result.Id,
-                ...item
-              });
-            }
-          }
-          
-          alert(translations["Invoice created successfully"]);
+          alert("Invoice created successfully");
           navigate("/admin/invoices");
         } else {
-          alert(translations["Failed to create invoice"]);
+          alert("Failed to create invoice");
         }
       }
     } catch (error) {
       console.error("Error submitting invoice:", error);
-      alert(isEditing ? translations["Failed to update invoice"] : translations["Failed to create invoice"]);
+      alert(
+        isEditing ? "Failed to update invoice" : "Failed to create invoice"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Loading state
-  if (!token) {
+  if (!token || !initialLoadComplete) {
     return (
       <Container className="flex justify-center items-center min-h-screen">
-        <Span className="text-blue-500 text-lg">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg">Loading...</Span>
       </Container>
     );
   }
 
   const getPageTitle = () => {
-    if (isEditing) return translations["Edit Invoice"];
-    if (isCloning) return translations["Clone Invoice"];
-    return translations["Add Invoice"];
+    if (isEditing) return "Edit Invoice";
+    if (isCloning) return "Clone Invoice";
+    return "Add Invoice";
   };
 
   const getSaveButtonText = () => {
-    if (isEditing) return translations["Save Changes"];
-    return translations.Save;
+    if (isEditing) return "Save Changes";
+    return "Save";
   };
 
   const formatCurrency = (value) => {
     return parseFloat(value || 0).toFixed(2);
+  };
+
+  const getSelectedClient = () => {
+    return clients.find((client) => client.Id === formData.ClientId);
   };
 
   return (
@@ -414,34 +471,38 @@ const NewInvoice = () => {
             <Container className="flex items-center gap-2 mb-4">
               <Receipt className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-900">
-                {translations["Invoice Information"]}
+                Invoice Information
               </h2>
             </Container>
 
             <Container className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Invoice Number */}
-              <Container>
+              {/* <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Invoice Number"]} <span className="text-red-500">*</span>
+                  Invoice Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.InvoiceNumber}
-                  onChange={(e) => handleInputChange("InvoiceNumber", e.target.value)}
-                  placeholder={translations["Enter invoice number"]}
+                  onChange={(e) =>
+                    handleInputChange("InvoiceNumber", e.target.value)
+                  }
+                  placeholder="Enter invoice number"
                   className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
                     errors.InvoiceNumber ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.InvoiceNumber && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.InvoiceNumber}</Span>
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.InvoiceNumber}
+                  </Span>
                 )}
-              </Container>
+              </Container> */}
 
               {/* Invoice Date */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Invoice Date"]}
+                  Invoice Date
                 </label>
                 <Container className="relative">
                   <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -450,7 +511,9 @@ const NewInvoice = () => {
                   <input
                     type="date"
                     value={formData.InvoiceDate}
-                    onChange={(e) => handleInputChange("InvoiceDate", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("InvoiceDate", e.target.value)
+                    }
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </Container>
@@ -459,7 +522,7 @@ const NewInvoice = () => {
               {/* Due Date */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Due Date"]}
+                  Due Date
                 </label>
                 <Container className="relative">
                   <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -468,7 +531,9 @@ const NewInvoice = () => {
                   <input
                     type="date"
                     value={formData.DueDate}
-                    onChange={(e) => handleInputChange("DueDate", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("DueDate", e.target.value)
+                    }
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </Container>
@@ -477,30 +542,32 @@ const NewInvoice = () => {
               {/* Status */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations.Status}
+                  Status
                 </label>
                 <select
                   value={formData.Status}
                   onChange={(e) => handleInputChange("Status", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="Draft">{translations.Draft}</option>
-                  <option value="Sent">{translations.Sent}</option>
-                  <option value="Paid">{translations.Paid}</option>
-                  <option value="Overdue">{translations.Overdue}</option>
-                  <option value="Cancelled">{translations.Cancelled}</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Sent">Sent</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Overdue">Overdue</option>
+                  <option value="Cancelled">Cancelled</option>
                 </select>
               </Container>
 
               {/* Description */}
               <Container className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations.Description}
+                  Description
                 </label>
                 <textarea
                   value={formData.Description}
-                  onChange={(e) => handleInputChange("Description", e.target.value)}
-                  placeholder={translations["Enter description"]}
+                  onChange={(e) =>
+                    handleInputChange("Description", e.target.value)
+                  }
+                  placeholder="Enter description"
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -508,76 +575,89 @@ const NewInvoice = () => {
             </Container>
           </Container>
 
-          {/* Customer Information */}
+          {/* Client Information */}
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <Container className="flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-green-600" />
+              <Building className="w-5 h-5 text-green-600" />
               <h2 className="text-lg font-semibold text-gray-900">
-                {translations["Customer Information"]}
+                Client Information
               </h2>
             </Container>
 
             <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Customer Name */}
+              {/* Client Selection */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Customer Name"]} <span className="text-red-500">*</span>
+                  Client <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.CustomerName}
-                  onChange={(e) => handleInputChange("CustomerName", e.target.value)}
-                  placeholder={translations["Enter customer name"]}
+                <select
+                  value={formData.ClientId}
+                  onChange={(e) =>
+                    handleInputChange("ClientId", e.target.value)
+                  }
                   className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.CustomerName ? "border-red-500" : "border-gray-300"
+                    errors.ClientId ? "border-red-500" : "border-gray-300"
                   }`}
-                />
-                {errors.CustomerName && (
-                  <Span className="text-red-500 text-sm mt-1">{errors.CustomerName}</Span>
+                  disabled={clientsLoading}
+                >
+                  <option value="">Select Client</option>
+                  {clients.map((client) => (
+                    <option key={client.Id} value={client.Id}>
+                      {client.Name || client.CompanyName}
+                    </option>
+                  ))}
+                </select>
+                {errors.ClientId && (
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.ClientId}
+                  </Span>
+                )}
+                {clientsLoading && (
+                  <Span className="text-gray-500 text-sm mt-1">
+                    Loading clients...
+                  </Span>
+                )}
+                {clientsError && (
+                  <Span className="text-red-500 text-sm mt-1">
+                    Error loading clients
+                  </Span>
                 )}
               </Container>
 
-              {/* Customer Email */}
-              <Container>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Customer Email"]}
-                </label>
-                <input
-                  type="email"
-                  value={formData.CustomerEmail}
-                  onChange={(e) => handleInputChange("CustomerEmail", e.target.value)}
-                  placeholder={translations["Enter customer email"]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </Container>
-
-              {/* Customer Phone */}
-              <Container>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Customer Phone"]}
-                </label>
-                <input
-                  type="tel"
-                  value={formData.CustomerPhone}
-                  onChange={(e) => handleInputChange("CustomerPhone", e.target.value)}
-                  placeholder={translations["Enter customer phone"]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </Container>
-
-              {/* Customer Address */}
-              <Container>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {translations["Customer Address"]}
-                </label>
-                <textarea
-                  value={formData.CustomerAddress}
-                  onChange={(e) => handleInputChange("CustomerAddress", e.target.value)}
-                  placeholder={translations["Enter customer address"]}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                />
-              </Container>
+              {/* Client Details Display */}
+              {formData.ClientId && (
+                <Container>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Client Details
+                  </label>
+                  <Container className="p-3 bg-gray-50 rounded-md">
+                    {(() => {
+                      const selectedClient = getSelectedClient();
+                      if (selectedClient) {
+                        return (
+                          <Container className="space-y-1">
+                            <Span className="text-sm font-medium text-gray-900">
+                              {selectedClient.Name ||
+                                selectedClient.CompanyName}
+                            </Span>
+                            {selectedClient.Email && (
+                              <Span className="text-sm text-gray-600 block">
+                                {selectedClient.Email}
+                              </Span>
+                            )}
+                            {selectedClient.Phone && (
+                              <Span className="text-sm text-gray-600 block">
+                                {selectedClient.Phone}
+                              </Span>
+                            )}
+                          </Container>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </Container>
+                </Container>
+              )}
             </Container>
           </Container>
 
@@ -587,7 +667,7 @@ const NewInvoice = () => {
               <Container className="flex items-center gap-2">
                 <Tags className="w-5 h-5 text-purple-600" />
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {translations["Invoice Items"]}
+                  Invoice Items
                 </h2>
               </Container>
               <FilledButton
@@ -597,7 +677,7 @@ const NewInvoice = () => {
                 bgColor="bg-blue-600 hover:bg-blue-700"
                 textColor="text-white"
                 rounded="rounded-lg"
-                buttonText={translations["Add Item"]}
+                buttonText="Add Item"
                 height="h-9"
                 px="px-3"
                 fontWeight="font-medium"
@@ -617,198 +697,288 @@ const NewInvoice = () => {
               {invoiceItems.map((item, index) => (
                 <Container
                   key={item.id}
-                  className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border border-gray-200 rounded-lg"
+                  className="border border-gray-200 rounded-lg p-4 bg-gray-50"
                 >
-                  {/* Item Name */}
-                  <Container className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {translations["Item Name"]}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.ItemName}
-                      onChange={(e) => handleItemChange(index, "ItemName", e.target.value)}
-                      placeholder={translations["Enter item name"]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </Container>
+                  <Container className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    {/* Item Type */}
+                    <Container className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Item Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={item.ItemType}
+                        onChange={(e) =>
+                          handleItemChange(index, "ItemType", e.target.value)
+                        }
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm ${
+                          errors[`item_${index}_type`]
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <option value="">Select Type</option>
+                        <option value="Product">Product</option>
+                        <option value="Service">Service</option>
+                      </select>
+                      {errors[`item_${index}_type`] && (
+                        <Span className="text-red-500 text-xs mt-1">
+                          {errors[`item_${index}_type`]}
+                        </Span>
+                      )}
+                    </Container>
 
-                  {/* Quantity */}
-                  <Container>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {translations.Quantity}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={item.Quantity}
-                      onChange={(e) => handleItemChange(index, "Quantity", e.target.value)}
-                      placeholder={translations["Enter quantity"]}
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        errors[`item_${index}_quantity`] ? "border-red-500" : "border-gray-300"
-                      }`}
-                    />
-                    {errors[`item_${index}_quantity`] && (
-                      <Span className="text-red-500 text-xs mt-1">{errors[`item_${index}_quantity`]}</Span>
-                    )}
-                  </Container>
+                    {/* Product/Service Selection */}
+                    <Container className="md:col-span-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {item.ItemType === "Product" ? "Product" : "Service"}
+                        {item.ItemType && (
+                          <span className="text-red-500">*</span>
+                        )}
+                      </label>
+                      {item.ItemType === "Product" ? (
+                        <select
+                          value={item.ProductId}
+                          onChange={(e) =>
+                            handleItemChange(index, "ProductId", e.target.value)
+                          }
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm ${
+                            errors[`item_${index}_product`]
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
+                          disabled={!item.ItemType || productsLoading}
+                        >
+                          <option value="">Select Product</option>
+                          {productsData.map((product) => (
+                            <option key={product.Id} value={product.Id}>
+                              {product.Name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : item.ItemType === "Service" ? (
+                        <select
+                          value={item.ServiceId}
+                          onChange={(e) =>
+                            handleItemChange(index, "ServiceId", e.target.value)
+                          }
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm ${
+                            errors[`item_${index}_service`]
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
+                          disabled={!item.ItemType || servicesLoading}
+                        >
+                          <option value="">Select Service</option>
+                          {services.map((service) => (
+                            <option key={service.Id} value={service.Id}>
+                              {service.Name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Container className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 text-sm">
+                          Select Item Type First
+                        </Container>
+                      )}
+                      {errors[`item_${index}_product`] && (
+                        <Span className="text-red-500 text-xs mt-1">
+                          {errors[`item_${index}_product`]}
+                        </Span>
+                      )}
+                      {errors[`item_${index}_service`] && (
+                        <Span className="text-red-500 text-xs mt-1">
+                          {errors[`item_${index}_service`]}
+                        </Span>
+                      )}
+                    </Container>
 
-                  {/* Unit Price */}
-                  <Container>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {translations["Unit Price"]}
-                    </label>
-                    <Container className="relative">
-                      <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSign className="h-3 w-3 text-gray-400" />
-                      </Container>
+                    {/* Quantity */}
+                    <Container className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Quantity <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="number"
-                        step="0.01"
-                        min="0"
-                        value={item.UnitPrice}
-                        onChange={(e) => handleItemChange(index, "UnitPrice", e.target.value)}
-                        placeholder={translations["Enter unit price"]}
-                        className={`w-full pl-8 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          errors[`item_${index}_price`] ? "border-red-500" : "border-gray-300"
+                        min="1"
+                        step="1"
+                        value={item.Quantity}
+                        onChange={(e) =>
+                          handleItemChange(index, "Quantity", e.target.value)
+                        }
+                        placeholder="Enter quantity"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm ${
+                          errors[`item_${index}_quantity`]
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                       />
+                      {errors[`item_${index}_quantity`] && (
+                        <Span className="text-red-500 text-xs mt-1">
+                          {errors[`item_${index}_quantity`]}
+                        </Span>
+                      )}
                     </Container>
-                    {errors[`item_${index}_price`] && (
-                      <Span className="text-red-500 text-xs mt-1">{errors[`item_${index}_price`]}</Span>
-                    )}
-                  </Container>
 
-                  {/* Tax Rate */}
-                  <Container>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {translations["Tax Rate"]} (%)
-                    </label>
-                    <Container className="relative">
-                      <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Percent className="h-3 w-3 text-gray-400" />
-                      </Container>
+                    {/* Unit Price */}
+                    <Container className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Unit Price <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="number"
+                        min="0"
                         step="0.01"
+                        value={item.UnitPrice}
+                        onChange={(e) =>
+                          handleItemChange(index, "UnitPrice", e.target.value)
+                        }
+                        placeholder="Enter unit price"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm ${
+                          errors[`item_${index}_price`]
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      />
+                      {errors[`item_${index}_price`] && (
+                        <Span className="text-red-500 text-xs mt-1">
+                          {errors[`item_${index}_price`]}
+                        </Span>
+                      )}
+                    </Container>
+
+                    {/* Tax Rate */}
+                    <Container className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tax Rate (%)
+                      </label>
+                      <input
+                        type="number"
                         min="0"
                         max="100"
+                        step="0.01"
                         value={item.TaxRate}
-                        onChange={(e) => handleItemChange(index, "TaxRate", e.target.value)}
+                        onChange={(e) =>
+                          handleItemChange(index, "TaxRate", e.target.value)
+                        }
                         placeholder="0.00"
-                        className={`w-full pl-8 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          errors[`item_${index}_tax`] ? "border-red-500" : "border-gray-300"
+                        className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm ${
+                          errors[`item_${index}_tax`]
+                            ? "border-red-500"
+                            : "border-gray-300"
                         }`}
                       />
-                    </Container>
-                    {errors[`item_${index}_tax`] && (
-                      <Span className="text-red-500 text-xs mt-1">{errors[`item_${index}_tax`]}</Span>
-                    )}
-                  </Container>
-
-                  {/* Line Total & Remove Button */}
-                  <Container className="flex items-end gap-2">
-                    <Container className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {translations.Total}
-                      </label>
-                      <Container className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md">
-                        <Span className="text-sm font-medium text-gray-900">
-                          ${formatCurrency(item.LineTotal)}
+                      {errors[`item_${index}_tax`] && (
+                        <Span className="text-red-500 text-xs mt-1">
+                          {errors[`item_${index}_tax`]}
                         </Span>
+                      )}
+                    </Container>
+
+                    {/* Line Total */}
+                    <Container className="md:col-span-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Total
+                      </label>
+                      <Container className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 text-sm font-medium">
+                        ${formatCurrency(item.LineTotal)}
                       </Container>
                     </Container>
-                    {invoiceItems.length > 1 && (
+
+                    {/* Remove Button */}
+                    <Container className="md:col-span-12 flex justify-end">
                       <FilledButton
                         isIcon={true}
                         icon={Trash2}
                         iconSize="w-4 h-4"
-                        bgColor="bg-red-600 hover:bg-red-700"
-                        textColor="text-white"
-                        rounded="rounded-md"
-                        buttonText=""
-                        height="h-9"
-                        width="w-9"
+                        bgColor="bg-red-100 hover:bg-red-200"
+                        textColor="text-red-600"
+                        rounded="rounded-lg"
+                        buttonText="Remove Item"
+                        height="h-8"
+                        px="px-3"
+                        fontWeight="font-medium"
+                        fontSize="text-sm"
+                        isIconLeft={true}
                         onClick={() => removeItem(index)}
-                        title={translations["Remove Item"]}
+                        disabled={invoiceItems.length === 1}
                       />
-                    )}
+                    </Container>
                   </Container>
                 </Container>
               ))}
             </Container>
           </Container>
 
-          {/* Totals Summary */}
+          {/* Totals Section */}
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <Container className="flex items-center gap-2 mb-4">
-              <Calculator className="w-5 h-5 text-green-600" />
+              <Calculator className="w-5 h-5 text-orange-600" />
               <h2 className="text-lg font-semibold text-gray-900">
                 Invoice Summary
               </h2>
             </Container>
 
-            <Container className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Container className="bg-blue-50 p-4 rounded-lg">
-                <Span className="text-sm font-medium text-blue-600 block">
-                  {translations["Sub Total"]}
-                </Span>
-                <Span className="text-2xl font-bold text-blue-900">
-                  ${formatCurrency(formData.SubTotal)}
-                </Span>
+            <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Notes */}
+              <Container>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={formData.Notes}
+                  onChange={(e) => handleInputChange("Notes", e.target.value)}
+                  placeholder="Enter notes"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                />
               </Container>
 
-              <Container className="bg-yellow-50 p-4 rounded-lg">
-                <Span className="text-sm font-medium text-yellow-600 block">
-                  {translations["Tax Amount"]}
-                </Span>
-                <Span className="text-2xl font-bold text-yellow-900">
-                  ${formatCurrency(formData.TaxAmount)}
-                </Span>
-              </Container>
+              {/* Summary */}
+              <Container className="space-y-4">
+                <Container className="bg-gray-50 rounded-lg p-4">
+                  <Container className="space-y-3">
+                    <Container className="flex justify-between items-center">
+                      <Span className="text-sm font-medium text-gray-700">
+                        Sub Total:
+                      </Span>
+                      <Span className="text-sm font-bold text-gray-900">
+                        ${formatCurrency(formData.SubTotal)}
+                      </Span>
+                    </Container>
 
-              <Container className="bg-green-50 p-4 rounded-lg">
-                <Span className="text-sm font-medium text-green-600 block">
-                  {translations["Total Amount"]}
-                </Span>
-                <Span className="text-2xl font-bold text-green-900">
-                  ${formatCurrency(formData.TotalAmount)}
-                </Span>
+                    <Container className="flex justify-between items-center">
+                      <Span className="text-sm font-medium text-gray-700">
+                        Tax Amount:
+                      </Span>
+                      <Span className="text-sm font-bold text-gray-900">
+                        ${formatCurrency(formData.TaxAmount)}
+                      </Span>
+                    </Container>
+
+                    <Container className="border-t border-gray-200 pt-3">
+                      <Container className="flex justify-between items-center">
+                        <Span className="text-lg font-bold text-gray-900">
+                          Total Amount:
+                        </Span>
+                        <Span className="text-lg font-bold text-blue-600">
+                          ${formatCurrency(formData.TotalAmount)}
+                        </Span>
+                      </Container>
+                    </Container>
+                  </Container>
+                </Container>
               </Container>
             </Container>
           </Container>
 
-          {/* Notes */}
-          <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <Container className="flex items-center gap-2 mb-4">
-              <FileText className="w-5 h-5 text-gray-600" />
-              <h2 className="text-lg font-semibold text-gray-900">
-                Additional Information
-              </h2>
-            </Container>
-
-            <Container>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {translations.Notes}
-              </label>
-              <textarea
-                value={formData.Notes}
-                onChange={(e) => handleInputChange("Notes", e.target.value)}
-                placeholder={translations["Enter notes"]}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </Container>
-          </Container>
-
-          {/* Form Actions */}
-          <Container className="flex justify-end gap-4 pt-6">
+          {/* Action Buttons */}
+          <Container className="flex justify-end gap-4">
             <FilledButton
+              isIcon={false}
               bgColor="bg-gray-100 hover:bg-gray-200"
               textColor="text-gray-700"
               rounded="rounded-lg"
-              buttonText={translations.Back}
+              buttonText="Back"
               height="h-10"
               px="px-6"
               fontWeight="font-medium"

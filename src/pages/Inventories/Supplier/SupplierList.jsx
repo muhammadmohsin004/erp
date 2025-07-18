@@ -82,7 +82,8 @@ const SupplierList = () => {
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Supplier Details": language === "ar" ? "تفاصيل المورد" : "Supplier Details",
+    "Supplier Details":
+      language === "ar" ? "تفاصيل المورد" : "Supplier Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     Notes: language === "ar" ? "ملاحظات" : "Notes",
     "Tax ID": language === "ar" ? "الرقم الضريبي" : "Tax ID",
@@ -93,6 +94,11 @@ const SupplierList = () => {
     "No results found":
       language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Successful":
+      language === "ar" ? "تم التصدير بنجاح" : "Export Successful",
+    "Export Failed": language === "ar" ? "فشل التصدير" : "Export Failed",
   };
 
   // Get supplier context
@@ -130,6 +136,7 @@ const SupplierList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Mock statistics - you can replace this with actual API call
   const [statistics, setStatistics] = useState({
@@ -158,12 +165,15 @@ const SupplierList = () => {
     if (Array.isArray(suppliersData) && suppliersData.length > 0) {
       const stats = {
         totalSuppliers: pagination?.TotalItems || suppliersData.length,
-        activeSuppliers: suppliersData.filter(s => s.Status === "Active").length,
-        suppliersThisMonth: suppliersData.filter(s => {
+        activeSuppliers: suppliersData.filter((s) => s.Status === "Active")
+          .length,
+        suppliersThisMonth: suppliersData.filter((s) => {
           const createdDate = new Date(s.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
       };
       setStatistics(stats);
@@ -192,6 +202,110 @@ const SupplierList = () => {
       navigate("/admin-Login");
     }
   }, [token, navigate]);
+
+  // CSV Export functionality
+  const convertToCSV = (data) => {
+    if (!data || data.length === 0) return "";
+
+    // Define headers
+    const headers = [
+      "Name",
+      "Contact Person",
+      "Email",
+      "Phone",
+      "Address",
+      "City",
+      "State",
+      "Zip Code",
+      "Country",
+      "Status",
+      "Tax ID",
+      "Notes",
+      "Created At",
+      "Updated At",
+    ];
+
+    // Convert data to CSV format
+    const csvContent = [
+      headers.join(","), // Header row
+      ...data.map((supplier) =>
+        [
+          `"${supplier.Name || ""}"`,
+          `"${supplier.ContactPerson || ""}"`,
+          `"${supplier.Email || ""}"`,
+          `"${supplier.Phone || ""}"`,
+          `"${supplier.Address || ""}"`,
+          `"${supplier.City || ""}"`,
+          `"${supplier.State || ""}"`,
+          `"${supplier.ZipCode || ""}"`,
+          `"${supplier.Country || ""}"`,
+          `"${supplier.Status || ""}"`,
+          `"${supplier.TaxId || ""}"`,
+          `"${supplier.Notes || ""}"`,
+          `"${supplier.CreatedAt
+            ? new Date(supplier.CreatedAt).toLocaleDateString()
+            : ""
+          }"`,
+          `"${supplier.UpdatedAt
+            ? new Date(supplier.UpdatedAt).toLocaleDateString()
+            : ""
+          }"`,
+        ].join(",")
+      ),
+    ].join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Export functionality
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      let dataToExport = [];
+
+      if (selectedSuppliers.length > 0) {
+        // Export selected suppliers
+        dataToExport = suppliersData.filter((supplier) =>
+          selectedSuppliers.includes(supplier.Id)
+        );
+      } else {
+        // Export all suppliers (you might want to fetch all data if pagination is involved)
+        dataToExport = suppliersData;
+      }
+
+      if (dataToExport.length === 0) {
+        alert("No data to export");
+        return;
+      }
+
+      const csvContent = convertToCSV(dataToExport);
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename = `suppliers_${timestamp}.csv`;
+
+      downloadCSV(csvContent, filename);
+
+      // Show success message
+      alert(translations["Export Successful"]);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert(translations["Export Failed"]);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Search function
   const handleSearchSuppliers = async () => {
@@ -349,15 +463,6 @@ const SupplierList = () => {
     }
   };
 
-  // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export suppliers:",
-      selectedSuppliers.length > 0 ? selectedSuppliers : "all"
-    );
-    alert("Export functionality to be implemented");
-  };
-
   // Statistics Card Component
   const StatCard = ({ title, value, icon: Icon, bgColor, iconColor }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
@@ -388,24 +493,25 @@ const SupplierList = () => {
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations.Suppliers}
             </h1>
             {selectedSuppliers.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedSuppliers.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <FilledButton
               isIcon={true}
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -415,21 +521,31 @@ const SupplierList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
+
             <FilledButton
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+              bgColor={
+                isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
+              }
               rounded="rounded-lg"
-              buttonText={translations.Export}
+              buttonText={
+                isExporting
+                  ? "Exporting..."
+                  : selectedSuppliers.length > 0
+                    ? `${translations.Export} (${selectedSuppliers.length})`
+                    : translations.Export
+              }
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
+              disabled={isExporting}
               onClick={handleExport}
             />
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -445,8 +561,9 @@ const SupplierList = () => {
               isIconLeft={true}
               onClick={() => navigate("/admin/new-supplier")}
             />
-          </Container>
-        </Container>
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -573,7 +690,9 @@ const SupplierList = () => {
                           <input
                             type="checkbox"
                             checked={selectedSuppliers.includes(supplier.Id)}
-                            onChange={() => handleSupplierSelection(supplier.Id)}
+                            onChange={() =>
+                              handleSupplierSelection(supplier.Id)
+                            }
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -622,11 +741,10 @@ const SupplierList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              supplier.Status === "Active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${supplier.Status === "Active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                              }`}
                           >
                             {translations[supplier.Status] || supplier.Status}
                           </Span>
@@ -714,7 +832,9 @@ const SupplierList = () => {
                       height="h-8"
                       width="w-8"
                       disabled={pagination.PageNumber === 1}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.PageNumber - 1)
+                      }
                     />
                     <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
                       {pagination.PageNumber} / {pagination.TotalPages}
@@ -730,7 +850,9 @@ const SupplierList = () => {
                       height="h-8"
                       width="w-8"
                       disabled={pagination.PageNumber === pagination.TotalPages}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
+                      onClick={() =>
+                        handlePageChange(pagination.PageNumber + 1)
+                      }
                     />
                     <FilledButton
                       isIcon={true}
@@ -798,13 +920,13 @@ const SupplierList = () => {
                     {translations.Status}
                   </Span>
                   <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedSupplier.Status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedSupplier.Status === "Active"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                      }`}
                   >
-                    {translations[selectedSupplier.Status] || selectedSupplier.Status}
+                    {translations[selectedSupplier.Status] ||
+                      selectedSupplier.Status}
                   </Span>
                 </Container>
 
@@ -852,29 +974,29 @@ const SupplierList = () => {
                 {(selectedSupplier.Address ||
                   selectedSupplier.City ||
                   selectedSupplier.Country) && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Address}
-                    </Span>
-                    <Container className="mt-1">
-                      {selectedSupplier.Address && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedSupplier.Address}
-                        </Span>
-                      )}
-                      <Span className="text-sm text-gray-900 block">
-                        {[
-                          selectedSupplier.City,
-                          selectedSupplier.State,
-                          selectedSupplier.ZipCode,
-                          selectedSupplier.Country,
-                        ]
-                          .filter(Boolean)
-                          .join(", ")}
+                    <Container>
+                      <Span className="text-sm font-medium text-gray-500">
+                        {translations.Address}
                       </Span>
+                      <Container className="mt-1">
+                        {selectedSupplier.Address && (
+                          <Span className="text-sm text-gray-900 block">
+                            {selectedSupplier.Address}
+                          </Span>
+                        )}
+                        <Span className="text-sm text-gray-900 block">
+                          {[
+                            selectedSupplier.City,
+                            selectedSupplier.State,
+                            selectedSupplier.ZipCode,
+                            selectedSupplier.Country,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </Span>
+                      </Container>
                     </Container>
-                  </Container>
-                )}
+                  )}
 
                 {selectedSupplier.Notes && (
                   <Container>
@@ -893,13 +1015,17 @@ const SupplierList = () => {
                   <Container>
                     Created:{" "}
                     {selectedSupplier.CreatedAt
-                      ? new Date(selectedSupplier.CreatedAt).toLocaleDateString()
+                      ? new Date(
+                        selectedSupplier.CreatedAt
+                      ).toLocaleDateString()
                       : "N/A"}
                   </Container>
                   {selectedSupplier.UpdatedAt && (
                     <Container>
                       Updated:{" "}
-                      {new Date(selectedSupplier.UpdatedAt).toLocaleDateString()}
+                      {new Date(
+                        selectedSupplier.UpdatedAt
+                      ).toLocaleDateString()}
                     </Container>
                   )}
                 </Container>
@@ -936,8 +1062,8 @@ const SupplierList = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the supplier{" "}
-              <strong>"{supplierToDelete?.Name}"</strong>{" "}
-              and all associated data.
+              <strong>"{supplierToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }

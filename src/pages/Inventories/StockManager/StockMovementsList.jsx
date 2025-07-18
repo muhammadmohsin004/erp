@@ -42,6 +42,8 @@ const StockMovementsList = () => {
     Search: language === "ar" ? "بحث" : "Search",
     Filters: language === "ar" ? "الفلاتر" : "Filters",
     Export: language === "ar" ? "تصدير" : "Export",
+    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
+    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     "No Movements": language === "ar" ? "لا توجد حركات" : "No movements found",
@@ -76,6 +78,9 @@ const StockMovementsList = () => {
     Today: language === "ar" ? "اليوم" : "Today",
     "This Week": language === "ar" ? "هذا الأسبوع" : "This Week",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
+    "Quantity Change": language === "ar" ? "تغيير الكمية" : "Quantity Change",
+    "Created By": language === "ar" ? "أنشأ بواسطة" : "Created By",
+    "Created At": language === "ar" ? "تاريخ الإنشاء" : "Created At",
   };
 
   // Get stock context
@@ -111,6 +116,8 @@ const StockMovementsList = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMovement, setSelectedMovement] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -190,7 +197,6 @@ const StockMovementsList = () => {
   const handleViewMovement = (movement) => {
     setSelectedMovement(movement);
     setShowViewModal(true);
-    // navigate(`/admin/stock/movements/${movement.Id}`);
   };
 
   // Pagination
@@ -231,13 +237,115 @@ const StockMovementsList = () => {
     }
   };
 
+  // CSV Export Functionality
+  const convertToCSV = (data) => {
+    const headers = [
+      translations.Product,
+      translations.Warehouse,
+      translations["Movement Type"],
+      translations["Quantity Change"],
+      translations.Reference,
+      translations.Notes,
+      translations["Created At"],
+      translations["Created By"],
+    ];
+
+    const csvContent = [
+      headers.join(","),
+      ...data.map((movement) =>
+        [
+          `"${movement.ProductName || "N/A"}"`,
+          `"${movement.WarehouseName || "N/A"}"`,
+          `"${movement.MovementType || "N/A"}"`,
+          movement.QuantityChange || 0,
+          `"${movement.Reference || "N/A"}"`,
+          `"${movement.Notes || "N/A"}"`,
+          `"${formatDate(movement.CreatedAt)}"`,
+          `"${movement.CreatedByUserId || "N/A"}"`,
+        ].join(",")
+      ),
+    ].join("\n");
+
+    return csvContent;
+  };
+
+  const downloadCSV = (csvContent, filename) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleExportSelected = async () => {
+    if (selectedMovements.length === 0) {
+      alert("Please select movements to export");
+      return;
+    }
+
+    setExportLoading(true);
+    try {
+      const selectedData = movementsData.filter((movement) =>
+        selectedMovements.includes(movement.Id)
+      );
+
+      const csvContent = convertToCSV(selectedData);
+      const filename = `stock_movements_selected_${new Date().toISOString().split("T")[0]
+        }.csv`;
+
+      downloadCSV(csvContent, filename);
+      setShowExportModal(false);
+
+      // Show success message
+      alert(`Successfully exported ${selectedData.length} movements`);
+    } catch (error) {
+      console.error("Error exporting selected movements:", error);
+      alert("Error exporting movements. Please try again.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportAll = async () => {
+    setExportLoading(true);
+    try {
+      // If we have filtered/searched data, export current view
+      // Otherwise, you might want to fetch all data from API
+      const dataToExport = movementsData;
+
+      if (dataToExport.length === 0) {
+        alert("No data to export");
+        return;
+      }
+
+      const csvContent = convertToCSV(dataToExport);
+      const filename = `stock_movements_all_${new Date().toISOString().split("T")[0]
+        }.csv`;
+
+      downloadCSV(csvContent, filename);
+      setShowExportModal(false);
+
+      // Show success message
+      alert(`Successfully exported ${dataToExport.length} movements`);
+    } catch (error) {
+      console.error("Error exporting all movements:", error);
+      alert("Error exporting movements. Please try again.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   // Export functionality
   const handleExport = () => {
-    console.log(
-      "Export movements:",
-      selectedMovements.length > 0 ? selectedMovements : "all"
-    );
-    alert("Export functionality to be implemented");
+    setShowExportModal(true);
   };
 
   // Format currency
@@ -332,24 +440,25 @@ const StockMovementsList = () => {
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations["Stock Movements"]}
             </h1>
             {selectedMovements.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedMovements.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <FilledButton
               isIcon={true}
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -359,21 +468,24 @@ const StockMovementsList = () => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
+
             <FilledButton
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
-              buttonText={translations.Export}
+              buttonText={`${translations.Export}${selectedMovements.length > 0 ? ` (${selectedMovements.length})` : ""}`}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
               onClick={handleExport}
+              disabled={movementsData.length === 0}
             />
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -390,23 +502,27 @@ const StockMovementsList = () => {
               onClick={() => navigate("/admin/stock/transactions/new")}
             />
 
-            <FilledButton
-              isIcon={true}
-              icon={FileText}
-              iconSize="w-4 h-4"
-              bgColor="bg-purple-600 hover:bg-purple-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText="View Report"
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => navigate("/admin/stock/movements/report")}
-            />
-          </Container>
-        </Container>
+            {/* Uncomment if needed */}
+            {/* 
+    <FilledButton
+      isIcon={true}
+      icon={FileText}
+      iconSize="w-4 h-4"
+      bgColor="bg-purple-600 hover:bg-purple-700"
+      textColor="text-white"
+      rounded="rounded-lg"
+      buttonText="View Report"
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      isIconLeft={true}
+      onClick={() => navigate("/admin/stock/movements/report")}
+    /> 
+    */}
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -601,11 +717,10 @@ const StockMovementsList = () => {
                           </td>
                           <td className="px-6 py-4 hidden lg:table-cell">
                             <Span
-                              className={`text-sm font-medium ${
-                                movement.QuantityChange > 0
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }`}
+                              className={`text-sm font-medium ${movement.QuantityChange > 0
+                                ? "text-green-600"
+                                : "text-red-600"
+                                }`}
                             >
                               {movement.QuantityChange > 0 ? "+" : ""}
                               {movement.QuantityChange}
@@ -787,11 +902,10 @@ const StockMovementsList = () => {
                       {translations.Quantity}
                     </Span>
                     <Span
-                      className={`text-sm font-medium block mt-1 ${
-                        selectedMovement.QuantityChange > 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+                      className={`text-sm font-medium block mt-1 ${selectedMovement.QuantityChange > 0
+                        ? "text-green-600"
+                        : "text-red-600"
+                        }`}
                     >
                       {selectedMovement.QuantityChange > 0 ? "+" : ""}
                       {selectedMovement.QuantityChange}
@@ -846,7 +960,82 @@ const StockMovementsList = () => {
           )
         }
       />
+      {/* Export Modal */}
+      <Modall
+        modalOpen={showExportModal}
+        setModalOpen={setShowExportModal}
+        title={
+          <Container className="flex items-center gap-2">
+            <Download className="w-5 h-5" />
+            <Span>{translations.Export}</Span>
+          </Container>
+        }
+        width={500}
+        cancelText={translations.Close}
+        cancelAction={() => setShowExportModal(false)}
+        body={
+          <Container className="space-y-4">
+            <Container className="text-center">
+              <Span className="text-gray-600">
+                Choose what you want to export:
+              </Span>
+            </Container>
 
+            <Container className="space-y-3">
+              <FilledButton
+                isIcon={true}
+                icon={Download}
+                iconSize="w-4 h-4"
+                bgColor="bg-blue-600 hover:bg-blue-700"
+                textColor="text-white"
+                rounded="rounded-lg"
+                buttonText={`${translations["Export All"]} (${movementsData.length} ${translations.Items})`}
+                height="h-12"
+                width="w-full"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                isIconLeft={true}
+                onClick={handleExportAll}
+                disabled={exportLoading || movementsData.length === 0}
+              />
+
+              <FilledButton
+                isIcon={true}
+                icon={Download}
+                iconSize="w-4 h-4"
+                bgColor="bg-green-600 hover:bg-green-700"
+                textColor="text-white"
+                rounded="rounded-lg"
+                buttonText={`${translations["Export Selected"]} (${selectedMovements.length} ${translations.Items})`}
+                height="h-12"
+                width="w-full"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                isIconLeft={true}
+                onClick={handleExportSelected}
+                disabled={exportLoading || selectedMovements.length === 0}
+              />
+            </Container>
+
+            {exportLoading && (
+              <Container className="text-center py-4">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <Span className="text-blue-500 text-sm block mt-2">
+                  Preparing export...
+                </Span>
+              </Container>
+            )}
+
+            <Container className="text-xs text-gray-500 text-center">
+              <Span>
+                The CSV file will include: Product, Warehouse, Movement Type,
+                Quantity Change, Reference, Notes, Date, and Created By
+                information.
+              </Span>
+            </Container>
+          </Container>
+        }
+      />
       {/* Filters Sidebar/Offcanvas */}
       {showFilters && (
         <Container className="fixed inset-0 z-50 overflow-hidden">

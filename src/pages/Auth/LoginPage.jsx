@@ -276,7 +276,7 @@ function LoginPage() {
     try {
       console.log("Attempting login with:", { email });
 
-      // Call login function which should return the auth response
+      // Call login function which should return the full API response
       const authResponse = await login({ email, password });
 
       console.log("Login response received:", authResponse);
@@ -300,37 +300,60 @@ function LoginPage() {
           localStorage.removeItem("rememberedCredentials");
         }
 
+        // Show success toast
+        toast.success("Login successful! Redirecting...", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
         // Check for password change requirement
         if (authResponse.RequirePasswordChange) {
-          toast.info("Password change required");
-          navigate("/change-password", { replace: true });
+          setTimeout(() => {
+            navigate("/change-password", { replace: true });
+          }, 2000);
           return;
         }
 
         // Navigate based on role
         const redirectPath = getRedirectPath(authResponse.Role);
-        toast.success("Login successful, navigating to:", redirectPath);
 
-        // Small delay to ensure localStorage is written
+        // Small delay to allow toast to be seen before redirect
         setTimeout(() => {
           navigate(redirectPath, { replace: true });
-        }, 100);
+        }, 2000);
       } else {
-        // Login failed
+        // Login failed - show message from API
         const errorMessage =
           authResponse?.Message ||
           authResponse?.message ||
           "Login failed. Please check your credentials.";
-        toast.error("Login failed:", errorMessage);
+
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+
         setFormError(errorMessage);
       }
     } catch (err) {
-      toast.error("Login error:", err);
+      console.error("Login error caught:", err);
+
       const errorMessage =
-        err.response?.data?.Message ||
-        err.response?.data?.message ||
-        err.message ||
+        err?.response?.data?.Message || // Correct API message
+        err?.response?.data?.message || // Fallback lowercase
+        err?.message || // E.g. Axios "Request failed with status code 400"
         "An unexpected error occurred. Please try again.";
+
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
       setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);

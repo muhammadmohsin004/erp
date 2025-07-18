@@ -15,13 +15,15 @@ import { SuperDashboardProvider } from "./Contexts/superAdminDashborad/SuperAdmi
 import { HRProvider } from "./Contexts/HrContext/HrContext";
 import { RequisitionProvider } from "./Contexts/RequisitionContext/RequisitionContext";
 import { PriceListProvider } from "./Contexts/PriceListContext/PriceListContext";
-import { InvoiceProvider } from "./Contexts/InvoiceContext/InvoiceContext";
+import { InvoicesProvider } from "./Contexts/InvoiceContext/InvoiceContext";
 import { SalaryProvider } from "./Contexts/SalaryManagementContext/SalaryManagementContext";
 import { LeaveAttendanceProvider } from "./Contexts/LeaveContext/LeaveContext";
 import { CompanyBranchProvider } from "./Contexts/CompanyBranchContext/CompanyBranchContext";
 import { StockProvider } from "./Contexts/StockContext/StockContext";
 import { FinanceProvider } from "./Contexts/FinanceContext/FinanceContext";
 import { DashboardProvider } from "./Contexts/DashboardContext/DashboardContext";
+import { VendorProvider } from "./Contexts/VendorContext/VendorContext";
+import { BankAccountProvider } from "./Contexts/BankAccountContext/BankAccountContext";
 function App() {
   return (
     <Router>
@@ -37,21 +39,25 @@ function App() {
                         <HRProvider>
                           <RequisitionProvider>
                             <PriceListProvider>
-                              <InvoiceProvider>
+                              <InvoicesProvider>
                                 <SalaryProvider>
                                   <CompanyBranchProvider>
                                     <StockProvider>
                                       <FinanceProvider>
                                         <DashboardProvider>
                                           <LeaveAttendanceProvider>
-                                            <Routes />
+                                            <VendorProvider>
+                                              <BankAccountProvider>
+                                                <Routes />
+                                              </BankAccountProvider>
+                                            </VendorProvider>
                                           </LeaveAttendanceProvider>
                                         </DashboardProvider>
                                       </FinanceProvider>
                                     </StockProvider>
                                   </CompanyBranchProvider>
                                 </SalaryProvider>
-                              </InvoiceProvider>
+                              </InvoicesProvider>
                             </PriceListProvider>
                           </RequisitionProvider>
                         </HRProvider>

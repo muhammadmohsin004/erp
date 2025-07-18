@@ -58,7 +58,8 @@ const RequisitionList = () => {
     Export: language === "ar" ? "تصدير" : "Export",
     Selected: language === "ar" ? "محدد" : "Selected",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    NoRequisitions: language === "ar" ? "لا يوجد طلبات" : "No requisitions found",
+    NoRequisitions:
+      language === "ar" ? "لا يوجد طلبات" : "No requisitions found",
     Number: language === "ar" ? "الرقم" : "Number",
     Type: language === "ar" ? "النوع" : "Type",
     Date: language === "ar" ? "التاريخ" : "Date",
@@ -76,13 +77,15 @@ const RequisitionList = () => {
     Clone: language === "ar" ? "نسخ" : "Clone",
     Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Requisition": language === "ar" ? "حذف الطلب" : "Delete Requisition",
+    "Delete Requisition":
+      language === "ar" ? "حذف الطلب" : "Delete Requisition",
     "This action cannot be undone":
       language === "ar"
         ? "لا يمكن التراجع عن هذا الإجراء"
         : "This action cannot be undone",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Requisition Details": language === "ar" ? "تفاصيل الطلب" : "Requisition Details",
+    "Requisition Details":
+      language === "ar" ? "تفاصيل الطلب" : "Requisition Details",
     Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
     "No results found":
@@ -95,8 +98,10 @@ const RequisitionList = () => {
     "Created At": language === "ar" ? "تاريخ الإنشاء" : "Created At",
     "Updated At": language === "ar" ? "تاريخ التحديث" : "Updated At",
     Attachments: language === "ar" ? "المرفقات" : "Attachments",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Additional Information":
+      language === "ar" ? "معلومات إضافية" : "Additional Information",
     "No attachments": language === "ar" ? "لا توجد مرفقات" : "No attachments",
     "No items": language === "ar" ? "لا توجد عناصر" : "No items",
     "Unit Price": language === "ar" ? "سعر الوحدة" : "Unit Price",
@@ -122,7 +127,7 @@ const RequisitionList = () => {
   } = useRequisition();
 
   // Process requisitions data from API response
-const requisitionsData = requisitions?.Data?.$values || [];
+  const requisitionsData = requisitions?.Data?.$values || [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
@@ -169,15 +174,19 @@ const requisitionsData = requisitions?.Data?.$values || [];
     if (Array.isArray(requisitionsData) && requisitionsData.length > 0) {
       const stats = {
         totalRequisitions: pagination?.TotalItems || requisitionsData.length,
-        purchaseRequisitions: requisitionsData.filter(r => r.Type === "Purchase").length,
-        requisitionsThisMonth: requisitionsData.filter(r => {
+        purchaseRequisitions: requisitionsData.filter(
+          (r) => r.Type === "Purchase"
+        ).length,
+        requisitionsThisMonth: requisitionsData.filter((r) => {
           const createdDate = new Date(r.CreatedAt);
           const now = new Date();
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
-        totalWithAttachments: requisitionsData.filter(r => 
-          r.Attachments && r.Attachments.length > 0
+        totalWithAttachments: requisitionsData.filter(
+          (r) => r.Attachments && r.Attachments.length > 0
         ).length,
       };
       setStatistics(stats);
@@ -344,7 +353,10 @@ const requisitionsData = requisitions?.Data?.$values || [];
         await filterRequisitionsByType(filterOptions.type);
       }
       if (filterOptions.sortBy) {
-        await sortRequisitions(filterOptions.sortBy, filterOptions.sortAscending);
+        await sortRequisitions(
+          filterOptions.sortBy,
+          filterOptions.sortAscending
+        );
       }
       setShowFilters(false);
     } catch (error) {
@@ -364,10 +376,10 @@ const requisitionsData = requisitions?.Data?.$values || [];
     try {
       // Reset filters in context and fetch fresh data
       setFilters({
-        searchTerm: '',
-        type: '',
-        sortBy: 'CreatedAt',
-        sortAscending: false
+        searchTerm: "",
+        type: "",
+        sortBy: "CreatedAt",
+        sortAscending: false,
       });
       await getRequisitions();
     } catch (error) {
@@ -376,13 +388,13 @@ const requisitionsData = requisitions?.Data?.$values || [];
   };
 
   // Export functionality
-  const handleExport = () => {
-    console.log(
-      "Export requisitions:",
-      selectedRequisitions.length > 0 ? selectedRequisitions : "all"
-    );
-    alert("Export functionality to be implemented");
-  };
+  // const handleExport = () => {
+  //   console.log(
+  //     "Export requisitions:",
+  //     selectedRequisitions.length > 0 ? selectedRequisitions : "all"
+  //   );
+  //   alert("Export functionality to be implemented");
+  // };
 
   // Format date
   const formatDate = (dateString) => {
@@ -435,40 +447,106 @@ const requisitionsData = requisitions?.Data?.$values || [];
       </Container>
     );
   }
+  // CSV Export functionality
+  const handleExport = async () => {
+    try {
+      // Determine which requisitions to export
+      const requisitionsToExport =
+        selectedRequisitions.length > 0
+          ? requisitionsData.filter((r) => selectedRequisitions.includes(r.Id))
+          : requisitionsData;
+
+      if (!requisitionsToExport || requisitionsToExport.length === 0) {
+        alert(translations["No requisitions to export"]);
+        return;
+      }
+
+      // Prepare CSV headers
+      const headers = [
+        translations.Number,
+        translations.Type,
+        translations.Date,
+        translations["Journal Account"],
+        translations.Notes,
+        translations["Created At"],
+        translations["Updated At"],
+      ];
+
+      // Prepare CSV rows
+      const rows = requisitionsToExport.map((requisition) => [
+        `"${requisition.Number || ""}"`,
+        `"${translations[requisition.Type] || requisition.Type || ""}"`,
+        `"${formatDate(requisition.Date) || ""}"`,
+        `"${requisition.JournalAccount || ""}"`,
+        `"${requisition.Notes || ""}"`,
+        `"${formatDate(requisition.CreatedAt) || ""}"`,
+        `"${requisition.UpdatedAt ? formatDate(requisition.UpdatedAt) : ""}"`,
+      ]);
+
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(","),
+        ...rows.map((row) => row.join(",")),
+      ].join("\n");
+
+      // Create download link
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `requisitions_export_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error exporting requisitions:", error);
+      alert("Failed to export requisitions");
+    }
+  };
+
+  // Add this to your translations object
+  translations["No requisitions to export"] =
+    language === "ar" ? "لا توجد طلبات للتصدير" : "No requisitions to export";
 
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
-        <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
               {translations.Requisitions}
             </h1>
             {selectedRequisitions.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 {selectedRequisitions.length} {translations.Selected}
-              </Span>
+              </span>
             )}
-          </Container>
-          <Container className="flex gap-3 flex-wrap">
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <FilledButton
-              isIcon={true}
+              isIcon
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
+
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
+              isIconLeft
               onClick={() => setShowFilters(true)}
             />
+
             <FilledButton
-              isIcon={true}
+              isIcon
               icon={Download}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
@@ -479,11 +557,16 @@ const requisitionsData = requisitions?.Data?.$values || [];
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
+              isIconLeft
               onClick={handleExport}
+              disabled={
+                (!Array.isArray(requisitionsData) || requisitionsData.length === 0) &&
+                selectedRequisitions.length === 0
+              }
             />
+
             <FilledButton
-              isIcon={true}
+              isIcon
               icon={Plus}
               iconSize="w-4 h-4"
               bgColor="bg-blue-600 hover:bg-blue-700"
@@ -494,11 +577,12 @@ const requisitionsData = requisitions?.Data?.$values || [];
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
+              isIconLeft
               onClick={() => navigate("/admin/new-requisition")}
             />
-          </Container>
-        </Container>
+          </div>
+        </div>
+
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -569,7 +653,8 @@ const requisitionsData = requisitions?.Data?.$values || [];
                 onClick={() => getRequisitions()}
               />
             </Container>
-          ) : !Array.isArray(requisitionsData) || requisitionsData.length === 0 ? (
+          ) : !Array.isArray(requisitionsData) ||
+            requisitionsData.length === 0 ? (
             <Container className="text-center py-12">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -631,8 +716,12 @@ const requisitionsData = requisitions?.Data?.$values || [];
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
-                            checked={selectedRequisitions.includes(requisition.Id)}
-                            onChange={() => handleRequisitionSelection(requisition.Id)}
+                            checked={selectedRequisitions.includes(
+                              requisition.Id
+                            )}
+                            onChange={() =>
+                              handleRequisitionSelection(requisition.Id)
+                            }
                             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                         </td>
@@ -675,7 +764,9 @@ const requisitionsData = requisitions?.Data?.$values || [];
                           <Container className="flex justify-center gap-1">
                             {/* View Button */}
                             <button
-                              onClick={() => handleViewRequisition(requisition.Id)}
+                              onClick={() =>
+                                handleViewRequisition(requisition.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                               title={translations.View}
                             >
@@ -684,7 +775,9 @@ const requisitionsData = requisitions?.Data?.$values || [];
 
                             {/* Edit Button */}
                             <button
-                              onClick={() => handleEditRequisition(requisition.Id)}
+                              onClick={() =>
+                                handleEditRequisition(requisition.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
                               title={translations.Edit}
                             >
@@ -693,7 +786,9 @@ const requisitionsData = requisitions?.Data?.$values || [];
 
                             {/* Clone Button */}
                             <button
-                              onClick={() => handleCloneRequisition(requisition.Id)}
+                              onClick={() =>
+                                handleCloneRequisition(requisition.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1"
                               title={translations.Clone}
                             >
@@ -702,7 +797,9 @@ const requisitionsData = requisitions?.Data?.$values || [];
 
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteRequisition(requisition.Id)}
+                              onClick={() =>
+                                handleDeleteRequisition(requisition.Id)
+                              }
                               className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               title={translations.Delete}
                             >
@@ -717,77 +814,83 @@ const requisitionsData = requisitions?.Data?.$values || [];
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.PageNumber * pagination.PageSize,
-                      pagination.TotalItems
-                    )}{" "}
-                    {translations.Of} {pagination.TotalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => handlePageChange(pagination.PageNumber - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.PageNumber} / {pagination.TotalPages}
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
+                    <Span className="text-sm text-gray-500">
+                      {translations.Showing}{" "}
+                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
+                      {Math.min(
+                        pagination.PageNumber * pagination.PageSize,
+                        pagination.TotalItems
+                      )}{" "}
+                      {translations.Of} {pagination.TotalItems}{" "}
+                      {translations.Items}
                     </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.PageNumber + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => handlePageChange(pagination.TotalPages)}
-                    />
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => handlePageChange(1)}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber - 1)
+                        }
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {pagination.PageNumber} / {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() =>
+                          handlePageChange(pagination.PageNumber + 1)
+                        }
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => handlePageChange(pagination.TotalPages)}
+                      />
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -820,7 +923,7 @@ const requisitionsData = requisitions?.Data?.$values || [];
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     {translations["Basic Information"]}
                   </h3>
-                  
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Number}
@@ -839,7 +942,8 @@ const requisitionsData = requisitions?.Data?.$values || [];
                         selectedRequisition.Type
                       )}`}
                     >
-                      {translations[selectedRequisition.Type] || selectedRequisition.Type}
+                      {translations[selectedRequisition.Type] ||
+                        selectedRequisition.Type}
                     </Span>
                   </Container>
 
@@ -867,7 +971,7 @@ const requisitionsData = requisitions?.Data?.$values || [];
                   <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
                     {translations["Additional Information"]}
                   </h3>
-                  
+
                   <Container>
                     <Span className="text-sm font-medium text-gray-500">
                       {translations.Notes}
@@ -900,63 +1004,85 @@ const requisitionsData = requisitions?.Data?.$values || [];
               </Container>
 
               {/* Items Section */}
-              {selectedRequisition.Items && selectedRequisition.Items.length > 0 && (
-                <Container className="mt-6 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    {translations.Items} ({selectedRequisition.Items.length})
-                  </h3>
-                  <Container className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-3 py-2 text-left">Product ID</th>
-                          <th className="px-3 py-2 text-left">{translations["Unit Price"]}</th>
-                          <th className="px-3 py-2 text-left">{translations.Quantity}</th>
-                          <th className="px-3 py-2 text-left">{translations["Stock on Hand"]}</th>
-                          <th className="px-3 py-2 text-left">{translations["New Stock"]}</th>
-                          <th className="px-3 py-2 text-left">{translations.Total}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {selectedRequisition.Items.map((item, index) => (
-                          <tr key={index}>
-                            <td className="px-3 py-2">{item.ProductId}</td>
-                            <td className="px-3 py-2">${item.UnitPrice}</td>
-                            <td className="px-3 py-2">{item.Qty}</td>
-                            <td className="px-3 py-2">{item.StockOnHand}</td>
-                            <td className="px-3 py-2">{item.NewStockOnHand}</td>
-                            <td className="px-3 py-2">${item.Total}</td>
+              {selectedRequisition.Items &&
+                selectedRequisition.Items.length > 0 && (
+                  <Container className="mt-6 pt-4 border-t border-gray-200">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      {translations.Items} ({selectedRequisition.Items.length})
+                    </h3>
+                    <Container className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-3 py-2 text-left">Product ID</th>
+                            <th className="px-3 py-2 text-left">
+                              {translations["Unit Price"]}
+                            </th>
+                            <th className="px-3 py-2 text-left">
+                              {translations.Quantity}
+                            </th>
+                            <th className="px-3 py-2 text-left">
+                              {translations["Stock on Hand"]}
+                            </th>
+                            <th className="px-3 py-2 text-left">
+                              {translations["New Stock"]}
+                            </th>
+                            <th className="px-3 py-2 text-left">
+                              {translations.Total}
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {selectedRequisition.Items.map((item, index) => (
+                            <tr key={index}>
+                              <td className="px-3 py-2">{item.ProductId}</td>
+                              <td className="px-3 py-2">${item.UnitPrice}</td>
+                              <td className="px-3 py-2">{item.Qty}</td>
+                              <td className="px-3 py-2">{item.StockOnHand}</td>
+                              <td className="px-3 py-2">
+                                {item.NewStockOnHand}
+                              </td>
+                              <td className="px-3 py-2">${item.Total}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </Container>
                   </Container>
-                </Container>
-              )}
+                )}
 
               {/* Attachments Section */}
               <Container className="mt-6 pt-4 border-t border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  {translations.Attachments} ({selectedRequisition.Attachments?.length || 0})
+                  {translations.Attachments} (
+                  {selectedRequisition.Attachments?.length || 0})
                 </h3>
-                {selectedRequisition.Attachments && selectedRequisition.Attachments.length > 0 ? (
+                {selectedRequisition.Attachments &&
+                  selectedRequisition.Attachments.length > 0 ? (
                   <Container className="space-y-2">
-                    {selectedRequisition.Attachments.map((attachment, index) => (
-                      <Container key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <Container className="flex items-center gap-2">
-                          <Paperclip className="w-4 h-4 text-gray-400" />
-                          <Span className="text-sm text-gray-900">
-                            {attachment.OriginalFileName || attachment.File}
+                    {selectedRequisition.Attachments.map(
+                      (attachment, index) => (
+                        <Container
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        >
+                          <Container className="flex items-center gap-2">
+                            <Paperclip className="w-4 h-4 text-gray-400" />
+                            <Span className="text-sm text-gray-900">
+                              {attachment.OriginalFileName || attachment.File}
+                            </Span>
+                          </Container>
+                          <Span className="text-xs text-gray-500">
+                            {formatDate(attachment.CreatedAt)}
                           </Span>
                         </Container>
-                        <Span className="text-xs text-gray-500">
-                          {formatDate(attachment.CreatedAt)}
-                        </Span>
-                      </Container>
-                    ))}
+                      )
+                    )}
                   </Container>
                 ) : (
-                  <Span className="text-sm text-gray-500">{translations["No attachments"]}</Span>
+                  <Span className="text-sm text-gray-500">
+                    {translations["No attachments"]}
+                  </Span>
                 )}
               </Container>
             </Container>
@@ -991,8 +1117,8 @@ const requisitionsData = requisitions?.Data?.$values || [];
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the requisition{" "}
-              <strong>"{requisitionToDelete?.Number}"</strong>{" "}
-              and all associated data.
+              <strong>"{requisitionToDelete?.Number}"</strong> and all
+              associated data.
             </Span>
           </Container>
         }

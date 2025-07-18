@@ -49,7 +49,7 @@ const EmployeeSelect = ({
 }) => {
   const { language: currentLanguage } = useSelector((state) => state.language);
   const t = (key) => overtimeTransation[currentLanguage][key] || key;
-  
+
   return (
     <SelectBox
       name="employeeId"
@@ -119,14 +119,14 @@ const Overtime = () => {
   // Format date based on language
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const options = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      calendar: currentLanguage === 'ar' ? 'gregory' : undefined
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      calendar: currentLanguage === "ar" ? "gregory" : undefined,
     };
     return new Date(dateString).toLocaleDateString(
-      currentLanguage === 'ar' ? 'ar-EG' : 'en-US', 
+      currentLanguage === "ar" ? "ar-EG" : "en-US",
       options
     );
   };
@@ -184,22 +184,22 @@ const Overtime = () => {
   const handleExport = () => {
     try {
       if (!overtimeRecords || overtimeRecords.length === 0) {
-        alert(t('noRecordsFound'));
+        alert(t("noRecordsFound"));
         return;
       }
 
       const exportData = overtimeRecords.map((overtime) => ({
-        [t('employee')]: overtime.EmployeeName || t('unknownEmployee'),
-        [t('date')]: formatDate(overtime.Date),
-        [t('startTime')]: formatTime(overtime.StartTime),
-        [t('endTime')]: formatTime(overtime.EndTime),
-        [t('duration')]: formatDuration(overtime.Duration),
-        [t('reason')]: overtime.Reason || "",
-        [t('description')]: overtime.Description || "",
-        [t('status')]: overtime.Status || "",
-        [t('amount')]: overtime.CalculatedAmount?.toFixed(2) || "0.00",
-        [t('overtimeRate')]: overtime.OvertimeRate || "",
-        [t('createdDate')]: overtime.CreatedDate
+        [t("employee")]: overtime.EmployeeName || t("unknownEmployee"),
+        [t("date")]: formatDate(overtime.Date),
+        [t("startTime")]: formatTime(overtime.StartTime),
+        [t("endTime")]: formatTime(overtime.EndTime),
+        [t("duration")]: formatDuration(overtime.Duration),
+        [t("reason")]: overtime.Reason || "",
+        [t("description")]: overtime.Description || "",
+        [t("status")]: overtime.Status || "",
+        [t("amount")]: overtime.CalculatedAmount?.toFixed(2) || "0.00",
+        [t("overtimeRate")]: overtime.OvertimeRate || "",
+        [t("createdDate")]: overtime.CreatedDate
           ? formatDate(overtime.CreatedDate)
           : "",
       }));
@@ -430,29 +430,29 @@ const Overtime = () => {
   };
 
   const calculateDuration = (startTime, endTime) => {
-    if (!startTime || !endTime) return t('invalidTimeRange');
+    if (!startTime || !endTime) return t("invalidTimeRange");
     const start = new Date(`2000-01-01T${startTime}`);
     const end = new Date(`2000-01-01T${endTime}`);
     if (end > start) {
       const diff = (end - start) / (1000 * 60 * 60);
-      return `${diff.toFixed(1)} ${t('hours')}`;
+      return `${diff.toFixed(1)} ${t("hours")}`;
     }
-    return t('invalidTimeRange');
+    return t("invalidTimeRange");
   };
 
   const getDropdownItems = (overtime) => [
     {
-      label: t('viewDetails'),
+      label: t("viewDetails"),
       onClick: () => handleViewDetails(overtime),
     },
     {
-      label: t('edit'),
+      label: t("edit"),
       onClick: () => handleEditOvertime(overtime),
     },
     ...(overtime.Status === "Pending"
       ? [
           {
-            label: t('approve'),
+            label: t("approve"),
             onClick: () => {
               setSelectedOvertimeId(overtime.Id);
               setShowApproveModal(true);
@@ -460,7 +460,7 @@ const Overtime = () => {
             className: "text-green-600",
           },
           {
-            label: t('reject'),
+            label: t("reject"),
             onClick: () => {
               setSelectedOvertimeId(overtime.Id);
               setShowRejectModal(true);
@@ -470,14 +470,14 @@ const Overtime = () => {
         ]
       : []),
     {
-      label: t('delete'),
+      label: t("delete"),
       onClick: () => handleDeleteOvertime(overtime.Id),
       className: "text-red-600",
     },
   ];
 
   return (
-    <div dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
+    <div dir={currentLanguage === "ar" ? "rtl" : "ltr"}>
       <Container className="py-4">
         {/* Header Section */}
         <Card className="mb-4 shadow-sm">
@@ -488,15 +488,15 @@ const Overtime = () => {
                   <Timer size={24} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800">{t('overtimeManagement')}</h3>
-                  <p className="text-gray-500 text-sm">
-                    {t('trackAndManage')}
-                  </p>
+                  <h3 className="font-bold text-gray-800">
+                    {t("overtimeManagement")}
+                  </h3>
+                  <p className="text-gray-500 text-sm">{t("trackAndManage")}</p>
                 </div>
               </div>
               <div className="flex space-x-2">
                 <OutlineButton
-                  buttonText={t('export')}
+                  buttonText={t("export")}
                   borderColor="border-gray-300"
                   borderWidth="border-2"
                   textColor="text-gray-700"
@@ -508,7 +508,7 @@ const Overtime = () => {
                   onClick={handleExport}
                 />
                 <FilledButton
-                  buttonText={t('addOvertime')}
+                  buttonText={t("addOvertime")}
                   bgColor="bg-green-500"
                   icon={Plus}
                   isIcon
@@ -527,21 +527,21 @@ const Overtime = () => {
             <div className="text-center p-4">
               <Activity size={28} className="text-blue-600 mb-2" />
               <h4 className="font-bold text-blue-600">{stats.total}</h4>
-              <small className="text-gray-500">{t('totalRecords')}</small>
+              <small className="text-gray-500">{t("totalRecords")}</small>
             </div>
           </Card>
           <Card className="shadow-sm">
             <div className="text-center p-4">
               <AlertCircle size={28} className="text-yellow-600 mb-2" />
               <h4 className="font-bold text-yellow-600">{stats.pending}</h4>
-              <small className="text-gray-500">{t('pendingApproval')}</small>
+              <small className="text-gray-500">{t("pendingApproval")}</small>
             </div>
           </Card>
           <Card className="shadow-sm">
             <div className="text-center p-4">
               <CheckCircle size={28} className="text-green-600 mb-2" />
               <h4 className="font-bold text-green-600">{stats.approved}</h4>
-              <small className="text-gray-500">{t('approved')}</small>
+              <small className="text-gray-500">{t("approved")}</small>
             </div>
           </Card>
           <Card className="shadow-sm">
@@ -550,7 +550,7 @@ const Overtime = () => {
               <h4 className="font-bold text-teal-600">
                 ${stats.totalAmount.toFixed(2)}
               </h4>
-              <small className="text-gray-500">{t('totalAmount')}</small>
+              <small className="text-gray-500">{t("totalAmount")}</small>
             </div>
           </Card>
         </div>
@@ -560,14 +560,12 @@ const Overtime = () => {
           <div className="p-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
-                <h5 className="font-bold">{t('quickActions')}</h5>
-                <small className="text-gray-500">
-                  {t('manageRequests')}
-                </small>
+                <h5 className="font-bold">{t("quickActions")}</h5>
+                <small className="text-gray-500">{t("manageRequests")}</small>
               </div>
               <div className="flex space-x-2 mt-2 md:mt-0">
                 <FilledButton
-                  buttonText={`${t('pending')} (${stats.pending})`}
+                  buttonText={`${t("pending")} (${stats.pending})`}
                   bgColor="bg-yellow-500"
                   icon={AlertCircle}
                   isIcon
@@ -576,7 +574,7 @@ const Overtime = () => {
                   fontSize="text-xs"
                 />
                 <FilledButton
-                  buttonText={t('summary')}
+                  buttonText={t("summary")}
                   bgColor="bg-blue-500"
                   icon={TrendingUp}
                   isIcon
@@ -594,22 +592,22 @@ const Overtime = () => {
           <SearchAndFilters
             searchValue={searchTerm}
             setSearchValue={setSearchTerm}
-            placeholder={t('searchPlaceholder')}
+            placeholder={t("searchPlaceholder")}
             isFocused={true}
           />
           <SelectBox
             name="status"
-            placeholder={t('allStatus')}
+            placeholder={t("allStatus")}
             value={filterStatus}
             handleChange={(value) => {
               setFilterStatus(value);
               setCurrentPage(1);
             }}
             optionList={[
-              { value: "all", label: t('allStatus') },
-              { value: "Pending", label: t('pending') },
-              { value: "Approved", label: t('approved') },
-              { value: "Rejected", label: t('rejected') },
+              { value: "all", label: t("allStatus") },
+              { value: "Pending", label: t("pending") },
+              { value: "Approved", label: t("approved") },
+              { value: "Rejected", label: t("rejected") },
             ]}
             width="w-full"
           />
@@ -620,7 +618,7 @@ const Overtime = () => {
               setFilterEmployee(value);
               setCurrentPage(1);
             }}
-            placeholder={t('allEmployees')}
+            placeholder={t("allEmployees")}
           />
         </div>
 
@@ -628,30 +626,30 @@ const Overtime = () => {
         <Card className="shadow-sm">
           <div className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <h5 className="font-bold">{t('overtimeRecords')}</h5>
+              <h5 className="font-bold">{t("overtimeRecords")}</h5>
               <small className="text-gray-500">
-                {t('showing')} {filteredOvertimeData.length} {t('of')}{" "}
-                {overtimeRecords?.pagination?.totalItems || 0} {t('records')}
+                {t("showing")} {filteredOvertimeData.length} {t("of")}{" "}
+                {overtimeRecords?.pagination?.totalItems || 0} {t("records")}
               </small>
             </div>
           </div>
           {loading ? (
             <div className="text-center py-5">
               <Skeleton height="40px" width="100%" marginBottom="10px" />
-              <p className="text-gray-500">{t('loadingRecords')}</p>
+              <p className="text-gray-500">{t("loadingRecords")}</p>
             </div>
           ) : filteredOvertimeData.length === 0 ? (
             <div className="text-center py-5">
               <Timer size={48} className="text-gray-500 mb-3" />
-              <h5 className="text-gray-500">{t('noRecordsFound')}</h5>
+              <h5 className="text-gray-500">{t("noRecordsFound")}</h5>
               <p className="text-gray-500 mb-3">
                 {searchTerm || filterStatus !== "all" || filterEmployee
-                  ? t('tryAdjusting')
-                  : t('addFirstRecord')}
+                  ? t("tryAdjusting")
+                  : t("addFirstRecord")}
               </p>
               {!searchTerm && filterStatus === "all" && !filterEmployee && (
                 <FilledButton
-                  buttonText={t('addFirstRecord')}
+                  buttonText={t("addFirstRecord")}
                   bgColor="bg-green-500"
                   icon={Plus}
                   isIcon
@@ -663,100 +661,118 @@ const Overtime = () => {
             </div>
           ) : (
             <>
-              <Table className="min-w-full">
-                <Thead className="bg-gray-50">
-                  <TR>
-                    <TH>{t('employee')}</TH>
-                    <TH>{t('dateTime')}</TH>
-                    <TH>{t('duration')}</TH>
-                    <TH>{t('reason')}</TH>
-                    <TH>{t('amount')}</TH>
-                    <TH>{t('status')}</TH>
-                    <TH className="text-center">{t('actions')}</TH>
-                  </TR>
-                </Thead>
-                <Tbody>
-                  {filteredOvertimeData.map((overtime) => (
-                    <TR key={overtime.Id}>
-                      <TD>
-                        <div className="flex items-center">
-                          <div className="mr-2 flex items-center justify-center bg-blue-600 text-white rounded-full w-8 h-8 text-xs">
-                            {overtime.EmployeeName
-                              ? overtime.EmployeeName.split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                              : "N/A"}
-                          </div>
-                          <div>
-                            <div className="font-medium">
-                              {overtime.EmployeeName || t('unknownEmployee')}
-                            </div>
-                            <small className="text-gray-500">
-                              {t('id')}: {overtime.EmployeeId}
-                            </small>
-                          </div>
-                        </div>
-                      </TD>
-                      <TD>
-                        <div className="flex items-center">
-                          <Calendar size={16} className="text-gray-500 mr-2" />
-                          <div>
-                            <div>
-                              {formatDate(overtime.Date)}
-                            </div>
-                            <small className="text-gray-500">
-                              {formatTime(overtime.StartTime)} -{" "}
-                              {formatTime(overtime.EndTime)}
-                            </small>
-                          </div>
-                        </div>
-                      </TD>
-                      <TD>
-                        <div className="flex items-center">
-                          <Clock size={16} className="text-green-600 mr-2" />
-                          <span className="font-medium">
-                            {formatDuration(overtime.Duration)}
-                          </span>
-                        </div>
-                      </TD>
-                      <TD>
-                        <div>
-                          <div className="font-medium">{overtime.Reason}</div>
-                          {overtime.Description && (
-                            <small className="text-gray-500">
-                              {overtime.Description.substring(0, 50)}...
-                            </small>
-                          )}
-                        </div>
-                      </TD>
-                      <TD>
-                        <div className="flex items-center">
-                          <DollarSign size={16} className="text-teal-600 mr-1" />
-                          <span className="font-medium">
-                            ${overtime.CalculatedAmount?.toFixed(2) || "0.00"}
-                          </span>
-                        </div>
-                        <small className="text-gray-500">
-                          {t('overtimeRate')}: {overtime.OvertimeRate}x
-                        </small>
-                      </TD>
-                      <TD>{getStatusBadge(overtime.Status)}</TD>
-                      <TD className="text-center">
-                        <Dropdown
-                          buttonText={t('actions')}
-                          buttonClassName="border-gray-300 text-gray-700 hover:bg-gray-50"
-                          items={getDropdownItems(overtime)}
-                          onSelect={(item) => item.onClick && item.onClick()}
-                        />
-                      </TD>
+              {/* Responsive table wrapper with horizontal scroll */}
+              <div className="overflow-x-auto">
+                <Table className="min-w-full">
+                  <Thead className="bg-gray-50">
+                    <TR>
+                      <TH className="min-w-[200px]">{t("employee")}</TH>
+                      <TH className="min-w-[160px]">{t("dateTime")}</TH>
+                      <TH className="min-w-[100px]">{t("duration")}</TH>
+                      <TH className="min-w-[150px]">{t("reason")}</TH>
+                      <TH className="min-w-[120px]">{t("amount")}</TH>
+                      <TH className="min-w-[100px]">{t("status")}</TH>
+                      <TH className="min-w-[120px] text-center">
+                        {t("actions")}
+                      </TH>
                     </TR>
-                  ))}
-                </Tbody>
-              </Table>
+                  </Thead>
+                  <Tbody>
+                    {filteredOvertimeData.map((overtime) => (
+                      <TR key={overtime.Id}>
+                        <TD className="min-w-[200px]">
+                          <div className="flex items-center">
+                            <div className="mr-2 flex items-center justify-center bg-blue-600 text-white rounded-full w-8 h-8 text-xs flex-shrink-0">
+                              {overtime.EmployeeName
+                                ? overtime.EmployeeName.split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                : "N/A"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium truncate">
+                                {overtime.EmployeeName || t("unknownEmployee")}
+                              </div>
+                              <small className="text-gray-500 truncate block">
+                                {t("id")}: {overtime.EmployeeId}
+                              </small>
+                            </div>
+                          </div>
+                        </TD>
+                        <TD className="min-w-[160px]">
+                          <div className="flex items-center">
+                            <Calendar
+                              size={16}
+                              className="text-gray-500 mr-2 flex-shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <div className="truncate">
+                                {formatDate(overtime.Date)}
+                              </div>
+                              <small className="text-gray-500 truncate block">
+                                {formatTime(overtime.StartTime)} -{" "}
+                                {formatTime(overtime.EndTime)}
+                              </small>
+                            </div>
+                          </div>
+                        </TD>
+                        <TD className="min-w-[100px]">
+                          <div className="flex items-center">
+                            <Clock
+                              size={16}
+                              className="text-green-600 mr-2 flex-shrink-0"
+                            />
+                            <span className="font-medium">
+                              {formatDuration(overtime.Duration)}
+                            </span>
+                          </div>
+                        </TD>
+                        <TD className="min-w-[150px]">
+                          <div>
+                            <div className="font-medium truncate">
+                              {overtime.Reason}
+                            </div>
+                            {overtime.Description && (
+                              <small className="text-gray-500 truncate block">
+                                {overtime.Description.substring(0, 50)}...
+                              </small>
+                            )}
+                          </div>
+                        </TD>
+                        <TD className="min-w-[120px]">
+                          <div className="flex items-center">
+                            <DollarSign
+                              size={16}
+                              className="text-teal-600 mr-1 flex-shrink-0"
+                            />
+                            <span className="font-medium">
+                              ${overtime.CalculatedAmount?.toFixed(2) || "0.00"}
+                            </span>
+                          </div>
+                          <small className="text-gray-500 truncate block">
+                            {t("overtimeRate")}: {overtime.OvertimeRate}x
+                          </small>
+                        </TD>
+                        <TD className="min-w-[100px]">
+                          {getStatusBadge(overtime.Status)}
+                        </TD>
+                        <TD className="min-w-[120px] text-center">
+                          <Dropdown
+                            buttonText={t("actions")}
+                            buttonClassName="border-gray-300 text-gray-700 hover:bg-gray-50"
+                            items={getDropdownItems(overtime)}
+                            onSelect={(item) => item.onClick && item.onClick()}
+                          />
+                        </TD>
+                      </TR>
+                    ))}
+                  </Tbody>
+                </Table>
+              </div>
 
               {/* Pagination */}
               {overtimeRecords?.pagination?.totalPages > 1 && (
-                <div className="flex justify-between items-center py-3 px-4 border-t">
+                <div className="flex flex-col sm:flex-row justify-between items-center py-3 px-4 border-t gap-3">
                   <SelectBox
                     name="itemsPerPage"
                     value={itemsPerPage}
@@ -785,13 +801,13 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <Timer size={20} className="mr-2" />
-              {editOvertimeId ? t('updateOvertime') : t('addOvertime')}
+              {editOvertimeId ? t("updateOvertime") : t("addOvertime")}
             </div>
           }
           modalOpen={showAddModal}
           setModalOpen={setShowAddModal}
-          okText={editOvertimeId ? t('updateOvertime') : t('addOvertime')}
-          cancelText={t('cancel')}
+          okText={editOvertimeId ? t("updateOvertime") : t("addOvertime")}
+          cancelText={t("cancel")}
           okAction={handleAddOvertime}
           cancelAction={() => setShowAddModal(false)}
           okButtonDisabled={
@@ -812,60 +828,60 @@ const Overtime = () => {
                   onEmployeeChange={(value) =>
                     setFormData((prev) => ({ ...prev, employeeId: value }))
                   }
-                  placeholder={t('selectEmployee')}
+                  placeholder={t("selectEmployee")}
                 />
                 <InputField
                   name="date"
                   type="date"
-                  placeholder={t('selectDate')}
+                  placeholder={t("selectDate")}
                   value={formData.date}
                   onChange={handleInputChange}
-                  label={`${t('date')} *`}
+                  label={`${t("date")} *`}
                   width="w-full"
                 />
                 <InputField
                   name="startTime"
                   type="time"
-                  placeholder={t('startTime')}
+                  placeholder={t("startTime")}
                   value={formData.startTime}
                   onChange={handleInputChange}
-                  label={`${t('startTime')} *`}
+                  label={`${t("startTime")} *`}
                   width="w-full"
                 />
                 <InputField
                   name="endTime"
                   type="time"
-                  placeholder={t('endTime')}
+                  placeholder={t("endTime")}
                   value={formData.endTime}
                   onChange={handleInputChange}
-                  label={`${t('endTime')} *`}
+                  label={`${t("endTime")} *`}
                   width="w-full"
                 />
               </div>
               {formData.startTime && formData.endTime && (
                 <Alert variant="info" className="my-3">
                   <Info size={16} className="mr-2" />
-                  {t('duration')}:{" "}
+                  {t("duration")}:{" "}
                   {calculateDuration(formData.startTime, formData.endTime)}
                 </Alert>
               )}
               <InputField
                 name="reason"
                 type="text"
-                placeholder={t('reasonRequired')}
+                placeholder={t("reasonRequired")}
                 value={formData.reason}
                 onChange={handleInputChange}
-                label={t('reasonRequired')}
+                label={t("reasonRequired")}
                 width="w-full"
                 marginBottom="mb-3"
               />
               <InputField
                 name="description"
                 type="textarea"
-                placeholder={t('additionalDetails')}
+                placeholder={t("additionalDetails")}
                 value={formData.description}
                 onChange={handleInputChange}
-                label={t('description')}
+                label={t("description")}
                 width="w-full"
                 marginBottom="mb-3"
               />
@@ -878,12 +894,12 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <Eye size={20} className="mr-2" />
-              {t('overtimeDetails')}
+              {t("overtimeDetails")}
             </div>
           }
           modalOpen={showDetailsModal}
           setModalOpen={setShowDetailsModal}
-          okText={t('close')}
+          okText={t("close")}
           cancelText=""
           okAction={() => setShowDetailsModal(false)}
           cancelButtonDisabled={true}
@@ -893,82 +909,78 @@ const Overtime = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <strong>{t('employee')}:</strong>
+                    <strong>{t("employee")}:</strong>
                     <p>{selectedOvertime.EmployeeName}</p>
                   </div>
                   <div>
-                    <strong>{t('date')}:</strong>
+                    <strong>{t("date")}:</strong>
                     <p>{formatDate(selectedOvertime.Date)}</p>
                   </div>
                   <div>
-                    <strong>{t('startTime')}:</strong>
+                    <strong>{t("startTime")}:</strong>
                     <p>{formatTime(selectedOvertime.StartTime)}</p>
                   </div>
                   <div>
-                    <strong>{t('endTime')}:</strong>
+                    <strong>{t("endTime")}:</strong>
                     <p>{formatTime(selectedOvertime.EndTime)}</p>
                   </div>
                   <div>
-                    <strong>{t('duration')}:</strong>
+                    <strong>{t("duration")}:</strong>
                     <p>{formatDuration(selectedOvertime.Duration)}</p>
                   </div>
                   <div>
-                    <strong>{t('status')}:</strong>
+                    <strong>{t("status")}:</strong>
                     <p>{getStatusBadge(selectedOvertime.Status)}</p>
                   </div>
                   <div>
-                    <strong>{t('overtimeRate')}:</strong>
+                    <strong>{t("overtimeRate")}:</strong>
                     <p>{selectedOvertime.OvertimeRate}x</p>
                   </div>
                   <div>
-                    <strong>{t('calculatedAmount')}:</strong>
+                    <strong>{t("calculatedAmount")}:</strong>
                     <p>
                       ${selectedOvertime.CalculatedAmount?.toFixed(2) || "0.00"}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <strong>{t('reason')}:</strong>
+                  <strong>{t("reason")}:</strong>
                   <p>{selectedOvertime.Reason}</p>
                 </div>
                 {selectedOvertime.Description && (
                   <div>
-                    <strong>{t('description')}:</strong>
+                    <strong>{t("description")}:</strong>
                     <p>{selectedOvertime.Description}</p>
                   </div>
                 )}
                 {selectedOvertime.ApprovalComments && (
                   <div>
-                    <strong>{t('approvalComments')}:</strong>
+                    <strong>{t("approvalComments")}:</strong>
                     <p>{selectedOvertime.ApprovalComments}</p>
                   </div>
                 )}
                 {selectedOvertime.RejectionReason && (
                   <div>
-                    <strong>{t('rejectionReason')}:</strong>
+                    <strong>{t("rejectionReason")}:</strong>
                     <p>{selectedOvertime.RejectionReason}</p>
                   </div>
                 )}
                 {selectedOvertime.ApprovedBy && (
                   <div>
-                    <strong>{t('approvedBy')}:</strong>
+                    <strong>{t("approvedBy")}:</strong>
                     <p>{selectedOvertime.ApprovedBy}</p>
                   </div>
                 )}
                 {selectedOvertime.ApprovalDate && (
                   <div>
-                    <strong>{t('approvalDate')}:</strong>
-                    <p>
-                      {formatDate(selectedOvertime.ApprovalDate)}
-                    </p>
+                    <strong>{t("approvalDate")}:</strong>
+                    <p>{formatDate(selectedOvertime.ApprovalDate)}</p>
                   </div>
                 )}
                 {selectedOvertime.CreatedDate && (
                   <div>
-                    <strong>{t('createdDate')}:</strong>
-                    <p>
-                      {formatDate(selectedOvertime.CreatedDate)}
-                    </p>
+                    <strong>{t("createdDate")}:</strong>
+                    <p>{formatDate(selectedOvertime.CreatedDate)}</p>
                   </div>
                 )}
               </div>
@@ -981,13 +993,13 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <CheckCircle size={20} className="mr-2 text-green-600" />
-              {t('approveOvertime')}
+              {t("approveOvertime")}
             </div>
           }
           modalOpen={showApproveModal}
           setModalOpen={setShowApproveModal}
-          okText={t('approve')}
-          cancelText={t('cancel')}
+          okText={t("approve")}
+          cancelText={t("cancel")}
           okAction={handleApproveOvertime}
           cancelAction={() => setShowApproveModal(false)}
           okButtonDisabled={loading}
@@ -996,15 +1008,15 @@ const Overtime = () => {
             <div className="space-y-4">
               <Alert variant="info" className="mb-4">
                 <Info size={16} className="mr-2" />
-                {t('approveConfirmation')}
+                {t("approveConfirmation")}
               </Alert>
               <InputField
                 name="approvalComments"
                 type="textarea"
-                placeholder={t('approvalComments')}
+                placeholder={t("approvalComments")}
                 value={formData.approvalComments}
                 onChange={handleInputChange}
-                label={t('approvalComments')}
+                label={t("approvalComments")}
                 width="w-full"
                 marginBottom="mb-3"
               />
@@ -1017,13 +1029,13 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <XCircle size={20} className="mr-2 text-red-600" />
-              {t('rejectOvertime')}
+              {t("rejectOvertime")}
             </div>
           }
           modalOpen={showRejectModal}
           setModalOpen={setShowRejectModal}
-          okText={t('reject')}
-          cancelText={t('cancel')}
+          okText={t("reject")}
+          cancelText={t("cancel")}
           okAction={handleRejectOvertime}
           cancelAction={() => setShowRejectModal(false)}
           okButtonDisabled={loading || !formData.rejectionReason}
@@ -1032,15 +1044,15 @@ const Overtime = () => {
             <div className="space-y-4">
               <Alert variant="warning" className="mb-4">
                 <AlertCircle size={16} className="mr-2" />
-                {t('rejectConfirmation')}
+                {t("rejectConfirmation")}
               </Alert>
               <InputField
                 name="rejectionReason"
                 type="textarea"
-                placeholder={t('rejectionReason')}
+                placeholder={t("rejectionReason")}
                 value={formData.rejectionReason}
                 onChange={handleInputChange}
-                label={`${t('rejectionReason')} *`}
+                label={`${t("rejectionReason")} *`}
                 width="w-full"
                 marginBottom="mb-3"
               />
@@ -1053,12 +1065,12 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <AlertCircle size={20} className="mr-2 text-yellow-600" />
-              {t('pendingApprovals')}
+              {t("pendingApprovals")}
             </div>
           }
           modalOpen={showPendingModal}
           setModalOpen={setShowPendingModal}
-          okText={t('close')}
+          okText={t("close")}
           cancelText=""
           okAction={() => setShowPendingModal(false)}
           cancelButtonDisabled={true}
@@ -1068,26 +1080,24 @@ const Overtime = () => {
               {loading ? (
                 <div className="text-center py-5">
                   <Skeleton height="40px" width="100%" marginBottom="10px" />
-                  <p className="text-gray-500">{t('loadingApprovals')}</p>
+                  <p className="text-gray-500">{t("loadingApprovals")}</p>
                 </div>
               ) : pendingOvertimeApprovals?.length === 0 ? (
                 <div className="text-center py-5">
                   <CheckCircle size={48} className="text-green-500 mb-3" />
-                  <h5 className="text-gray-500">{t('noPendingApprovals')}</h5>
-                  <p className="text-gray-500">
-                    {t('allProcessed')}
-                  </p>
+                  <h5 className="text-gray-500">{t("noPendingApprovals")}</h5>
+                  <p className="text-gray-500">{t("allProcessed")}</p>
                 </div>
               ) : (
-                <Table className="min-w-full">
+                <Table className="min-w-full ">
                   <Thead className="bg-gray-50">
                     <TR>
-                      <TH>{t('employee')}</TH>
-                      <TH>{t('date')}</TH>
-                      <TH>{t('duration')}</TH>
-                      <TH>{t('reason')}</TH>
-                      <TH>{t('amount')}</TH>
-                      <TH className="text-center">{t('actions')}</TH>
+                      <TH>{t("employee")}</TH>
+                      <TH>{t("date")}</TH>
+                      <TH>{t("duration")}</TH>
+                      <TH>{t("reason")}</TH>
+                      <TH>{t("amount")}</TH>
+                      <TH className="text-center">{t("actions")}</TH>
                     </TR>
                   </Thead>
                   <Tbody>
@@ -1104,19 +1114,17 @@ const Overtime = () => {
                             </div>
                             <div>
                               <div className="font-medium">
-                                {overtime.EmployeeName || t('unknownEmployee')}
+                                {overtime.EmployeeName || t("unknownEmployee")}
                               </div>
                               <small className="text-gray-500">
-                                {t('id')}: {overtime.EmployeeId}
+                                {t("id")}: {overtime.EmployeeId}
                               </small>
                             </div>
                           </div>
                         </TD>
                         <TD>
                           <div>
-                            <div>
-                              {formatDate(overtime.Date)}
-                            </div>
+                            <div>{formatDate(overtime.Date)}</div>
                             <small className="text-gray-500">
                               {formatTime(overtime.StartTime)} -{" "}
                               {formatTime(overtime.EndTime)}
@@ -1155,7 +1163,7 @@ const Overtime = () => {
                         <TD className="text-center">
                           <div className="flex space-x-2 justify-center">
                             <OutlineButton
-                              buttonText={t('approve')}
+                              buttonText={t("approve")}
                               borderColor="border-green-500"
                               borderWidth="border-2"
                               textColor="text-green-500"
@@ -1170,7 +1178,7 @@ const Overtime = () => {
                               fontSize="text-xs"
                             />
                             <OutlineButton
-                              buttonText={t('reject')}
+                              buttonText={t("reject")}
                               borderColor="border-red-500"
                               borderWidth="border-2"
                               textColor="text-red-500"
@@ -1200,12 +1208,12 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <TrendingUp size={20} className="mr-2 text-blue-600" />
-              {t('employeeSummary')}
+              {t("employeeSummary")}
             </div>
           }
           modalOpen={showSummaryModal}
           setModalOpen={setShowSummaryModal}
-          okText={t('close')}
+          okText={t("close")}
           cancelText=""
           okAction={() => setShowSummaryModal(false)}
           cancelButtonDisabled={true}
@@ -1217,16 +1225,19 @@ const Overtime = () => {
                   employees={employees || []}
                   selectedEmployeeId={formData.summaryEmployeeId}
                   onEmployeeChange={(value) =>
-                    setFormData((prev) => ({ ...prev, summaryEmployeeId: value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      summaryEmployeeId: value,
+                    }))
                   }
-                  placeholder={t('selectEmployeeSummary')}
+                  placeholder={t("selectEmployeeSummary")}
                 />
               </div>
 
               {loading ? (
                 <div className="text-center py-5">
                   <Skeleton height="40px" width="100%" marginBottom="10px" />
-                  <p className="text-gray-500">{t('loadingSummary')}</p>
+                  <p className="text-gray-500">{t("loadingSummary")}</p>
                 </div>
               ) : formData.summaryEmployeeId && overtimeSummary ? (
                 <div className="space-y-4">
@@ -1238,7 +1249,9 @@ const Overtime = () => {
                         <h4 className="font-bold text-blue-600">
                           {overtimeSummary.totalHours || 0}
                         </h4>
-                        <small className="text-gray-500">{t('totalHours')}</small>
+                        <small className="text-gray-500">
+                          {t("totalHours")}
+                        </small>
                       </div>
                     </Card>
                     <Card className="shadow-sm">
@@ -1247,7 +1260,9 @@ const Overtime = () => {
                         <h4 className="font-bold text-green-600">
                           ${overtimeSummary.totalAmount?.toFixed(2) || "0.00"}
                         </h4>
-                        <small className="text-gray-500">{t('totalAmount')}</small>
+                        <small className="text-gray-500">
+                          {t("totalAmount")}
+                        </small>
                       </div>
                     </Card>
                     <Card className="shadow-sm">
@@ -1256,7 +1271,9 @@ const Overtime = () => {
                         <h4 className="font-bold text-purple-600">
                           {overtimeSummary.totalRecords || 0}
                         </h4>
-                        <small className="text-gray-500">{t('totalRecords')}</small>
+                        <small className="text-gray-500">
+                          {t("totalRecords")}
+                        </small>
                       </div>
                     </Card>
                   </div>
@@ -1268,21 +1285,21 @@ const Overtime = () => {
                       <div className="font-bold text-yellow-600">
                         {overtimeSummary.pendingCount || 0}
                       </div>
-                      <small className="text-gray-500">{t('pending')}</small>
+                      <small className="text-gray-500">{t("pending")}</small>
                     </div>
                     <div className="text-center p-3 bg-green-50 rounded-lg">
                       <CheckCircle size={20} className="text-green-600 mb-1" />
                       <div className="font-bold text-green-600">
                         {overtimeSummary.approvedCount || 0}
                       </div>
-                      <small className="text-gray-500">{t('approved')}</small>
+                      <small className="text-gray-500">{t("approved")}</small>
                     </div>
                     <div className="text-center p-3 bg-red-50 rounded-lg">
                       <XCircle size={20} className="text-red-600 mb-1" />
                       <div className="font-bold text-red-600">
                         {overtimeSummary.rejectedCount || 0}
                       </div>
-                      <small className="text-gray-500">{t('rejected')}</small>
+                      <small className="text-gray-500">{t("rejected")}</small>
                     </div>
                   </div>
 
@@ -1290,9 +1307,7 @@ const Overtime = () => {
                   {overtimeSummary.recentRecords &&
                     overtimeSummary.recentRecords.length > 0 && (
                       <div>
-                        <h6 className="font-bold mb-3">
-                          {t('recentRecords')}
-                        </h6>
+                        <h6 className="font-bold mb-3">{t("recentRecords")}</h6>
                         <div className="space-y-2">
                           {overtimeSummary.recentRecords.map((record) => (
                             <div
@@ -1336,18 +1351,14 @@ const Overtime = () => {
               ) : formData.summaryEmployeeId ? (
                 <div className="text-center py-5">
                   <FileText size={48} className="text-gray-500 mb-3" />
-                  <h5 className="text-gray-500">{t('noSummaryRecords')}</h5>
-                  <p className="text-gray-500">
-                    {t('noSummaryRecords')}
-                  </p>
+                  <h5 className="text-gray-500">{t("noSummaryRecords")}</h5>
+                  <p className="text-gray-500">{t("noSummaryRecords")}</p>
                 </div>
               ) : (
                 <div className="text-center py-5">
                   <Users size={48} className="text-gray-500 mb-3" />
-                  <h5 className="text-gray-500">{t('noEmployeeSelected')}</h5>
-                  <p className="text-gray-500">
-                    {t('selectEmployeePrompt')}
-                  </p>
+                  <h5 className="text-gray-500">{t("noEmployeeSelected")}</h5>
+                  <p className="text-gray-500">{t("selectEmployeePrompt")}</p>
                 </div>
               )}
             </div>
@@ -1359,13 +1370,13 @@ const Overtime = () => {
           title={
             <div className="flex items-center">
               <Trash2 size={20} className="mr-2 text-red-600" />
-              {t('confirmDelete')}
+              {t("confirmDelete")}
             </div>
           }
           modalOpen={showConfirmDelete}
           setModalOpen={setShowConfirmDelete}
-          okText={t('delete')}
-          cancelText={t('cancel')}
+          okText={t("delete")}
+          cancelText={t("cancel")}
           okAction={confirmDelete}
           cancelAction={() => setShowConfirmDelete(false)}
           okButtonDisabled={loading}
@@ -1374,11 +1385,9 @@ const Overtime = () => {
             <div className="space-y-4">
               <Alert variant="danger" className="mb-4">
                 <AlertCircle size={16} className="mr-2" />
-                {t('deleteConfirmation')}
+                {t("deleteConfirmation")}
               </Alert>
-              <p className="text-gray-600">
-                {t('recordWillBeRemoved')}
-              </p>
+              <p className="text-gray-600">{t("recordWillBeRemoved")}</p>
             </div>
           }
         />
