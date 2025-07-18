@@ -38,6 +38,7 @@ import FilledButton from "../../components/elements/elements/buttons/filledButto
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 import Modall from "../../components/elements/modal/Modal";
+import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
 
 const InvoicesList = () => {
   const navigate = useNavigate();
@@ -341,6 +342,9 @@ const InvoicesList = () => {
       </Container>
     );
   }
+
+
+  console.log('invoices================>>>>', invoices)
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -724,7 +728,7 @@ const InvoicesList = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Container className="flex items-center gap-2">
-                          <FilledButton
+                          <OutlineButton
                             isIcon={true}
                             icon={Eye}
                             iconSize="w-4 h-4"
@@ -736,20 +740,21 @@ const InvoicesList = () => {
                             width="w-8"
                             onClick={() => handleView(invoice)}
                           />
-                          <FilledButton
+                          <OutlineButton
                             isIcon={true}
                             icon={Edit}
-                            iconSize="w-4 h-4"
+                            iconSize="w-10 h-10"
                             bgColor="bg-blue-100 hover:bg-blue-200"
                             textColor="text-blue-700"
                             rounded="rounded-lg"
                             buttonText=""
+
                             height="h-8"
                             width="w-8"
                             onClick={() => handleEdit(invoice)}
                           />
                           <Container className="relative">
-                            <FilledButton
+                            <OutlineButton
                               isIcon={true}
                               icon={MoreVertical}
                               iconSize="w-4 h-4"

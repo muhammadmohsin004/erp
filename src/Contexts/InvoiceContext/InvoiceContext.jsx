@@ -395,13 +395,14 @@ export const InvoicesProvider = ({ children }) => {
 
         const params = buildQueryParams(options);
         const response = await apiClient.get('/invoices', { params });
+
         
         dispatch({
           type: INVOICES_ACTIONS.SET_INVOICES,
-          payload: response.data,
+          payload: response.data.Data.$values,
         });
 
-        return response.data;
+        return response.data.Data.$values;
       } catch (error) {
         handleApiError(error);
       }
