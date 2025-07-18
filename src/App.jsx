@@ -24,6 +24,7 @@ import { FinanceProvider } from "./Contexts/FinanceContext/FinanceContext";
 import { DashboardProvider } from "./Contexts/DashboardContext/DashboardContext";
 import { VendorProvider } from "./Contexts/VendorContext/VendorContext";
 import { BankAccountProvider } from "./Contexts/BankAccountContext/BankAccountContext";
+import { FinanceDashboardProvider } from "./Contexts/FinanceContext/FinanceDashboardContext";
 function App() {
   return (
     <Router>
@@ -48,7 +49,9 @@ function App() {
                                           <LeaveAttendanceProvider>
                                             <VendorProvider>
                                               <BankAccountProvider>
+                                                <FinanceDashboardProvider>
                                                 <Routes />
+                                                </FinanceDashboardProvider>
                                               </BankAccountProvider>
                                             </VendorProvider>
                                           </LeaveAttendanceProvider>
