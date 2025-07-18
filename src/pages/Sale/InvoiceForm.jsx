@@ -293,11 +293,11 @@ const InvoiceForm = () => {
 
   // Calculate totals
   const calculateTotals = useCallback(() => {
-    const subtotal = formData.items.reduce((sum, item) => {
+    const subtotal = formData?.items?.reduce((sum, item) => {
       return sum + (item.quantity * item.unitPrice);
     }, 0);
 
-    const totalDiscount = formData.items.reduce((sum, item) => {
+    const totalDiscount = formData?.items?.reduce((sum, item) => {
       const lineAmount = item.quantity * item.unitPrice;
       const discountAmount = item.discountType === "percentage" 
         ? (lineAmount * (item.discount || 0)) / 100
@@ -307,7 +307,7 @@ const InvoiceForm = () => {
 
     const afterDiscount = subtotal - totalDiscount;
 
-    const totalTax = formData.items.reduce((sum, item) => {
+    const totalTax = formData?.items?.reduce((sum, item) => {
       const lineAmount = item.quantity * item.unitPrice;
       const itemDiscount = item.discountType === "percentage" 
         ? (lineAmount * (item.discount || 0)) / 100
@@ -468,7 +468,7 @@ const InvoiceForm = () => {
       const submitData = {
         ...formData,
         status: action === "send" ? "Sent" : formData.status,
-        items: formData.items.map(item => ({
+        items: formData?.items?.map(item => ({
           productId: item.productId,
           serviceId: item.serviceId,
           itemName: item.itemName,
@@ -547,6 +547,8 @@ const InvoiceForm = () => {
       </Container>
     );
   }
+
+  console.log('This is the form data ', formData)
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -895,179 +897,9 @@ const InvoiceForm = () => {
               </Container>
 
               <Container className="space-y-4">
-                {formData.items.map((item, index) => (
-                  <Container key={item.id || index} className="border border-gray-200 rounded-lg p-4">
-                    <Container className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                      {/* Product/Service Selection */}
-                      <Container className="md:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {translations["Product/Service"]}
-                        </label>
-                        <Container className="relative">
-                          <button
-                            type="button"
-                            onClick={() => setShowProductDropdown(showProductDropdown === index ? null : index)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <Span className="block truncate">
-                              {item.itemName || "Select product..."}
-                            </Span>
-                            <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          </button>
+                
 
-                          {showProductDropdown === index && (
-                            <Container className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                              <Container className="p-3">
-                                <Container className="relative">
-                                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                  <input
-                                    type="text"
-                                    placeholder={translations["Search products..."]}
-                                    value={itemSearch}
-                                    onChange={(e) => setItemSearch(e.target.value)}
-                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  />
-                                </Container>
-                              </Container>
-                              {filteredItems.map((item) => (
-                                <button
-                                  key={`${item.type}-${item.id}`}
-                                  onClick={() => selectItem(index, item)}
-                                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                                >
-                                  <Container className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <Package className="w-4 h-4 text-green-600" />
-                                  </Container>
-                                  <Container className="flex-1 min-w-0">
-                                    <Span className="block text-sm font-medium text-gray-900 truncate">
-                                      {item.name}
-                                    </Span>
-                                    <Span className="block text-xs text-gray-500 truncate">
-                                      {item.type === 'product' ? 'Product' : 'Service'} - ${item.price}
-                                    </Span>
-                                  </Container>
-                                </button>
-                              ))}
-                            </Container>
-                          )}
-                        </Container>
-                      </Container>
-
-                      {/* Description */}
-                      <Container className="md:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {translations.Description}
-                        </label>
-                        <input
-                          type="text"
-                          value={item.description || ""}
-                          onChange={(e) => updateItem(index, "description", e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </Container>
-
-                      {/* Quantity */}
-                      <Container className="md:col-span-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {translations.Quantity}
-                        </label>
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(index, "quantity", parseFloat(e.target.value) || 0)}
-                          min="0"
-                          step="0.01"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </Container>
-
-                      {/* Unit Price */}
-                      <Container className="md:col-span-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {translations["Unit Price"]}
-                        </label>
-                        <input
-                          type="number"
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(index, "unitPrice", parseFloat(e.target.value) || 0)}
-                          min="0"
-                          step="0.01"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </Container>
-
-                      {/* Discount */}
-                      <Container className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {translations.Discount}
-                        </label>
-                        <Container className="flex">
-                          <input
-                            type="number"
-                            value={item.discount || 0}
-                            onChange={(e) => updateItem(index, "discount", parseFloat(e.target.value) || 0)}
-                            min="0"
-                            step="0.01"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                          <select
-                            value={item.discountType}
-                            onChange={(e) => updateItem(index, "discountType", e.target.value)}
-                            className="px-3 py-2 border border-l-0 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="percentage">%</option>
-                            <option value="fixed">$</option>
-                          </select>
-                        </Container>
-                      </Container>
-
-                      {/* Tax */}
-                      <Container className="md:col-span-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {translations.Tax} (%)
-                        </label>
-                        <input
-                          type="number"
-                          value={item.taxRate || 0}
-                          onChange={(e) => updateItem(index, "taxRate", parseFloat(e.target.value) || 0)}
-                          min="0"
-                          step="0.01"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </Container>
-
-                      {/* Actions */}
-                      <Container className="md:col-span-1 flex items-end justify-end">
-                        <FilledButton
-                          isIcon={true}
-                          icon={X}
-                          iconSize="w-4 h-4"
-                          bgColor="bg-red-600 hover:bg-red-700"
-                          textColor="text-white"
-                          rounded="rounded-lg"
-                          buttonText=""
-                          height="h-10"
-                          width="w-10"
-                          onClick={() => removeItem(index)}
-                        />
-                      </Container>
-                    </Container>
-
-                    {/* Line Total */}
-                    <Container className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
-                      <Container className="text-right">
-                        <Span className="text-sm text-gray-500">
-                          {translations["Line Total"]}:
-                        </Span>
-                        <Span className="text-lg font-semibold text-gray-900 ml-2">
-                          {formData.currency} {item.lineTotal?.toFixed(2) || '0.00'}
-                        </Span>
-                      </Container>
-                    </Container>
-                  </Container>
-                ))}
-
-                {formData.items.length === 0 && (
+                {formData?.items?.length === 0 && (
                   <Container className="text-center py-8">
                     <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <Span className="text-gray-500">
@@ -1144,7 +976,7 @@ const InvoiceForm = () => {
                 <Container className="flex justify-between">
                   <Span className="text-gray-600">{translations.Subtotal}:</Span>
                   <Span className="font-medium">
-                    {formData.currency} {totals.subtotal.toFixed(2)}
+                    {formData.currency} {totals.subtotal}
                   </Span>
                 </Container>
 
@@ -1152,7 +984,7 @@ const InvoiceForm = () => {
                 <Container className="flex justify-between">
                   <Span className="text-gray-600">{translations.Discount}:</Span>
                   <Span className="font-medium text-red-600">
-                    -{formData.currency} {totals.totalDiscount.toFixed(2)}
+                    -{formData.currency} {totals.totalDiscount}
                   </Span>
                 </Container>
 
@@ -1160,7 +992,7 @@ const InvoiceForm = () => {
                 <Container className="flex justify-between">
                   <Span className="text-gray-600">{translations["Tax Amount"]}:</Span>
                   <Span className="font-medium">
-                    {formData.currency} {totals.totalTax.toFixed(2)}
+                    {formData.currency} {totals.totalTax}
                   </Span>
                 </Container>
 
@@ -1208,7 +1040,7 @@ const InvoiceForm = () => {
                     {translations["Grand Total"]}:
                   </Span>
                   <Span className="text-xl font-bold text-blue-600">
-                    {formData.currency} {totals.grandTotal.toFixed(2)}
+                    {formData.currency} {totals.grandTotal}
                   </Span>
                 </Container>
 

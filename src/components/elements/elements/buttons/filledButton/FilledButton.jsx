@@ -32,7 +32,7 @@ const FilledButton = ({
     >
       {isIconLeft && isIcon && (
         <Span className={`${buttonText ? "mr-2" : "mr-0"}`}>
-          <Icon className={`${iconSize}`} />
+          <Icon className={` ${iconSize}`} />
         </Span>
       )}
       {buttonText && <Span>{buttonText}</Span>}

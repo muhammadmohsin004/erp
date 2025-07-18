@@ -372,7 +372,7 @@ const NewInvoice = () => {
         result = await updateInvoice(editData.Id, invoiceData);
         if (result) {
           alert("Invoice updated successfully");
-          navigate("/admin/invoices");
+          navigate("/admin/invoices/list");
         } else {
           alert("Failed to update invoice");
         }
@@ -381,7 +381,7 @@ const NewInvoice = () => {
         result = await createInvoice(invoiceData);
         if (result) {
           alert("Invoice created successfully");
-          navigate("/admin/invoices");
+          navigate("/admin/invoices/list");
         } else {
           alert("Failed to create invoice");
         }
