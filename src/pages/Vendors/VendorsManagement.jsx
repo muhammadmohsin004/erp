@@ -227,7 +227,7 @@ const VendorManagement = () => {
     return isValid;
   };
 
-  // Handle vendor selection
+  // In handleVendorSelection and handleSelectAll:
   const handleVendorSelection = (vendorId) => {
     setSelectedVendors((prev) =>
       prev.includes(vendorId)
@@ -236,26 +236,35 @@ const VendorManagement = () => {
     );
   };
 
-  // Handle select all
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedVendors([]);
     } else {
-      setSelectedVendors(vendors?.map((vendor) => vendor.id) || []);
+      setSelectedVendors(vendorsData.map((vendor) => vendor.id) || []);
     }
     setSelectAll(!selectAll);
   };
 
   // Handle view vendor
   const handleViewVendor = async (vendorId) => {
+    console.log('Starting to view vendor:', vendorId); // Debug
     try {
+      setLoading(true);
       const vendor = await getVendor(vendorId);
+      console.log('Received vendor data:', vendor); // Debug
+
       if (vendor) {
+        console.log('Setting vendor and opening modal'); // Debug
         setSelectedVendor(vendor);
         setShowViewModal(true);
+      } else {
+        console.log('No vendor data received'); // Debug
       }
     } catch (err) {
+      console.error('Error viewing vendor:', err); // Debug
       showNotification("error", translations.Error, err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -276,22 +285,22 @@ const VendorManagement = () => {
       if (vendor) {
         setSelectedVendor(vendor);
         setFormData({
-          name: vendor.name || "",
-          code: vendor.code || "",
-          email: vendor.email || "",
-          phone: vendor.phone || "",
-          address: vendor.address || "",
-          city: vendor.city || "",
-          state: vendor.state || "",
-          country: vendor.country || "",
-          postalCode: vendor.postalCode || "",
-          currency: vendor.currency || "USD",
-          paymentTerms: vendor.paymentTerms || "",
-          contactPerson: vendor.contactPerson || "",
-          taxNumber: vendor.taxNumber || "",
-          bankDetails: vendor.bankDetails || "",
-          isActive: vendor.isActive !== undefined ? vendor.isActive : true,
-          description: vendor.description || "",
+          name: vendor.Name || "",
+          code: vendor.Code || "",
+          email: vendor.Email || "",
+          phone: vendor.Phone || "",
+          address: vendor.Address || "",
+          city: vendor.City || "",
+          state: vendor.State || "",
+          country: vendor.Country || "",
+          postalCode: vendor.PostalCode || "",
+          currency: vendor.Currency || "USD",
+          paymentTerms: vendor.PaymentTerms || "",
+          contactPerson: vendor.ContactPerson || "",
+          taxNumber: vendor.TaxNumber || "",
+          bankDetails: vendor.BankDetails || "",
+          isActive: vendor.IsActive !== undefined ? vendor.IsActive : true,
+          description: vendor.Description || "",
         });
         setShowEditModal(true);
       }
@@ -306,22 +315,22 @@ const VendorManagement = () => {
       const vendor = await getVendor(vendorId);
       if (vendor) {
         setFormData({
-          name: `${vendor.name} (Copy)` || "",
-          code: `${vendor.code}_COPY` || "",
-          email: vendor.email || "",
-          phone: vendor.phone || "",
-          address: vendor.address || "",
-          city: vendor.city || "",
-          state: vendor.state || "",
-          country: vendor.country || "",
-          postalCode: vendor.postalCode || "",
-          currency: vendor.currency || "USD",
-          paymentTerms: vendor.paymentTerms || "",
-          contactPerson: vendor.contactPerson || "",
-          taxNumber: vendor.taxNumber || "",
-          bankDetails: vendor.bankDetails || "",
+          name: `${vendor.Name} (Copy)` || "",
+          code: `${vendor.Code}_COPY` || "",
+          email: vendor.Email || "",
+          phone: vendor.Phone || "",
+          address: vendor.Address || "",
+          city: vendor.City || "",
+          state: vendor.State || "",
+          country: vendor.Country || "",
+          postalCode: vendor.PostalCode || "",
+          currency: vendor.Currency || "USD",
+          paymentTerms: vendor.PaymentTerms || "",
+          contactPerson: vendor.ContactPerson || "",
+          taxNumber: vendor.TaxNumber || "",
+          bankDetails: vendor.BankDetails || "",
           isActive: true,
-          description: vendor.description || "",
+          description: vendor.Description || "",
         });
         setShowCreateModal(true);
       }
@@ -663,6 +672,32 @@ const VendorManagement = () => {
     </form>
   );
 
+  const Modall = ({ isOpen, onClose, title, body, okText, okAction }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-4 border-b">
+            <h3 className="text-lg font-medium">{title}</h3>
+          </div>
+          <div className="p-4">{body}</div>
+          <div className="p-4 border-t flex justify-end">
+            <button
+              onClick={() => {
+                okAction?.();
+                onClose();
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              {okText}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Container className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -811,7 +846,7 @@ const VendorManagement = () => {
                     if (
                       window.confirm(
                         translations[
-                          "Are you sure you want to delete selected vendors?"
+                        "Are you sure you want to delete selected vendors?"
                         ]
                       )
                     ) {
@@ -908,7 +943,7 @@ const VendorManagement = () => {
                             {vendor.Name || "N/A"}
                           </Span>
                         </Container>
-                        {vendor.email && (
+                        {vendor.Email && (
                           <a
                             href={`mailto:${vendor.Email}`}
                             className="text-sm text-blue-600 hover:text-blue-800"
@@ -920,7 +955,7 @@ const VendorManagement = () => {
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
                       <Span className="text-sm text-gray-900">
-                        {vendor.code || "-"}
+                        {vendor.Code || "-"}
                       </Span>
                     </td>
                     <td className="px-6 py-4 hidden lg:table-cell">
@@ -930,7 +965,7 @@ const VendorManagement = () => {
                             <Span className="text-sm text-gray-900 block">
                               {vendor.ContactPerson}
                             </Span>
-                            {vendor.phone && (
+                            {vendor.Phone && (
                               <a
                                 href={`tel:${vendor.Phone}`}
                                 className="text-xs text-blue-600 hover:text-blue-800"
@@ -952,10 +987,10 @@ const VendorManagement = () => {
                             {vendor.Address && (
                               <>
                                 <Span className="block"></Span>
-                                <Span className="block">{vendor.address}</Span>
+                                <Span className="block">{vendor.Address}</Span>
                               </>
                             )}
-                            {vendor.city && (
+                            {vendor.City && (
                               <Span className="block text-gray-600">
                                 {vendor.City}
                                 {vendor.State && `, ${vendor.State}`}
@@ -990,7 +1025,7 @@ const VendorManagement = () => {
                       <Container className="flex items-center justify-center gap-2">
                         <OutlineButton
                           buttonText="Eye"
-                          onClick={() => handleViewVendor(vendor.id)}
+                          onClick={() => handleViewVendor(vendor.Id)}
                           borderColor="border-blue-200"
                           borderWidth="border"
                           rounded="rounded-lg"
@@ -1004,7 +1039,7 @@ const VendorManagement = () => {
                         />
                         <OutlineButton
                           buttonText="Edit"
-                          onClick={() => handleEditVendor(vendor.id)}
+                          onClick={() => handleEditVendor(vendor.Id)}
                           borderColor="border-green-200"
                           borderWidth="border"
                           rounded="rounded-lg"
@@ -1018,7 +1053,7 @@ const VendorManagement = () => {
                         />
                         <OutlineButton
                           buttonText="Copy"
-                          onClick={() => handleCloneVendor(vendor.id)}
+                          onClick={() => handleCloneVendor(vendor.Id)}
                           borderColor="border-purple-200"
                           borderWidth="border"
                           rounded="rounded-lg"
@@ -1032,9 +1067,9 @@ const VendorManagement = () => {
                         />
                         <OutlineButton
                           buttonText=""
-                          onClick={() => handleToggleStatus(vendor.id)}
+                          onClick={() => handleToggleStatus(vendor.Id)}
                           borderColor={
-                            vendor.isActive
+                            vendor.IsActive
                               ? "border-orange-200"
                               : "border-gray-200"
                           }
@@ -1054,12 +1089,12 @@ const VendorManagement = () => {
                           width="w-8"
                           icon={vendor.IsActive ? ToggleRight : ToggleLeft}
                           iconSize="w-4 h-4"
-                          disabled={isTogglingStatus === vendor.id}
+                          disabled={isTogglingStatus === vendor.Id}
                           title={translations.Toggle}
                         />
                         <OutlineButton
                           buttonText="Trash"
-                          onClick={() => handleDeleteVendor(vendor.id)}
+                          onClick={() => handleDeleteVendor(vendor.Id)}
                           borderColor="border-red-200"
                           borderWidth="border"
                           rounded="rounded-lg"
@@ -1069,7 +1104,7 @@ const VendorManagement = () => {
                           width="w-8"
                           icon={Trash2}
                           iconSize="w-4 h-4"
-                          disabled={isDeleting === vendor.id}
+                          disabled={isDeleting === vendor.Id}
                           title={translations.Delete}
                         />
                       </Container>
@@ -1086,20 +1121,20 @@ const VendorManagement = () => {
           <Container className="flex items-center justify-between">
             <Span className="text-sm text-gray-700">
               Showing{" "}
-              {pagination.pageNumber * pagination.pageSize -
-                pagination.pageSize +
+              {pagination.PageNumber * pagination.PageSize -
+                pagination.PageSize +
                 1}{" "}
               to{" "}
               {Math.min(
-                pagination.pageNumber * pagination.pageSize,
-                pagination.totalItems
+                pagination.PageNumber * pagination.PageSize,
+                pagination.TotalItems
               )}{" "}
-              of {pagination.totalItems} results
+              of {pagination.TotalItems} results
             </Span>
             <Container className="flex items-center gap-2">
               <SelectBox
                 name="pageSize"
-                value={pagination.pageSize}
+                value={pagination.PageSize}
                 handleChange={(value) => changePageSize(Number(value))}
                 optionList={[
                   { value: 10, label: "10" },
@@ -1113,7 +1148,7 @@ const VendorManagement = () => {
               <Container className="flex gap-1">
                 <OutlineButton
                   buttonText="Previous"
-                  onClick={() => changePage(pagination.pageNumber - 1)}
+                  onClick={() => changePage(pagination.PageNumber - 1)}
                   borderColor="border-gray-300"
                   borderWidth="border"
                   rounded="rounded-lg"
@@ -1123,11 +1158,11 @@ const VendorManagement = () => {
                   px="px-3"
                   fontWeight="font-medium"
                   fontSize="text-sm"
-                  disabled={pagination.pageNumber === 1}
+                  disabled={pagination.PageNumber === 1}
                 />
                 <OutlineButton
                   buttonText="Next"
-                  onClick={() => changePage(pagination.pageNumber + 1)}
+                  onClick={() => changePage(pagination.PageNumber + 1)}
                   borderColor="border-gray-300"
                   borderWidth="border"
                   rounded="rounded-lg"
@@ -1138,8 +1173,8 @@ const VendorManagement = () => {
                   fontWeight="font-medium"
                   fontSize="text-sm"
                   disabled={
-                    pagination.pageNumber >=
-                    Math.ceil(pagination.totalItems / pagination.pageSize)
+                    pagination.PageNumber >=
+                    Math.ceil(pagination.TotalItems / pagination.PageSize)
                   }
                 />
               </Container>
@@ -1208,7 +1243,7 @@ const VendorManagement = () => {
                     <Building className="w-5 h-5 text-gray-400" />
                     <Container>
                       <Span className="text-sm font-medium text-gray-900 block">
-                        {selectedVendor.name || "N/A"}
+                        {selectedVendor.Name || "N/A"}
                       </Span>
                       <Span className="text-xs text-gray-500">
                         {translations.Name}
@@ -1216,16 +1251,14 @@ const VendorManagement = () => {
                     </Container>
                   </Container>
 
-                  {selectedVendor.code && (
+                  {selectedVendor.Code && (
                     <Container className="flex items-center gap-3">
                       <Container className="w-5 h-5 flex items-center justify-center">
-                        <Span className="text-xs font-bold text-gray-400">
-                          #
-                        </Span>
+                        <Span className="text-xs font-bold text-gray-400">#</Span>
                       </Container>
                       <Container>
                         <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.code}
+                          {selectedVendor.Code}
                         </Span>
                         <Span className="text-xs text-gray-500">
                           {translations.Code}
@@ -1234,15 +1267,15 @@ const VendorManagement = () => {
                     </Container>
                   )}
 
-                  {selectedVendor.email && (
+                  {selectedVendor.Email && (
                     <Container className="flex items-center gap-3">
                       <Mail className="w-5 h-5 text-gray-400" />
                       <Container>
                         <a
-                          href={`mailto:${selectedVendor.email}`}
+                          href={`mailto:${selectedVendor.Email}`}
                           className="text-sm font-medium text-blue-600 hover:text-blue-800 block"
                         >
-                          {selectedVendor.email}
+                          {selectedVendor.Email}
                         </a>
                         <Span className="text-xs text-gray-500">
                           {translations.Email}
@@ -1251,15 +1284,15 @@ const VendorManagement = () => {
                     </Container>
                   )}
 
-                  {selectedVendor.phone && (
+                  {selectedVendor.Phone && (
                     <Container className="flex items-center gap-3">
                       <Phone className="w-5 h-5 text-gray-400" />
                       <Container>
                         <a
-                          href={`tel:${selectedVendor.phone}`}
+                          href={`tel:${selectedVendor.Phone}`}
                           className="text-sm font-medium text-blue-600 hover:text-blue-800 block"
                         >
-                          {selectedVendor.phone}
+                          {selectedVendor.Phone}
                         </a>
                         <Span className="text-xs text-gray-500">
                           {translations.Phone}
@@ -1268,12 +1301,12 @@ const VendorManagement = () => {
                     </Container>
                   )}
 
-                  {selectedVendor.contactPerson && (
+                  {selectedVendor.ContactPerson && (
                     <Container className="flex items-center gap-3">
                       <User className="w-5 h-5 text-gray-400" />
                       <Container>
                         <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.contactPerson}
+                          {selectedVendor.ContactPerson}
                         </Span>
                         <Span className="text-xs text-gray-500">
                           {translations["Contact Person"]}
@@ -1282,16 +1315,14 @@ const VendorManagement = () => {
                     </Container>
                   )}
 
-                  {selectedVendor.currency && (
+                  {selectedVendor.Currency && (
                     <Container className="flex items-center gap-3">
                       <Container className="w-5 h-5 flex items-center justify-center">
-                        <Span className="text-xs font-bold text-gray-400">
-                          $
-                        </Span>
+                        <Span className="text-xs font-bold text-gray-400">$</Span>
                       </Container>
                       <Container>
                         <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.currency}
+                          {selectedVendor.Currency}
                         </Span>
                         <Span className="text-xs text-gray-500">
                           {translations.Currency}
@@ -1302,28 +1333,28 @@ const VendorManagement = () => {
                 </Container>
 
                 <Container className="space-y-4">
-                  {(selectedVendor.address || selectedVendor.city) && (
+                  {(selectedVendor.Address || selectedVendor.City) && (
                     <Container className="flex items-start gap-3">
                       <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
                       <Container>
                         <Container className="text-sm font-medium text-gray-900">
-                          {selectedVendor.address && (
+                          {selectedVendor.Address && (
                             <Span className="block">
-                              {selectedVendor.address}
+                              {selectedVendor.Address}
                             </Span>
                           )}
-                          {selectedVendor.city && (
+                          {selectedVendor.City && (
                             <Span className="block">
-                              {selectedVendor.city}
-                              {selectedVendor.state &&
-                                `, ${selectedVendor.state}`}
-                              {selectedVendor.postalCode &&
-                                ` ${selectedVendor.postalCode}`}
+                              {selectedVendor.City}
+                              {selectedVendor.State &&
+                                `, ${selectedVendor.State}`}
+                              {selectedVendor.PostalCode &&
+                                ` ${selectedVendor.PostalCode}`}
                             </Span>
                           )}
-                          {selectedVendor.country && (
+                          {selectedVendor.Country && (
                             <Span className="block text-gray-600">
-                              {selectedVendor.country}
+                              {selectedVendor.Country}
                             </Span>
                           )}
                         </Container>
@@ -1334,12 +1365,12 @@ const VendorManagement = () => {
                     </Container>
                   )}
 
-                  {selectedVendor.paymentTerms && (
+                  {selectedVendor.PaymentTerms && (
                     <Container className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-gray-400" />
                       <Container>
                         <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.paymentTerms}
+                          {selectedVendor.PaymentTerms}
                         </Span>
                         <Span className="text-xs text-gray-500">
                           {translations["Payment Terms"]}
@@ -1348,7 +1379,7 @@ const VendorManagement = () => {
                     </Container>
                   )}
 
-                  {selectedVendor.taxNumber && (
+                  {selectedVendor.TaxNumber && (
                     <Container className="flex items-center gap-3">
                       <Container className="w-5 h-5 flex items-center justify-center">
                         <Span className="text-xs font-bold text-gray-400">
@@ -1357,7 +1388,7 @@ const VendorManagement = () => {
                       </Container>
                       <Container>
                         <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.taxNumber}
+                          {selectedVendor.TaxNumber}
                         </Span>
                         <Span className="text-xs text-gray-500">
                           {translations["Tax Number"]}
@@ -1369,22 +1400,20 @@ const VendorManagement = () => {
                   <Container className="flex items-center gap-3">
                     <Container className="w-5 h-5 flex items-center justify-center">
                       <Container
-                        className={`w-2 h-2 rounded-full ${
-                          selectedVendor.isActive
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        }`}
+                        className={`w-2 h-2 rounded-full ${selectedVendor.IsActive
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                          }`}
                       ></Container>
                     </Container>
                     <Container>
                       <Span
-                        className={`text-sm font-medium block ${
-                          selectedVendor.isActive
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+                        className={`text-sm font-medium block ${selectedVendor.IsActive
+                          ? "text-green-600"
+                          : "text-red-600"
+                          }`}
                       >
-                        {selectedVendor.isActive
+                        {selectedVendor.IsActive
                           ? translations.Active
                           : translations.Inactive}
                       </Span>
@@ -1396,7 +1425,7 @@ const VendorManagement = () => {
                 </Container>
               </Container>
 
-              {selectedVendor.bankDetails && (
+              {selectedVendor.BankDetails && (
                 <Container className="border-t border-gray-200 pt-4">
                   <Container className="space-y-2">
                     <Span className="text-sm font-medium text-gray-900">
@@ -1404,14 +1433,14 @@ const VendorManagement = () => {
                     </Span>
                     <Container className="bg-gray-50 p-3 rounded-md">
                       <Span className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedVendor.bankDetails}
+                        {selectedVendor.BankDetails}
                       </Span>
                     </Container>
                   </Container>
                 </Container>
               )}
 
-              {selectedVendor.description && (
+              {selectedVendor.Description && (
                 <Container className="border-t border-gray-200 pt-4">
                   <Container className="space-y-2">
                     <Span className="text-sm font-medium text-gray-900">
@@ -1419,7 +1448,7 @@ const VendorManagement = () => {
                     </Span>
                     <Container className="bg-gray-50 p-3 rounded-md">
                       <Span className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedVendor.description}
+                        {selectedVendor.Description}
                       </Span>
                     </Container>
                   </Container>
@@ -1429,6 +1458,7 @@ const VendorManagement = () => {
           )
         }
       />
+
     </Container>
   );
 };
