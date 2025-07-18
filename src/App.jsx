@@ -25,6 +25,10 @@ import { DashboardProvider } from "./Contexts/DashboardContext/DashboardContext"
 import { VendorProvider } from "./Contexts/VendorContext/VendorContext";
 import { BankAccountProvider } from "./Contexts/BankAccountContext/BankAccountContext";
 import { FinanceDashboardProvider } from "./Contexts/FinanceContext/FinanceDashboardContext";
+import { ExpenseCategoryProvider } from "./Contexts/ExpenseCategoryContext/ExpenseCategoryContext";
+import { FinanceExpensesProvider } from "./Contexts/FinanceContext/FinanceExpensesContext";
+import { FinanceIncomesProvider } from "./Contexts/FinanceContext/FinanceIncomeContext";
+import { IncomeCategoryProvider } from "./Contexts/IncomeCategoryContext/IncomeCategoryContext";
 function App() {
   return (
     <Router>
@@ -50,7 +54,15 @@ function App() {
                                             <VendorProvider>
                                               <BankAccountProvider>
                                                 <FinanceDashboardProvider>
-                                                <Routes />
+                                                  <ExpenseCategoryProvider>
+                                                    <FinanceExpensesProvider>
+                                                      <FinanceIncomesProvider>
+                                                        <IncomeCategoryProvider>
+                                                          <Routes />
+                                                        </IncomeCategoryProvider>
+                                                      </FinanceIncomesProvider>
+                                                    </FinanceExpensesProvider>
+                                                  </ExpenseCategoryProvider>
                                                 </FinanceDashboardProvider>
                                               </BankAccountProvider>
                                             </VendorProvider>

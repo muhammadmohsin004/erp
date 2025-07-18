@@ -69,7 +69,9 @@ export const sidebarTranslations = {
     // Finance
     finance: "Finance",
     incomes: "Incomes",
+    incomescatagories: "Incomes Catagories",
     expenses: "Expenses",
+    expensescatagories: "Expenses Catagories",
     balanceSheet: "Balance Sheet",
 
     //vendor

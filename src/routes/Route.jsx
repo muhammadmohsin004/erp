@@ -79,6 +79,10 @@ import AdminLeaveManagement from "../pages/HRModule/LeaveMangement/AdminLeaveMan
 import EmployeeLeaveManagement from "../pages/HRModule/LeaveMangement/EmployeeLeaveManagement";
 import VendorsManagement from "../pages/Vendors/VendorsManagement";
 import BankAccountManagement from "../pages/BankAccountManagement/BankAccountManagement";
+import FinanceIncome from "../pages/FinanceManager/FinanceIncome";
+import FinanceExpenses from "../pages/FinanceManager/FinanceExpenses";
+import ExpenseCategories from "../pages/FinanceManager/ExpenseCategories"
+import IncomeCategories from "../pages/FinanceManager/IncomeCategories"
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -664,13 +668,31 @@ const getRouteConfig = () => {
     },
     {
       path: "/admin/finance/incomes",
-      component: IncomeList,
+      component: FinanceIncome,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/incomes/categories",
+      component: IncomeCategories,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
     {
       path: "/admin/finance/income/new",
       component: NewIncome,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/expenses",
+      component: FinanceExpenses,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/finance/expenses/catagories",
+      component: ExpenseCategories,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

@@ -1,27 +1,30 @@
 
 import React, { useEffect, useState } from 'react';
-import { useFinanceIncomes } from '../contexts/FinanceIncomesContext';
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Plus, Download, Filter, Search, TrendingUp, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical } from 'lucide-react';
-import Container from '../components/elements/container/Container';
-import Card from '../components/elements/card/Card';
-import BodyHeader from '../components/elements/BodyHeader';
-import FilledButton from '../components/elements/buttons/FilledButton';
-import OutlineButton from '../components/elements/buttons/OutlineButton';
-import Badge from '../components/elements/badge/Badge';
-import Table from '../components/elements/table/Table';
-import Thead from '../components/elements/table/Thead';
-import Tbody from '../components/elements/table/Tbody';
-import TH from '../components/elements/table/TH';
-import TD from '../components/elements/table/TD';
-import TR from '../components/elements/table/TR';
-import Pagination from '../components/elements/pagination/Pagination';
-import SearchAndFilters from '../components/elements/search/SearchAndFilters';
-import SelectBox from '../components/elements/SelectBox';
-import InputField from '../components/elements/InputField';
-import Modall from '../components/elements/Modall';
-import Dropdown from '../components/elements/dropdown/Dropdown';
-import Skeleton from '../components/elements/skeleton/Skeleton';
+
+
+import { useFinanceIncomes } from '../../Contexts/FinanceContext/FinanceIncomeContext';
+import Container from '../../components/elements/container/Container';
+import BodyHeader from '../../components/elements/bodyHeader/BodyHeader';
+import FilledButton from '../../components/elements/elements/buttons/filledButton/FilledButton';
+import Card from '../../components/elements/card/Card';
+import SelectBox from '../../components/elements/selectBox/SelectBox';
+import InputField from '../../components/elements/inputField/InputField';
+import Dropdown from '../../components/elements/dropdown/Dropdown';
+import Table from '../../components/elements/table/Table';
+import Thead from '../../components/elements/thead/Thead';
+import TR from '../../components/elements/tr/TR';
+import TH from '../../components/elements/th/TH';
+import Tbody from '../../components/elements/tbody/Tbody';
+import TD from '../../components/elements/td/TD';
+import Badge from '../../components/elements/Badge/Badge';
+import Pagination from '../../components/elements/Pagination/Pagination';
+import Modall from '../../components/elements/modal/Modal';
+import OutlineButton from '../../components/elements/elements/buttons/OutlineButton/OutlineButton';
+import SearchAndFilters from '../../components/elements/searchAndFilters/SearchAndFilters';
+import Skeleton from '../../components/elements/skeleton/Skeleton';
 
 const FinanceIncome = () => {
   const {

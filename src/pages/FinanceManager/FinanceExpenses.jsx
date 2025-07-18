@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useFinanceExpenses } from '../contexts/FinanceExpensesContext';
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Plus, Download, Filter, Search, CreditCard, DollarSign, Calendar, Check, X, Clock, MoreVertical, Upload, Eye, Edit, Trash2 } from 'lucide-react';
-import Container from '../components/elements/container/Container';
-import Card from '../components/elements/card/Card';
-import BodyHeader from '../components/elements/BodyHeader';
-import FilledButton from '../components/elements/buttons/FilledButton';
-import OutlineButton from '../components/elements/buttons/OutlineButton';
-import Badge from '../components/elements/badge/Badge';
-import Table from '../components/elements/table/Table';
-import Thead from '../components/elements/table/Thead';
-import Tbody from '../components/elements/table/Tbody';
-import TH from '../components/elements/table/TH';
-import TD from '../components/elements/table/TD';
-import TR from '../components/elements/table/TR';
-import Pagination from '../components/elements/pagination/Pagination';
-import SearchAndFilters from '../components/elements/search/SearchAndFilters';
-import SelectBox from '../components/elements/SelectBox';
-import InputField from '../components/elements/InputField';
-import Modall from '../components/elements/Modall';
-import Dropdown from '../components/elements/dropdown/Dropdown';
-import Skeleton from '../components/elements/skeleton/Skeleton';
-import CheckboxField from '../components/elements/CheckboxField';
+import { useFinanceExpenses } from '../../Contexts/FinanceContext/FinanceExpensesContext';
+import Container from '../../components/elements/container/Container';
+import BodyHeader from '../../components/elements/bodyHeader/BodyHeader';
+import Card from '../../components/elements/card/Card';
+import Skeleton from '../../components/elements/skeleton/Skeleton';
+import OutlineButton from '../../components/elements/elements/buttons/OutlineButton/OutlineButton';
+import FilledButton from '../../components/elements/elements/buttons/filledButton/FilledButton';
+import SearchAndFilters from '../../components/elements/searchAndFilters/SearchAndFilters';
+import SelectBox from '../../components/elements/selectBox/SelectBox';
+import Table from '../../components/elements/table/Table';
+import Thead from '../../components/elements/thead/Thead';
+import TR from '../../components/elements/tr/TR';
+import TH from '../../components/elements/th/TH';
+import TD from '../../components/elements/td/TD';
+import Dropdown from '../../components/elements/dropdown/Dropdown';
+import Pagination from '../../components/elements/Pagination/Pagination';
+import Modall from '../../components/elements/modal/Modal';
+import InputField from '../../components/elements/inputField/InputField';
+import CheckboxField from '../../components/elements/checkbox/CheckboxField';
+import Tbody from '../../components/elements/tbody/Tbody';
 
 const FinanceExpenses = () => {
   const {
