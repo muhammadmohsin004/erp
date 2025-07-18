@@ -1,22 +1,27 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
-import axios from 'axios';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from "react";
+import axios from "axios";
 
 // Base URL configuration
-const BASE_URL = 'https://api.speed-erp.com/api';
+const BASE_URL = "https://api.speed-erp.com/api";
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,10 +38,10 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('company');
-      window.location.href = '/login';
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("company");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -54,9 +59,9 @@ const initialState = {
     totalItems: 0,
     totalPages: 0,
   },
-  searchTerm: '',
-  clientType: '',
-  sortBy: 'Id',
+  searchTerm: "",
+  clientType: "",
+  sortBy: "Id",
   sortAscending: false,
   statistics: {
     totalClients: 0,
@@ -68,21 +73,21 @@ const initialState = {
 
 // Action types
 const CLIENTS_ACTIONS = {
-  SET_LOADING: 'SET_LOADING',
-  SET_ERROR: 'SET_ERROR',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  SET_CLIENTS: 'SET_CLIENTS',
-  SET_CURRENT_CLIENT: 'SET_CURRENT_CLIENT',
-  CLEAR_CURRENT_CLIENT: 'CLEAR_CURRENT_CLIENT',
-  ADD_CLIENT: 'ADD_CLIENT',
-  UPDATE_CLIENT: 'UPDATE_CLIENT',
-  DELETE_CLIENT: 'DELETE_CLIENT',
-  SET_SEARCH_TERM: 'SET_SEARCH_TERM',
-  SET_CLIENT_TYPE: 'SET_CLIENT_TYPE',
-  SET_SORT: 'SET_SORT',
-  SET_PAGINATION: 'SET_PAGINATION',
-  SET_STATISTICS: 'SET_STATISTICS',
-  RESET_FILTERS: 'RESET_FILTERS',
+  SET_LOADING: "SET_LOADING",
+  SET_ERROR: "SET_ERROR",
+  CLEAR_ERROR: "CLEAR_ERROR",
+  SET_CLIENTS: "SET_CLIENTS",
+  SET_CURRENT_CLIENT: "SET_CURRENT_CLIENT",
+  CLEAR_CURRENT_CLIENT: "CLEAR_CURRENT_CLIENT",
+  ADD_CLIENT: "ADD_CLIENT",
+  UPDATE_CLIENT: "UPDATE_CLIENT",
+  DELETE_CLIENT: "DELETE_CLIENT",
+  SET_SEARCH_TERM: "SET_SEARCH_TERM",
+  SET_CLIENT_TYPE: "SET_CLIENT_TYPE",
+  SET_SORT: "SET_SORT",
+  SET_PAGINATION: "SET_PAGINATION",
+  SET_STATISTICS: "SET_STATISTICS",
+  RESET_FILTERS: "RESET_FILTERS",
 };
 
 // Reducer function
@@ -109,15 +114,33 @@ const clientsReducer = (state, action) => {
 
     case CLIENTS_ACTIONS.SET_CLIENTS:
       // Handle the API response format - Updated to match backend response
-      const clientsData = action.payload.Data || action.payload.data || action.payload;
+      const clientsData =
+        action.payload.Data || action.payload.data || action.payload;
       return {
         ...state,
         clients: Array.isArray(clientsData) ? clientsData : [],
         pagination: {
-          page: action.payload.Page || action.payload.page || state.pagination.page,
-          pageSize: action.payload.PageSize || action.payload.pageSize || state.pagination.pageSize,
-          totalItems: action.payload.TotalItems || action.payload.totalItems || (Array.isArray(clientsData) ? clientsData.length : 0),
-          totalPages: action.payload.Paginations?.TotalPages || action.payload.totalPages || Math.ceil((action.payload.TotalItems || action.payload.totalItems || (Array.isArray(clientsData) ? clientsData.length : 0)) / (action.payload.PageSize || action.payload.pageSize || state.pagination.pageSize)),
+          page:
+            action.payload.Page || action.payload.page || state.pagination.page,
+          pageSize:
+            action.payload.PageSize ||
+            action.payload.pageSize ||
+            state.pagination.pageSize,
+          totalItems:
+            action.payload.TotalItems ||
+            action.payload.totalItems ||
+            (Array.isArray(clientsData) ? clientsData.length : 0),
+          totalPages:
+            action.payload.Paginations?.TotalPages ||
+            action.payload.totalPages ||
+            Math.ceil(
+              (action.payload.TotalItems ||
+                action.payload.totalItems ||
+                (Array.isArray(clientsData) ? clientsData.length : 0)) /
+                (action.payload.PageSize ||
+                  action.payload.pageSize ||
+                  state.pagination.pageSize)
+            ),
         },
         isLoading: false,
         error: null,
@@ -152,10 +175,13 @@ const clientsReducer = (state, action) => {
     case CLIENTS_ACTIONS.UPDATE_CLIENT:
       return {
         ...state,
-        clients: state.clients.map(client =>
+        clients: state.clients.map((client) =>
           client.Id === action.payload.Id ? action.payload : client
         ),
-        currentClient: state.currentClient?.Id === action.payload.Id ? action.payload : state.currentClient,
+        currentClient:
+          state.currentClient?.Id === action.payload.Id
+            ? action.payload
+            : state.currentClient,
         isLoading: false,
         error: null,
       };
@@ -163,8 +189,11 @@ const clientsReducer = (state, action) => {
     case CLIENTS_ACTIONS.DELETE_CLIENT:
       return {
         ...state,
-        clients: state.clients.filter(client => client.Id !== action.payload),
-        currentClient: state.currentClient?.Id === action.payload ? null : state.currentClient,
+        clients: state.clients.filter((client) => client.Id !== action.payload),
+        currentClient:
+          state.currentClient?.Id === action.payload
+            ? null
+            : state.currentClient,
         pagination: {
           ...state.pagination,
           totalItems: state.pagination.totalItems - 1,
@@ -212,9 +241,9 @@ const clientsReducer = (state, action) => {
     case CLIENTS_ACTIONS.RESET_FILTERS:
       return {
         ...state,
-        searchTerm: '',
-        clientType: '',
-        sortBy: 'Id',
+        searchTerm: "",
+        clientType: "",
+        sortBy: "Id",
         sortAscending: false,
         pagination: { ...state.pagination, page: 1 },
       };
@@ -233,16 +262,16 @@ export const ClientsProvider = ({ children }) => {
 
   // Helper function to handle API errors - Updated to match backend error format
   const handleApiError = useCallback((error) => {
-    let errorMessage = 'An unexpected error occurred';
-    
+    let errorMessage = "An unexpected error occurred";
+
     if (error.response?.data?.Message) {
       errorMessage = error.response.data.Message;
     } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
     } else if (error.response?.data?.ValidationErrors) {
-      errorMessage = error.response.data.ValidationErrors.join(', ');
+      errorMessage = error.response.data.ValidationErrors.join(", ");
     } else if (error.response?.data?.validationErrors) {
-      errorMessage = error.response.data.validationErrors.join(', ');
+      errorMessage = error.response.data.validationErrors.join(", ");
     } else if (error.message) {
       errorMessage = error.message;
     }
@@ -257,17 +286,22 @@ export const ClientsProvider = ({ children }) => {
 
   // Calculate statistics from client data
   const calculateStatisticsFromClients = useCallback((clients) => {
-    if (!Array.isArray(clients)) return {
-      totalClients: 0,
-      individualClients: 0,
-      businessClients: 0,
-      clientsThisMonth: 0,
-    };
+    if (!Array.isArray(clients))
+      return {
+        totalClients: 0,
+        individualClients: 0,
+        businessClients: 0,
+        clientsThisMonth: 0,
+      };
 
     const total = clients.length;
-    const individual = clients.filter(c => c.ClientType?.toLowerCase() === 'individual').length;
-    const business = clients.filter(c => c.ClientType?.toLowerCase() === 'business').length;
-    
+    const individual = clients.filter(
+      (c) => c.ClientType?.toLowerCase() === "individual"
+    ).length;
+    const business = clients.filter(
+      (c) => c.ClientType?.toLowerCase() === "business"
+    ).length;
+
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     const thisMonth = clients.filter((c) => {
@@ -294,14 +328,14 @@ export const ClientsProvider = ({ children }) => {
     return {
       ...clientData,
       // Ensure required NOT NULL fields are strings
-      MobileNumber: clientData.Mobile || clientData.MobileNumber || '',
-      PaymentTerms: clientData.PaymentTerms || '',
-      Phone: clientData.Telephone || clientData.Phone || '',
-      TaxNumber: clientData.TaxNumber || '',
-      Address: clientData.Address || '',
-      Currency: clientData.Currency || 'USD',
-      ClientType: clientData.ClientType || 'Individual',
-      DisplayLanguage: clientData.DisplayLanguage || 'en',
+      MobileNumber: clientData.Mobile || clientData.MobileNumber || "",
+      PaymentTerms: clientData.PaymentTerms || "",
+      Phone: clientData.Telephone || clientData.Phone || "",
+      TaxNumber: clientData.TaxNumber || "",
+      Address: clientData.Address || "",
+      Currency: clientData.Currency || "USD",
+      ClientType: clientData.ClientType || "Individual",
+      DisplayLanguage: clientData.DisplayLanguage || "en",
     };
   }, []);
 
@@ -316,35 +350,49 @@ export const ClientsProvider = ({ children }) => {
         const params = {
           page: options.page || state.pagination.page,
           pageSize: options.pageSize || state.pagination.pageSize,
-          search: options.searchTerm !== undefined ? options.searchTerm : state.searchTerm,
-          clientType: options.clientType !== undefined ? options.clientType : state.clientType,
+          search:
+            options.searchTerm !== undefined
+              ? options.searchTerm
+              : state.searchTerm,
+          clientType:
+            options.clientType !== undefined
+              ? options.clientType
+              : state.clientType,
           sortBy: options.sortBy || state.sortBy,
-          sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sortAscending,
+          sortAscending:
+            options.sortAscending !== undefined
+              ? options.sortAscending
+              : state.sortAscending,
           // Add other filter options to match backend
-          category: options.category || '',
-          currency: options.currency || '',
-          country: options.country || '',
-          city: options.city || '',
+          category: options.category || "",
+          currency: options.currency || "",
+          country: options.country || "",
+          city: options.city || "",
           startDate: options.startDate || null,
           endDate: options.endDate || null,
         };
 
         // Remove empty params
-        Object.keys(params).forEach(key => {
-          if (params[key] === '' || params[key] === null || params[key] === undefined) {
+        Object.keys(params).forEach((key) => {
+          if (
+            params[key] === "" ||
+            params[key] === null ||
+            params[key] === undefined
+          ) {
             delete params[key];
           }
         });
 
-        const response = await apiClient.get('/clients', { params });
-        
+        const response = await apiClient.get("/clients", { params });
+
         dispatch({
           type: CLIENTS_ACTIONS.SET_CLIENTS,
-          payload: response.data,
+          payload: response.data.Data.$values,
         });
 
         // Calculate and set statistics from the received data
-        const clientsData = response.data.Data || response.data.data || response.data;
+        const clientsData =
+          response.data.Data.$values || response.data.data || response.data;
         if (Array.isArray(clientsData)) {
           const stats = calculateStatisticsFromClients(clientsData);
           dispatch({
@@ -366,9 +414,10 @@ export const ClientsProvider = ({ children }) => {
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const response = await apiClient.get(`/clients/${clientId}`);
-        
-        const clientData = response.data.Data || response.data.data || response.data;
-        
+
+        const clientData =
+          response.data.Data || response.data.data || response.data;
+
         dispatch({
           type: CLIENTS_ACTIONS.SET_CURRENT_CLIENT,
           payload: clientData,
@@ -387,18 +436,29 @@ export const ClientsProvider = ({ children }) => {
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const formData = new FormData();
-        
+
         // Sanitize and append client data
         const sanitizedData = sanitizeClientData(clientData);
-        
-        Object.keys(sanitizedData).forEach(key => {
-          if (sanitizedData[key] !== null && sanitizedData[key] !== undefined && sanitizedData[key] !== '') {
-            if (key === 'contacts' && Array.isArray(sanitizedData[key])) {
+
+        Object.keys(sanitizedData).forEach((key) => {
+          if (
+            sanitizedData[key] !== null &&
+            sanitizedData[key] !== undefined &&
+            sanitizedData[key] !== ""
+          ) {
+            if (key === "contacts" && Array.isArray(sanitizedData[key])) {
               // Handle contacts array - match backend expected format
               sanitizedData[key].forEach((contact, index) => {
-                Object.keys(contact).forEach(contactKey => {
-                  if (contact[contactKey] !== null && contact[contactKey] !== undefined && contact[contactKey] !== '') {
-                    formData.append(`Contacts[${index}].${contactKey}`, contact[contactKey]);
+                Object.keys(contact).forEach((contactKey) => {
+                  if (
+                    contact[contactKey] !== null &&
+                    contact[contactKey] !== undefined &&
+                    contact[contactKey] !== ""
+                  ) {
+                    formData.append(
+                      `Contacts[${index}].${contactKey}`,
+                      contact[contactKey]
+                    );
                   }
                 });
               });
@@ -412,16 +472,17 @@ export const ClientsProvider = ({ children }) => {
 
         // Append attachments
         attachments.forEach((file) => {
-          formData.append('Attachments', file);
+          formData.append("Attachments", file);
         });
 
-        const response = await apiClient.post('/clients', formData, {
+        const response = await apiClient.post("/clients", formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
 
-        const newClient = response.data.Data || response.data.data || response.data;
+        const newClient =
+          response.data.Data || response.data.data || response.data;
 
         dispatch({
           type: CLIENTS_ACTIONS.ADD_CLIENT,
@@ -441,18 +502,29 @@ export const ClientsProvider = ({ children }) => {
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const formData = new FormData();
-        
+
         // Sanitize and append client data
         const sanitizedData = sanitizeClientData(clientData);
-        
-        Object.keys(sanitizedData).forEach(key => {
-          if (sanitizedData[key] !== null && sanitizedData[key] !== undefined && sanitizedData[key] !== '') {
-            if (key === 'contacts' && Array.isArray(sanitizedData[key])) {
+
+        Object.keys(sanitizedData).forEach((key) => {
+          if (
+            sanitizedData[key] !== null &&
+            sanitizedData[key] !== undefined &&
+            sanitizedData[key] !== ""
+          ) {
+            if (key === "contacts" && Array.isArray(sanitizedData[key])) {
               // Handle contacts array - match backend expected format
               sanitizedData[key].forEach((contact, index) => {
-                Object.keys(contact).forEach(contactKey => {
-                  if (contact[contactKey] !== null && contact[contactKey] !== undefined && contact[contactKey] !== '') {
-                    formData.append(`Contacts[${index}].${contactKey}`, contact[contactKey]);
+                Object.keys(contact).forEach((contactKey) => {
+                  if (
+                    contact[contactKey] !== null &&
+                    contact[contactKey] !== undefined &&
+                    contact[contactKey] !== ""
+                  ) {
+                    formData.append(
+                      `Contacts[${index}].${contactKey}`,
+                      contact[contactKey]
+                    );
                   }
                 });
               });
@@ -466,16 +538,17 @@ export const ClientsProvider = ({ children }) => {
 
         // Append new attachments
         attachments.forEach((file) => {
-          formData.append('Attachments', file);
+          formData.append("Attachments", file);
         });
 
         const response = await apiClient.put(`/clients/${clientId}`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
 
-        const updatedClient = response.data.Data || response.data.data || response.data;
+        const updatedClient =
+          response.data.Data || response.data.data || response.data;
 
         dispatch({
           type: CLIENTS_ACTIONS.UPDATE_CLIENT,
@@ -495,8 +568,10 @@ export const ClientsProvider = ({ children }) => {
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         const params = hardDelete ? { hardDelete: true } : {};
-        const response = await apiClient.delete(`/clients/${clientId}`, { params });
-        
+        const response = await apiClient.delete(`/clients/${clientId}`, {
+          params,
+        });
+
         dispatch({
           type: CLIENTS_ACTIONS.DELETE_CLIENT,
           payload: clientId,
@@ -516,7 +591,11 @@ export const ClientsProvider = ({ children }) => {
         if (options.endDate) params.endDate = options.endDate;
 
         // If we have clients data, calculate statistics from it first
-        if (state.clients.length > 0 && !options.startDate && !options.endDate) {
+        if (
+          state.clients.length > 0 &&
+          !options.startDate &&
+          !options.endDate
+        ) {
           const stats = calculateStatisticsFromClients(state.clients);
           dispatch({
             type: CLIENTS_ACTIONS.SET_STATISTICS,
@@ -530,9 +609,12 @@ export const ClientsProvider = ({ children }) => {
         dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
         try {
-          const response = await apiClient.get('/clients/statistics', { params });
-          const statsData = response.data.Data || response.data.data || response.data;
-          
+          const response = await apiClient.get("/clients/statistics", {
+            params,
+          });
+          const statsData =
+            response.data.Data || response.data.data || response.data;
+
           dispatch({
             type: CLIENTS_ACTIONS.SET_STATISTICS,
             payload: statsData,
@@ -541,10 +623,11 @@ export const ClientsProvider = ({ children }) => {
           return response.data;
         } catch (error) {
           // If statistics endpoint doesn't exist, calculate from clients
-          const allClientsResponse = await apiClient.get('/clients');
-          const allClients = allClientsResponse.data.Data || allClientsResponse.data.data || [];
+          const allClientsResponse = await apiClient.get("/clients");
+          const allClients =
+            allClientsResponse.data.Data || allClientsResponse.data.data || [];
           const stats = calculateStatisticsFromClients(allClients);
-          
+
           dispatch({
             type: CLIENTS_ACTIONS.SET_STATISTICS,
             payload: stats,
@@ -650,17 +733,22 @@ export const ClientsProvider = ({ children }) => {
   const contextValue = {
     // State
     ...state,
-    
+
     // API methods
     ...clientsApi,
 
     // Utility methods
-    getTotalPages: () => Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
-    hasNextPage: () => state.pagination.page < Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
+    getTotalPages: () =>
+      Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
+    hasNextPage: () =>
+      state.pagination.page <
+      Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
     hasPrevPage: () => state.pagination.page > 1,
-    getClientById: (clientId) => state.clients.find(client => client.Id === clientId),
-    isClientLoaded: (clientId) => state.clients.some(client => client.Id === clientId),
-    
+    getClientById: (clientId) =>
+      state.clients.find((client) => client.Id === clientId),
+    isClientLoaded: (clientId) =>
+      state.clients.some((client) => client.Id === clientId),
+
     // Filter helpers
     hasFilters: () => state.searchTerm || state.clientType,
     getActiveFiltersCount: () => {
@@ -682,7 +770,7 @@ export const ClientsProvider = ({ children }) => {
 export const useClients = () => {
   const context = useContext(ClientsContext);
   if (!context) {
-    throw new Error('useClients must be used within a ClientsProvider');
+    throw new Error("useClients must be used within a ClientsProvider");
   }
   return context;
 };
