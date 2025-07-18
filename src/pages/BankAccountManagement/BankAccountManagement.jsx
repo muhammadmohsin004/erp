@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   Plus,
   Building2,
@@ -35,8 +40,8 @@ import Card from "../../components/elements/card/Card";
 import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import SearchAndFilters from "../../components/elements/searchAndFilters/SearchAndFilters";
-import SelectBox from "../../components/elements/selectBox/SelectBox";
-import InputField from "../../components/elements/inputField/InputField";
+// import SelectBox from "../../components/elements/selectBox/SelectBox";
+// import InputField from "../../components/elements/inputField/InputField";
 import Table from "../../components/elements/table/Table";
 import Thead from "../../components/elements/thead/Thead";
 import TR from "../../components/elements/tr/TR";
@@ -50,296 +55,401 @@ import Skeleton from "../../components/elements/skeleton/Skeleton";
 import Badge from "../../components/elements/Badge/Badge";
 import { useBankAccount } from "../../Contexts/BankAccountContext/BankAccountContext";
 
-// Translations
+// Mock translations object
 const translations = {
-  "Bank Account Management": "Bank Account Management",
-  "Add New Account": "Add New Account",
-  "Edit Bank Account": "Edit Bank Account",
+  "Account Information": "Account Information",
+  "Account Name": "Account Name",
+  "Enter account name": "Enter account name",
   "Bank Name": "Bank Name",
+  "Enter bank name": "Enter bank name",
   "Account Number": "Account Number",
+  "Enter account number": "Enter account number",
   "Account Type": "Account Type",
+  "Select account type": "Select account type",
   Currency: "Currency",
+  "Select currency": "Select currency",
   Balance: "Balance",
-  Status: "Status",
-  Default: "Default",
-  Actions: "Actions",
-  Active: "Active",
-  Inactive: "Inactive",
-  "Search bank accounts": "Search bank accounts",
-  "Filter by account type": "Filter by account type",
-  "Filter by currency": "Filter by currency",
-  "Filter by status": "Filter by status",
-  All: "All",
+  "Enter balance": "Enter balance",
+  "Additional Details": "Additional Details",
+  Branch: "Branch",
+  "Enter branch name": "Enter branch name",
+  IBAN: "IBAN",
+  "Enter IBAN": "Enter IBAN",
+  "Swift Code": "Swift Code",
+  "Enter Swift code": "Enter Swift code",
+  Description: "Description",
+  "Enter description": "Enter description",
   Savings: "Savings",
   Checking: "Checking",
   Business: "Business",
-  Edit: "Edit",
-  Delete: "Delete",
-  "Set as Default": "Set as Default",
-  "View Details": "View Details",
-  "View Transactions": "View Transactions",
-  "Toggle Status": "Toggle Status",
-  "Create Account": "Create Account",
-  "Update Account": "Update Account",
-  Cancel: "Cancel",
-  Save: "Save",
-  Loading: "Loading",
-  "No accounts found": "No accounts found",
-  "Create your first bank account": "Create your first bank account",
-  Branch: "Branch",
-  IBAN: "IBAN",
-  "Swift Code": "Swift Code",
-  Description: "Description",
-  "Enter bank name": "Enter bank name",
-  "Enter account number": "Enter account number",
-  "Enter branch name": "Enter branch name",
-  "Enter IBAN": "Enter IBAN",
-  "Enter Swift code": "Enter Swift code",
-  "Enter description": "Enter description",
-  "Enter balance": "Enter balance",
-  "Select account type": "Select account type",
-  "Select currency": "Select currency",
-  "Account Information": "Account Information",
-  "Additional Details": "Additional Details",
-  "Are you sure?": "Are you sure?",
-  "This action cannot be undone": "This action cannot be undone",
-  "Recent Transactions": "Recent Transactions",
-  "Balance History": "Balance History",
-  Export: "Export",
-  Import: "Import",
-  Refresh: "Refresh",
-  "Sort by": "Sort by",
-  Name: "Name",
-  "Created Date": "Created Date",
-  "Updated Date": "Updated Date",
-  "Default Account": "Default Account",
-  "Total Accounts": "Total Accounts",
-  "Active Accounts": "Active Accounts",
-  "Total Balance": "Total Balance",
 };
 
-// Bank Account Form Component
-const BankAccountForm = React.forwardRef(({ account, onSubmit, isEditing = false }, ref) => {
-  const [formData, setFormData] = useState({
-    BankName: "",
-    AccountNumber: "",
-    AccountType: "",
-    Currency: "",
-    Branch: "",
-    IBAN: "",
-    SwiftCode: "",
-    Description: "",
-    Balance: "",
-    IsActive: true,
-    IsDefault: false,
-    ...account,
-  });
+// InputField Component
+const InputField = ({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  errors,
+  icon: Icon,
+  as = "input",
+}) => {
+  console.log(`InputField ${name} - Current value:`, value);
 
-  const [errors, setErrors] = useState({});
-
-  const accountTypes = [
-    { value: "Savings", label: translations.Savings },
-    { value: "Checking", label: translations.Checking },
-    { value: "Business", label: translations.Business },
-  ];
-
-  const currencies = [
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-    { value: "GBP", label: "GBP" },
-    { value: "PKR", label: "PKR" },
-  ];
-
-  // Handle input change for regular inputs
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+  const inputProps = {
+    name,
+    type,
+    placeholder,
+    value: value || "",
+    onChange,
+    className: `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+      errors[name] ? "border-red-500" : "border-gray-300"
+    }`,
   };
-
-  // Handle select change for dropdowns
-  const handleSelectChange = (value) => {
-    const name = arguments[1]?.name || arguments[1]; // Handle different select implementations
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear error when user makes selection
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.BankName.trim()) {
-      newErrors.BankName = "Bank name is required";
-    }
-
-    if (!formData.AccountNumber.trim()) {
-      newErrors.AccountNumber = "Account number is required";
-    }
-
-    if (!formData.AccountType) {
-      newErrors.AccountType = "Account type is required";
-    }
-
-    if (!formData.Currency) {
-      newErrors.Currency = "Currency is required";
-    }
-
-    if (formData.Balance && isNaN(parseFloat(formData.Balance))) {
-      newErrors.Balance = "Balance must be a valid number";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleFormSubmit = () => {
-    if (!validateForm()) return false;
-    onSubmit(formData);
-    return true;
-  };
-
-  // Expose the handleFormSubmit function to parent component
-  React.useImperativeHandle(ref, () => ({
-    handleFormSubmit,
-  }));
 
   return (
-    <Container className="space-y-6">
-      {/* Account Information Section */}
-      <Container>
-        <Container className="flex items-center gap-2 mb-4">
-          <Building2 className="w-5 h-5 text-blue-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
-            {translations["Account Information"]}
-          </h3>
-        </Container>
+    <div className="space-y-1">
+      <label className="block text-sm font-medium text-gray-700">
+        {Icon && <Icon className="w-4 h-4 inline mr-1" />}
+        {label}
+      </label>
+      {as === "textarea" ? (
+        <textarea {...inputProps} rows={3} />
+      ) : (
+        <input {...inputProps} />
+      )}
+      {errors[name] && <p className="text-red-500 text-sm">{errors[name]}</p>}
+    </div>
+  );
+};
 
-        <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField
-            label={translations["Bank Name"]}
-            name="BankName"
-            placeholder={translations["Enter bank name"]}
-            value={formData.BankName}
-            onChange={handleInputChange}
-            errors={errors}
-            icon={Building2}
-          />
+// SelectBox Component
+const SelectBox = ({
+  label,
+  name,
+  value,
+  handleChange,
+  errors,
+  optionList,
+  placeholder,
+}) => {
+  console.log(`SelectBox ${name} - Current value:`, value);
 
-          <InputField
-            label={translations["Account Number"]}
-            name="AccountNumber"
-            placeholder={translations["Enter account number"]}
-            value={formData.AccountNumber}
-            onChange={handleInputChange}
-            errors={errors}
-            icon={CreditCard}
-          />
+  return (
+    <div className="space-y-1">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <select
+        name={name}
+        value={value || ""}
+        onChange={(e) => {
+          console.log(`SelectBox ${name} - Selected:`, e.target.value);
+          handleChange(e.target.value);
+        }}
+        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          errors[name] ? "border-red-500" : "border-gray-300"
+        }`}
+      >
+        <option value="">{placeholder}</option>
+        {optionList.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {errors[name] && <p className="text-red-500 text-sm">{errors[name]}</p>}
+    </div>
+  );
+};
 
-          <SelectBox
-            label={translations["Account Type"]}
-            name="AccountType"
-            value={formData.AccountType}
-            handleChange={(value) => handleSelectChange(value, "AccountType")}
-            errors={errors}
-            optionList={accountTypes}
-            placeholder={translations["Select account type"]}
-          />
+const BankAccountForm = forwardRef(
+  ({ account, onSubmit, isEditing = false }, ref) => {
+    console.log("BankAccountForm - Initial props:", { account, isEditing });
 
-          <SelectBox
-            label={translations["Currency"]}
-            name="Currency"
-            value={formData.Currency}
-            handleChange={(value) => handleSelectChange(value, "Currency")}
-            errors={errors}
-            optionList={currencies}
-            placeholder={translations["Select currency"]}
-          />
+    const [formData, setFormData] = useState({
+      AccountName: "",
+      BankName: "",
+      AccountNumber: "",
+      AccountType: "",
+      Currency: "",
+      Branch: "",
+      IBAN: "",
+      SwiftCode: "",
+      Description: "",
+      Balance: "",
+      IsActive: true,
+      IsDefault: false,
+      ...account,
+    });
 
-          <InputField
-            label={translations["Balance"]}
-            name="Balance"
-            type="number"
-            placeholder={translations["Enter balance"]}
-            value={formData.Balance}
-            onChange={handleInputChange}
-            errors={errors}
-            icon={DollarSign}
-          />
-        </Container>
-      </Container>
+    const [errors, setErrors] = useState({});
 
-      {/* Additional Details Section */}
-      <Container>
-        <Container className="flex items-center gap-2 mb-4">
-          <Settings className="w-5 h-5 text-blue-600" />
-          <h3 className="text-lg font-semibold text-gray-900">
-            {translations["Additional Details"]}
-          </h3>
-        </Container>
+    console.log("BankAccountForm - Current formData:", formData);
 
-        <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField
-            label={translations["Branch"]}
-            name="Branch"
-            placeholder={translations["Enter branch name"]}
-            value={formData.Branch}
-            onChange={handleInputChange}
-            errors={errors}
-          />
+    const accountTypes = [
+      { value: "Savings", label: translations.Savings },
+      { value: "Checking", label: translations.Checking },
+      { value: "Business", label: translations.Business },
+    ];
 
-          <InputField
-            label={translations["IBAN"]}
-            name="IBAN"
-            placeholder={translations["Enter IBAN"]}
-            value={formData.IBAN}
-            onChange={handleInputChange}
-            errors={errors}
-          />
+    const currencies = [
+      { value: "USD", label: "USD" },
+      { value: "EUR", label: "EUR" },
+      { value: "GBP", label: "GBP" },
+      { value: "PKR", label: "PKR" },
+    ];
 
-          <InputField
-            label={translations["Swift Code"]}
-            name="SwiftCode"
-            placeholder={translations["Enter Swift code"]}
-            value={formData.SwiftCode}
-            onChange={handleInputChange}
-            errors={errors}
-          />
+    // Handle input change for regular inputs
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      console.log(`handleInputChange - Field: ${name}, Value: ${value}`);
 
-          <Container className="md:col-span-2">
+      setFormData((prev) => {
+        const newFormData = {
+          ...prev,
+          [name]: value,
+        };
+        console.log("handleInputChange - Updated formData:", newFormData);
+        return newFormData;
+      });
+
+      // Clear error when user starts typing
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: "",
+        }));
+      }
+    };
+
+    // Handle select change for dropdowns
+    const handleSelectChange = (value, fieldName) => {
+      console.log(`handleSelectChange - Field: ${fieldName}, Value: ${value}`);
+
+      setFormData((prev) => {
+        const newFormData = {
+          ...prev,
+          [fieldName]: value,
+        };
+        console.log("handleSelectChange - Updated formData:", newFormData);
+        return newFormData;
+      });
+
+      // Clear error when user makes selection
+      if (errors[fieldName]) {
+        setErrors((prev) => ({
+          ...prev,
+          [fieldName]: "",
+        }));
+      }
+    };
+
+    const validateForm = () => {
+      console.log(
+        "validateForm - Starting validation with formData:",
+        formData
+      );
+      const newErrors = {};
+
+      if (!formData.AccountName?.trim()) {
+        newErrors.AccountName = "Account name is required";
+      }
+
+      if (!formData.BankName?.trim()) {
+        newErrors.BankName = "Bank name is required";
+      }
+
+      if (!formData.AccountNumber?.trim()) {
+        newErrors.AccountNumber = "Account number is required";
+      }
+
+      if (!formData.AccountType) {
+        newErrors.AccountType = "Account type is required";
+      }
+
+      if (!formData.Currency) {
+        newErrors.Currency = "Currency is required";
+      }
+
+      if (formData.Balance && isNaN(parseFloat(formData.Balance))) {
+        newErrors.Balance = "Balance must be a valid number";
+      }
+
+      console.log("validateForm - Errors found:", newErrors);
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+
+    const handleFormSubmit = () => {
+      console.log("handleFormSubmit - Starting submission");
+      console.log("handleFormSubmit - Current formData:", formData);
+
+      if (!validateForm()) {
+        console.log("handleFormSubmit - Validation failed");
+        return false;
+      }
+
+      console.log("handleFormSubmit - Validation passed, calling onSubmit");
+      if (onSubmit) {
+        onSubmit(formData);
+        console.log("handleFormSubmit - onSubmit called successfully");
+      } else {
+        console.log("handleFormSubmit - No onSubmit function provided");
+      }
+      return true;
+    };
+
+    // Expose the handleFormSubmit function to parent component
+    useImperativeHandle(ref, () => ({
+      handleFormSubmit,
+    }));
+
+    console.log("BankAccountForm - Render with formData:", formData);
+
+    return (
+      <Container className="space-y-6 p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
+        {/* Account Information Section */}
+        <Container>
+          <Container className="flex items-center gap-2 mb-4">
+            <Building2 className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              {translations["Account Information"]}
+            </h3>
+          </Container>
+
+          <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField
-              label={translations["Description"]}
-              name="Description"
-              as="textarea"
-              placeholder={translations["Enter description"]}
-              value={formData.Description}
+              label={translations["Account Name"]}
+              name="AccountName"
+              placeholder={translations["Enter account name"]}
+              value={formData.AccountName}
               onChange={handleInputChange}
               errors={errors}
+              icon={Building2}
+            />
+
+            <InputField
+              label={translations["Bank Name"]}
+              name="BankName"
+              placeholder={translations["Enter bank name"]}
+              value={formData.BankName}
+              onChange={handleInputChange}
+              errors={errors}
+              icon={Building2}
+            />
+
+            <InputField
+              label={translations["Account Number"]}
+              name="AccountNumber"
+              placeholder={translations["Enter account number"]}
+              value={formData.AccountNumber}
+              onChange={handleInputChange}
+              errors={errors}
+              icon={CreditCard}
+            />
+
+            <SelectBox
+              label={translations["Account Type"]}
+              name="AccountType"
+              value={formData.AccountType}
+              handleChange={(value) => handleSelectChange(value, "AccountType")}
+              errors={errors}
+              optionList={accountTypes}
+              placeholder={translations["Select account type"]}
+            />
+
+            <SelectBox
+              label={translations["Currency"]}
+              name="Currency"
+              value={formData.Currency}
+              handleChange={(value) => handleSelectChange(value, "Currency")}
+              errors={errors}
+              optionList={currencies}
+              placeholder={translations["Select currency"]}
+            />
+
+            <InputField
+              label={translations["Balance"]}
+              name="Balance"
+              type="number"
+              placeholder={translations["Enter balance"]}
+              value={formData.Balance}
+              onChange={handleInputChange}
+              errors={errors}
+              icon={DollarSign}
             />
           </Container>
         </Container>
+
+        {/* Additional Details Section */}
+        <Container>
+          <Container className="flex items-center gap-2 mb-4">
+            <Settings className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              {translations["Additional Details"]}
+            </h3>
+          </Container>
+
+          <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField
+              label={translations["Branch"]}
+              name="Branch"
+              placeholder={translations["Enter branch name"]}
+              value={formData.Branch}
+              onChange={handleInputChange}
+              errors={errors}
+            />
+
+            <InputField
+              label={translations["IBAN"]}
+              name="IBAN"
+              placeholder={translations["Enter IBAN"]}
+              value={formData.IBAN}
+              onChange={handleInputChange}
+              errors={errors}
+            />
+
+            <InputField
+              label={translations["Swift Code"]}
+              name="SwiftCode"
+              placeholder={translations["Enter Swift code"]}
+              value={formData.SwiftCode}
+              onChange={handleInputChange}
+              errors={errors}
+            />
+
+            <Container className="md:col-span-2">
+              <InputField
+                label={translations["Description"]}
+                name="Description"
+                as="textarea"
+                placeholder={translations["Enter description"]}
+                value={formData.Description}
+                onChange={handleInputChange}
+                errors={errors}
+              />
+            </Container>
+          </Container>
+        </Container>
+
+        {/* Submit Button for Testing */}
+        <Container className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => {
+              console.log("Submit button clicked");
+              handleFormSubmit();
+            }}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {isEditing ? "Update Account" : "Create Account"}
+          </button>
+        </Container>
       </Container>
-    </Container>
-  );
-});
+    );
+  }
+);
 
 // Main Bank Account Management Component
 const BankAccountManagement = () => {
@@ -408,6 +518,7 @@ const BankAccountManagement = () => {
 
   // Handle form submission
   const handleFormSubmit = async (formData) => {
+    console.log(" ----fomdata", formData);
     setIsSaving(true);
     try {
       if (isEditing) {
@@ -529,10 +640,10 @@ const BankAccountManagement = () => {
   };
 
   // Get account data safely - handle both array and nested object structure
-  const accountData = Array.isArray(bankAccounts) 
-    ? bankAccounts 
-    : (bankAccounts?.Data?.$values || bankAccounts?.Data || []);
-  
+  const accountData = Array.isArray(bankAccounts)
+    ? bankAccounts
+    : bankAccounts?.Data?.$values || bankAccounts?.Data || [];
+
   const activeBankAccounts = getActiveBankAccounts();
   const defaultBankAccount = getDefaultBankAccount();
 
