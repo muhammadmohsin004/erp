@@ -105,7 +105,7 @@ const InvoiceManagementPage = () => {
   };
 
   const handleCreateNewInvoice = () => {
-    navigate('/admin/showinvoices/create');
+    navigate('/admin/new-invoice');
   };
 
   // Dynamic status tabs with real counts
