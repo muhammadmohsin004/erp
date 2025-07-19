@@ -703,49 +703,51 @@ const VendorManagement = () => {
       {/* Header */}
       <Container className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
         <Container className="px-6 py-4 border-b border-gray-200">
-          <Container className="flex items-center justify-between">
-            <Container className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {translations.Vendors}
-              </h1>
-              <Span className="text-sm text-gray-500">
-                {pagination.totalItems} total vendors
-              </Span>
-            </Container>
-            <Container className="flex gap-3">
-              <OutlineButton
-                buttonText={translations.Filters}
-                onClick={() => setShowFilters(!showFilters)}
-                borderColor="border-gray-300"
-                borderWidth="border"
-                rounded="rounded-lg"
-                bgColor="bg-white"
-                textColor="text-gray-700"
-                height="h-10"
-                px="px-4"
-                fontWeight="font-medium"
-                fontSize="text-sm"
-                icon={Filter}
-                iconSize="w-4 h-4"
-                isIconLeft={true}
-              />
-              <FilledButton
-                isIcon={true}
-                icon={Plus}
-                iconSize="w-4 h-4"
-                bgColor="bg-blue-600 hover:bg-blue-700"
-                textColor="text-white"
-                rounded="rounded-lg"
-                buttonText={translations["New Vendor"]}
-                height="h-10"
-                px="px-4"
-                fontWeight="font-medium"
-                fontSize="text-sm"
-                isIconLeft={true}
-                onClick={handleOpenCreateModal}
-              />
-            </Container>
-          </Container>
+          <div className="flex items-center justify-between">
+  <div className="flex items-center gap-4">
+    <h1 className="text-2xl font-bold text-gray-900">
+      {translations.Vendors}
+    </h1>
+    <span className="text-sm text-gray-500">
+      {pagination.totalItems} total vendors
+    </span>
+  </div>
+
+  <div className="flex gap-3">
+    <OutlineButton
+      buttonText={translations.Filters}
+      onClick={() => setShowFilters(!showFilters)}
+      borderColor="border-gray-300"
+      borderWidth="border"
+      rounded="rounded-lg"
+      bgColor="bg-white"
+      textColor="text-gray-700"
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      icon={Filter}
+      iconSize="w-4 h-4"
+      isIconLeft={true}
+    />
+    <FilledButton
+      isIcon={true}
+      icon={Plus}
+      iconSize="w-4 h-4"
+      bgColor="bg-blue-600 hover:bg-blue-700"
+      textColor="text-white"
+      rounded="rounded-lg"
+      buttonText={translations["New Vendor"]}
+      height="h-10"
+      px="px-4"
+      fontWeight="font-medium"
+      fontSize="text-sm"
+      isIconLeft={true}
+      onClick={handleOpenCreateModal}
+    />
+  </div>
+</div>
+
         </Container>
 
         {/* Filters */}

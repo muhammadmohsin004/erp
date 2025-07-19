@@ -308,10 +308,10 @@ const BankAccountForm = forwardRef(
     console.log("BankAccountForm - Render with formData:", formData);
 
     return (
-      <Container className="space-y-6 p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
+      <Container className="space-y-6 p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
         {/* Account Information Section */}
         <Container>
-          <Container className="flex items-center gap-2 mb-4">
+          <Container className="flex items-center gap-2 mb-4"> 
             <Building2 className="w-5 h-5 text-blue-600" />
             <h3 className="text-lg font-semibold text-gray-900">
               {translations["Account Information"]}
