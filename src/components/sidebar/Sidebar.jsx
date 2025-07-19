@@ -47,6 +47,15 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
     }
   }, [isMobile, onClose]);
 
+  // Handle overlay click to close sidebar on mobile
+  const handleOverlayClick = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
+
   // Company logo/initial component based on user data
   const CompanyLogo = useMemo(() => {
     if (!userData) return null;
@@ -95,7 +104,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             isCurrentActive
               ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
               : "text-gray-700 hover:text-black"
-          } ${currentLanguage === "ar" ? "" : ""}`;
+          } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
         }}
       >
         <item.icon
@@ -129,7 +138,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             {item.label}
             <div
               className={`absolute ${
-                currentLanguage === "ar" ? "right-0" : "left-0 add-scroll"
+                currentLanguage === "ar" ? "right-0" : "left-0"
               } top-1/2 transform -translate-y-1/2 ${
                 currentLanguage === "ar" ? "translate-x-1" : "-translate-x-1"
               } w-2 h-2 bg-gray-900 rotate-45`}
@@ -160,10 +169,11 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             className={({ isActive }) => {
               const isCurrentActive =
                 isActive || isPathActive(subItem.path, location.pathname);
-              return `flex items-center px-8 py-2 text-sm hover:border-r-2 my-2 hover:border-purple-300 transition-all duration-200 ${isCurrentActive
+              return `flex items-center px-8 py-2 text-sm hover:border-r-2 my-2 hover:border-purple-300 transition-all duration-200 ${
+                isCurrentActive
                   ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-r-4 border-purple-400 shadow-lg"
                   : "text-gray-600 hover:text-black"
-              } ${currentLanguage === "ar" ? "" : ""}`;
+              } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`;
             }}
           >
             <subItem.icon
@@ -241,7 +251,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
               hasActiveSubmenu
                 ? "bg-gradient-to-r from-purple-500 to-purple-600 border-r-4 border-purple-400 shadow-lg"
                 : "text-gray-700"
-            } ${currentLanguage === "ar" ? "" : ""}`}
+            } ${currentLanguage === "ar" ? "flex-row-reverse" : ""}`}
             onClick={() => toggleSubmenu(item.key)}
           >
             <item.icon
@@ -334,34 +344,33 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
 
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Mobile Overlay - Only show on mobile when sidebar is open */}
       {isMobile && isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onClose}
+          onClick={handleOverlayClick}
         />
       )}
 
-      {/* Sidebar - FIXED HEIGHT AND FLEX LAYOUT */}
+      {/* Sidebar Container */}
       <div
-        className={`fixed ${
-          currentLanguage === "ar" ? "right-0" : "left-0"
-        } top-0 h-full bg-white shadow-2xl border-r border-gray-200 z-50 transition-all duration-300 ease-in-out ${
-          isOpen ? "w-60" : "w-16"
-        } ${
-          isMobile
-            ? isOpen
-              ? "translate-x-0"
-              : currentLanguage === "ar"
-              ? "translate-x-full"
-              : "-translate-x-full"
-            : "translate-x-0"
-        } overflow-hidden flex flex-col`}
+        className={`fixed top-0 h-full bg-white shadow-2xl border-r border-gray-200 z-50 transition-all duration-300 ease-in-out flex flex-col
+          ${currentLanguage === "ar" ? "right-0" : "left-0"}
+          ${isMobile ? (
+            // Mobile styles
+            isOpen 
+              ? `w-60 ${currentLanguage === "ar" ? "translate-x-0" : "translate-x-0"}` 
+              : `w-60 ${currentLanguage === "ar" ? "translate-x-full" : "-translate-x-full"}`
+          ) : (
+            // Desktop styles  
+            isOpen ? "w-60" : "w-16"
+          )}
+        `}
       >
-        {/* Header - FIXED HEIGHT */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700 flex-shrink-0">
+        {/* Header Section - Fixed Height */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-purple-700 flex-shrink-0 min-h-[80px]">
           {isOpen ? (
-            <div className="flex items-center">
+            <div className="flex items-center min-w-0 flex-1">
               {CompanyLogo}
               <div className="min-w-0 flex-1">
                 <h2 className="text-white font-bold text-lg truncate">
@@ -388,22 +397,23 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
             </div>
           )}
 
-          {/* Close button for mobile */}
-          {isMobile && (
+          {/* Close button - Only show on mobile when open */}
+          {isMobile && isOpen && (
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-purple-700 transition-colors duration-200"
+              className="p-2 rounded-lg hover:bg-purple-700 transition-colors duration-200 flex-shrink-0 ml-2"
+              aria-label="Close sidebar"
             >
               <X className="w-5 h-5 text-white" />
             </button>
           )}
         </div>
 
-        {/* User Info - FIXED HEIGHT */}
+        {/* User Info Section - Fixed Height */}
         {isOpen && (
-          <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0">
+          <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0 min-h-[100px]">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mr-3 shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mr-3 shadow-lg flex-shrink-0">
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0 flex-1">
@@ -420,7 +430,7 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
                   {userData?.Email || userInfo?.email || "No email"}
                 </p>
                 <div className="flex items-center mt-1">
-                  <span className="text-xs text-purple-600 font-medium">
+                  <span className="text-xs text-purple-600 font-medium truncate">
                     {t?.accessLevel || "Access Level"}:{" "}
                     {userData?.Position || userData?.Role || "User"}
                   </span>
@@ -430,21 +440,20 @@ const Sidebar = ({ isOpen, onClose, isRTL }) => {
           </div>
         )}
 
-        {/* Navigation Menu - SCROLLABLE AREA */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Navigation Menu - Scrollable Area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <nav className="py-2">
-         
             <div className="space-y-1">
               {menuItems.map((item, index) => renderMenuItem(item, index))}
             </div>
           </nav>
         </div>
 
-        {/* Footer - FIXED HEIGHT */}
-        <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0">
+        {/* Footer Section - Fixed Height */}
+        <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0 min-h-[80px]">
           {isOpen ? (
             <div className="text-center">
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-gray-500 mb-2 truncate">
                 {t?.current || "Current"}{" "}
                 {userData?.Role || userData?.Position || "User"}
               </p>

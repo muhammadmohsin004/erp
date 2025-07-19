@@ -59,11 +59,7 @@ const ExpenseCategories = () => {
     Name: '',
     Description: '',
     Color: '#EF4444',
-    Icon: '',
-    IsActive: true,
-    DisplayOrder: 0,
-    BudgetLimit: 0,
-    AllowOverBudget: true
+    IsActive: true // Default to true to avoid null validation error
   });
 
   const [dateRange, setDateRange] = useState({
@@ -99,7 +95,7 @@ const ExpenseCategories = () => {
 
   // Mock data generator - replace with actual API call
   const generateMockPerformanceData = () => {
-    const categories = expenseCategories?.Data || [];
+    const categories = expenseCategories?.Data?.$values || [];
     const mockBreakdown = categories.slice(0, 6).map((cat, index) => ({
       categoryName: cat.Name,
       totalExpenses: Math.floor(Math.random() * 50000) + 10000,
@@ -134,7 +130,12 @@ const ExpenseCategories = () => {
 
   const handleAddCategory = async () => {
     try {
-      await createExpenseCategory(categoryForm);
+      await createExpenseCategory({
+        Name: categoryForm.Name,
+        Description: categoryForm.Description,
+        Color: categoryForm.Color,
+        IsActive: categoryForm.IsActive !== null ? categoryForm.IsActive : true // Ensure IsActive is never null
+      });
       setShowAddModal(false);
       resetForm();
       getExpenseCategories();
@@ -147,7 +148,12 @@ const ExpenseCategories = () => {
     try {
       if (!editingCategory?.Id) return;
       
-      await updateExpenseCategory(editingCategory.Id, categoryForm);
+      await updateExpenseCategory(editingCategory.Id, {
+        Name: categoryForm.Name,
+        Description: categoryForm.Description,
+        Color: categoryForm.Color,
+        IsActive: categoryForm.IsActive !== null ? categoryForm.IsActive : true // Ensure IsActive is never null
+      });
       setShowEditModal(false);
       setEditingCategory(null);
       resetForm();
@@ -183,11 +189,7 @@ const ExpenseCategories = () => {
       Name: category.Name || '',
       Description: category.Description || '',
       Color: category.Color || '#EF4444',
-      Icon: category.Icon || '',
-      IsActive: category.IsActive !== false,
-      DisplayOrder: category.DisplayOrder || 0,
-      BudgetLimit: category.BudgetLimit || 0,
-      AllowOverBudget: category.AllowOverBudget !== false
+      IsActive: category.IsActive !== undefined ? category.IsActive : true // Ensure IsActive is never undefined
     });
     setShowEditModal(true);
   };
@@ -204,11 +206,7 @@ const ExpenseCategories = () => {
       Name: '',
       Description: '',
       Color: '#EF4444',
-      Icon: '',
-      IsActive: true,
-      DisplayOrder: 0,
-      BudgetLimit: 0,
-      AllowOverBudget: true
+      IsActive: true // Reset to true to avoid null validation error
     });
   };
 
@@ -226,17 +224,7 @@ const ExpenseCategories = () => {
     );
   };
 
-  const getBudgetStatusBadge = (spent, budget) => {
-    if (budget === 0) return <Badge variant="secondary">No Budget</Badge>;
-    const percentage = (spent / budget) * 100;
-    if (percentage > 100) return <Badge variant="danger">Over Budget</Badge>;
-    if (percentage > 80) return <Badge variant="warning">Near Limit</Badge>;
-    return <Badge variant="success">Within Budget</Badge>;
-  };
-
-  const COLORS = ['#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16', '#22C55E', '#10B981', '#14B8A6'];
-
-  const categories = expenseCategories?.Data || [];
+  const categories = expenseCategories?.Data?.$values || [];
   const totalCategories = categories.length;
   const activeCategories = categories.filter(cat => cat.IsActive).length;
   const totalExpensesFromCategories = categoryPerformance?.TotalExpenses || 0;
@@ -341,44 +329,6 @@ const ExpenseCategories = () => {
         </Card>
       </div>
 
-
-      {/* Budget Overview */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Budget vs Actual Spending</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {categories.filter(cat => cat.BudgetLimit > 0).slice(0, 4).map((category) => {
-            const spent = Math.floor(Math.random() * category.BudgetLimit * 1.2); // Mock spent amount
-            const percentage = (spent / category.BudgetLimit) * 100;
-            return (
-              <div key={category.Id} className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900">{category.Name}</h4>
-                  {getBudgetStatusBadge(spent, category.BudgetLimit)}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Spent: ${spent.toLocaleString()}</span>
-                    <span>Budget: ${category.BudgetLimit.toLocaleString()}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        percentage > 100 ? 'bg-red-500' : 
-                        percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
-                      }`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {percentage.toFixed(1)}% of budget used
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-
       {/* Filters */}
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -418,90 +368,66 @@ const ExpenseCategories = () => {
                 <TH>Category</TH>
                 <TH>Description</TH>
                 <TH>Color</TH>
-                <TH>Total Expenses</TH>
-                <TH>Expense Count</TH>
-                <TH>Budget Limit</TH>
                 <TH>Status</TH>
-                <TH>Display Order</TH>
                 <TH>Actions</TH>
               </TR>
             </Thead>
             <Tbody>
-              {categories.map((category) => {
-                const mockSpent = Math.floor(Math.random() * 50000); // Mock data
-                return (
-                  <TR key={category.Id}>
-                    <TD className="font-medium text-gray-900">
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
-                          style={{ backgroundColor: category.Color || '#EF4444' }}
-                        />
-                        <span>{category.Name}</span>
-                      </div>
-                    </TD>
-                    <TD className="text-gray-600 max-w-xs truncate">
-                      {category.Description || 'No description'}
-                    </TD>
-                    <TD>
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="w-6 h-6 rounded-md border" 
-                          style={{ backgroundColor: category.Color || '#EF4444' }}
-                        />
-                        <span className="text-sm text-gray-500">{category.Color}</span>
-                      </div>
-                    </TD>
-                    <TD className="font-semibold text-red-600">
-                      ${mockSpent.toLocaleString()}
-                    </TD>
-                    <TD className="text-center">
-                      <Badge variant="info">{Math.floor(Math.random() * 50)}</Badge>
-                    </TD>
-                    <TD>
-                      {category.BudgetLimit > 0 ? (
-                        <div className="flex flex-col">
-                          <span className="font-medium">${category.BudgetLimit.toLocaleString()}</span>
-                          {getBudgetStatusBadge(mockSpent, category.BudgetLimit)}
-                        </div>
-                      ) : (
-                        <Badge variant="secondary">No Limit</Badge>
-                      )}
-                    </TD>
-                    <TD>{getStatusBadge(category.IsActive)}</TD>
-                    <TD className="text-center">{category.DisplayOrder || 0}</TD>
-                    <TD>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleToggleStatus(category.Id)}
-                          className={`p-1 rounded ${
-                            category.IsActive ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'
-                          }`}
-                          title={category.IsActive ? 'Deactivate' : 'Activate'}
-                        >
-                          {category.IsActive ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-                        </button>
-                        <Dropdown
-                          buttonText=""
-                          icon={MoreVertical}
-                          items={[
-                            { label: 'View Details', action: () => openDetailsModal(category) },
-                            { label: 'Edit Category', action: () => openEditModal(category) },
-                            { label: 'Delete Category', action: () => handleDeleteCategory(category.Id) }
-                          ]}
-                          onSelect={(item) => item.action()}
-                          buttonClassName="p-2 rounded-md hover:bg-gray-100"
-                        />
-                      </div>
-                    </TD>
-                  </TR>
-                );
-              })}
+              {categories.map((category) => (
+                <TR key={category.Id}>
+                  <TD className="font-medium text-gray-900">
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: category.Color || '#EF4444' }}
+                      />
+                      <span>{category.Name}</span>
+                    </div>
+                  </TD>
+                  <TD className="text-gray-600 max-w-xs truncate">
+                    {category.Description || 'No description'}
+                  </TD>
+                  <TD>
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className="w-6 h-6 rounded-md border" 
+                        style={{ backgroundColor: category.Color || '#EF4444' }}
+                      />
+                      <span className="text-sm text-gray-500">{category.Color}</span>
+                    </div>
+                  </TD>
+                  <TD>{getStatusBadge(category.IsActive)}</TD>
+                  <TD>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleToggleStatus(category.Id)}
+                        className={`p-1 rounded ${
+                          category.IsActive ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'
+                        }`}
+                        title={category.IsActive ? 'Deactivate' : 'Activate'}
+                      >
+                        {category.IsActive ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                      </button>
+                      <Dropdown
+                        buttonText=""
+                        icon={MoreVertical}
+                        items={[
+                          { label: 'View Details', action: () => openDetailsModal(category) },
+                          { label: 'Edit Category', action: () => openEditModal(category) },
+                          { label: 'Delete Category', action: () => handleDeleteCategory(category.Id) }
+                        ]}
+                        onSelect={(item) => item.action()}
+                        buttonClassName="p-2 rounded-md hover:bg-gray-100"
+                      />
+                    </div>
+                  </TD>
+                </TR>
+              ))}
             </Tbody>
           </Table>
         </div>
         
-        {categories.length === 0 && (
+        {categories.length === 0 && !loading && (
           <div className="text-center py-8 text-gray-500">
             <CreditCard size={48} className="mx-auto mb-4 opacity-50" />
             <p>No expense categories found</p>
@@ -544,70 +470,32 @@ const ExpenseCategories = () => {
               onChange={(e) => setCategoryForm({...categoryForm, Description: e.target.value})}
               width="w-full"
             />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Color
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    className="w-12 h-10 border border-gray-300 rounded-md"
-                  />
-                  <InputField
-                    placeholder="#EF4444"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    width="w-full"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category Color
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="color"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  className="w-12 h-10 border border-gray-300 rounded-md"
+                />
+                <InputField
+                  placeholder="#EF4444"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  width="w-full"
+                />
               </div>
-              <InputField
-                label="Display Order"
-                type="number"
-                placeholder="0"
-                value={categoryForm.DisplayOrder}
-                onChange={(e) => setCategoryForm({...categoryForm, DisplayOrder: parseInt(e.target.value) || 0})}
-                width="w-full"
-              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="Budget Limit ($)"
-                type="number"
-                placeholder="0"
-                value={categoryForm.BudgetLimit}
-                onChange={(e) => setCategoryForm({...categoryForm, BudgetLimit: parseFloat(e.target.value) || 0})}
-                width="w-full"
-                min="0"
-                step="0.01"
-              />
-              <InputField
-                label="Icon (Optional)"
-                placeholder="Icon name or unicode"
-                value={categoryForm.Icon}
-                onChange={(e) => setCategoryForm({...categoryForm, Icon: e.target.value})}
-                width="w-full"
-              />
-            </div>
-            <div className="flex items-center space-x-6">
-              <CheckboxField
-                name="IsActive"
-                label="Active Category"
-                checked={categoryForm.IsActive}
-                onChange={(e) => setCategoryForm({...categoryForm, IsActive: e.target.checked})}
-                errors={{}}
-              />
-              <CheckboxField
-                name="AllowOverBudget"
-                label="Allow Over Budget"
-                checked={categoryForm.AllowOverBudget}
-                onChange={(e) => setCategoryForm({...categoryForm, AllowOverBudget: e.target.checked})}
-                errors={{}}
-              />
-            </div>
+            <CheckboxField
+              name="IsActive"
+              label="Active Category"
+              checked={categoryForm.IsActive}
+              onChange={(e) => setCategoryForm({...categoryForm, IsActive: e.target.checked})}
+              errors={{}}
+            />
           </div>
         }
       />
@@ -639,70 +527,32 @@ const ExpenseCategories = () => {
               onChange={(e) => setCategoryForm({...categoryForm, Description: e.target.value})}
               width="w-full"
             />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Color
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    className="w-12 h-10 border border-gray-300 rounded-md"
-                  />
-                  <InputField
-                    placeholder="#EF4444"
-                    value={categoryForm.Color}
-                    onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
-                    width="w-full"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category Color
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="color"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  className="w-12 h-10 border border-gray-300 rounded-md"
+                />
+                <InputField
+                  placeholder="#EF4444"
+                  value={categoryForm.Color}
+                  onChange={(e) => setCategoryForm({...categoryForm, Color: e.target.value})}
+                  width="w-full"
+                />
               </div>
-              <InputField
-                label="Display Order"
-                type="number"
-                placeholder="0"
-                value={categoryForm.DisplayOrder}
-                onChange={(e) => setCategoryForm({...categoryForm, DisplayOrder: parseInt(e.target.value) || 0})}
-                width="w-full"
-              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="Budget Limit ($)"
-                type="number"
-                placeholder="0"
-                value={categoryForm.BudgetLimit}
-                onChange={(e) => setCategoryForm({...categoryForm, BudgetLimit: parseFloat(e.target.value) || 0})}
-                width="w-full"
-                min="0"
-                step="0.01"
-              />
-              <InputField
-                label="Icon (Optional)"
-                placeholder="Icon name or unicode"
-                value={categoryForm.Icon}
-                onChange={(e) => setCategoryForm({...categoryForm, Icon: e.target.value})}
-                width="w-full"
-              />
-            </div>
-            <div className="flex items-center space-x-6">
-              <CheckboxField
-                name="IsActive"
-                label="Active Category"
-                checked={categoryForm.IsActive}
-                onChange={(e) => setCategoryForm({...categoryForm, IsActive: e.target.checked})}
-                errors={{}}
-              />
-              <CheckboxField
-                name="AllowOverBudget"
-                label="Allow Over Budget"
-                checked={categoryForm.AllowOverBudget}
-                onChange={(e) => setCategoryForm({...categoryForm, AllowOverBudget: e.target.checked})}
-                errors={{}}
-              />
-            </div>
+            <CheckboxField
+              name="IsActive"
+              label="Active Category"
+              checked={categoryForm.IsActive}
+              onChange={(e) => setCategoryForm({...categoryForm, IsActive: e.target.checked})}
+              errors={{}}
+            />
           </div>
         }
       />
@@ -735,13 +585,7 @@ const ExpenseCategories = () => {
                       <p className="text-sm text-gray-600">{currentExpenseCategory.Description}</p>
                       <div className="flex items-center space-x-4 text-sm">
                         <span>Status: {getStatusBadge(currentExpenseCategory.IsActive)}</span>
-                        <span>Order: {currentExpenseCategory.DisplayOrder}</span>
                       </div>
-                      {currentExpenseCategory.BudgetLimit > 0 && (
-                        <div className="text-sm">
-                          <span>Budget Limit: <span className="font-semibold">${currentExpenseCategory.BudgetLimit.toLocaleString()}</span></span>
-                        </div>
-                      )}
                     </div>
                   </div>
                   
@@ -768,12 +612,12 @@ const ExpenseCategories = () => {
                   </div>
                 </div>
 
-                {recentExpenses && recentExpenses.length > 0 && (
+                {recentExpenses && recentExpenses.$values && recentExpenses.$values.length > 0 && (
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Recent Expense Records</h4>
                     <div className="max-h-60 overflow-y-auto">
                       <div className="space-y-2">
-                        {recentExpenses.slice(0, 5).map((expense, index) => (
+                        {recentExpenses.$values.slice(0, 5).map((expense, index) => (
                           <div key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
                             <div>
                               <p className="font-medium text-sm">{expense.Description}</p>

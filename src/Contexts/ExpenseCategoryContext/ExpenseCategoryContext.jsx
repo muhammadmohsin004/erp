@@ -22,7 +22,7 @@ const initialState = {
   error: null,
   filters: {
     search: '',
-    isActive: null,
+    isActive: true,
     sortBy: 'Name',
     sortAscending: true
   }
@@ -52,71 +52,71 @@ const expenseCategoryReducer = (state, action) => {
   switch (action.type) {
     case actionTypes.SET_LOADING:
       return { ...state, loading: action.payload };
-    
+
     case actionTypes.SET_ERROR:
       return { ...state, error: action.payload, loading: false };
-    
+
     case actionTypes.SET_EXPENSE_CATEGORIES:
-      return { 
-        ...state, 
-        expenseCategories: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        expenseCategories: action.payload,
+        loading: false,
+        error: null
       };
-    
+
     case actionTypes.SET_CURRENT_EXPENSE_CATEGORY:
-      return { 
-        ...state, 
-        currentExpenseCategory: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        currentExpenseCategory: action.payload,
+        loading: false,
+        error: null
       };
-    
+
     case actionTypes.SET_CATEGORY_EXPENSES:
-      return { 
-        ...state, 
-        categoryExpenses: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        categoryExpenses: action.payload,
+        loading: false,
+        error: null
       };
-    
+
     case actionTypes.SET_CATEGORY_STATISTICS:
-      return { 
-        ...state, 
-        categoryStatistics: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        categoryStatistics: action.payload,
+        loading: false,
+        error: null
       };
-    
+
     case actionTypes.SET_RECENT_EXPENSES:
-      return { 
-        ...state, 
-        recentExpenses: action.payload, 
-        loading: false, 
-        error: null 
+      return {
+        ...state,
+        recentExpenses: action.payload,
+        loading: false,
+        error: null
       };
-    
+
     case actionTypes.SET_PAGINATION:
-      return { 
-        ...state, 
+      return {
+        ...state,
         expenseCategories: {
           ...state.expenseCategories,
-          Paginations: { 
-            ...state.expenseCategories.Paginations, 
-            ...action.payload 
+          Paginations: {
+            ...state.expenseCategories.Paginations,
+            ...action.payload
           }
         }
       };
-    
+
     case actionTypes.SET_FILTERS:
-      return { 
-        ...state, 
-        filters: { ...state.filters, ...action.payload } 
+      return {
+        ...state,
+        filters: { ...state.filters, ...action.payload }
       };
-    
+
     case actionTypes.ADD_EXPENSE_CATEGORY:
-      return { 
-        ...state, 
+      return {
+        ...state,
         expenseCategories: {
           ...state.expenseCategories,
           Data: [...state.expenseCategories.Data, action.payload]
@@ -124,7 +124,7 @@ const expenseCategoryReducer = (state, action) => {
         loading: false,
         error: null
       };
-    
+
     case actionTypes.UPDATE_EXPENSE_CATEGORY:
       return {
         ...state,
@@ -134,13 +134,13 @@ const expenseCategoryReducer = (state, action) => {
             category.Id === action.payload.Id ? action.payload : category
           )
         },
-        currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload.Id 
-          ? action.payload 
+        currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload.Id
+          ? action.payload
           : state.currentExpenseCategory,
         loading: false,
         error: null
       };
-    
+
     case actionTypes.DELETE_EXPENSE_CATEGORY:
       return {
         ...state,
@@ -150,37 +150,37 @@ const expenseCategoryReducer = (state, action) => {
             category => category.Id !== action.payload
           )
         },
-        currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload 
-          ? null 
+        currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload
+          ? null
           : state.currentExpenseCategory,
         loading: false,
         error: null
       };
-    
+
     case actionTypes.TOGGLE_EXPENSE_CATEGORY_STATUS:
       return {
         ...state,
         expenseCategories: {
           ...state.expenseCategories,
           Data: state.expenseCategories.Data.map(category =>
-            category.Id === action.payload.id 
+            category.Id === action.payload.id
               ? { ...category, IsActive: action.payload.isActive }
               : category
           )
         },
-        currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload.id 
+        currentExpenseCategory: state.currentExpenseCategory?.Id === action.payload.id
           ? { ...state.currentExpenseCategory, IsActive: action.payload.isActive }
           : state.currentExpenseCategory,
         loading: false,
         error: null
       };
-    
+
     case actionTypes.CLEAR_ERROR:
       return { ...state, error: null };
-    
+
     case actionTypes.RESET_STATE:
       return initialState;
-    
+
     default:
       return state;
   }
@@ -200,7 +200,7 @@ const getAuthToken = () => {
 // Helper function to make API calls with better error handling
 const makeApiCall = async (url, options = {}) => {
   const token = getAuthToken();
-  
+
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
@@ -212,12 +212,13 @@ const makeApiCall = async (url, options = {}) => {
   try {
     console.log('Making API call to:', url, options); // Debug log
     const response = await fetch(url, { ...defaultOptions, ...options });
-    
+
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.Message || `HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     console.log('API response:', data); // Debug log
     return data;
@@ -250,9 +251,9 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const getExpenseCategories = useCallback(async (params = {}) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const queryParams = new URLSearchParams();
-      
+
       // Add parameters with proper naming (PascalCase as per your API)
       if (params.page || state.expenseCategories.Paginations.CurrentPage) {
         queryParams.append('Page', params.page || state.expenseCategories.Paginations.CurrentPage);
@@ -274,10 +275,10 @@ export const ExpenseCategoryProvider = ({ children }) => {
       }
 
       const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
-      
+
       if (response.Success) {
-        dispatch({ 
-          type: actionTypes.SET_EXPENSE_CATEGORIES, 
+        dispatch({
+          type: actionTypes.SET_EXPENSE_CATEGORIES,
           payload: {
             Data: response.Data || [],
             Paginations: response.Paginations || {
@@ -300,9 +301,9 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const getExpenseCategory = useCallback(async (id) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}`);
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.SET_CURRENT_EXPENSE_CATEGORY, payload: response.Data });
         return response.Data;
@@ -316,27 +317,25 @@ export const ExpenseCategoryProvider = ({ children }) => {
   }, []);
 
   // Create expense category
+  // Create expense category - Updated to match API requirements
   const createExpenseCategory = useCallback(async (categoryData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
-      // Ensure payload matches exactly what API expects (PascalCase)
+
+      // Updated payload to exactly match API requirements
       const payload = {
-        Name: categoryData.name,
-        Description: categoryData.description,
-        Color: categoryData.color,
-        Icon: categoryData.icon || null,
-        IsActive: categoryData.isActive !== false,
-        DisplayOrder: categoryData.displayOrder || 0,
-        BudgetLimit: categoryData.budgetLimit || 0,
-        AllowOverBudget: categoryData.allowOverBudget !== false
+        Name: categoryData.Name,  // Note: Using Name directly from input
+        Description: categoryData.Description,
+        Color: categoryData.Color || null,
+        IsActive: categoryData.IsActive !== false
+        // Note: The AllowOverBudget field is not in the cURL example
       };
-      
+
       const response = await makeApiCall(API_BASE_URL, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.ADD_EXPENSE_CATEGORY, payload: response.Data });
         return response.Data;
@@ -353,24 +352,21 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const updateExpenseCategory = useCallback(async (id, categoryData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       // Ensure payload matches exactly what API expects (PascalCase)
       const payload = {
         Name: categoryData.name,
         Description: categoryData.description,
-        Color: categoryData.color,
-        Icon: categoryData.icon || null,
+        Color: categoryData.color || null,
         IsActive: categoryData.isActive !== false,
-        DisplayOrder: categoryData.displayOrder || 0,
-        BudgetLimit: categoryData.budgetLimit || 0,
         AllowOverBudget: categoryData.allowOverBudget !== false
       };
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
         method: 'PUT',
         body: JSON.stringify(payload)
       });
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.UPDATE_EXPENSE_CATEGORY, payload: response.Data });
         return response.Data;
@@ -387,11 +383,11 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const deleteExpenseCategory = useCallback(async (id) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
         method: 'DELETE'
       });
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.DELETE_EXPENSE_CATEGORY, payload: id });
         return true;
@@ -408,18 +404,18 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const toggleExpenseCategoryStatus = useCallback(async (id) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}/toggle-status`, {
         method: 'PATCH'
       });
-      
+
       if (response.Success) {
-        dispatch({ 
-          type: actionTypes.TOGGLE_EXPENSE_CATEGORY_STATUS, 
-          payload: { 
-            id, 
-            isActive: response.Data.IsActive 
-          } 
+        dispatch({
+          type: actionTypes.TOGGLE_EXPENSE_CATEGORY_STATUS,
+          payload: {
+            id,
+            isActive: response.Data.IsActive
+          }
         });
         return true;
       } else {
@@ -435,13 +431,13 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const getCategoryStatistics = useCallback(async (id, startDate = null, endDate = null) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const queryParams = new URLSearchParams();
       if (startDate) queryParams.append('StartDate', startDate);
       if (endDate) queryParams.append('EndDate', endDate);
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}/statistics?${queryParams}`);
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.SET_CATEGORY_STATISTICS, payload: response.Data });
         return response.Data;
@@ -458,16 +454,16 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const getCategoryExpenses = useCallback(async (id, params = {}) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      
+
       const queryParams = new URLSearchParams();
       if (params.page) queryParams.append('Page', params.page);
       if (params.pageSize) queryParams.append('PageSize', params.pageSize);
       if (params.startDate) queryParams.append('StartDate', params.startDate);
       if (params.endDate) queryParams.append('EndDate', params.endDate);
       if (params.status) queryParams.append('Status', params.status);
-      
+
       const response = await makeApiCall(`${API_BASE_URL}/${id}/expenses?${queryParams}`);
-      
+
       if (response.Success) {
         dispatch({ type: actionTypes.SET_CATEGORY_EXPENSES, payload: response.Data });
         return response.Data;
@@ -503,18 +499,18 @@ export const ExpenseCategoryProvider = ({ children }) => {
 
   // Change page
   const changePage = useCallback(async (page) => {
-    dispatch({ 
-      type: actionTypes.SET_PAGINATION, 
-      payload: { CurrentPage: page } 
+    dispatch({
+      type: actionTypes.SET_PAGINATION,
+      payload: { CurrentPage: page }
     });
     await getExpenseCategories({ page });
   }, [getExpenseCategories]);
 
   // Change page size
   const changePageSize = useCallback(async (pageSize) => {
-    dispatch({ 
-      type: actionTypes.SET_PAGINATION, 
-      payload: { PageSize: pageSize, CurrentPage: 1 } 
+    dispatch({
+      type: actionTypes.SET_PAGINATION,
+      payload: { PageSize: pageSize, CurrentPage: 1 }
     });
     await getExpenseCategories({ pageSize, page: 1 });
   }, [getExpenseCategories]);
@@ -541,7 +537,7 @@ export const ExpenseCategoryProvider = ({ children }) => {
     error: state.error,
     pagination: state.expenseCategories.Paginations,
     filters: state.filters,
-    
+
     // Actions
     getExpenseCategories,
     getExpenseCategory,
@@ -560,7 +556,7 @@ export const ExpenseCategoryProvider = ({ children }) => {
     clearError,
     setLoading,
     resetState,
-    
+
     // Helper functions
     getActiveExpenseCategories
   };
