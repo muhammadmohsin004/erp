@@ -138,13 +138,10 @@ const InvoicesList = () => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedClient, setSelectedClientLocal] = useState("");
   const [dateRange, setDateRangeLocal] = useState({ from: "", to: "" });
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedInvoices, setSelectedInvoices] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState(null);
-  const [showBulkActions, setShowBulkActions] = useState(false);
   const [actionDropdown, setActionDropdown] = useState(null);
-  const [viewMode, setViewMode] = useState("grid"); // grid or table
 
   // Load data on mount
   useEffect(() => {
@@ -166,7 +163,7 @@ const InvoicesList = () => {
     };
 
     loadData();
-  }, [token]);
+  }, [token, navigate, getInvoices, getClients, getStatistics]);
 
   // Handle search
   const handleSearch = async (value) => {
@@ -325,12 +322,19 @@ const InvoicesList = () => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   // Format date
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString();
+  };
+
+  // Calculate paid amount from invoices (since statistics might not have this)
+  const calculatePaidAmount = () => {
+    return invoices.reduce((total, invoice) => {
+      return total + (invoice.PaidAmount || 0);
+    }, 0);
   };
 
   // Loading state
@@ -343,8 +347,9 @@ const InvoicesList = () => {
     );
   }
 
-
-  console.log('invoices================>>>>', invoices)
+  console.log('invoices================>>>>', invoices);
+  console.log('statistics================>>>>', statistics);
+  console.log('pagination================>>>>', pagination);
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -452,7 +457,7 @@ const InvoicesList = () => {
                   {translations["Paid Amount"]}
                 </Span>
                 <Span className="text-2xl font-bold text-gray-900 block">
-                  {formatCurrency(statistics.totalRevenue || 0)}
+                  {formatCurrency(calculatePaidAmount())}
                 </Span>
               </Container>
               <Container className="bg-green-100 rounded-full p-3">
@@ -743,12 +748,11 @@ const InvoicesList = () => {
                           <OutlineButton
                             isIcon={true}
                             icon={Edit}
-                            iconSize="w-10 h-10"
+                            iconSize="w-4 h-4"
                             bgColor="bg-blue-100 hover:bg-blue-200"
                             textColor="text-blue-700"
                             rounded="rounded-lg"
                             buttonText=""
-
                             height="h-8"
                             width="w-8"
                             onClick={() => handleEdit(invoice)}
@@ -872,7 +876,7 @@ const InvoicesList = () => {
               />
 
               <Container className="flex items-center gap-1">
-                {[...Array(pagination.totalPages)].map((_, index) => {
+                {[...Array(pagination.totalPages || 1)].map((_, index) => {
                   const pageNumber = index + 1;
                   const isCurrentPage = pageNumber === pagination.page;
                   return (

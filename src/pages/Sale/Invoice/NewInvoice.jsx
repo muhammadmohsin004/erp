@@ -59,9 +59,9 @@ const NewInvoice = () => {
 
   // Form state
   const [formData, setFormData] = useState({
-    InvoiceDate: new Date().toISOString().split("T")[0],
+    ClientId: "", // FIXED: Use correct field name
+    InvoiceDate: new Date().toISOString().split("T")[0], // FIXED: Use correct field name
     DueDate: "",
-    ClientId: "",
     Description: "",
     Notes: "",
     Status: "Draft",
@@ -87,34 +87,45 @@ const NewInvoice = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  // FIXED: Remove the dependencies that were causing the infinite loop
+  // FIXED: Extract data according to your exact API structure
+  const productsData = products?.Data?.$values || [];
+  const servicesData = services?.Data?.$values || [];
+  const clientsData = clients || []; // Clients seem to be already processed
+
+  // Debug logging - remove in production
+  console.log("=== DROPDOWN DEBUG INFO ===");
+  console.log("Raw products:", products);
+  console.log("Raw services:", services);
+  console.log("Raw clients:", clients);
+  console.log("Processed productsData:", productsData);
+  console.log("Processed servicesData:", servicesData);
+  console.log("Processed clientsData:", clientsData);
+  console.log("Products loading:", productsLoading);
+  console.log("Services loading:", servicesLoading);
+  console.log("Clients loading:", clientsLoading);
+
+  // Load initial data
   const loadInitialData = useCallback(async () => {
     try {
-      // Load clients first since they're most critical
-      await getClients();
-
-      // Then load services and products in parallel
-      await Promise.all([getServices(), getProducts()]);
+      console.log("Loading initial data...");
+      // Load all data in parallel
+      await Promise.all([getClients(), getServices(), getProducts()]);
 
       setInitialLoadComplete(true);
+      console.log("Initial data load complete");
     } catch (error) {
       console.error("Error loading initial data:", error);
     }
-  }, []); // FIXED: Empty dependency array to prevent infinite loop
+  }, [getClients, getServices, getProducts]);
 
-  const productsData = products?.Data?.$values || [];
-
-  // FIXED: Load initial data only once when component mounts and token is available
+  // Load initial data only once when component mounts and token is available
   useEffect(() => {
-    getProducts();
     if (token && !initialLoadComplete) {
       loadInitialData();
     }
-  }, [token, initialLoadComplete]); // FIXED: Removed loadInitialData from dependencies
+  }, [token, initialLoadComplete, loadInitialData]);
 
   // Initialize form data
-
-  console.log("services===>", services);
   useEffect(() => {
     if (initialLoadComplete && (editData || cloneData)) {
       const dataToUse = editData || cloneData;
@@ -159,7 +170,7 @@ const NewInvoice = () => {
     }
   }, [editData, cloneData, isEditing, isCloning, initialLoadComplete]);
 
-  // FIXED: Calculate totals function - moved outside useEffect to prevent dependencies issue
+  // Calculate totals function
   const calculateTotals = useCallback(() => {
     const subTotal = invoiceItems.reduce((sum, item) => {
       return sum + (parseFloat(item.LineTotal) || 0);
@@ -197,19 +208,45 @@ const NewInvoice = () => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
+  console.log(`=== INPUT CHANGE: ${field} ===`);
+  console.log("New value:", value);
+  console.log("Value type:", typeof value);
+  console.log("Current formData before update:", formData);
+
+  setFormData((prev) => {
+    const updated = {
       ...prev,
       [field]: value,
-    }));
+    };
+    console.log("Updated formData:", updated);
+    return updated;
+  });
 
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({
+  // Clear error when user starts typing
+  if (errors[field]) {
+    setErrors((prev) => ({
+      ...prev,
+      [field]: "",
+    }));
+  }
+
+  // If client is selected, log additional info and validate
+  if (field === "ClientId" && value) {
+    console.log("Client selection changed to:", value);
+    const selectedClient = clientsData.find(client => client.Id === parseInt(value));
+    console.log("Selected client details:", selectedClient);
+    
+    if (!selectedClient) {
+      console.warn("Selected client not found in clientsData!");
+      setErrors(prev => ({
         ...prev,
-        [field]: "",
+        ClientId: "Selected client is invalid"
       }));
+    } else {
+      console.log("Valid client selected:", selectedClient.FullName || selectedClient.BusinessName);
     }
-  };
+  }
+};
 
   // Handle item changes
   const handleItemChange = async (index, field, value) => {
@@ -226,22 +263,33 @@ const NewInvoice = () => {
       updatedItems[index].UnitPrice = 0;
     }
 
-    // Auto-populate price when product or service is selected
+    // Auto-populate price when product is selected
     if (field === "ProductId" && value) {
       try {
-        const product = productsData.find((p) => p.Id === value);
-        if (product && product.Price) {
-          updatedItems[index].UnitPrice = product.Price;
+        const product = productsData.find((p) => p.Id === parseInt(value));
+        console.log("Selected product:", product);
+        if (product && product.UnitPrice) {
+          // Convert string price to number
+          updatedItems[index].UnitPrice = parseFloat(product.UnitPrice) || 0;
+          console.log("Set price to:", updatedItems[index].UnitPrice);
         }
       } catch (error) {
         console.error("Error finding product:", error);
       }
     }
 
+    // Auto-populate price when service is selected
     if (field === "ServiceId" && value) {
-      const service = services.find((s) => s.Id === value);
-      if (service && service.Price) {
-        updatedItems[index].UnitPrice = service.Price;
+      try {
+        const service = servicesData.find((s) => s.Id === parseInt(value));
+        console.log("Selected service:", service);
+        if (service && service.UnitPrice) {
+          // Convert string price to number
+          updatedItems[index].UnitPrice = parseFloat(service.UnitPrice) || 0;
+          console.log("Set price to:", updatedItems[index].UnitPrice);
+        }
+      } catch (error) {
+        console.error("Error finding service:", error);
       }
     }
 
@@ -285,122 +333,218 @@ const NewInvoice = () => {
     }
   };
 
-  // Validate form
-  const validateForm = () => {
-    const newErrors = {};
+const validateForm = () => {
+  const newErrors = {};
 
-    if (!formData.ClientId) {
-      newErrors.ClientId = "Client is required";
+  // FIXED: More robust client validation with detailed logging
+  console.log("=== FORM VALIDATION DEBUG ===");
+  console.log("FormData ClientId:", formData.ClientId);
+  console.log("FormData ClientId type:", typeof formData.ClientId);
+  console.log("Available clients:", clientsData.map(c => ({id: c.Id, name: c.FullName || c.BusinessName})));
+
+  if (!formData.ClientId || formData.ClientId === "" || formData.ClientId === "0") {
+    newErrors.ClientId = "Client is required";
+    console.log("Client validation failed: No client selected");
+  } else {
+    // Check if client exists in the list
+    const clientExists = clientsData.find(client => client.Id === parseInt(formData.ClientId));
+    console.log("Selected client exists:", clientExists);
+    if (!clientExists) {
+      newErrors.ClientId = "Selected client is invalid";
+      console.log("Client validation failed: Selected client not found in list");
     }
+  }
 
-    // Validate items
-    if (
-      invoiceItems.length === 0 ||
-      invoiceItems.every((item) => !item.ItemType)
-    ) {
-      newErrors.items = "At least one item is required";
-    }
+  // FIXED: More detailed invoice date validation
+  if (!formData.InvoiceDate) {
+    newErrors.InvoiceDate = "Invoice date is required";
+  }
 
-    // Validate item data
-    invoiceItems.forEach((item, index) => {
-      if (item.ItemType) {
-        if (!item.ItemType) {
-          newErrors[`item_${index}_type`] = "Item type is required";
-        }
+  // FIXED: Better items validation with detailed logging
+  const validItems = invoiceItems.filter(item => {
+    const hasType = item.ItemType;
+    const hasProduct = item.ItemType === "Product" && item.ProductId;
+    const hasService = item.ItemType === "Service" && item.ServiceId;
+    const hasQuantity = parseFloat(item.Quantity) > 0;
+    const hasPrice = parseFloat(item.UnitPrice) >= 0;
+    
+    const isValid = hasType && (hasProduct || hasService) && hasQuantity && hasPrice;
+    
+    console.log(`Item validation - Type: ${hasType}, Product: ${hasProduct}, Service: ${hasService}, Qty: ${hasQuantity}, Price: ${hasPrice}, Valid: ${isValid}`);
+    
+    return isValid;
+  });
 
-        if (item.ItemType === "Product" && !item.ProductId) {
-          newErrors[`item_${index}_product`] = "Product is required";
-        }
+  console.log("Valid items count:", validItems.length);
+  console.log("Total items count:", invoiceItems.length);
 
-        if (item.ItemType === "Service" && !item.ServiceId) {
-          newErrors[`item_${index}_service`] = "Service is required";
-        }
+  if (validItems.length === 0) {
+    newErrors.items = "At least one complete item is required";
+  }
 
-        const quantity = parseFloat(item.Quantity);
-        const unitPrice = parseFloat(item.UnitPrice);
-        const taxRate = parseFloat(item.TaxRate);
-
-        if (isNaN(quantity) || quantity <= 0) {
-          newErrors[`item_${index}_quantity`] = "Invalid quantity";
-        }
-
-        if (isNaN(unitPrice) || unitPrice < 0) {
-          newErrors[`item_${index}_price`] = "Invalid price format";
-        }
-
-        if (isNaN(taxRate) || taxRate < 0 || taxRate > 100) {
-          newErrors[`item_${index}_tax`] = "Invalid tax rate";
-        }
+  // Validate individual items
+  invoiceItems.forEach((item, index) => {
+    if (item.ItemType) {
+      if (!item.ItemType) {
+        newErrors[`item_${index}_type`] = "Item type is required";
       }
-    });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+      if (item.ItemType === "Product" && !item.ProductId) {
+        newErrors[`item_${index}_product`] = "Product is required";
+      }
+
+      if (item.ItemType === "Service" && !item.ServiceId) {
+        newErrors[`item_${index}_service`] = "Service is required";
+      }
+
+      const quantity = parseFloat(item.Quantity);
+      const unitPrice = parseFloat(item.UnitPrice);
+      const taxRate = parseFloat(item.TaxRate);
+
+      if (isNaN(quantity) || quantity <= 0) {
+        newErrors[`item_${index}_quantity`] = "Quantity must be greater than 0";
+      }
+
+      if (isNaN(unitPrice) || unitPrice < 0) {
+        newErrors[`item_${index}_price`] = "Unit price must be 0 or greater";
+      }
+
+      if (isNaN(taxRate) || taxRate < 0 || taxRate > 100) {
+        newErrors[`item_${index}_tax`] = "Tax rate must be between 0 and 100";
+      }
+    }
+  });
+
+  console.log("=== FORM VALIDATION RESULTS ===");
+  console.log("Form data:", formData);
+  console.log("Selected ClientId:", formData.ClientId);
+  console.log("Validation errors:", newErrors);
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+// Fixed handleSubmit method in your NewInvoice component
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!validateForm()) {
+  if (!validateForm()) {
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    // FIXED: Prepare invoice data with correct field names matching backend DTO
+    const invoiceData = {
+      // Basic invoice information - Use exact field names from backend DTO
+      ClientId: parseInt(formData.ClientId), // FIXED: Ensure it's an integer
+      InvoiceNumber: formData.InvoiceNumber || null, // API might auto-generate if null
+      InvoiceDate: formData.InvoiceDate, // FIXED: Use InvoiceDate (capital I)
+      DueDate: formData.DueDate || null, // FIXED: Use DueDate (capital D)
+      Status: formData.Status || "Draft",
+      Description: formData.Description || null,
+      Notes: formData.Notes || null,
+      
+      // Financial fields
+      Currency: "SAR", // Default currency
+      ExchangeRate: 1,
+      DiscountAmount: parseFloat(formData.discountAmount) || 0,
+      ShippingAmount: parseFloat(formData.shippingAmount) || 0,
+      
+      // Additional fields that might be expected
+      PaymentTerms: formData.paymentTerms || null,
+      InternalNotes: formData.internalNotes || null,
+      PurchaseOrderNumber: formData.purchaseOrderNumber || null,
+      IsRecurring: false,
+      
+      // FIXED: Invoice items with correct structure - ensure field name matches context expectation
+      InvoiceItems: invoiceItems
+        .filter((item) => item.ItemType && (item.ProductId || item.ServiceId))
+        .map((item) => ({
+          ItemType: item.ItemType,
+          ProductId: item.ItemType === "Product" ? parseInt(item.ProductId) : null,
+          ServiceId: item.ItemType === "Service" ? parseInt(item.ServiceId) : null,
+          Quantity: parseFloat(item.Quantity) || 1,
+          UnitPrice: parseFloat(item.UnitPrice) || 0,
+          TaxRate: parseFloat(item.TaxRate) || 0,
+          LineTotal: parseFloat(item.LineTotal) || 0,
+          Description: item.Description || item.ItemName || "",
+          Discount: parseFloat(item.Discount) || 0,
+          DiscountType: item.DiscountType || "percentage",
+        })),
+      
+      // Calculated totals
+      SubTotal: parseFloat(formData.SubTotal) || 0,
+      TaxAmount: parseFloat(formData.TaxAmount) || 0,
+      TotalAmount: parseFloat(formData.TotalAmount) || 0,
+    };
+
+    console.log("=== SUBMITTING INVOICE DATA ===");
+    console.log("Prepared invoice data:", invoiceData);
+    console.log("Client ID:", invoiceData.ClientId);
+    console.log("Invoice Items:", invoiceData.InvoiceItems);
+    console.log("Items count:", invoiceData.InvoiceItems.length);
+
+    // FIXED: Additional validation before submission
+    if (!invoiceData.ClientId || invoiceData.ClientId <= 0) {
+      alert("Please select a valid client before submitting the invoice.");
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // Prepare invoice data
-      const invoiceData = {
-        ...formData,
-        InvoiceItems: invoiceItems
-          .filter((item) => item.ItemType)
-          .map((item) => ({
-            ItemType: item.ItemType,
-            ProductId: item.ItemType === "Product" ? item.ProductId : null,
-            ServiceId: item.ItemType === "Service" ? item.ServiceId : null,
-            Quantity: parseFloat(item.Quantity),
-            UnitPrice: parseFloat(item.UnitPrice),
-            TaxRate: parseFloat(item.TaxRate),
-            LineTotal: parseFloat(item.LineTotal),
-          })),
-      };
-
-      let result;
-
-      if (isEditing && editData) {
-        // Update existing invoice
-        result = await updateInvoice(editData.Id, invoiceData);
-        if (result) {
-          alert("Invoice updated successfully");
-          navigate("/admin/invoices/list");
-        } else {
-          alert("Failed to update invoice");
-        }
-      } else {
-        // Create new invoice
-        result = await createInvoice(invoiceData);
-        if (result) {
-          alert("Invoice created successfully");
-          navigate("/admin/invoices/list");
-        } else {
-          alert("Failed to create invoice");
-        }
-      }
-    } catch (error) {
-      console.error("Error submitting invoice:", error);
-      alert(
-        isEditing ? "Failed to update invoice" : "Failed to create invoice"
-      );
-    } finally {
-      setIsSubmitting(false);
+    if (!invoiceData.InvoiceItems || invoiceData.InvoiceItems.length === 0) {
+      alert("Please add at least one invoice item before submitting.");
+      return;
     }
-  };
+
+    let result;
+
+    if (isEditing && editData) {
+      // Update existing invoice
+      console.log("Updating invoice with ID:", editData.Id);
+      result = await updateInvoice(editData.Id, invoiceData);
+      if (result) {
+        alert("Invoice updated successfully");
+        navigate("/admin/invoices/list");
+      } else {
+        alert("Failed to update invoice");
+      }
+    } else {
+      // Create new invoice
+      console.log("Creating new invoice...");
+      result = await createInvoice(invoiceData);
+      if (result) {
+        alert("Invoice created successfully");
+        navigate("/admin/invoices/list");
+      } else {
+        alert("Failed to create invoice");
+      }
+    }
+  } catch (error) {
+    console.error("Error submitting invoice:", error);
+    
+    // More detailed error handling
+    if (error.message.includes("Invalid client ID")) {
+      alert("Please select a valid client before submitting the invoice.");
+    } else if (error.message.includes("validation")) {
+      alert("Please check all required fields and try again.");
+    } else {
+      alert(
+        `${isEditing ? "Failed to update" : "Failed to create"} invoice: ${error.message}`
+      );
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Loading state
   if (!token || !initialLoadComplete) {
     return (
       <Container className="flex justify-center items-center min-h-screen">
-        <Span className="text-blue-500 text-lg">Loading...</Span>
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <Span className="text-blue-500 text-lg ml-4">Loading...</Span>
       </Container>
     );
   }
@@ -421,12 +565,52 @@ const NewInvoice = () => {
   };
 
   const getSelectedClient = () => {
-    return clients.find((client) => client.Id === formData.ClientId);
+    return clientsData.find((client) => client.Id === parseInt(formData.ClientId));
   };
 
   return (
     <Container className="min-h-screen bg-gray-50">
       <Container className="px-6 py-6">
+        {/* Debug Info Panel - Remove this in production */}
+        <Container className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">Debug Info (Remove in production):</h4>
+          <div className="text-sm text-yellow-700 grid grid-cols-3 gap-4">
+            <div>
+              <p><strong>Products:</strong></p>
+              <p>Loading: {productsLoading ? 'Yes' : 'No'}</p>
+              <p>Count: {productsData.length}</p>
+              <p>Available: {productsData.length > 0 ? 'Yes' : 'No'}</p>
+              {productsData.length > 0 && (
+                <>
+                  <p>First product: {productsData[0]?.Name || 'No name'}</p>
+                  <p>Price: ${productsData[0]?.UnitPrice || 'No price'}</p>
+                </>
+              )}
+            </div>
+            <div>
+              <p><strong>Services:</strong></p>
+              <p>Loading: {servicesLoading ? 'Yes' : 'No'}</p>
+              <p>Count: {servicesData.length}</p>
+              <p>Available: {servicesData.length > 0 ? 'Yes' : 'No'}</p>
+              {servicesData.length > 0 && (
+                <>
+                  <p>First service: {servicesData[0]?.Name || 'No name'}</p>
+                  <p>Price: ${servicesData[0]?.UnitPrice || 'No price'}</p>
+                </>
+              )}
+            </div>
+            <div>
+              <p><strong>Clients:</strong></p>
+              <p>Loading: {clientsLoading ? 'Yes' : 'No'}</p>
+              <p>Count: {clientsData.length}</p>
+              <p>Available: {clientsData.length > 0 ? 'Yes' : 'No'}</p>
+              {clientsData.length > 0 && (
+                <p>First client: {clientsData[0]?.FullName || clientsData[0]?.BusinessName || 'No name'}</p>
+              )}
+            </div>
+          </div>
+        </Container>
+
         {/* Header */}
         <Container className="flex items-center justify-between mb-6">
           <Container className="flex items-center gap-4">
@@ -476,29 +660,6 @@ const NewInvoice = () => {
             </Container>
 
             <Container className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Invoice Number */}
-              {/* <Container>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Invoice Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.InvoiceNumber}
-                  onChange={(e) =>
-                    handleInputChange("InvoiceNumber", e.target.value)
-                  }
-                  placeholder="Enter invoice number"
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.InvoiceNumber ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.InvoiceNumber && (
-                  <Span className="text-red-500 text-sm mt-1">
-                    {errors.InvoiceNumber}
-                  </Span>
-                )}
-              </Container> */}
-
               {/* Invoice Date */}
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -514,9 +675,16 @@ const NewInvoice = () => {
                     onChange={(e) =>
                       handleInputChange("InvoiceDate", e.target.value)
                     }
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.InvoiceDate ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
                 </Container>
+                {errors.InvoiceDate && (
+                  <Span className="text-red-500 text-sm mt-1">
+                    {errors.InvoiceDate}
+                  </Span>
+                )}
               </Container>
 
               {/* Due Date */}
@@ -591,30 +759,32 @@ const NewInvoice = () => {
                   Client <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={formData.ClientId}
-                  onChange={(e) =>
-                    handleInputChange("ClientId", e.target.value)
-                  }
+                  value={formData.ClientId || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    console.log("Client dropdown changed to:", value);
+                    handleInputChange("ClientId", value);
+                  }}
                   className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
                     errors.ClientId ? "border-red-500" : "border-gray-300"
                   }`}
                   disabled={clientsLoading}
                 >
-                  <option value="">Select Client</option>
-                  {clients.map((client) => (
+                  <option value="">
+                    {clientsLoading ? "Loading clients..." : "Select Client"}
+                  </option>
+                  {clientsData.map((client) => (
                     <option key={client.Id} value={client.Id}>
-                      {client.Name || client.CompanyName}
+                      {client.FullName || client.BusinessName} - {client.Email}
                     </option>
                   ))}
+                  {!clientsLoading && clientsData.length === 0 && (
+                    <option value="" disabled>No clients available</option>
+                  )}
                 </select>
                 {errors.ClientId && (
                   <Span className="text-red-500 text-sm mt-1">
                     {errors.ClientId}
-                  </Span>
-                )}
-                {clientsLoading && (
-                  <Span className="text-gray-500 text-sm mt-1">
-                    Loading clients...
                   </Span>
                 )}
                 {clientsError && (
@@ -637,17 +807,21 @@ const NewInvoice = () => {
                         return (
                           <Container className="space-y-1">
                             <Span className="text-sm font-medium text-gray-900">
-                              {selectedClient.Name ||
-                                selectedClient.CompanyName}
+                              {selectedClient.FullName || selectedClient.BusinessName}
                             </Span>
                             {selectedClient.Email && (
                               <Span className="text-sm text-gray-600 block">
                                 {selectedClient.Email}
                               </Span>
                             )}
-                            {selectedClient.Phone && (
+                            {(selectedClient.Mobile || selectedClient.Telephone) && (
                               <Span className="text-sm text-gray-600 block">
-                                {selectedClient.Phone}
+                                {selectedClient.Mobile || selectedClient.Telephone}
+                              </Span>
+                            )}
+                            {selectedClient.Currency && (
+                              <Span className="text-sm text-blue-600 block">
+                                Currency: {selectedClient.Currency}
                               </Span>
                             )}
                           </Container>
@@ -748,12 +922,17 @@ const NewInvoice = () => {
                           }`}
                           disabled={!item.ItemType || productsLoading}
                         >
-                          <option value="">Select Product</option>
+                          <option value="">
+                            {productsLoading ? "Loading products..." : "Select Product"}
+                          </option>
                           {productsData.map((product) => (
                             <option key={product.Id} value={product.Id}>
-                              {product.Name}
+                              {product.Name} - ${parseFloat(product.UnitPrice || 0).toFixed(2)}
                             </option>
                           ))}
+                          {!productsLoading && productsData.length === 0 && (
+                            <option value="" disabled>No products available</option>
+                          )}
                         </select>
                       ) : item.ItemType === "Service" ? (
                         <select
@@ -768,12 +947,17 @@ const NewInvoice = () => {
                           }`}
                           disabled={!item.ItemType || servicesLoading}
                         >
-                          <option value="">Select Service</option>
-                          {services.map((service) => (
+                          <option value="">
+                            {servicesLoading ? "Loading services..." : "Select Service"}
+                          </option>
+                          {servicesData.map((service) => (
                             <option key={service.Id} value={service.Id}>
-                              {service.Name}
+                              {service.Name} - ${parseFloat(service.UnitPrice || 0).toFixed(2)}
                             </option>
                           ))}
+                          {!servicesLoading && servicesData.length === 0 && (
+                            <option value="" disabled>No services available</option>
+                          )}
                         </select>
                       ) : (
                         <Container className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 text-sm">

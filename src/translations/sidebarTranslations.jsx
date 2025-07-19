@@ -65,6 +65,7 @@ export const sidebarTranslations = {
     sales: "Sales",
     invoiceDashboard: "Invoice Dashboard",
     allInvoices: "All Invoices",
+    ManageInvoices: "Manage Invoices",
 
     // Finance
     finance: "Finance",
@@ -155,6 +156,7 @@ export const sidebarTranslations = {
     sales: "المبيعات",
     invoiceDashboard: "لوحة تحكم الفواتير",
     allInvoices: "جميع الفواتير",
+    ManageInvoices: "ادارة الفواتير",
 
     // Finance
     finance: "المالية",

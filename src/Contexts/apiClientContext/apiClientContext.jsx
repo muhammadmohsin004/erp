@@ -37,7 +37,6 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("company");
@@ -90,7 +89,7 @@ const CLIENTS_ACTIONS = {
   RESET_FILTERS: "RESET_FILTERS",
 };
 
-// Reducer function
+// Reducer function (same as your original)
 const clientsReducer = (state, action) => {
   switch (action.type) {
     case CLIENTS_ACTIONS.SET_LOADING:
@@ -113,8 +112,7 @@ const clientsReducer = (state, action) => {
       };
 
     case CLIENTS_ACTIONS.SET_CLIENTS:
-      // Handle the API response format - Updated to match backend response
-      const clientsData =
+      { const clientsData =
         action.payload.Data || action.payload.data || action.payload;
       return {
         ...state,
@@ -144,7 +142,7 @@ const clientsReducer = (state, action) => {
         },
         isLoading: false,
         error: null,
-      };
+      }; }
 
     case CLIENTS_ACTIONS.SET_CURRENT_CLIENT:
       return {
@@ -260,7 +258,7 @@ const ClientsContext = createContext();
 export const ClientsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(clientsReducer, initialState);
 
-  // Helper function to handle API errors - Updated to match backend error format
+  // FIXED: Stable error handler
   const handleApiError = useCallback((error) => {
     let errorMessage = "An unexpected error occurred";
 
@@ -273,7 +271,6 @@ export const ClientsProvider = ({ children }) => {
     } else if (error.response?.data?.validationErrors) {
       errorMessage = error.response.data.validationErrors.join(", ");
     } else if (error.response?.data?.errors) {
-      // Handle the new error format
       const errors = error.response.data.errors;
       const errorMessages = [];
       Object.keys(errors).forEach(key => {
@@ -294,505 +291,266 @@ export const ClientsProvider = ({ children }) => {
     });
 
     throw new Error(errorMessage);
-  }, []);
+  }, []); // FIXED: Empty dependency array
 
-  // Calculate statistics from client data
-  const calculateStatisticsFromClients = useCallback((clients) => {
-    if (!Array.isArray(clients))
-      return {
-        totalClients: 0,
-        individualClients: 0,
-        businessClients: 0,
-        clientsThisMonth: 0,
+  // FIXED: Stable API functions
+  const getClients = useCallback(async (options = {}) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const params = {
+        page: options.page || 1,
+        pageSize: options.pageSize || 25,
+        search: options.searchTerm || "",
+        clientType: options.clientType || "",
+        sortBy: options.sortBy || "Id",
+        sortAscending: options.sortAscending !== undefined ? options.sortAscending : false,
+        category: options.category || "",
+        currency: options.currency || "",
+        country: options.country || "",
+        city: options.city || "",
+        startDate: options.startDate || null,
+        endDate: options.endDate || null,
       };
 
-    const total = clients.length;
-    const individual = clients.filter(
-      (c) => c.ClientType?.toLowerCase() === "individual"
-    ).length;
-    const business = clients.filter(
-      (c) => c.ClientType?.toLowerCase() === "business"
-    ).length;
-
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const thisMonth = clients.filter((c) => {
-      if (c.CreatedAt) {
-        const clientDate = new Date(c.CreatedAt);
-        return (
-          clientDate.getMonth() === currentMonth &&
-          clientDate.getFullYear() === currentYear
-        );
-      }
-      return false;
-    }).length;
-
-    return {
-      totalClients: total,
-      individualClients: individual,
-      businessClients: business,
-      clientsThisMonth: thisMonth,
-    };
-  }, []);
-
-  // Ensure required fields are strings (to match backend requirements)
-  const sanitizeClientData = useCallback((clientData) => {
-    return {
-      ...clientData,
-      // Ensure required NOT NULL fields are strings
-      MobileNumber: clientData.Mobile || clientData.MobileNumber || "",
-      PaymentTerms: clientData.PaymentTerms || "",
-      Phone: clientData.Telephone || clientData.Phone || "",
-      TaxNumber: clientData.TaxNumber || "",
-      Address: clientData.Address || "",
-      Currency: clientData.Currency || "USD",
-      ClientType: clientData.ClientType || "Individual",
-      DisplayLanguage: clientData.DisplayLanguage || "en",
-    };
-  }, []);
-
-  // Clients API methods
-  const clientsApi = {
-    // Get clients with pagination, search, and filters
-    getClients: async (options = {}) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const params = {
-          page: options.page || state.pagination.page,
-          pageSize: options.pageSize || state.pagination.pageSize,
-          search:
-            options.searchTerm !== undefined
-              ? options.searchTerm
-              : state.searchTerm,
-          clientType:
-            options.clientType !== undefined
-              ? options.clientType
-              : state.clientType,
-          sortBy: options.sortBy || state.sortBy,
-          sortAscending:
-            options.sortAscending !== undefined
-              ? options.sortAscending
-              : state.sortAscending,
-          // Add other filter options to match backend
-          category: options.category || "",
-          currency: options.currency || "",
-          country: options.country || "",
-          city: options.city || "",
-          startDate: options.startDate || null,
-          endDate: options.endDate || null,
-        };
-
-        // Remove empty params
-        Object.keys(params).forEach((key) => {
-          if (
-            params[key] === "" ||
-            params[key] === null ||
-            params[key] === undefined
-          ) {
-            delete params[key];
-          }
-        });
-
-        const response = await apiClient.get("/clients", { params });
-
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_CLIENTS,
-          payload: response.data.Data.$values,
-        });
-
-        // Calculate and set statistics from the received data
-        const clientsData =
-          response.data.Data.$values || response.data.data || response.data;
-        if (Array.isArray(clientsData)) {
-          const stats = calculateStatisticsFromClients(clientsData);
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
-        }
-
-        return response.data.Data.$values;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Get single client by ID
-    getClient: async (clientId) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.get(`/clients/${clientId}`);
-
-        const clientData =
-          response.data.Data || response.data.data || response.data;
-
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_CURRENT_CLIENT,
-          payload: clientData,
-        });
-
-        return { data: clientData };
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Create new client - Updated to match backend FormData expectations
-    createClient: async (clientData, attachments = []) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const formData = new FormData();
-
-        // Sanitize and append client data
-        const sanitizedData = sanitizeClientData(clientData);
-
-        Object.keys(sanitizedData).forEach((key) => {
-          if (
-            sanitizedData[key] !== null &&
-            sanitizedData[key] !== undefined &&
-            sanitizedData[key] !== ""
-          ) {
-            if (key === "contacts" && Array.isArray(sanitizedData[key])) {
-              // Handle contacts array - match backend expected format
-              sanitizedData[key].forEach((contact, index) => {
-                Object.keys(contact).forEach((contactKey) => {
-                  if (
-                    contact[contactKey] !== null &&
-                    contact[contactKey] !== undefined &&
-                    contact[contactKey] !== ""
-                  ) {
-                    formData.append(
-                      `Contacts[${index}].${contactKey}`,
-                      contact[contactKey]
-                    );
-                  }
-                });
-              });
-            } else {
-              // Use PascalCase for backend compatibility
-              const backendKey = key.charAt(0).toUpperCase() + key.slice(1);
-              formData.append(backendKey, sanitizedData[key]);
-            }
-          }
-        });
-
-        // Append attachments only if they exist
-        if (attachments && attachments.length > 0) {
-          attachments.forEach((file) => {
-            formData.append("Attachments", file);
-          });
-        }
-
-        const response = await apiClient.post("/clients", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        const newClient =
-          response.data.Data || response.data.data || response.data;
-
-        dispatch({
-          type: CLIENTS_ACTIONS.ADD_CLIENT,
-          payload: newClient,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Update existing client - COMPLETELY FIXED VERSION
-  // Update existing client - Simplest solution with no backend changes
-updateClient: async (clientId, clientData, attachments = []) => {
-  try {
-    dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-    dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-    const formData = new FormData();
-    
-    // Prepare ALL fields that backend expects with proper defaults
-    const completeData = {
-      // Required fields with defaults
-      ClientType: clientData.ClientType || "Individual",
-      FullName: clientData.FullName || "",
-      BusinessName: clientData.BusinessName || "",
-      FirstName: clientData.FirstName || "",
-      LastName: clientData.LastName || "",
-      Email: clientData.Email || "",
-      Mobile: clientData.Mobile || "",
-      Telephone: clientData.Telephone || "",
-      Website: clientData.Website || "",
-      StreetAddress1: clientData.StreetAddress1 || "",
-      StreetAddress2: clientData.StreetAddress2 || "",
-      City: clientData.City || "",
-      State: clientData.State || "",
-      PostalCode: clientData.PostalCode || "",
-      Country: clientData.Country || "",
-      VatNumber: clientData.VatNumber || "",
-      TaxNumber: clientData.TaxNumber || "",
-      CodeNumber: clientData.CodeNumber || "",
-      Currency: clientData.Currency || "USD",
-      Category: clientData.Category || "",
-      PaymentTerms: clientData.PaymentTerms || "",
-      InvoicingMethod: clientData.InvoicingMethod || "Email",
-      Notes: clientData.Notes || "",
-      DisplayLanguage: clientData.DisplayLanguage || "en",
-      HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
-      
-      // Backend specific required fields
-      MobileNumber: clientData.Mobile || "",
-      Phone: clientData.Telephone || "",
-      Address: "",
-    };
-
-    // Append ALL fields to FormData
-    Object.keys(completeData).forEach(key => {
-      const value = completeData[key];
-      if (typeof value === 'boolean') {
-        formData.append(key, value.toString());
-      } else {
-        formData.append(key, value || "");
-      }
-    });
-
-    // Handle contacts
-    if (clientData.contacts && Array.isArray(clientData.contacts)) {
-      clientData.contacts.forEach((contact, index) => {
-        formData.append(`Contacts[${index}].FirstName`, contact.FirstName || "");
-        formData.append(`Contacts[${index}].LastName`, contact.LastName || "");
-        formData.append(`Contacts[${index}].Email`, contact.Email || "");
-        formData.append(`Contacts[${index}].Mobile`, contact.Mobile || "");
-        formData.append(`Contacts[${index}].Telephone`, contact.Telephone || "");
-      });
-    }
-
-    // Handle attachments - Don't send empty files if no attachments
-    if (attachments && attachments.length > 0) {
-      attachments.forEach((file) => {
-        if (file instanceof File) {
-          formData.append('Attachments', file);
-        }
-      });
-    }
-
-    // Handle attachments to remove - Only send if there are valid IDs
-    const attachmentsToRemove = clientData.attachmentsToRemove || [];
-    if (attachmentsToRemove.length > 0) {
-      attachmentsToRemove.forEach((attachmentId, index) => {
-        if (attachmentId && parseInt(attachmentId) > 0) {
-          formData.append(`AttachmentsToRemove[${index}]`, attachmentId.toString());
-        }
-      });
-    }
-
-    console.log('FormData being sent:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
-    const response = await apiClient.put(`/clients/${clientId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    const updatedClient = response.data.Data || response.data.data || response.data;
-
-    dispatch({
-      type: CLIENTS_ACTIONS.UPDATE_CLIENT,
-      payload: updatedClient,
-    });
-
-    return response.data;
-  } catch (error) {
-    handleApiError(error);
-  }
-},
-
-    // Delete client - Updated to match backend signature
-    deleteClient: async (clientId, hardDelete = false) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const params = hardDelete ? { hardDelete: true } : {};
-        const response = await apiClient.delete(`/clients/${clientId}`, {
-          params,
-        });
-
-        dispatch({
-          type: CLIENTS_ACTIONS.DELETE_CLIENT,
-          payload: clientId,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Get client statistics - Updated to match backend response
-    getStatistics: async (options = {}) => {
-      try {
-        const params = {};
-        if (options.startDate) params.startDate = options.startDate;
-        if (options.endDate) params.endDate = options.endDate;
-
-        // If we have clients data, calculate statistics from it first
+      // Remove empty params
+      Object.keys(params).forEach((key) => {
         if (
-          state.clients.length > 0 &&
-          !options.startDate &&
-          !options.endDate
+          params[key] === "" ||
+          params[key] === null ||
+          params[key] === undefined
         ) {
-          const stats = calculateStatisticsFromClients(state.clients);
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
-          return { data: stats };
+          delete params[key];
         }
+      });
 
-        // Otherwise try to fetch from API
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+      const response = await apiClient.get("/clients", { params });
 
-        try {
-          const response = await apiClient.get("/clients/statistics", {
-            params,
-          });
-          const statsData =
-            response.data.Data || response.data.data || response.data;
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_CLIENTS,
+        payload: response.data.Data.$values,
+      });
 
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: statsData,
-          });
+      return response.data.Data.$values;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]); // FIXED: Only depends on stable handleApiError
 
-          return response.data;
-        } catch (error) {
-          // If statistics endpoint doesn't exist, calculate from clients
-          const allClientsResponse = await apiClient.get("/clients");
-          const allClients =
-            allClientsResponse.data.Data || allClientsResponse.data.data || [];
-          const stats = calculateStatisticsFromClients(allClients);
-
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
-
-          return { data: stats };
-        }
-      } catch (error) {
-        // Fallback to calculating from current state
-        const stats = calculateStatisticsFromClients(state.clients);
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_STATISTICS,
-          payload: stats,
-        });
-        return { data: stats };
-      }
-    },
-
-    // Clear current client
-    clearCurrentClient: () => {
-      dispatch({ type: CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT });
-    },
-
-    // Clear error manually
-    clearError: () => {
+  const getClient = useCallback(async (clientId) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-    },
 
-    // Set search term
-    setSearchTerm: (searchTerm) => {
+      const response = await apiClient.get(`/clients/${clientId}`);
+
+      const clientData =
+        response.data.Data || response.data.data || response.data;
+
       dispatch({
-        type: CLIENTS_ACTIONS.SET_SEARCH_TERM,
-        payload: searchTerm,
+        type: CLIENTS_ACTIONS.SET_CURRENT_CLIENT,
+        payload: clientData,
       });
-    },
 
-    // Set client type filter
-    setClientType: (clientType) => {
+      return { data: clientData };
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]); // FIXED: Only depends on stable handleApiError
+
+  const createClient = useCallback(async (clientData, attachments = []) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const formData = new FormData();
+
+      // Process client data
+      const sanitizedData = {
+        ...clientData,
+        MobileNumber: clientData.Mobile || clientData.MobileNumber || "",
+        PaymentTerms: clientData.PaymentTerms || "",
+        Phone: clientData.Telephone || clientData.Phone || "",
+        TaxNumber: clientData.TaxNumber || "",
+        Address: clientData.Address || "",
+        Currency: clientData.Currency || "USD",
+        ClientType: clientData.ClientType || "Individual",
+        DisplayLanguage: clientData.DisplayLanguage || "en",
+      };
+
+      Object.keys(sanitizedData).forEach((key) => {
+        if (
+          sanitizedData[key] !== null &&
+          sanitizedData[key] !== undefined &&
+          sanitizedData[key] !== ""
+        ) {
+          if (key === "contacts" && Array.isArray(sanitizedData[key])) {
+            sanitizedData[key].forEach((contact, index) => {
+              Object.keys(contact).forEach((contactKey) => {
+                if (
+                  contact[contactKey] !== null &&
+                  contact[contactKey] !== undefined &&
+                  contact[contactKey] !== ""
+                ) {
+                  formData.append(
+                    `Contacts[${index}].${contactKey}`,
+                    contact[contactKey]
+                  );
+                }
+              });
+            });
+          } else {
+            const backendKey = key.charAt(0).toUpperCase() + key.slice(1);
+            formData.append(backendKey, sanitizedData[key]);
+          }
+        }
+      });
+
+      if (attachments && attachments.length > 0) {
+        attachments.forEach((file) => {
+          formData.append("Attachments", file);
+        });
+      }
+
+      const response = await apiClient.post("/clients", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const newClient =
+        response.data.Data || response.data.data || response.data;
+
       dispatch({
-        type: CLIENTS_ACTIONS.SET_CLIENT_TYPE,
-        payload: clientType,
+        type: CLIENTS_ACTIONS.ADD_CLIENT,
+        payload: newClient,
       });
-    },
 
-    // Set sorting
-    setSort: (sortBy, sortAscending) => {
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]); // FIXED: Only depends on stable handleApiError
+
+  const updateClient = useCallback(async (clientId, clientData, attachments = []) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const formData = new FormData();
+      
+      const completeData = {
+        ClientType: clientData.ClientType || "Individual",
+        FullName: clientData.FullName || "",
+        BusinessName: clientData.BusinessName || "",
+        FirstName: clientData.FirstName || "",
+        LastName: clientData.LastName || "",
+        Email: clientData.Email || "",
+        Mobile: clientData.Mobile || "",
+        Telephone: clientData.Telephone || "",
+        Website: clientData.Website || "",
+        StreetAddress1: clientData.StreetAddress1 || "",
+        StreetAddress2: clientData.StreetAddress2 || "",
+        City: clientData.City || "",
+        State: clientData.State || "",
+        PostalCode: clientData.PostalCode || "",
+        Country: clientData.Country || "",
+        VatNumber: clientData.VatNumber || "",
+        TaxNumber: clientData.TaxNumber || "",
+        CodeNumber: clientData.CodeNumber || "",
+        Currency: clientData.Currency || "USD",
+        Category: clientData.Category || "",
+        PaymentTerms: clientData.PaymentTerms || "",
+        InvoicingMethod: clientData.InvoicingMethod || "Email",
+        Notes: clientData.Notes || "",
+        DisplayLanguage: clientData.DisplayLanguage || "en",
+        HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
+        MobileNumber: clientData.Mobile || "",
+        Phone: clientData.Telephone || "",
+        Address: "",
+      };
+
+      Object.keys(completeData).forEach(key => {
+        const value = completeData[key];
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+        } else {
+          formData.append(key, value || "");
+        }
+      });
+
+      if (clientData.contacts && Array.isArray(clientData.contacts)) {
+        clientData.contacts.forEach((contact, index) => {
+          formData.append(`Contacts[${index}].FirstName`, contact.FirstName || "");
+          formData.append(`Contacts[${index}].LastName`, contact.LastName || "");
+          formData.append(`Contacts[${index}].Email`, contact.Email || "");
+          formData.append(`Contacts[${index}].Mobile`, contact.Mobile || "");
+          formData.append(`Contacts[${index}].Telephone`, contact.Telephone || "");
+        });
+      }
+
+      if (attachments && attachments.length > 0) {
+        attachments.forEach((file) => {
+          if (file instanceof File) {
+            formData.append('Attachments', file);
+          }
+        });
+      }
+
+      const attachmentsToRemove = clientData.attachmentsToRemove || [];
+      if (attachmentsToRemove.length > 0) {
+        attachmentsToRemove.forEach((attachmentId, index) => {
+          if (attachmentId && parseInt(attachmentId) > 0) {
+            formData.append(`AttachmentsToRemove[${index}]`, attachmentId.toString());
+          }
+        });
+      }
+
+      const response = await apiClient.put(`/clients/${clientId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const updatedClient = response.data.Data || response.data.data || response.data;
+
       dispatch({
-        type: CLIENTS_ACTIONS.SET_SORT,
-        payload: { sortBy, sortAscending },
+        type: CLIENTS_ACTIONS.UPDATE_CLIENT,
+        payload: updatedClient,
       });
-    },
 
-    // Set pagination
-    setPagination: (paginationData) => {
-      dispatch({
-        type: CLIENTS_ACTIONS.SET_PAGINATION,
-        payload: paginationData,
-      });
-    },
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]); // FIXED: Only depends on stable handleApiError
 
-    // Reset all filters
-    resetFilters: () => {
-      dispatch({ type: CLIENTS_ACTIONS.RESET_FILTERS });
-    },
+  const clearCurrentClient = useCallback(() => {
+    dispatch({ type: CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT });
+  }, []); // FIXED: No dependencies
 
-    // Refresh clients (reload with current filters)
-    refreshClients: async () => {
-      return await clientsApi.getClients();
-    },
+  const clearError = useCallback(() => {
+    dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+  }, []); // FIXED: No dependencies
 
-    // Search clients (convenience method)
-    searchClients: async (searchTerm) => {
-      clientsApi.setSearchTerm(searchTerm);
-      return await clientsApi.getClients({ searchTerm, page: 1 });
-    },
-
-    // Filter by client type (convenience method)
-    filterByClientType: async (clientType) => {
-      clientsApi.setClientType(clientType);
-      return await clientsApi.getClients({ clientType, page: 1 });
-    },
-
-    // Sort clients (convenience method)
-    sortClients: async (sortBy, sortAscending = true) => {
-      clientsApi.setSort(sortBy, sortAscending);
-      return await clientsApi.getClients({ sortBy, sortAscending, page: 1 });
-    },
-
-    // Go to specific page
-    goToPage: async (page) => {
-      clientsApi.setPagination({ page });
-      return await clientsApi.getClients({ page });
-    },
-
-    // Change page size
-    changePageSize: async (pageSize) => {
-      clientsApi.setPagination({ pageSize, page: 1 });
-      return await clientsApi.getClients({ pageSize, page: 1 });
-    },
-  };
-
-  // Context value
+  // Context value with stable functions
   const contextValue = {
     // State
-    ...state,
-
-    // API methods
-    ...clientsApi,
-
+    clients: state.clients,
+    currentClient: state.currentClient,
+    loading: state.isLoading,
+    error: state.error,
+    pagination: state.pagination,
+    
+    // Stable API methods
+    getClients,
+    getClient,
+    createClient,
+    updateClient,
+    clearCurrentClient,
+    clearError,
+    
     // Utility methods
     getTotalPages: () =>
       Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
@@ -804,15 +562,6 @@ updateClient: async (clientId, clientData, attachments = []) => {
       state.clients.find((client) => client.Id === clientId),
     isClientLoaded: (clientId) =>
       state.clients.some((client) => client.Id === clientId),
-
-    // Filter helpers
-    hasFilters: () => state.searchTerm || state.clientType,
-    getActiveFiltersCount: () => {
-      let count = 0;
-      if (state.searchTerm) count++;
-      if (state.clientType) count++;
-      return count;
-    },
   };
 
   return (
