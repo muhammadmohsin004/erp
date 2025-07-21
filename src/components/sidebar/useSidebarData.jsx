@@ -35,6 +35,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { sidebarTranslations } from "../../translations/sidebarTranslations";
+import { PiInvoiceFill } from "react-icons/pi";
 
 export const useSidebarData = () => {
   const location = useLocation();
@@ -310,6 +311,12 @@ export const useSidebarData = () => {
         path: getRoleBasedPath("/clients"),
         roles: ["Admin", "Manager", "Employee"],
       },
+       {
+        icon: Users,
+        label: t.ManageClients,
+        path: getRoleBasedPath("/ManageClients"),
+        roles: ["Admin", "Manager", "Employee"],
+      },
       {
         icon: Package,
         label: t.inventory,
@@ -430,9 +437,14 @@ export const useSidebarData = () => {
             path: getRoleBasedPath("/invoice-dashboard"),
             icon: Receipt,
           },
+           {
+            label: t.ManageInvoices,
+            path: getRoleBasedPath("/invoices/All-Invoices-list-with description"),
+            icon: PiInvoiceFill,
+          },
           {
             label: t.allInvoices,
-            path: getRoleBasedPath("/invoices"),
+            path: getRoleBasedPath("/invoices/list"),
             icon: FileText,
           },
           {

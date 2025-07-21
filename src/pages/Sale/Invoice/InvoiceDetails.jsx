@@ -364,7 +364,7 @@ const InvoiceDetails = () => {
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              onClick={() => navigate("/admin/invoices")}
+              onClick={() => navigate("/admin/invoices/list")}
             />
           </Container>
         </Container>

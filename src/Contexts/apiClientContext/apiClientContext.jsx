@@ -37,7 +37,6 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("company");
@@ -47,7 +46,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Initial state
+// UPDATED: Initial state to match backend response structure
 const initialState = {
   clients: [],
   currentClient: null,
@@ -59,19 +58,39 @@ const initialState = {
     totalItems: 0,
     totalPages: 0,
   },
-  searchTerm: "",
-  clientType: "",
-  sortBy: "Id",
-  sortAscending: false,
+  // Enhanced filters to match controller
+  filters: {
+    search: "",
+    clientType: "",
+    category: "",
+    currency: "",
+    country: "",
+    city: "",
+    startDate: null,
+    endDate: null,
+  },
+  sorting: {
+    sortBy: "Id",
+    sortAscending: false,
+  },
+  // UPDATED: Statistics state to match backend structure
   statistics: {
     totalClients: 0,
     individualClients: 0,
     businessClients: 0,
+    otherClients: 0,
     clientsThisMonth: 0,
+    categories: [],
+    currencies: [],
+    monthlyGrowth: [],
+    dateRange: null,
+    generatedAt: null,
+    companyId: null,
   },
+  lastFetchOptions: null,
 };
 
-// Action types
+// Enhanced action types
 const CLIENTS_ACTIONS = {
   SET_LOADING: "SET_LOADING",
   SET_ERROR: "SET_ERROR",
@@ -82,15 +101,15 @@ const CLIENTS_ACTIONS = {
   ADD_CLIENT: "ADD_CLIENT",
   UPDATE_CLIENT: "UPDATE_CLIENT",
   DELETE_CLIENT: "DELETE_CLIENT",
-  SET_SEARCH_TERM: "SET_SEARCH_TERM",
-  SET_CLIENT_TYPE: "SET_CLIENT_TYPE",
-  SET_SORT: "SET_SORT",
+  SET_FILTERS: "SET_FILTERS",
+  SET_SORTING: "SET_SORTING",
   SET_PAGINATION: "SET_PAGINATION",
   SET_STATISTICS: "SET_STATISTICS",
   RESET_FILTERS: "RESET_FILTERS",
+  SET_LAST_FETCH_OPTIONS: "SET_LAST_FETCH_OPTIONS",
 };
 
-// Reducer function
+// UPDATED: Enhanced reducer function to handle backend statistics structure
 const clientsReducer = (state, action) => {
   switch (action.type) {
     case CLIENTS_ACTIONS.SET_LOADING:
@@ -112,39 +131,52 @@ const clientsReducer = (state, action) => {
         error: null,
       };
 
-    case CLIENTS_ACTIONS.SET_CLIENTS:
-      // Handle the API response format - Updated to match backend response
-      const clientsData =
-        action.payload.Data || action.payload.data || action.payload;
-      return {
-        ...state,
-        clients: Array.isArray(clientsData) ? clientsData : [],
-        pagination: {
-          page:
-            action.payload.Page || action.payload.page || state.pagination.page,
-          pageSize:
-            action.payload.PageSize ||
-            action.payload.pageSize ||
-            state.pagination.pageSize,
-          totalItems:
-            action.payload.TotalItems ||
-            action.payload.totalItems ||
-            (Array.isArray(clientsData) ? clientsData.length : 0),
-          totalPages:
-            action.payload.Paginations?.TotalPages ||
-            action.payload.totalPages ||
-            Math.ceil(
-              (action.payload.TotalItems ||
-                action.payload.totalItems ||
-                (Array.isArray(clientsData) ? clientsData.length : 0)) /
-                (action.payload.PageSize ||
-                  action.payload.pageSize ||
-                  state.pagination.pageSize)
-            ),
-        },
-        isLoading: false,
-        error: null,
-      };
+   // REPLACE this case in your clientsReducer:
+
+case CLIENTS_ACTIONS.SET_CLIENTS:
+  {
+    const responseData = action.payload;
+    
+    // FIXED: Handle nested $values structure properly
+    let clientsData = [];
+    
+    if (responseData.Data && responseData.Data.$values && Array.isArray(responseData.Data.$values)) {
+      // Handle: { Data: { $values: [...] } }
+      clientsData = responseData.Data.$values;
+    } else if (responseData.Data && Array.isArray(responseData.Data)) {
+      // Handle: { Data: [...] }
+      clientsData = responseData.Data;
+    } else if (responseData.data && responseData.data.$values && Array.isArray(responseData.data.$values)) {
+      // Handle: { data: { $values: [...] } }
+      clientsData = responseData.data.$values;
+    } else if (responseData.data && Array.isArray(responseData.data)) {
+      // Handle: { data: [...] }
+      clientsData = responseData.data;
+    } else if (Array.isArray(responseData)) {
+      // Handle: [...]
+      clientsData = responseData;
+    }
+    
+    console.log('🔧 Context SET_CLIENTS Debug:');
+    console.log('Response structure:', responseData);
+    console.log('Extracted clients array:', clientsData);
+    console.log('Clients count:', clientsData.length);
+    
+    return {
+      ...state,
+      clients: clientsData,
+      pagination: {
+        page: responseData.Page || state.pagination.page,
+        pageSize: responseData.PageSize || state.pagination.pageSize,
+        totalItems: responseData.TotalItems || clientsData.length,
+        totalPages: responseData.Paginations?.TotalPages || 
+                   Math.ceil((responseData.TotalItems || clientsData.length) / 
+                            (responseData.PageSize || state.pagination.pageSize)),
+      },
+      isLoading: false,
+      error: null,
+    };
+  }
 
     case CLIENTS_ACTIONS.SET_CURRENT_CLIENT:
       return {
@@ -202,25 +234,17 @@ const clientsReducer = (state, action) => {
         error: null,
       };
 
-    case CLIENTS_ACTIONS.SET_SEARCH_TERM:
+    case CLIENTS_ACTIONS.SET_FILTERS:
       return {
         ...state,
-        searchTerm: action.payload,
+        filters: { ...state.filters, ...action.payload },
         pagination: { ...state.pagination, page: 1 },
       };
 
-    case CLIENTS_ACTIONS.SET_CLIENT_TYPE:
+    case CLIENTS_ACTIONS.SET_SORTING:
       return {
         ...state,
-        clientType: action.payload,
-        pagination: { ...state.pagination, page: 1 },
-      };
-
-    case CLIENTS_ACTIONS.SET_SORT:
-      return {
-        ...state,
-        sortBy: action.payload.sortBy,
-        sortAscending: action.payload.sortAscending,
+        sorting: action.payload,
         pagination: { ...state.pagination, page: 1 },
       };
 
@@ -230,22 +254,58 @@ const clientsReducer = (state, action) => {
         pagination: { ...state.pagination, ...action.payload },
       };
 
+    // UPDATED: Handle backend statistics structure correctly
     case CLIENTS_ACTIONS.SET_STATISTICS:
-      return {
-        ...state,
-        statistics: action.payload,
-        isLoading: false,
-        error: null,
-      };
+      {
+        const statsData = action.payload;
+        
+        // Map backend response to frontend state structure
+        const mappedStats = {
+          totalClients: statsData.TotalClients || 0,
+          individualClients: statsData.ClientTypes?.Individual || 0,
+          businessClients: statsData.ClientTypes?.Business || 0,
+          otherClients: statsData.ClientTypes?.Other || 0,
+          clientsThisMonth: statsData.ClientsThisMonth || 0,
+          categories: statsData.Categories || [],
+          currencies: statsData.Currencies || [],
+          monthlyGrowth: statsData.MonthlyGrowth || [],
+          dateRange: statsData.DateRange || null,
+          generatedAt: statsData.GeneratedAt || null,
+          companyId: statsData.CompanyId || null,
+        };
+
+        return {
+          ...state,
+          statistics: mappedStats,
+          isLoading: false,
+          error: null,
+        };
+      }
 
     case CLIENTS_ACTIONS.RESET_FILTERS:
       return {
         ...state,
-        searchTerm: "",
-        clientType: "",
-        sortBy: "Id",
-        sortAscending: false,
+        filters: {
+          search: "",
+          clientType: "",
+          category: "",
+          currency: "",
+          country: "",
+          city: "",
+          startDate: null,
+          endDate: null,
+        },
+        sorting: {
+          sortBy: "Id",
+          sortAscending: false,
+        },
         pagination: { ...state.pagination, page: 1 },
+      };
+
+    case CLIENTS_ACTIONS.SET_LAST_FETCH_OPTIONS:
+      return {
+        ...state,
+        lastFetchOptions: action.payload,
       };
 
     default:
@@ -260,7 +320,7 @@ const ClientsContext = createContext();
 export const ClientsProvider = ({ children }) => {
   const [state, dispatch] = useReducer(clientsReducer, initialState);
 
-  // Helper function to handle API errors - Updated to match backend error format
+  // Enhanced error handler to match controller error responses
   const handleApiError = useCallback((error) => {
     let errorMessage = "An unexpected error occurred";
 
@@ -269,11 +329,14 @@ export const ClientsProvider = ({ children }) => {
     } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
     } else if (error.response?.data?.ValidationErrors) {
-      errorMessage = error.response.data.ValidationErrors.join(", ");
+      errorMessage = Array.isArray(error.response.data.ValidationErrors) 
+        ? error.response.data.ValidationErrors.join(", ")
+        : error.response.data.ValidationErrors;
     } else if (error.response?.data?.validationErrors) {
-      errorMessage = error.response.data.validationErrors.join(", ");
+      errorMessage = Array.isArray(error.response.data.validationErrors)
+        ? error.response.data.validationErrors.join(", ")
+        : error.response.data.validationErrors;
     } else if (error.response?.data?.errors) {
-      // Handle the new error format
       const errors = error.response.data.errors;
       const errorMessages = [];
       Object.keys(errors).forEach(key => {
@@ -296,503 +359,598 @@ export const ClientsProvider = ({ children }) => {
     throw new Error(errorMessage);
   }, []);
 
-  // Calculate statistics from client data
-  const calculateStatisticsFromClients = useCallback((clients) => {
-    if (!Array.isArray(clients))
-      return {
-        totalClients: 0,
-        individualClients: 0,
-        businessClients: 0,
-        clientsThisMonth: 0,
-      };
+  // REPLACE your getClients method with this:
 
-    const total = clients.length;
-    const individual = clients.filter(
-      (c) => c.ClientType?.toLowerCase() === "individual"
-    ).length;
-    const business = clients.filter(
-      (c) => c.ClientType?.toLowerCase() === "business"
-    ).length;
-
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const thisMonth = clients.filter((c) => {
-      if (c.CreatedAt) {
-        const clientDate = new Date(c.CreatedAt);
-        return (
-          clientDate.getMonth() === currentMonth &&
-          clientDate.getFullYear() === currentYear
-        );
-      }
-      return false;
-    }).length;
-
-    return {
-      totalClients: total,
-      individualClients: individual,
-      businessClients: business,
-      clientsThisMonth: thisMonth,
-    };
-  }, []);
-
-  // Ensure required fields are strings (to match backend requirements)
-  const sanitizeClientData = useCallback((clientData) => {
-    return {
-      ...clientData,
-      // Ensure required NOT NULL fields are strings
-      MobileNumber: clientData.Mobile || clientData.MobileNumber || "",
-      PaymentTerms: clientData.PaymentTerms || "",
-      Phone: clientData.Telephone || clientData.Phone || "",
-      TaxNumber: clientData.TaxNumber || "",
-      Address: clientData.Address || "",
-      Currency: clientData.Currency || "USD",
-      ClientType: clientData.ClientType || "Individual",
-      DisplayLanguage: clientData.DisplayLanguage || "en",
-    };
-  }, []);
-
-  // Clients API methods
-  const clientsApi = {
-    // Get clients with pagination, search, and filters
-    getClients: async (options = {}) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const params = {
-          page: options.page || state.pagination.page,
-          pageSize: options.pageSize || state.pagination.pageSize,
-          search:
-            options.searchTerm !== undefined
-              ? options.searchTerm
-              : state.searchTerm,
-          clientType:
-            options.clientType !== undefined
-              ? options.clientType
-              : state.clientType,
-          sortBy: options.sortBy || state.sortBy,
-          sortAscending:
-            options.sortAscending !== undefined
-              ? options.sortAscending
-              : state.sortAscending,
-          // Add other filter options to match backend
-          category: options.category || "",
-          currency: options.currency || "",
-          country: options.country || "",
-          city: options.city || "",
-          startDate: options.startDate || null,
-          endDate: options.endDate || null,
-        };
-
-        // Remove empty params
-        Object.keys(params).forEach((key) => {
-          if (
-            params[key] === "" ||
-            params[key] === null ||
-            params[key] === undefined
-          ) {
-            delete params[key];
-          }
-        });
-
-        const response = await apiClient.get("/clients", { params });
-
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_CLIENTS,
-          payload: response.data.Data.$values,
-        });
-
-        // Calculate and set statistics from the received data
-        const clientsData =
-          response.data.Data.$values || response.data.data || response.data;
-        if (Array.isArray(clientsData)) {
-          const stats = calculateStatisticsFromClients(clientsData);
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
-        }
-
-        return response.data.Data.$values;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Get single client by ID
-    getClient: async (clientId) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.get(`/clients/${clientId}`);
-
-        const clientData =
-          response.data.Data || response.data.data || response.data;
-
-        dispatch({
-          type: CLIENTS_ACTIONS.SET_CURRENT_CLIENT,
-          payload: clientData,
-        });
-
-        return { data: clientData };
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Create new client - Updated to match backend FormData expectations
-    createClient: async (clientData, attachments = []) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        const formData = new FormData();
-
-        // Sanitize and append client data
-        const sanitizedData = sanitizeClientData(clientData);
-
-        Object.keys(sanitizedData).forEach((key) => {
-          if (
-            sanitizedData[key] !== null &&
-            sanitizedData[key] !== undefined &&
-            sanitizedData[key] !== ""
-          ) {
-            if (key === "contacts" && Array.isArray(sanitizedData[key])) {
-              // Handle contacts array - match backend expected format
-              sanitizedData[key].forEach((contact, index) => {
-                Object.keys(contact).forEach((contactKey) => {
-                  if (
-                    contact[contactKey] !== null &&
-                    contact[contactKey] !== undefined &&
-                    contact[contactKey] !== ""
-                  ) {
-                    formData.append(
-                      `Contacts[${index}].${contactKey}`,
-                      contact[contactKey]
-                    );
-                  }
-                });
-              });
-            } else {
-              // Use PascalCase for backend compatibility
-              const backendKey = key.charAt(0).toUpperCase() + key.slice(1);
-              formData.append(backendKey, sanitizedData[key]);
-            }
-          }
-        });
-
-        // Append attachments only if they exist
-        if (attachments && attachments.length > 0) {
-          attachments.forEach((file) => {
-            formData.append("Attachments", file);
-          });
-        }
-
-        const response = await apiClient.post("/clients", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        const newClient =
-          response.data.Data || response.data.data || response.data;
-
-        dispatch({
-          type: CLIENTS_ACTIONS.ADD_CLIENT,
-          payload: newClient,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Update existing client - COMPLETELY FIXED VERSION
-  // Update existing client - Simplest solution with no backend changes
-updateClient: async (clientId, clientData, attachments = []) => {
+const getClients = useCallback(async (options = {}) => {
   try {
     dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
     dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-    const formData = new FormData();
-    
-    // Prepare ALL fields that backend expects with proper defaults
-    const completeData = {
-      // Required fields with defaults
-      ClientType: clientData.ClientType || "Individual",
-      FullName: clientData.FullName || "",
-      BusinessName: clientData.BusinessName || "",
-      FirstName: clientData.FirstName || "",
-      LastName: clientData.LastName || "",
-      Email: clientData.Email || "",
-      Mobile: clientData.Mobile || "",
-      Telephone: clientData.Telephone || "",
-      Website: clientData.Website || "",
-      StreetAddress1: clientData.StreetAddress1 || "",
-      StreetAddress2: clientData.StreetAddress2 || "",
-      City: clientData.City || "",
-      State: clientData.State || "",
-      PostalCode: clientData.PostalCode || "",
-      Country: clientData.Country || "",
-      VatNumber: clientData.VatNumber || "",
-      TaxNumber: clientData.TaxNumber || "",
-      CodeNumber: clientData.CodeNumber || "",
-      Currency: clientData.Currency || "USD",
-      Category: clientData.Category || "",
-      PaymentTerms: clientData.PaymentTerms || "",
-      InvoicingMethod: clientData.InvoicingMethod || "Email",
-      Notes: clientData.Notes || "",
-      DisplayLanguage: clientData.DisplayLanguage || "en",
-      HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
-      
-      // Backend specific required fields
-      MobileNumber: clientData.Mobile || "",
-      Phone: clientData.Telephone || "",
-      Address: "",
+    const params = {
+      page: options.page || state.pagination.page,
+      pageSize: options.pageSize || state.pagination.pageSize,
+      search: options.search || state.filters.search,
+      clientType: options.clientType || state.filters.clientType,
+      category: options.category || state.filters.category,
+      currency: options.currency || state.filters.currency,
+      startDate: options.startDate || state.filters.startDate,
+      endDate: options.endDate || state.filters.endDate,
+      sortBy: options.sortBy || state.sorting.sortBy,
+      sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sorting.sortAscending,
     };
 
-    // Append ALL fields to FormData
-    Object.keys(completeData).forEach(key => {
-      const value = completeData[key];
-      if (typeof value === 'boolean') {
-        formData.append(key, value.toString());
-      } else {
-        formData.append(key, value || "");
+    // Remove empty params
+    Object.keys(params).forEach((key) => {
+      if (
+        params[key] === "" ||
+        params[key] === null ||
+        params[key] === undefined
+      ) {
+        delete params[key];
       }
     });
 
-    // Handle contacts
-    if (clientData.contacts && Array.isArray(clientData.contacts)) {
-      clientData.contacts.forEach((contact, index) => {
-        formData.append(`Contacts[${index}].FirstName`, contact.FirstName || "");
-        formData.append(`Contacts[${index}].LastName`, contact.LastName || "");
-        formData.append(`Contacts[${index}].Email`, contact.Email || "");
-        formData.append(`Contacts[${index}].Mobile`, contact.Mobile || "");
-        formData.append(`Contacts[${index}].Telephone`, contact.Telephone || "");
-      });
-    }
-
-    // Handle attachments - Don't send empty files if no attachments
-    if (attachments && attachments.length > 0) {
-      attachments.forEach((file) => {
-        if (file instanceof File) {
-          formData.append('Attachments', file);
-        }
-      });
-    }
-
-    // Handle attachments to remove - Only send if there are valid IDs
-    const attachmentsToRemove = clientData.attachmentsToRemove || [];
-    if (attachmentsToRemove.length > 0) {
-      attachmentsToRemove.forEach((attachmentId, index) => {
-        if (attachmentId && parseInt(attachmentId) > 0) {
-          formData.append(`AttachmentsToRemove[${index}]`, attachmentId.toString());
-        }
-      });
-    }
-
-    console.log('FormData being sent:');
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
-    const response = await apiClient.put(`/clients/${clientId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    // Store fetch options for refresh
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_LAST_FETCH_OPTIONS,
+      payload: params,
     });
 
-    const updatedClient = response.data.Data || response.data.data || response.data;
+    console.log('🚀 Fetching clients with params:', params);
 
+    const response = await apiClient.get("/clients", { params });
+
+    console.log('✅ Raw API response:', response.data);
+    console.log('📦 Response structure check:');
+    console.log('- Has Data:', !!response.data.Data);
+    console.log('- Has Data.$values:', !!response.data.Data?.$values);
+    console.log('- $values is array:', Array.isArray(response.data.Data?.$values));
+    console.log('- $values length:', response.data.Data?.$values?.length || 0);
+
+    // CRITICAL: Pass the complete response to reducer
     dispatch({
-      type: CLIENTS_ACTIONS.UPDATE_CLIENT,
-      payload: updatedClient,
+      type: CLIENTS_ACTIONS.SET_CLIENTS,
+      payload: response.data, // Pass complete response, let reducer handle extraction
     });
 
     return response.data;
   } catch (error) {
+    console.error('❌ getClients error:', error);
     handleApiError(error);
   }
-},
+}, [state.pagination, state.filters, state.sorting, handleApiError]);
 
-    // Delete client - Updated to match backend signature
-    deleteClient: async (clientId, hardDelete = false) => {
-      try {
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+  // Get single client with full details
+  const getClient = useCallback(async (clientId) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-        const params = hardDelete ? { hardDelete: true } : {};
-        const response = await apiClient.delete(`/clients/${clientId}`, {
-          params,
-        });
+      const response = await apiClient.get(`/clients/${clientId}`);
 
-        dispatch({
-          type: CLIENTS_ACTIONS.DELETE_CLIENT,
-          payload: clientId,
-        });
+      const clientData = response.data.Data || response.data.data || response.data;
 
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_CURRENT_CLIENT,
+        payload: clientData,
+      });
+
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  // FIXED: Enhanced createClient - Remove language conversion causing issues
+  const createClient = useCallback(async (clientData, attachments = []) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const formData = new FormData();
+
+      // CRITICAL: Build FullName exactly as controller validation expects
+      let fullName = "";
+      if (clientData.ClientType === "Business") {
+        fullName = clientData.BusinessName?.trim() || "";
+      } else {
+        // For Individual, use FullName directly or build from FirstName + LastName
+        fullName = clientData.FullName?.trim() || 
+                  `${clientData.FirstName?.trim() || ""} ${clientData.LastName?.trim() || ""}`.trim();
       }
-    },
 
-    // Get client statistics - Updated to match backend response
-    getStatistics: async (options = {}) => {
+      // FIXED: Build complete client data matching controller model exactly
+      const completeClientData = {
+        // CRITICAL: Required core fields with controller defaults
+        ClientType: clientData.ClientType || "Individual",
+        Currency: clientData.Currency || "USD",
+        InvoicingMethod: clientData.InvoicingMethod || "Email",
+        DisplayLanguage: clientData.DisplayLanguage || "English", // FIXED: Send directly, no conversion
+        
+        // CRITICAL: Required NOT NULL fields - ensure string.Empty for nulls
+        Mobile: clientData.Mobile?.trim() || "",
+        Telephone: clientData.Telephone?.trim() || "",
+        TaxNumber: clientData.TaxNumber?.trim() || "",
+        PaymentTerms: clientData.PaymentTerms?.trim() || "",
+        
+        // CRITICAL: Name fields - exact mapping to controller
+        FullName: fullName,
+        BusinessName: clientData.BusinessName?.trim() || "",
+        FirstName: clientData.FirstName?.trim() || "",
+        LastName: clientData.LastName?.trim() || "",
+        
+        // Contact fields
+        Email: clientData.Email?.trim() || "",
+        
+        // Address fields  
+        StreetAddress1: clientData.StreetAddress1?.trim() || "",
+        StreetAddress2: clientData.StreetAddress2?.trim() || "",
+        City: clientData.City?.trim() || "",
+        State: clientData.State?.trim() || "",
+        PostalCode: clientData.PostalCode?.trim() || "",
+        Country: clientData.Country?.trim() || "",
+        
+        // Optional fields
+        VatNumber: clientData.VatNumber?.trim() || "",
+        CodeNumber: clientData.CodeNumber?.trim() || "",
+        Category: clientData.Category?.trim() || "",
+        Notes: clientData.Notes?.trim() || "",
+        
+        // Boolean fields
+        HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
+        
+        // CRITICAL: Backend expected duplicate fields
+        MobileNumber: clientData.Mobile?.trim() || "",
+        Phone: clientData.Telephone?.trim() || "",
+        Address: "", // Will be built by controller
+      };
+
+      // CRITICAL: Add all client fields to FormData in exact order expected
+      Object.keys(completeClientData).forEach((key) => {
+        const value = completeClientData[key];
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+        } else {
+          formData.append(key, value || "");
+        }
+      });
+
+      // CRITICAL: Add contacts - ONLY if they have meaningful data
+      if (clientData.contacts && Array.isArray(clientData.contacts)) {
+        let contactIndex = 0;
+        clientData.contacts.forEach((contact) => {
+          // Only add contacts that have at least a name or email
+          const hasData = contact.FirstName?.trim() || contact.LastName?.trim() || contact.Email?.trim();
+          if (hasData) {
+            formData.append(`Contacts[${contactIndex}].FirstName`, contact.FirstName?.trim() || "");
+            formData.append(`Contacts[${contactIndex}].LastName`, contact.LastName?.trim() || "");
+            formData.append(`Contacts[${contactIndex}].Email`, contact.Email?.trim() || "");
+            formData.append(`Contacts[${contactIndex}].Telephone`, contact.Telephone?.trim() || "");
+            formData.append(`Contacts[${contactIndex}].Mobile`, contact.Mobile?.trim() || "");
+            contactIndex++;
+          }
+        });
+      }
+
+      // CRITICAL: Add attachments - only real files
+      if (attachments && attachments.length > 0) {
+        attachments.forEach((file) => {
+          if (file instanceof File) {
+            formData.append("Attachments", file);
+          }
+        });
+      }
+
+      // ENHANCED: Debug logging with validation checks
+      console.log('=== CLIENT CREATION DEBUG INFO ===');
+      console.log('ClientType:', completeClientData.ClientType);
+      console.log('FullName:', completeClientData.FullName);
+      console.log('BusinessName:', completeClientData.BusinessName);
+      console.log('Email:', completeClientData.Email);
+      console.log('DisplayLanguage:', completeClientData.DisplayLanguage);
+      
+      // Validate critical fields before sending
+      if (completeClientData.ClientType === "Individual" && !completeClientData.FullName) {
+        throw new Error("FullName is required for Individual clients");
+      }
+      if (completeClientData.ClientType === "Business" && !completeClientData.BusinessName) {
+        throw new Error("BusinessName is required for Business clients");
+      }
+      
+      console.log('=== FormData being sent ===');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      console.log('=== End FormData ===');
+
+      const response = await apiClient.post("/clients", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 60000, // Increase timeout for debugging
+      });
+
+      console.log('✅ SUCCESS Response:', response.data);
+
+      const newClient = response.data.Data || response.data.data || response.data;
+
+      dispatch({
+        type: CLIENTS_ACTIONS.ADD_CLIENT,
+        payload: newClient,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('❌ DETAILED ERROR:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers,
+        }
+      });
+
+      // Enhanced error handling
+      if (error.response?.status === 500) {
+        console.error('🚨 SERVER ERROR: Check server logs for detailed error information');
+      }
+      
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  // FIXED: Enhanced updateClient to match controller expectations
+  const updateClient = useCallback(async (clientId, clientData, attachments = []) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const formData = new FormData();
+      
+      // FIXED: Build complete update data with proper defaults
+      const completeData = {
+        // Required core fields
+        ClientType: clientData.ClientType || "Individual",
+        Currency: clientData.Currency || "USD", // FIXED: Use USD as controller default
+        InvoicingMethod: clientData.InvoicingMethod || "Email",
+        DisplayLanguage: clientData.DisplayLanguage || "English", // FIXED: Use full name as controller expects
+        
+        // FIXED: Required NOT NULL fields with proper defaults
+        Mobile: clientData.Mobile?.trim() || "",
+        Telephone: clientData.Telephone?.trim() || "",
+        TaxNumber: clientData.TaxNumber?.trim() || "", // FIXED: Empty string as controller expects
+        PaymentTerms: clientData.PaymentTerms?.trim() || "", // FIXED: Empty string as controller expects
+        
+        // Name fields
+        FullName: clientData.FullName?.trim() || "",
+        BusinessName: clientData.BusinessName?.trim() || "",
+        FirstName: clientData.FirstName?.trim() || "",
+        LastName: clientData.LastName?.trim() || "",
+        
+        // Contact fields
+        Email: clientData.Email?.trim() || "",
+        
+        // Address fields
+        StreetAddress1: clientData.StreetAddress1?.trim() || "",
+        StreetAddress2: clientData.StreetAddress2?.trim() || "",
+        City: clientData.City?.trim() || "",
+        State: clientData.State?.trim() || "",
+        PostalCode: clientData.PostalCode?.trim() || "",
+        Country: clientData.Country?.trim() || "",
+        
+        // Optional fields
+        VatNumber: clientData.VatNumber?.trim() || "",
+        CodeNumber: clientData.CodeNumber?.trim() || "",
+        Category: clientData.Category?.trim() || "",
+        Notes: clientData.Notes?.trim() || "",
+        
+        // Boolean fields
+        HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
+        
+        // FIXED: Backend expected duplicate fields
+        MobileNumber: clientData.Mobile?.trim() || "",
+        Phone: clientData.Telephone?.trim() || "",
+      };
+
+      // Add all fields to FormData
+      Object.keys(completeData).forEach(key => {
+        const value = completeData[key];
+        if (typeof value === 'boolean') {
+          formData.append(key, value.toString());
+        } else {
+          formData.append(key, value || "");
+        }
+      });
+
+      // Add contacts
+      if (clientData.contacts && Array.isArray(clientData.contacts)) {
+        clientData.contacts.forEach((contact, index) => {
+          formData.append(`Contacts[${index}].FirstName`, contact.FirstName?.trim() || "");
+          formData.append(`Contacts[${index}].LastName`, contact.LastName?.trim() || "");
+          formData.append(`Contacts[${index}].Email`, contact.Email?.trim() || "");
+          formData.append(`Contacts[${index}].Mobile`, contact.Mobile?.trim() || "");
+          formData.append(`Contacts[${index}].Telephone`, contact.Telephone?.trim() || "");
+        });
+      }
+
+      // Add new attachments
+      if (attachments && attachments.length > 0) {
+        attachments.forEach((file) => {
+          if (file instanceof File) {
+            formData.append('Attachments', file);
+          }
+        });
+      }
+
+      // ADDED: Debug logging for update
+      console.log('=== FormData Contents for Client Update ===');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+      console.log('=== End FormData Contents ===');
+
+      const response = await apiClient.put(`/clients/${clientId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Update client response:', response.data);
+
+      const updatedClient = response.data.Data || response.data.data || response.data;
+
+      dispatch({
+        type: CLIENTS_ACTIONS.UPDATE_CLIENT,
+        payload: updatedClient,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Update client error:', error.response?.data || error.message);
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  // Delete client method to match controller
+  const deleteClient = useCallback(async (clientId, hardDelete = false) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const params = hardDelete ? { hardDelete: true } : {};
+
+      const response = await apiClient.delete(`/clients/${clientId}`, { params });
+
+      dispatch({
+        type: CLIENTS_ACTIONS.DELETE_CLIENT,
+        payload: clientId,
+      });
+
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  // UPDATED: Get client statistics to match backend endpoints
+  const getClientStatistics = useCallback(async (startDate = null, endDate = null) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      console.log('📊 Calling statistics endpoint with params:', params);
+
+      const response = await apiClient.get("/clients/statistics", { params });
+
+      console.log('📊 Statistics response:', response.data);
+
+      // Extract the data based on backend response structure
+      const statisticsData = response.data.Data || response.data.data || response.data;
+
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_STATISTICS,
+        payload: statisticsData,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('❌ Statistics API error:', error);
+      
+      // Try fallback to basic statistics if main endpoint fails
       try {
-        const params = {};
-        if (options.startDate) params.startDate = options.startDate;
-        if (options.endDate) params.endDate = options.endDate;
+        console.log('🔄 Trying basic statistics endpoint...');
+        const basicResponse = await apiClient.get("/clients/statistics/basic");
+        console.log('📊 Basic statistics response:', basicResponse.data);
+        
+        const basicData = basicResponse.data.Data || basicResponse.data.data || basicResponse.data;
+        
+        // Map basic response to expected structure
+        const mappedBasicStats = {
+          TotalClients: basicData.TotalClients || 0,
+          ClientTypes: {
+            Individual: 0,
+            Business: 0,
+            Other: 0
+          },
+          ClientsThisMonth: basicData.ClientsThisMonth || 0,
+          Categories: [],
+          Currencies: [],
+          MonthlyGrowth: [],
+          DateRange: null,
+          GeneratedAt: basicData.GeneratedAt || new Date().toISOString(),
+          CompanyId: basicData.CompanyId || null,
+        };
 
-        // If we have clients data, calculate statistics from it first
-        if (
-          state.clients.length > 0 &&
-          !options.startDate &&
-          !options.endDate
-        ) {
-          const stats = calculateStatisticsFromClients(state.clients);
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
-          return { data: stats };
-        }
-
-        // Otherwise try to fetch from API
-        dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-
-        try {
-          const response = await apiClient.get("/clients/statistics", {
-            params,
-          });
-          const statsData =
-            response.data.Data || response.data.data || response.data;
-
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: statsData,
-          });
-
-          return response.data;
-        } catch (error) {
-          // If statistics endpoint doesn't exist, calculate from clients
-          const allClientsResponse = await apiClient.get("/clients");
-          const allClients =
-            allClientsResponse.data.Data || allClientsResponse.data.data || [];
-          const stats = calculateStatisticsFromClients(allClients);
-
-          dispatch({
-            type: CLIENTS_ACTIONS.SET_STATISTICS,
-            payload: stats,
-          });
-
-          return { data: stats };
-        }
-      } catch (error) {
-        // Fallback to calculating from current state
-        const stats = calculateStatisticsFromClients(state.clients);
         dispatch({
           type: CLIENTS_ACTIONS.SET_STATISTICS,
-          payload: stats,
+          payload: mappedBasicStats,
         });
-        return { data: stats };
+
+        return basicResponse.data;
+      } catch (basicError) {
+        console.error('❌ Basic statistics also failed:', basicError);
+        handleApiError(error); // Use original error
       }
-    },
+    }
+  }, [handleApiError]);
 
-    // Clear current client
-    clearCurrentClient: () => {
-      dispatch({ type: CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT });
-    },
-
-    // Clear error manually
-    clearError: () => {
+  // ADDED: Get basic client statistics (fallback)
+  const getBasicClientStatistics = useCallback(async () => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
-    },
 
-    // Set search term
-    setSearchTerm: (searchTerm) => {
+      const response = await apiClient.get("/clients/statistics/basic");
+      const basicData = response.data.Data || response.data.data || response.data;
+      
+      // Map basic response to expected structure
+      const mappedBasicStats = {
+        TotalClients: basicData.TotalClients || 0,
+        ClientTypes: {
+          Individual: 0,
+          Business: 0,
+          Other: 0
+        },
+        ClientsThisMonth: basicData.ClientsThisMonth || 0,
+        Categories: [],
+        Currencies: [],
+        MonthlyGrowth: [],
+        DateRange: null,
+        GeneratedAt: basicData.GeneratedAt || new Date().toISOString(),
+        CompanyId: basicData.CompanyId || null,
+      };
+
       dispatch({
-        type: CLIENTS_ACTIONS.SET_SEARCH_TERM,
-        payload: searchTerm,
+        type: CLIENTS_ACTIONS.SET_STATISTICS,
+        payload: mappedBasicStats,
       });
-    },
 
-    // Set client type filter
-    setClientType: (clientType) => {
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  // ADDED: Get client type statistics
+  const getClientTypeStatistics = useCallback(async () => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.get("/clients/statistics/types");
+      const typeData = response.data.Data || response.data.data || response.data;
+      
+      // Map type response to expected structure
+      const mappedTypeStats = {
+        TotalClients: typeData.TotalClients || 0,
+        ClientTypes: {
+          Individual: typeData.Individual || 0,
+          Business: typeData.Business || 0,
+          Other: typeData.Other || 0
+        },
+        ClientsThisMonth: 0,
+        Categories: [],
+        Currencies: [],
+        MonthlyGrowth: [],
+        DateRange: null,
+        GeneratedAt: typeData.GeneratedAt || new Date().toISOString(),
+        CompanyId: typeData.CompanyId || null,
+      };
+
       dispatch({
-        type: CLIENTS_ACTIONS.SET_CLIENT_TYPE,
-        payload: clientType,
+        type: CLIENTS_ACTIONS.SET_STATISTICS,
+        payload: mappedTypeStats,
       });
-    },
 
-    // Set sorting
-    setSort: (sortBy, sortAscending) => {
-      dispatch({
-        type: CLIENTS_ACTIONS.SET_SORT,
-        payload: { sortBy, sortAscending },
-      });
-    },
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
-    // Set pagination
-    setPagination: (paginationData) => {
-      dispatch({
-        type: CLIENTS_ACTIONS.SET_PAGINATION,
-        payload: paginationData,
-      });
-    },
+  // Enhanced filter and sorting methods
+  const setFilters = useCallback((filters) => {
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_FILTERS,
+      payload: filters,
+    });
+  }, []);
 
-    // Reset all filters
-    resetFilters: () => {
-      dispatch({ type: CLIENTS_ACTIONS.RESET_FILTERS });
-    },
+  const setSorting = useCallback((sortBy, sortAscending) => {
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_SORTING,
+      payload: { sortBy, sortAscending },
+    });
+  }, []);
 
-    // Refresh clients (reload with current filters)
-    refreshClients: async () => {
-      return await clientsApi.getClients();
-    },
+  const setPagination = useCallback((paginationData) => {
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_PAGINATION,
+      payload: paginationData,
+    });
+  }, []);
 
-    // Search clients (convenience method)
-    searchClients: async (searchTerm) => {
-      clientsApi.setSearchTerm(searchTerm);
-      return await clientsApi.getClients({ searchTerm, page: 1 });
-    },
+  const resetFilters = useCallback(() => {
+    dispatch({ type: CLIENTS_ACTIONS.RESET_FILTERS });
+  }, []);
 
-    // Filter by client type (convenience method)
-    filterByClientType: async (clientType) => {
-      clientsApi.setClientType(clientType);
-      return await clientsApi.getClients({ clientType, page: 1 });
-    },
+  const clearCurrentClient = useCallback(() => {
+    dispatch({ type: CLIENTS_ACTIONS.CLEAR_CURRENT_CLIENT });
+  }, []);
 
-    // Sort clients (convenience method)
-    sortClients: async (sortBy, sortAscending = true) => {
-      clientsApi.setSort(sortBy, sortAscending);
-      return await clientsApi.getClients({ sortBy, sortAscending, page: 1 });
-    },
+  const clearError = useCallback(() => {
+    dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+  }, []);
 
-    // Go to specific page
-    goToPage: async (page) => {
-      clientsApi.setPagination({ page });
-      return await clientsApi.getClients({ page });
-    },
+  // Refresh current data
+  const refreshClients = useCallback(async () => {
+    if (state.lastFetchOptions) {
+      return await getClients(state.lastFetchOptions);
+    } else {
+      return await getClients();
+    }
+  }, [state.lastFetchOptions, getClients]);
 
-    // Change page size
-    changePageSize: async (pageSize) => {
-      clientsApi.setPagination({ pageSize, page: 1 });
-      return await clientsApi.getClients({ pageSize, page: 1 });
-    },
-  };
-
-  // Context value
+  // Context value with all methods
   const contextValue = {
     // State
-    ...state,
-
-    // API methods
-    ...clientsApi,
-
+    clients: state.clients,
+    currentClient: state.currentClient,
+    loading: state.isLoading,
+    error: state.error,
+    pagination: state.pagination,
+    filters: state.filters,
+    sorting: state.sorting,
+    statistics: state.statistics,
+    
+    // Core CRUD operations
+    getClients,
+    getClient,
+    createClient,
+    updateClient,
+    deleteClient,
+    
+    // UPDATED: Statistics with multiple endpoints
+    getClientStatistics,
+    getBasicClientStatistics,
+    getClientTypeStatistics,
+    
+    // State management
+    setFilters,
+    setSorting,
+    setPagination,
+    resetFilters,
+    clearCurrentClient,
+    clearError,
+    refreshClients,
+    
     // Utility methods
     getTotalPages: () =>
       Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
@@ -804,14 +962,26 @@ updateClient: async (clientId, clientData, attachments = []) => {
       state.clients.find((client) => client.Id === clientId),
     isClientLoaded: (clientId) =>
       state.clients.some((client) => client.Id === clientId),
-
+    
     // Filter helpers
-    hasFilters: () => state.searchTerm || state.clientType,
-    getActiveFiltersCount: () => {
-      let count = 0;
-      if (state.searchTerm) count++;
-      if (state.clientType) count++;
-      return count;
+    setSearchFilter: (search) => setFilters({ search }),
+    setClientTypeFilter: (clientType) => setFilters({ clientType }),
+    setCategoryFilter: (category) => setFilters({ category }),
+    setCurrencyFilter: (currency) => setFilters({ currency }),
+    setDateRangeFilter: (startDate, endDate) => setFilters({ startDate, endDate }),
+    
+    // Quick actions
+    searchClients: (searchTerm) => {
+      setFilters({ search: searchTerm });
+      return getClients({ search: searchTerm });
+    },
+    filterByType: (clientType) => {
+      setFilters({ clientType });
+      return getClients({ clientType });
+    },
+    sortClients: (sortBy, sortAscending = true) => {
+      setSorting(sortBy, sortAscending);
+      return getClients({ sortBy, sortAscending });
     },
   };
 

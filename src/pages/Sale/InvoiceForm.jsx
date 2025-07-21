@@ -5,25 +5,23 @@ import {
   ArrowLeft,
   Save,
   Send,
-  Eye,
-  Copy,
-  Trash2,
   Plus,
   X,
   User,
-  Building,
+  Package,
+  Search,
+  ChevronDown,
   Calendar,
   DollarSign,
   FileText,
-  Package,
-  Settings,
   Calculator,
   AlertCircle,
   CheckCircle,
-  Search,
-  ChevronDown,
-  Percent,
+  Loader2,
+  Building2,
   Hash,
+  Percent,
+  Trash2,
 } from "lucide-react";
 
 // Context imports
@@ -32,20 +30,29 @@ import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import { useService } from "../../Contexts/ServiceContext/ServiceContext";
 import { useProductsManager } from "../../Contexts/ProductsManagerContext/ProductsManagerContext";
 
-// Component imports
-import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
-import Container from "../../components/elements/container/Container";
-import Span from "../../components/elements/span/Span";
-import Modall from "../../components/elements/modal/Modal";
+const ensureArray = (value) => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (value && value.$values && Array.isArray(value.$values)) {
+    return value.$values;
+  }
+  if (value && value.Data && Array.isArray(value.Data)) {
+    return value.Data;
+  }
+  if (value && value.data && Array.isArray(value.data)) {
+    return value.data;
+  }
+  return [];
+};
 
-const InvoiceForm = () => {
+const DaftraInvoiceForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
-  // Determine if we're editing or creating
   const isEditing = !!id;
   const editData = location.state?.editData;
   const cloneData = location.state?.cloneData;
@@ -54,141 +61,106 @@ const InvoiceForm = () => {
   const translations = {
     "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
     "Edit Invoice": language === "ar" ? "تعديل فاتورة" : "Edit Invoice",
-    "Invoice Details":
-      language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
-    "Client Information":
-      language === "ar" ? "معلومات العميل" : "Client Information",
-    "Invoice Items": language === "ar" ? "عناصر الفاتورة" : "Invoice Items",
-    "Payment & Terms": language === "ar" ? "الدفع والشروط" : "Payment & Terms",
-    "Invoice Summary": language === "ar" ? "ملخص الفاتورة" : "Invoice Summary",
+    Client: language === "ar" ? "العميل" : "Client",
     "Select Client": language === "ar" ? "اختر العميل" : "Select Client",
     "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
-    "Invoice Date": language === "ar" ? "تاريخ الفاتورة" : "Invoice Date",
+    "Issue Date": language === "ar" ? "تاريخ الإصدار" : "Issue Date",
     "Due Date": language === "ar" ? "تاريخ الاستحقاق" : "Due Date",
     Status: language === "ar" ? "الحالة" : "Status",
-    Currency: language === "ar" ? "العملة" : "Currency",
-    "Add Item": language === "ar" ? "إضافة عنصر" : "Add Item",
-    "Product/Service": language === "ar" ? "منتج/خدمة" : "Product/Service",
+    Item: language === "ar" ? "العنصر" : "Item",
     Description: language === "ar" ? "الوصف" : "Description",
-    Quantity: language === "ar" ? "الكمية" : "Quantity",
-    "Unit Price": language === "ar" ? "سعر الوحدة" : "Unit Price",
+    Qty: language === "ar" ? "الكمية" : "Qty",
+    Price: language === "ar" ? "السعر" : "Price",
     Discount: language === "ar" ? "الخصم" : "Discount",
     Tax: language === "ar" ? "الضريبة" : "Tax",
-    Total: language === "ar" ? "المجموع" : "Total",
-    Subtotal: language === "ar" ? "المجموع الفرعي" : "Subtotal",
-    "Tax Amount": language === "ar" ? "مبلغ الضريبة" : "Tax Amount",
-    "Discount Amount": language === "ar" ? "مبلغ الخصم" : "Discount Amount",
-    "Grand Total": language === "ar" ? "المجموع الكلي" : "Grand Total",
-    "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
-    Notes: language === "ar" ? "ملاحظات" : "Notes",
-    "Internal Notes": language === "ar" ? "ملاحظات داخلية" : "Internal Notes",
-    "Save Draft": language === "ar" ? "حفظ المسودة" : "Save Draft",
-    "Save & Send": language === "ar" ? "حفظ وإرسال" : "Save & Send",
-    Preview: language === "ar" ? "معاينة" : "Preview",
-    Delete: language === "ar" ? "حذف" : "Delete",
-    Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "Search clients...":
-      language === "ar" ? "البحث عن العملاء..." : "Search clients...",
-    "Search products...":
-      language === "ar" ? "البحث عن المنتجات..." : "Search products...",
+    Amount: language === "ar" ? "المبلغ" : "Amount",
     Draft: language === "ar" ? "مسودة" : "Draft",
     Sent: language === "ar" ? "مرسل" : "Sent",
     Paid: language === "ar" ? "مدفوع" : "Paid",
-    Overdue: language === "ar" ? "متأخر" : "Overdue",
-    "Back to Invoices":
-      language === "ar" ? "العودة للفواتير" : "Back to Invoices",
+    "Save Invoice": language === "ar" ? "حفظ الفاتورة" : "Save Invoice",
+    "Add Item": language === "ar" ? "إضافة عنصر" : "Add Item",
+    Subtotal: language === "ar" ? "المجموع الفرعي" : "Subtotal",
+    "Grand Total": language === "ar" ? "المجموع الكلي" : "Grand Total",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     Required: language === "ar" ? "مطلوب" : "Required",
-    Invalid: language === "ar" ? "غير صالح" : "Invalid",
-    Success: language === "ar" ? "نجح" : "Success",
-    Error: language === "ar" ? "خطأ" : "Error",
-    Percentage: language === "ar" ? "نسبة مئوية" : "Percentage",
-    Fixed: language === "ar" ? "ثابت" : "Fixed",
-    "Auto Generate": language === "ar" ? "توليد تلقائي" : "Auto Generate",
-    "PO Number": language === "ar" ? "رقم أمر الشراء" : "PO Number",
-    "Exchange Rate": language === "ar" ? "سعر الصرف" : "Exchange Rate",
-    Item: language === "ar" ? "عنصر" : "Item",
-    Remove: language === "ar" ? "إزالة" : "Remove",
-    "Line Total": language === "ar" ? "إجمالي الخط" : "Line Total",
+    "Search items...":
+      language === "ar" ? "البحث في العناصر..." : "Search items...",
+    "Search clients...":
+      language === "ar" ? "البحث في العملاء..." : "Search clients...",
+    "No items found":
+      language === "ar" ? "لم يتم العثور على عناصر" : "No items found",
+    "Select item": language === "ar" ? "اختر عنصر" : "Select item",
+    "Auto-generated":
+      language === "ar" ? "يتم إنشاؤه تلقائياً" : "Auto-generated",
+    "Select Items": language === "ar" ? "اختيار العناصر" : "Select Items",
+    "Add Selected Items":
+      language === "ar" ? "إضافة العناصر المحددة" : "Add Selected Items",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    Products: language === "ar" ? "المنتجات" : "Products",
+    Services: language === "ar" ? "الخدمات" : "Services",
+    All: language === "ar" ? "الكل" : "All",
   };
 
   // Context hooks
   const {
     currentInvoice,
     loading: invoiceLoading,
-    error: invoiceError,
     createInvoice,
     updateInvoice,
     getInvoice,
     sendInvoice,
-    duplicateInvoice,
-    deleteInvoice,
-    getClientDetails,
-    clientDetails,
     clearCurrentInvoice,
-    clearError,
   } = useInvoices();
 
-  const {
-    clients,
-    searchClients,
-    getClients,
-    loading: clientsLoading,
-  } = useClients();
+  const { clients = [], getClients, loading: clientsLoading } = useClients();
 
-  // Services context
-  const {
-    services,
-    getServices,
-    searchServices,
-    loading: servicesLoading,
-  } = useService();
+  const { services = [], getServices, loading: servicesLoading } = useService();
 
-  // Products context
   const {
-    products,
+    products = [],
     getProducts,
-    searchProducts,
     loading: productsLoading,
   } = useProductsManager();
 
-  // Form state
   const [formData, setFormData] = useState({
-    clientId: "",
-    invoiceNumber: "",
-    invoiceDate: new Date().toISOString().split("T")[0],
-    dueDate: "",
-    status: "Draft",
-    currency: "USD",
-    exchangeRate: 1,
-    paymentTerms: "",
-    notes: "",
-    internalNotes: "",
-    purchaseOrderNumber: "",
-    items: [],
-    discountAmount: 0,
-    shippingAmount: 0,
+    ClientId: "",
+    InvoiceNumber: "",
+    InvoiceDate: new Date().toISOString().split("T")[0],
+    DueDate: "",
+    Status: "Draft",
+    Currency: "SAR",
+    ExchangeRate: 1,
+    PaymentTerms: "",
+    Notes: "",
+    InternalNotes: "",
+    PurchaseOrderNumber: "",
+    Items: [], // Always initialize as empty array
+    DiscountAmount: 0,
+    ShippingAmount: 0,
   });
 
   // UI state
-  const [activeTab, setActiveTab] = useState("details");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
-  const [showProductDropdown, setShowProductDropdown] = useState(null);
+  const [showItemModal, setShowItemModal] = useState(false);
   const [clientSearch, setClientSearch] = useState("");
+  const [itemSearch, setItemSearch] = useState("");
+  const [selectedItemCategory, setSelectedItemCategory] = useState("all");
+  const [selectedItems, setSelectedItems] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [allItems, setAllItems] = useState([]);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Totals calculation
   const [totals, setTotals] = useState({
     subtotal: 0,
     totalTax: 0,
     totalDiscount: 0,
     grandTotal: 0,
   });
-
-  // Mock data for products/services (replace with actual context)
-  const [allItems, setAllItems] = useState([]);
-  const [itemSearch, setItemSearch] = useState("");
 
   // Load initial data
   useEffect(() => {
@@ -197,152 +169,288 @@ const InvoiceForm = () => {
       return;
     }
 
+    if (dataLoaded) {
+      return;
+    }
+
     const loadInitialData = async () => {
       try {
-        // Load clients
-        await getClients();
+        console.log("🔄 Loading initial data...");
+        setDataLoaded(true);
 
-        // Load services
-        await getServices();
+        await Promise.all([getClients(), getServices(), getProducts()]);
 
-        // Load products
-        await getProducts();
-
-        // If editing, load invoice data
         if (isEditing && id) {
           await getInvoice(parseInt(id));
         }
-
-        // If cloning, set form data
-        if (cloneData) {
-          setFormData({
-            ...cloneData,
-            id: undefined,
-            invoiceNumber: "",
-            status: "Draft",
-            invoiceDate: new Date().toISOString().split("T")[0],
-          });
-        }
-
-        // If editing, populate form
-        if (editData) {
-          setFormData(editData);
-        }
       } catch (error) {
-        console.error("Error loading initial data:", error);
+        console.error("❌ Error loading initial data:", error);
+        setDataLoaded(false); // Reset on error to allow retry
       }
     };
 
     loadInitialData();
-  }, [token, id, isEditing, cloneData, editData]);
+  }, [token, navigate, id, isEditing]);
 
-  // Update form when invoice data changes
+  // Handle clone and edit data separately
+  useEffect(() => {
+    if (cloneData && dataLoaded) {
+      setFormData((prev) => ({
+        ...prev,
+        ...cloneData,
+        id: undefined,
+        InvoiceNumber: "",
+        Status: "Draft",
+        InvoiceDate: new Date().toISOString().split("T")[0],
+        Items: ensureArray(cloneData.Items), // Ensure Items is an array
+      }));
+    }
+  }, [cloneData, dataLoaded]);
+
+  // Fix the useEffect that handles editData
+  useEffect(() => {
+    if (editData && dataLoaded) {
+      setFormData((prev) => ({
+        ...prev,
+        ...editData,
+        Items: ensureArray(editData.Items), // Ensure Items is an array
+      }));
+    }
+  }, [editData, dataLoaded]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setDataLoaded(false);
+      if (clearCurrentInvoice) {
+        clearCurrentInvoice();
+      }
+    };
+  }, [clearCurrentInvoice]);
+
   useEffect(() => {
     if (currentInvoice && isEditing) {
       setFormData({
-        clientId: currentInvoice.ClientId || "",
-        invoiceNumber: currentInvoice.InvoiceNumber || "",
-        invoiceDate: currentInvoice.InvoiceDate
+        ClientId: currentInvoice.ClientId || "",
+        InvoiceNumber: currentInvoice.InvoiceNumber || "",
+        InvoiceDate: currentInvoice.InvoiceDate
           ? new Date(currentInvoice.InvoiceDate).toISOString().split("T")[0]
           : "",
-        dueDate: currentInvoice.DueDate
+        DueDate: currentInvoice.DueDate
           ? new Date(currentInvoice.DueDate).toISOString().split("T")[0]
           : "",
-        status: currentInvoice.Status || "Draft",
-        currency: currentInvoice.Currency || "USD",
-        exchangeRate: currentInvoice.ExchangeRate || 1,
-        paymentTerms: currentInvoice.PaymentTerms || "",
-        notes: currentInvoice.Notes || "",
-        internalNotes: currentInvoice.InternalNotes || "",
-        purchaseOrderNumber: currentInvoice.PurchaseOrderNumber || "",
-        items: currentInvoice.Items || [],
-        discountAmount: currentInvoice.DiscountAmount || 0,
-        shippingAmount: currentInvoice.ShippingAmount || 0,
+        Status: currentInvoice.Status || "Draft",
+        Currency: currentInvoice.Currency || "SAR",
+        ExchangeRate: currentInvoice.ExchangeRate || 1,
+        PaymentTerms: currentInvoice.PaymentTerms || "",
+        Notes: currentInvoice.Notes || "",
+        InternalNotes: currentInvoice.InternalNotes || "",
+        PurchaseOrderNumber: currentInvoice.PurchaseOrderNumber || "",
+        Items: ensureArray(currentInvoice.Items), // Ensure Items is an array
+        DiscountAmount: currentInvoice.DiscountAmount || 0,
+        ShippingAmount: currentInvoice.ShippingAmount || 0,
       });
     }
   }, [currentInvoice, isEditing]);
 
-  // Combine products and services into unified items array
+  // Process products and services into unified items list
   useEffect(() => {
-    const productItems = (products?.Data?.$values || []).map((product) => ({
-      id: product.Id,
-      name: product.Name,
-      price: product.UnitPrice || 0,
-      type: "product",
-      taxRate: product.TaxRate || 0,
-      description: product.Description || "",
-    }));
+    // Only process if we have data and it's loaded
+    if (!dataLoaded || (!products && !services)) {
+      return;
+    }
 
-    const serviceItems = (services?.Data?.$values || []).map((service) => ({
-      id: service.Id,
-      name: service.Name,
-      price: service.UnitPrice || 0,
-      type: "service",
-      taxRate: service.TaxRate || 0,
-      description: service.Description || "",
-    }));
+    console.log("🔄 Processing items...");
+    console.log("Raw Products:", products);
+    console.log("Raw Services:", services);
 
-    setAllItems([...productItems, ...serviceItems]);
-  }, [products, services]);
+    let combinedItems = [];
+
+    try {
+      // Process products with better error handling
+      if (products) {
+        let productArray = [];
+
+        // Handle different data structures
+        if (Array.isArray(products)) {
+          productArray = products;
+        } else if (products.Data && Array.isArray(products.Data)) {
+          productArray = products.Data;
+        } else if (
+          products.Data &&
+          products.Data.$values &&
+          Array.isArray(products.Data.$values)
+        ) {
+          productArray = products.Data.$values;
+        } else if (products.data && Array.isArray(products.data)) {
+          productArray = products.data;
+        } else if (
+          products.data &&
+          products.data.$values &&
+          Array.isArray(products.data.$values)
+        ) {
+          productArray = products.data.$values;
+        } else if (products.$values && Array.isArray(products.$values)) {
+          productArray = products.$values;
+        }
+
+        console.log("📦 Product Array:", productArray);
+
+        const processedProducts = productArray
+          .filter((product) => product && (product.Id || product.id))
+          .map((product) => {
+            try {
+              return {
+                id: product.Id || product.id,
+                name: product.Name || product.name || "Unnamed Product",
+                price: parseFloat(
+                  product.UnitPrice ||
+                    product.unitPrice ||
+                    product.Price ||
+                    product.price ||
+                    0
+                ),
+                type: "product",
+                taxRate: parseFloat(product.TaxRate || product.taxRate || 15),
+                description: product.Description || product.description || "",
+                category: "Product",
+                itemCode:
+                  product.ItemCode || product.itemCode || product.Code || "",
+                icon: Package,
+              };
+            } catch (err) {
+              console.error("Error processing product:", product, err);
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        combinedItems = [...combinedItems, ...processedProducts];
+        console.log("✅ Processed products:", processedProducts.length);
+      }
+
+      // Process services with better error handling
+      if (services) {
+        let serviceArray = [];
+
+        // Handle different data structures
+        if (Array.isArray(services)) {
+          serviceArray = services;
+        } else if (services.Data && Array.isArray(services.Data)) {
+          serviceArray = services.Data;
+        } else if (
+          services.Data &&
+          services.Data.$values &&
+          Array.isArray(services.Data.$values)
+        ) {
+          serviceArray = services.Data.$values;
+        } else if (services.data && Array.isArray(services.data)) {
+          serviceArray = services.data;
+        } else if (
+          services.data &&
+          services.data.$values &&
+          Array.isArray(services.data.$values)
+        ) {
+          serviceArray = services.data.$values;
+        } else if (services.$values && Array.isArray(services.$values)) {
+          serviceArray = services.$values;
+        }
+
+        console.log("🛠️ Service Array:", serviceArray);
+
+        const processedServices = serviceArray
+          .filter((service) => service && (service.Id || service.id))
+          .map((service) => {
+            try {
+              return {
+                id: service.Id || service.id,
+                name: service.Name || service.name || "Unnamed Service",
+                price: parseFloat(
+                  service.UnitPrice ||
+                    service.unitPrice ||
+                    service.Price ||
+                    service.price ||
+                    0
+                ),
+                type: "service",
+                taxRate: parseFloat(service.TaxRate || service.taxRate || 15),
+                description: service.Description || service.description || "",
+                category: "Service",
+                icon: FileText,
+              };
+            } catch (err) {
+              console.error("Error processing service:", service, err);
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        combinedItems = [...combinedItems, ...processedServices];
+        console.log("✅ Processed services:", processedServices.length);
+      }
+    } catch (error) {
+      console.error("❌ Error processing items:", error);
+    }
+
+    console.log("✅ Final combined items:", combinedItems.length);
+    setAllItems(combinedItems);
+  }, [products, services, dataLoaded]);
 
   // Calculate totals whenever items change
   useEffect(() => {
     calculateTotals();
-  }, [formData.items, formData.discountAmount, formData.shippingAmount]);
+  }, [formData.Items, formData.DiscountAmount, formData.ShippingAmount]);
 
-  // Get selected client info
+  // Get selected client details
   useEffect(() => {
-    if (formData.clientId) {
-      const client = clients.find((c) => c.Id === parseInt(formData.clientId));
+    if (formData.ClientId && Array.isArray(clients)) {
+      const client = clients.find((c) => c.Id === parseInt(formData.ClientId));
       setSelectedClient(client);
-      if (client) {
-        getClientDetails(client.Id);
-      }
     }
-  }, [formData.clientId, clients]);
+  }, [formData.ClientId, clients]);
 
-  // Calculate totals
   const calculateTotals = useCallback(() => {
-    const subtotal = formData?.items?.reduce((sum, item) => {
-      return sum + item.quantity * item.unitPrice;
+    const items = ensureArray(formData.Items); // Ensure it's an array
+
+    const subtotal = items.reduce((sum, item) => {
+      return sum + (item.Quantity || 0) * (item.UnitPrice || 0);
     }, 0);
 
-    const totalDiscount = formData?.items?.reduce((sum, item) => {
-      const lineAmount = item.quantity * item.unitPrice;
+    const totalDiscount = items.reduce((sum, item) => {
+      const lineAmount = (item.Quantity || 0) * (item.UnitPrice || 0);
       const discountAmount =
-        item.discountType === "percentage"
-          ? (lineAmount * (item.discount || 0)) / 100
-          : item.discount || 0;
+        item.DiscountType === "percentage"
+          ? lineAmount * ((item.Discount || 0) / 100)
+          : item.Discount || 0;
       return sum + discountAmount;
     }, 0);
 
     const afterDiscount = subtotal - totalDiscount;
 
-    const totalTax = formData?.items?.reduce((sum, item) => {
-      const lineAmount = item.quantity * item.unitPrice;
+    const totalTax = items.reduce((sum, item) => {
+      const lineAmount = (item.Quantity || 0) * (item.UnitPrice || 0);
       const itemDiscount =
-        item.discountType === "percentage"
-          ? (lineAmount * (item.discount || 0)) / 100
-          : item.discount || 0;
+        item.DiscountType === "percentage"
+          ? lineAmount * ((item.Discount || 0) / 100)
+          : item.Discount || 0;
       const taxableAmount = lineAmount - itemDiscount;
-      return sum + (taxableAmount * (item.taxRate || 0)) / 100;
+      return sum + taxableAmount * ((item.TaxRate || 0) / 100);
     }, 0);
 
     const grandTotal =
       afterDiscount +
       totalTax +
-      (formData.shippingAmount || 0) -
-      (formData.discountAmount || 0);
+      (formData.ShippingAmount || 0) -
+      (formData.DiscountAmount || 0);
 
     setTotals({
-      subtotal,
-      totalTax,
-      totalDiscount,
-      grandTotal,
+      subtotal: Math.max(0, subtotal),
+      totalTax: Math.max(0, totalTax),
+      totalDiscount: Math.max(0, totalDiscount),
+      grandTotal: Math.max(0, grandTotal),
     });
-  }, [formData.items, formData.discountAmount, formData.shippingAmount]);
+  }, [formData.Items, formData.DiscountAmount, formData.ShippingAmount]);
 
-  // Handle form input changes
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -356,116 +464,137 @@ const InvoiceForm = () => {
         [field]: null,
       }));
     }
+
+    // Clear submit messages
+    setSubmitError("");
+    setSubmitSuccess("");
   };
 
-  // Handle client selection
   const handleClientSelect = (client) => {
+    console.log("👤 Selecting client:", client);
     setFormData((prev) => ({
       ...prev,
-      clientId: client.Id,
-      currency: client.Currency || "USD",
-      paymentTerms: client.PaymentTerms || "",
+      ClientId: client.Id,
+      Currency: client.Currency || "SAR",
+      PaymentTerms: client.PaymentTerms || "",
     }));
     setShowClientDropdown(false);
     setClientSearch("");
   };
 
-  // Add new item
-  const addItem = () => {
-    const newItem = {
-      id: Date.now(),
-      productId: null,
-      serviceId: null,
-      itemName: "",
-      description: "",
-      quantity: 1,
-      unitPrice: 0,
-      discount: 0,
-      discountType: "percentage",
-      taxRate: 0,
-      lineTotal: 0,
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      items: [...prev.items, newItem],
-    }));
-  };
-
-  // Update item
-  const updateItem = (index, field, value) => {
-    const updatedItems = [...formData.items];
-    updatedItems[index] = {
-      ...updatedItems[index],
-      [field]: value,
-    };
-
-    // Calculate line total
-    const item = updatedItems[index];
-    const lineAmount = item.quantity * item.unitPrice;
-    const discountAmount =
-      item.discountType === "percentage"
-        ? (lineAmount * (item.discount || 0)) / 100
-        : item.discount || 0;
-    const taxableAmount = lineAmount - discountAmount;
-    const taxAmount = (taxableAmount * (item.taxRate || 0)) / 100;
-    item.lineTotal = taxableAmount + taxAmount;
-
-    setFormData((prev) => ({
-      ...prev,
-      items: updatedItems,
-    }));
-  };
-
-  // Remove item
-  const removeItem = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index),
-    }));
-  };
-
-  // Select product/service for item
-  const selectItem = (index, item) => {
-    if (item.type === "product") {
-      updateItem(index, "productId", item.id);
-      updateItem(index, "serviceId", null);
-    } else {
-      updateItem(index, "serviceId", item.id);
-      updateItem(index, "productId", null);
-    }
-    updateItem(index, "itemName", item.name);
-    updateItem(index, "description", item.description);
-    updateItem(index, "unitPrice", item.price);
-    updateItem(index, "taxRate", item.taxRate);
-    setShowProductDropdown(null);
+  // Modal functions
+  const openItemModal = () => {
+    setShowItemModal(true);
+    setSelectedItems([]);
     setItemSearch("");
+    setSelectedItemCategory("all");
   };
 
-  // Validate form
+  const closeItemModal = () => {
+    setShowItemModal(false);
+    setSelectedItems([]);
+    setItemSearch("");
+    setSelectedItemCategory("all");
+  };
+
+  const toggleItemSelection = (item) => {
+    setSelectedItems((prev) => {
+      const isSelected = prev.find(
+        (i) => i.id === item.id && i.type === item.type
+      );
+      if (isSelected) {
+        return prev.filter((i) => !(i.id === item.id && i.type === item.type));
+      } else {
+        return [...prev, item];
+      }
+    });
+  };
+
+  const addSelectedItems = () => {
+    const newItems = selectedItems.map((item) => ({
+      id: Date.now() + Math.random(),
+      ProductId: item.type === "product" ? item.id : null,
+      ServiceId: item.type === "service" ? item.id : null,
+      ItemName: item.name,
+      Description: item.description,
+      Quantity: 1,
+      UnitPrice: item.price,
+      Discount: 0,
+      DiscountType: "percentage",
+      TaxRate: item.taxRate,
+      LineTotal: item.price + item.price * (item.taxRate / 100),
+    }));
+
+    const currentItems = ensureArray(formData.Items);
+    setFormData((prev) => ({
+      ...prev,
+      Items: [...currentItems, ...newItems],
+    }));
+
+    closeItemModal();
+  };
+
+  const updateItem = (index, field, value) => {
+    const currentItems = ensureArray(formData.Items);
+    const updatedItems = [...currentItems];
+
+    if (updatedItems[index]) {
+      updatedItems[index] = {
+        ...updatedItems[index],
+        [field]: value,
+      };
+
+      // Recalculate line total
+      const item = updatedItems[index];
+      const lineAmount = (item.Quantity || 0) * (item.UnitPrice || 0);
+      const discountAmount =
+        item.DiscountType === "percentage"
+          ? lineAmount * ((item.Discount || 0) / 100)
+          : item.Discount || 0;
+      const taxableAmount = lineAmount - discountAmount;
+      const taxAmount = taxableAmount * ((item.TaxRate || 0) / 100);
+      item.LineTotal = taxableAmount + taxAmount;
+
+      setFormData((prev) => ({
+        ...prev,
+        Items: updatedItems,
+      }));
+    }
+  };
+
+  const removeItem = (index) => {
+    const currentItems = ensureArray(formData.Items);
+    setFormData((prev) => ({
+      ...prev,
+      Items: currentItems.filter((_, i) => i !== index),
+    }));
+  };
+
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.clientId) {
-      errors.clientId = translations.Required;
+    if (!formData.ClientId) {
+      errors.ClientId = translations.Required;
     }
 
-    if (!formData.invoiceDate) {
-      errors.invoiceDate = translations.Required;
+    if (!formData.InvoiceDate) {
+      errors.InvoiceDate = translations.Required;
     }
 
-    if (formData.items.length === 0) {
-      errors.items = "At least one item is required";
+    const items = ensureArray(formData.Items);
+    if (items.length === 0) {
+      errors.Items = "At least one item is required";
     }
 
-    formData.items.forEach((item, index) => {
-      if (!item.itemName) {
-        errors[`item_${index}_name`] = translations.Required;
+    // Validate items
+    items.forEach((item, index) => {
+      if (!item.ItemName && !item.ProductId && !item.ServiceId) {
+        errors[`item_${index}_name`] = "Item name is required";
       }
-      if (item.quantity <= 0) {
-        errors[`item_${index}_quantity`] = "Quantity must be greater than 0";
+      if (!item.Quantity || item.Quantity <= 0) {
+        errors[`item_${index}_qty`] = "Quantity must be greater than 0";
       }
-      if (item.unitPrice < 0) {
+      if (item.UnitPrice < 0) {
         errors[`item_${index}_price`] = "Price cannot be negative";
       }
     });
@@ -474,29 +603,56 @@ const InvoiceForm = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (action = "draft") => {
+    console.log("🚀 Submitting invoice with action:", action);
+
+    setSubmitError("");
+    setSubmitSuccess("");
+
     if (!validateForm()) {
+      setSubmitError("Please fix the validation errors before submitting");
       return;
     }
 
     setIsSubmitting(true);
+
     try {
+      const items = ensureArray(formData.Items);
+
+      // Format data to match backend DTO
       const submitData = {
-        ...formData,
-        status: action === "send" ? "Sent" : formData.status,
-        items: formData?.items?.map((item) => ({
-          productId: item.productId,
-          serviceId: item.serviceId,
-          itemName: item.itemName,
-          description: item.description,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          discount: item.discount,
-          discountType: item.discountType,
-          taxRate: item.taxRate,
+        ClientId: parseInt(formData.ClientId),
+        InvoiceNumber: formData.InvoiceNumber || null,
+        InvoiceDate: formData.InvoiceDate,
+        DueDate: formData.DueDate || null,
+        Status: action === "send" ? "Sent" : formData.Status,
+        Currency: formData.Currency,
+        ExchangeRate: formData.ExchangeRate,
+        PaymentTerms: formData.PaymentTerms || null,
+        Notes: formData.Notes || null,
+        InternalNotes: formData.InternalNotes || null,
+        PurchaseOrderNumber: formData.PurchaseOrderNumber || null,
+        DiscountAmount: formData.DiscountAmount || 0,
+        ShippingAmount: formData.ShippingAmount || 0,
+        Items: items.map((item) => ({
+          ProductId:
+            item.ProductId && item.ProductId > 0
+              ? parseInt(item.ProductId)
+              : null,
+          ServiceId:
+            item.ServiceId && item.ServiceId > 0
+              ? parseInt(item.ServiceId)
+              : null,
+          Description: item.Description || item.ItemName || "",
+          Quantity: parseFloat(item.Quantity) || 1,
+          UnitPrice: parseFloat(item.UnitPrice) || 0,
+          Discount: parseFloat(item.Discount) || 0,
+          DiscountType: item.DiscountType || "percentage",
+          TaxRate: parseFloat(item.TaxRate) || 0,
         })),
       };
+
+      console.log("📤 Submitting data:", submitData);
 
       let result;
       if (isEditing) {
@@ -506,688 +662,958 @@ const InvoiceForm = () => {
       }
 
       if (result) {
-        // If sending invoice, also send it
         if (action === "send" && result.data?.Id) {
           await sendInvoice(result.data.Id);
         }
 
-        navigate("/admin/invoices", {
-          state: {
-            message: isEditing
-              ? "Invoice updated successfully"
-              : "Invoice created successfully",
-            type: "success",
-          },
-        });
+        setSubmitSuccess(
+          `Invoice ${isEditing ? "updated" : "created"} successfully!`
+        );
+
+        // Navigate after a brief delay to show success message
+        setTimeout(() => {
+          navigate("/admin/invoices/list", {
+            state: {
+              message: isEditing
+                ? "Invoice updated successfully"
+                : "Invoice created successfully",
+              type: "success",
+            },
+          });
+        }, 1000);
       }
     } catch (error) {
-      console.error("Error saving invoice:", error);
+      console.error("❌ Error saving invoice:", error);
+      setSubmitError(
+        error.message || "Failed to save invoice. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle delete
-  const handleDelete = async () => {
-    if (!currentInvoice?.Id) return;
+  // Filter functions
+  const filteredClients = Array.isArray(clients)
+    ? clients.filter(
+        (client) =>
+          (client.FullName?.toLowerCase() || "").includes(
+            clientSearch.toLowerCase()
+          ) ||
+          (client.BusinessName?.toLowerCase() || "").includes(
+            clientSearch.toLowerCase()
+          ) ||
+          (client.Email?.toLowerCase() || "").includes(
+            clientSearch.toLowerCase()
+          )
+      )
+    : [];
 
-    try {
-      await deleteInvoice(currentInvoice.Id);
-      navigate("/admin/invoices", {
-        state: {
-          message: "Invoice deleted successfully",
-          type: "success",
-        },
-      });
-    } catch (error) {
-      console.error("Error deleting invoice:", error);
-    }
-  };
+  const filteredItems = Array.isArray(allItems)
+    ? allItems.filter((item) => {
+        const matchesSearch =
+          (item.name?.toLowerCase() || "").includes(itemSearch.toLowerCase()) ||
+          (item.description?.toLowerCase() || "").includes(
+            itemSearch.toLowerCase()
+          ) ||
+          (item.itemCode?.toLowerCase() || "").includes(
+            itemSearch.toLowerCase()
+          );
 
-  // Filtered clients for search
-  const filteredClients = clients.filter(
-    (client) =>
-      client.FullName?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-      client.BusinessName?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-      client.Email?.toLowerCase().includes(clientSearch.toLowerCase())
-  );
+        const matchesCategory =
+          selectedItemCategory === "all" ||
+          (selectedItemCategory === "products" && item.type === "product") ||
+          (selectedItemCategory === "services" && item.type === "service");
 
-  // Filtered items for search
-  const filteredItems = allItems.filter(
-    (item) =>
-      item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-      item.description.toLowerCase().includes(itemSearch.toLowerCase())
-  );
+        return matchesSearch && matchesCategory;
+      })
+    : [];
 
   // Loading state
-  if (invoiceLoading && isEditing) {
+  if (
+    (invoiceLoading && isEditing) ||
+    (!dataLoaded && (productsLoading || servicesLoading || clientsLoading))
+  ) {
     return (
-      <Container className="flex justify-center items-center min-h-screen">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">
-          {translations.Loading}
-        </Span>
-      </Container>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">{translations.Loading}</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {!dataLoaded ? "Loading initial data..." : "Loading invoice..."}
+          </p>
+        </div>
+      </div>
     );
   }
 
-  console.log("This is the form data ", formData);
-
   return (
-    <Container className="min-h-screen bg-gray-50">
-      <Container className="px-6 py-6">
-        {/* Header */}
-        <Container className="flex items-center justify-between mb-6">
-          <Container className="flex items-center gap-4">
-            <FilledButton
-              isIcon={true}
-              icon={ArrowLeft}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText=""
-              height="h-10"
-              width="w-10"
-              onClick={() => navigate("/admin/invoices")}
-            />
-            <Container>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {isEditing
-                  ? translations["Edit Invoice"]
-                  : translations["Create Invoice"]}
-              </h1>
-              <Span className="text-sm text-gray-500">
-                {isEditing && formData.invoiceNumber
-                  ? `#${formData.invoiceNumber}`
-                  : translations["Invoice Details"]}
-              </Span>
-            </Container>
-          </Container>
+    <div className="min-h-screen bg-gray-50">
+      {/* Modern Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate("/admin/invoices/list")}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {isEditing
+                    ? translations["Edit Invoice"]
+                    : translations["Create Invoice"]}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {isEditing
+                    ? `Invoice #${formData.InvoiceNumber}`
+                    : "Create a new invoice"}
+                </p>
+              </div>
+            </div>
 
-          <Container className="flex gap-3">
-            <FilledButton
-              isIcon={true}
-              icon={Eye}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-600 hover:bg-gray-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations.Preview}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => {
-                /* Handle preview */
-              }}
-            />
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => handleSubmit("draft")}
+                disabled={isSubmitting}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Save Draft
+              </button>
 
-            <FilledButton
-              isIcon={true}
-              icon={Save}
-              iconSize="w-4 h-4"
-              bgColor="bg-blue-600 hover:bg-blue-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations["Save Draft"]}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => handleSubmit("draft")}
-              disabled={isSubmitting}
-            />
+              <button
+                onClick={() => handleSubmit("send")}
+                disabled={isSubmitting}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Save & Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <FilledButton
-              isIcon={true}
-              icon={Send}
-              iconSize="w-4 h-4"
-              bgColor="bg-green-600 hover:bg-green-700"
-              textColor="text-white"
-              rounded="rounded-lg"
-              buttonText={translations["Save & Send"]}
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => handleSubmit("send")}
-              disabled={isSubmitting}
-            />
+      {/* Success/Error Messages */}
+      {submitSuccess && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+            <p className="text-green-800">{submitSuccess}</p>
+          </div>
+        </div>
+      )}
 
-            {isEditing && (
-              <FilledButton
-                isIcon={true}
-                icon={Trash2}
-                iconSize="w-4 h-4"
-                bgColor="bg-red-600 hover:bg-red-700"
-                textColor="text-white"
-                rounded="rounded-lg"
-                buttonText={translations.Delete}
-                height="h-10"
-                px="px-4"
-                fontWeight="font-medium"
-                fontSize="text-sm"
-                isIconLeft={true}
-                onClick={() => setShowDeleteModal(true)}
-              />
-            )}
-          </Container>
-        </Container>
+      {submitError && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+            <p className="text-red-800">{submitError}</p>
+          </div>
+        </div>
+      )}
 
-        {/* Main Content */}
-        <Container className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Form */}
-          <Container className="lg:col-span-2 space-y-6">
-            {/* Client Information */}
-            <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                {translations["Client Information"]}
-              </h3>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Form - Left Side */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Client & Invoice Details Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-6">
+                <h2 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+                  <User className="w-5 h-5 mr-2 text-blue-600" />
+                  Invoice Details
+                </h2>
 
-              <Container className="space-y-4">
-                {/* Client Selection */}
-                <Container className="relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Select Client"]} *
-                  </label>
-                  <Container className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowClientDropdown(!showClientDropdown)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {selectedClient ? (
-                        <Span className="block truncate">
-                          {selectedClient.FullName ||
-                            selectedClient.BusinessName}{" "}
-                          ({selectedClient.Email})
-                        </Span>
-                      ) : (
-                        <Span className="block truncate text-gray-500">
-                          {translations["Select Client"]}
-                        </Span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Client Selection */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations.Client} *
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowClientDropdown(!showClientDropdown)
+                        }
+                        className={`w-full px-3 py-3 border rounded-lg bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                          validationErrors.ClientId
+                            ? "border-red-300"
+                            : "border-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        {selectedClient ? (
+                          <div className="flex items-center">
+                            <Building2 className="w-4 h-4 text-gray-400 mr-3" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {selectedClient.FullName ||
+                                  selectedClient.BusinessName}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {selectedClient.Email}
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-gray-500">
+                            <Building2 className="w-4 h-4 mr-3" />
+                            <span>{translations["Select Client"]}</span>
+                          </div>
+                        )}
+                        <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      </button>
+
+                      {showClientDropdown && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                          <div className="p-3 border-b border-gray-200">
+                            <div className="relative">
+                              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                              <input
+                                type="text"
+                                placeholder={translations["Search clients..."]}
+                                value={clientSearch}
+                                onChange={(e) =>
+                                  setClientSearch(e.target.value)
+                                }
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-48 overflow-auto">
+                            {clientsLoading ? (
+                              <div className="p-4 text-center">
+                                <Loader2 className="w-4 h-4 animate-spin text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-500">
+                                  Loading clients...
+                                </p>
+                              </div>
+                            ) : filteredClients.length === 0 ? (
+                              <div className="p-4 text-center text-gray-500">
+                                <p className="text-sm">No clients found</p>
+                              </div>
+                            ) : (
+                              filteredClients.map((client) => (
+                                <button
+                                  key={client.Id}
+                                  onClick={() => handleClientSelect(client)}
+                                  className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0"
+                                >
+                                  <Building2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                      {client.FullName || client.BusinessName}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">
+                                      {client.Email}
+                                    </p>
+                                  </div>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
                       )}
-                      <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    </button>
+                    </div>
+                    {validationErrors.ClientId && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {validationErrors.ClientId}
+                      </p>
+                    )}
+                  </div>
 
-                    {showClientDropdown && (
-                      <Container className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                        <Container className="p-3">
-                          <Container className="relative">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  {/* Invoice Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Invoice Number"]}
+                    </label>
+                    <div className="relative">
+                      <Hash className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        value={formData.InvoiceNumber}
+                        onChange={(e) =>
+                          handleInputChange("InvoiceNumber", e.target.value)
+                        }
+                        placeholder={translations["Auto-generated"]}
+                        className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Issue Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Issue Date"]} *
+                    </label>
+                    <div className="relative">
+                      <Calendar className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="date"
+                        value={formData.InvoiceDate}
+                        onChange={(e) =>
+                          handleInputChange("InvoiceDate", e.target.value)
+                        }
+                        className={`w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          validationErrors.InvoiceDate
+                            ? "border-red-300"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </div>
+                    {validationErrors.InvoiceDate && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {validationErrors.InvoiceDate}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Due Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Due Date"]}
+                    </label>
+                    <div className="relative">
+                      <Calendar className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="date"
+                        value={formData.DueDate}
+                        onChange={(e) =>
+                          handleInputChange("DueDate", e.target.value)
+                        }
+                        className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations.Status}
+                    </label>
+                    <select
+                      value={formData.Status}
+                      onChange={(e) =>
+                        handleInputChange("Status", e.target.value)
+                      }
+                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="Draft">{translations.Draft}</option>
+                      <option value="Sent">{translations.Sent}</option>
+                      <option value="Paid">{translations.Paid}</option>
+                    </select>
+                  </div>
+
+                  {/* Currency */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Currency
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <select
+                        value={formData.Currency}
+                        onChange={(e) =>
+                          handleInputChange("Currency", e.target.value)
+                        }
+                        className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="SAR">SAR - Saudi Riyal</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="AED">AED - UAE Dirham</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Items Card */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                    <Package className="w-5 h-5 mr-2 text-blue-600" />
+                    Invoice Items
+                  </h2>
+                  <button
+                    onClick={openItemModal}
+                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {translations["Add Item"]}
+                  </button>
+                </div>
+
+                {/* Items Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">
+                          {translations.Item}
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
+                          {translations.Description}
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                          {translations.Qty}
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                          {translations.Price}
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                          {translations.Discount}
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                          {translations.Tax} %
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                          {translations.Amount}
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {formData.Items.map((item, index) => (
+                        <tr key={item.id || index} className="hover:bg-gray-50">
+                          {/* Item Name */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center">
+                              <Package className="w-4 h-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">
+                                {item.ItemName}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Description */}
+                          <td className="px-4 py-3">
                             <input
                               type="text"
-                              placeholder={translations["Search clients..."]}
-                              value={clientSearch}
-                              onChange={(e) => setClientSearch(e.target.value)}
-                              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              value={item.Description || ""}
+                              onChange={(e) =>
+                                updateItem(index, "Description", e.target.value)
+                              }
+                              placeholder={translations.Description}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                             />
-                          </Container>
-                        </Container>
-                        {filteredClients.map((client) => (
-                          <button
-                            key={client.Id}
-                            onClick={() => handleClientSelect(client)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                          >
-                            <Container className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <User className="w-4 h-4 text-blue-600" />
-                            </Container>
-                            <Container className="flex-1 min-w-0">
-                              <Span className="block text-sm font-medium text-gray-900 truncate">
-                                {client.FullName || client.BusinessName}
-                              </Span>
-                              <Span className="block text-xs text-gray-500 truncate">
-                                {client.Email}
-                              </Span>
-                            </Container>
-                          </button>
-                        ))}
-                      </Container>
-                    )}
-                  </Container>
-                  {validationErrors.clientId && (
-                    <Span className="text-red-500 text-sm mt-1">
-                      {validationErrors.clientId}
-                    </Span>
+                          </td>
+
+                          {/* Quantity */}
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              value={item.Quantity}
+                              onChange={(e) =>
+                                updateItem(
+                                  index,
+                                  "Quantity",
+                                  parseFloat(e.target.value) || 0
+                                )
+                              }
+                              min="0"
+                              step="0.01"
+                              className="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-center"
+                            />
+                          </td>
+
+                          {/* Price */}
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              value={item.UnitPrice}
+                              onChange={(e) =>
+                                updateItem(
+                                  index,
+                                  "UnitPrice",
+                                  parseFloat(e.target.value) || 0
+                                )
+                              }
+                              min="0"
+                              step="0.01"
+                              className="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-right"
+                            />
+                          </td>
+
+                          {/* Discount */}
+                          <td className="px-4 py-3">
+                            <div className="flex">
+                              <input
+                                type="number"
+                                value={item.Discount}
+                                onChange={(e) =>
+                                  updateItem(
+                                    index,
+                                    "Discount",
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
+                                min="0"
+                                step="0.01"
+                                className="flex-1 px-2 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-center"
+                              />
+                              <select
+                                value={item.DiscountType}
+                                onChange={(e) =>
+                                  updateItem(
+                                    index,
+                                    "DiscountType",
+                                    e.target.value
+                                  )
+                                }
+                                className="px-2 py-2 border border-l-0 border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs"
+                              >
+                                <option value="percentage">%</option>
+                                <option value="fixed">Fixed</option>
+                              </select>
+                            </div>
+                          </td>
+
+                          {/* Tax */}
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              value={item.TaxRate}
+                              onChange={(e) =>
+                                updateItem(
+                                  index,
+                                  "TaxRate",
+                                  parseFloat(e.target.value) || 0
+                                )
+                              }
+                              min="0"
+                              max="100"
+                              step="0.01"
+                              className="w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-center"
+                            />
+                          </td>
+
+                          {/* Amount */}
+                          <td className="px-4 py-3">
+                            <div className="text-right font-medium text-gray-900">
+                              {formData.Currency}{" "}
+                              {(item.LineTotal || 0).toFixed(2)}
+                            </div>
+                          </td>
+
+                          {/* Remove */}
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => removeItem(index)}
+                              className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {formData.Items.length === 0 && (
+                    <div className="text-center py-12">
+                      <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">
+                        No items added yet. Click "Add Item" to get started.
+                      </p>
+                    </div>
                   )}
-                </Container>
+                </div>
 
-                {/* Client Details Preview */}
-                {selectedClient && (
-                  <Container className="bg-gray-50 rounded-lg p-4">
-                    <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Container>
-                        <Span className="text-sm text-gray-500">Name</Span>
-                        <Span className="block font-medium text-gray-900">
-                          {selectedClient.FullName ||
-                            selectedClient.BusinessName}
-                        </Span>
-                      </Container>
-                      <Container>
-                        <Span className="text-sm text-gray-500">Email</Span>
-                        <Span className="block font-medium text-gray-900">
-                          {selectedClient.Email}
-                        </Span>
-                      </Container>
-                      {selectedClient.Phone && (
-                        <Container>
-                          <Span className="text-sm text-gray-500">Phone</Span>
-                          <Span className="block font-medium text-gray-900">
-                            {selectedClient.Phone}
-                          </Span>
-                        </Container>
-                      )}
-                      {selectedClient.Address && (
-                        <Container>
-                          <Span className="text-sm text-gray-500">Address</Span>
-                          <Span className="block font-medium text-gray-900">
-                            {selectedClient.Address}
-                          </Span>
-                        </Container>
-                      )}
-                    </Container>
-                  </Container>
+                {validationErrors.Items && (
+                  <p className="text-red-500 text-sm mt-2">
+                    {validationErrors.Items}
+                  </p>
                 )}
-              </Container>
-            </Container>
-
-            {/* Invoice Details */}
-            <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                {translations["Invoice Details"]}
-              </h3>
-
-              <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Invoice Number */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Invoice Number"]}
-                  </label>
-                  <Container className="relative">
-                    <input
-                      type="text"
-                      value={formData.invoiceNumber}
-                      onChange={(e) =>
-                        handleInputChange("invoiceNumber", e.target.value)
-                      }
-                      placeholder={translations["Auto Generate"]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <Hash className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </Container>
-                </Container>
-
-                {/* Status */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.Status}
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      handleInputChange("status", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="Draft">{translations.Draft}</option>
-                    <option value="Sent">{translations.Sent}</option>
-                    <option value="Paid">{translations.Paid}</option>
-                  </select>
-                </Container>
-
-                {/* Invoice Date */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Invoice Date"]} *
-                  </label>
-                  <Container className="relative">
-                    <input
-                      type="date"
-                      value={formData.invoiceDate}
-                      onChange={(e) =>
-                        handleInputChange("invoiceDate", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <Calendar className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </Container>
-                  {validationErrors.invoiceDate && (
-                    <Span className="text-red-500 text-sm mt-1">
-                      {validationErrors.invoiceDate}
-                    </Span>
-                  )}
-                </Container>
-
-                {/* Due Date */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Due Date"]}
-                  </label>
-                  <Container className="relative">
-                    <input
-                      type="date"
-                      value={formData.dueDate}
-                      onChange={(e) =>
-                        handleInputChange("dueDate", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <Calendar className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </Container>
-                </Container>
-
-                {/* Currency */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.Currency}
-                  </label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) =>
-                      handleInputChange("currency", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="SAR">SAR</option>
-                  </select>
-                </Container>
-
-                {/* PO Number */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["PO Number"]}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.purchaseOrderNumber}
-                    onChange={(e) =>
-                      handleInputChange("purchaseOrderNumber", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </Container>
-              </Container>
-            </Container>
-
-            {/* Invoice Items */}
-            <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <Container className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  {translations["Invoice Items"]}
-                </h3>
-                <FilledButton
-                  isIcon={true}
-                  icon={Plus}
-                  iconSize="w-4 h-4"
-                  bgColor="bg-blue-600 hover:bg-blue-700"
-                  textColor="text-white"
-                  rounded="rounded-lg"
-                  buttonText={translations["Add Item"]}
-                  height="h-9"
-                  px="px-3"
-                  fontWeight="font-medium"
-                  fontSize="text-sm"
-                  isIconLeft={true}
-                  onClick={addItem}
-                />
-              </Container>
-
-              <Container className="space-y-4">
-                {formData?.items?.length === 0 && (
-                  <Container className="text-center py-8">
-                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <Span className="text-gray-500">
-                      No items added yet. Click "Add Item" to get started.
-                    </Span>
-                  </Container>
-                )}
-              </Container>
-            </Container>
+              </div>
+            </div>
 
             {/* Additional Information */}
-            <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                {translations["Payment & Terms"]}
-              </h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-6">
+                <h2 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                  Additional Information
+                </h2>
 
-              <Container className="space-y-4">
-                {/* Payment Terms */}
-                <Container>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Invoice Level Discount
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="number"
+                        value={formData.DiscountAmount}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "DiscountAmount",
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
+                        min="0"
+                        step="0.01"
+                        className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Shipping Charges
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="number"
+                        value={formData.ShippingAmount}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "ShippingAmount",
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
+                        min="0"
+                        step="0.01"
+                        className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Payment Terms"]}
+                    Notes / Terms
                   </label>
                   <textarea
-                    value={formData.paymentTerms}
-                    onChange={(e) =>
-                      handleInputChange("paymentTerms", e.target.value)
-                    }
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Payment terms and conditions..."
+                    value={formData.Notes}
+                    onChange={(e) => handleInputChange("Notes", e.target.value)}
+                    rows="4"
+                    placeholder="Enter notes or terms..."
+                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                </Container>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Notes */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.Notes}
-                  </label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => handleInputChange("notes", e.target.value)}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Notes visible to client..."
-                  />
-                </Container>
+          {/* Summary Panel - Right Side */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 sticky top-24">
+              <div className="p-6">
+                <h2 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+                  <Calculator className="w-5 h-5 mr-2 text-blue-600" />
+                  Invoice Summary
+                </h2>
 
-                {/* Internal Notes */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Internal Notes"]}
-                  </label>
-                  <textarea
-                    value={formData.internalNotes}
-                    onChange={(e) =>
-                      handleInputChange("internalNotes", e.target.value)
-                    }
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Internal notes (not visible to client)..."
-                  />
-                </Container>
-              </Container>
-            </Container>
-          </Container>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="font-medium">
+                      {formData.Currency} {totals.subtotal.toFixed(2)}
+                    </span>
+                  </div>
 
-          {/* Right Column - Summary */}
-          <Container className="lg:col-span-1">
-            <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <Calculator className="w-5 h-5" />
-                {translations["Invoice Summary"]}
-              </h3>
+                  {totals.totalDiscount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Item Discounts:</span>
+                      <span className="font-medium text-red-600">
+                        -{formData.Currency} {totals.totalDiscount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
 
-              <Container className="space-y-4">
-                {/* Subtotal */}
-                <Container className="flex justify-between">
-                  <Span className="text-gray-600">
-                    {translations.Subtotal}:
-                  </Span>
-                  <Span className="font-medium">
-                    {formData.currency} {totals.subtotal}
-                  </Span>
-                </Container>
+                  {totals.totalTax > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Tax:</span>
+                      <span className="font-medium">
+                        {formData.Currency} {totals.totalTax.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
 
-                {/* Discount */}
-                <Container className="flex justify-between">
-                  <Span className="text-gray-600">
-                    {translations.Discount}:
-                  </Span>
-                  <Span className="font-medium text-red-600">
-                    -{formData.currency} {totals.totalDiscount}
-                  </Span>
-                </Container>
+                  {formData.DiscountAmount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Invoice Discount:</span>
+                      <span className="font-medium text-red-600">
+                        -{formData.Currency}{" "}
+                        {formData.DiscountAmount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
 
-                {/* Tax */}
-                <Container className="flex justify-between">
-                  <Span className="text-gray-600">
-                    {translations["Tax Amount"]}:
-                  </Span>
-                  <Span className="font-medium">
-                    {formData.currency} {totals.totalTax}
-                  </Span>
-                </Container>
+                  {formData.ShippingAmount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Shipping:</span>
+                      <span className="font-medium">
+                        {formData.Currency} {formData.ShippingAmount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
 
-                {/* Additional Discount */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Discount Amount"]}
-                  </label>
-                  <Container className="relative">
-                    <input
-                      type="number"
-                      value={formData.discountAmount}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "discountAmount",
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <DollarSign className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </Container>
-                </Container>
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-900">
+                        Total:
+                      </span>
+                      <span className="text-xl font-bold text-blue-600">
+                        {formData.Currency} {totals.grandTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                {/* Shipping */}
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Shipping Amount
-                  </label>
-                  <Container className="relative">
-                    <input
-                      type="number"
-                      value={formData.shippingAmount}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "shippingAmount",
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <DollarSign className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </Container>
-                </Container>
-
-                <hr className="border-gray-200" />
-
-                {/* Grand Total */}
-                <Container className="flex justify-between items-center">
-                  <Span className="text-lg font-semibold text-gray-900">
-                    {translations["Grand Total"]}:
-                  </Span>
-                  <Span className="text-xl font-bold text-blue-600">
-                    {formData.currency} {totals.grandTotal}
-                  </Span>
-                </Container>
-
-                <hr className="border-gray-200" />
-
-                {/* Action Buttons */}
-                <Container className="space-y-3">
-                  <FilledButton
-                    isIcon={true}
-                    icon={Save}
-                    iconSize="w-4 h-4"
-                    bgColor="bg-blue-600 hover:bg-blue-700"
-                    textColor="text-white"
-                    rounded="rounded-lg"
-                    buttonText={translations["Save Draft"]}
-                    height="h-10"
-                    width="w-full"
-                    fontWeight="font-medium"
-                    fontSize="text-sm"
-                    isIconLeft={true}
+                <div className="mt-8 space-y-3">
+                  <button
                     onClick={() => handleSubmit("draft")}
                     disabled={isSubmitting}
-                  />
+                    className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Save Draft
+                  </button>
 
-                  <FilledButton
-                    isIcon={true}
-                    icon={Send}
-                    iconSize="w-4 h-4"
-                    bgColor="bg-green-600 hover:bg-green-700"
-                    textColor="text-white"
-                    rounded="rounded-lg"
-                    buttonText={translations["Save & Send"]}
-                    height="h-10"
-                    width="w-full"
-                    fontWeight="font-medium"
-                    fontSize="text-sm"
-                    isIconLeft={true}
+                  <button
                     onClick={() => handleSubmit("send")}
                     disabled={isSubmitting}
-                  />
-                </Container>
-              </Container>
-            </Container>
-          </Container>
-        </Container>
-      </Container>
+                    className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Send className="w-4 h-4 mr-2" />
+                    )}
+                    Save & Send
+                  </button>
+                </div>
 
-      {/* Delete Confirmation Modal */}
-      {isEditing && (
-        <Modall
-          modalOpen={showDeleteModal}
-          setModalOpen={setShowDeleteModal}
-          title={
-            <Container className="flex items-center gap-2 text-red-600">
-              <Trash2 className="w-5 h-5" />
-              <Span>Delete Invoice</Span>
-            </Container>
-          }
-          width={500}
-          okText={translations.Delete}
-          cancelText={translations.Cancel}
-          okAction={handleDelete}
-          cancelAction={() => setShowDeleteModal(false)}
-          body={
-            <Container className="text-center py-4">
-              <Container className="bg-red-50 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Trash2 className="w-8 h-8 text-red-600" />
-              </Container>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Are you sure?
-              </h3>
-              <Span className="text-gray-500 mb-4 block">
-                This action cannot be undone. This will permanently delete the
-                invoice <strong>"{formData.invoiceNumber}"</strong> and all
-                associated data.
-              </Span>
-            </Container>
-          }
-        />
+                {/* Debug Info */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <details className="text-xs text-gray-500">
+                    <summary className="cursor-pointer font-medium">
+                      Debug Info
+                    </summary>
+                    <div className="mt-2 space-y-1">
+                      <p>Data Loaded: {dataLoaded ? "Y" : "N"}</p>
+                      <p>
+                        Products:{" "}
+                        {allItems.filter((i) => i.type === "product").length}
+                      </p>
+                      <p>
+                        Services:{" "}
+                        {allItems.filter((i) => i.type === "service").length}
+                      </p>
+                      <p>Total Items: {allItems.length}</p>
+                      <p>Form Items: {formData.Items.length}</p>
+                      <p>Client ID: {formData.ClientId}</p>
+                      <p>
+                        Loading: P:{productsLoading ? "Y" : "N"} S:
+                        {servicesLoading ? "Y" : "N"} C:
+                        {clientsLoading ? "Y" : "N"}
+                      </p>
+                    </div>
+                  </details>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Item Selection Modal */}
+      {showItemModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {translations["Select Items"]}
+                </h2>
+                <button
+                  onClick={closeItemModal}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex flex-col h-[calc(90vh-180px)]">
+              {/* Search and Filter */}
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Search */}
+                  <div className="flex-1 relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={translations["Search items..."]}
+                      value={itemSearch}
+                      onChange={(e) => setItemSearch(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    />
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setSelectedItemCategory("all")}
+                      className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                        selectedItemCategory === "all"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      {translations.All}
+                    </button>
+                    <button
+                      onClick={() => setSelectedItemCategory("products")}
+                      className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                        selectedItemCategory === "products"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      {translations.Products}
+                    </button>
+                    <button
+                      onClick={() => setSelectedItemCategory("services")}
+                      className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                        selectedItemCategory === "services"
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      {translations.Services}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Items List */}
+              <div className="flex-1 overflow-auto px-6 py-4">
+                {productsLoading || servicesLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400 mr-3" />
+                    <p className="text-gray-500">Loading items...</p>
+                  </div>
+                ) : filteredItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">
+                      {translations["No items found"]}
+                    </p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Try adjusting your search or filter criteria
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredItems.map((item) => {
+                      const isSelected = selectedItems.find(
+                        (i) => i.id === item.id && i.type === item.type
+                      );
+                      return (
+                        <div
+                          key={`${item.type}-${item.id}`}
+                          onClick={() => toggleItemSelection(item)}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                            isSelected
+                              ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                              : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0">
+                              {item.icon && (
+                                <item.icon className="w-5 h-5 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-medium text-gray-900 truncate">
+                                {item.name}
+                              </h3>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {item.category} • {formData.Currency}{" "}
+                                {item.price?.toFixed(2) || "0.00"}
+                              </p>
+                              {item.itemCode && (
+                                <p className="text-xs text-blue-600 mt-1">
+                                  Code: {item.itemCode}
+                                </p>
+                              )}
+                              {item.description && (
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                  {item.description}
+                                </p>
+                              )}
+                              <div className="flex items-center mt-2">
+                                <span className="text-xs font-medium text-gray-600">
+                                  Tax: {item.taxRate}%
+                                </span>
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  {selectedItems.length} item(s) selected
+                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={closeItemModal}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    {translations.Cancel}
+                  </button>
+                  <button
+                    onClick={addSelectedItems}
+                    disabled={selectedItems.length === 0}
+                    className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {translations["Add Selected Items"]}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
-    </Container>
+    </div>
   );
 };
 
-export default InvoiceForm;
+export default DaftraInvoiceForm;

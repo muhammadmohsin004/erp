@@ -1,574 +1,350 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
   User,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Mail,
   Phone,
   MapPin,
   Building,
-  Eye,
-  Edit,
-  Copy,
-  Trash2,
-  Filter,
-  Download,
-  X,
-  FileText,
   Users,
   Calendar,
+  TrendingUp,
+  Activity,
+  AlertCircle,
+  RefreshCw,
+  Eye,
+  Edit,
+  Copy
 } from "lucide-react";
-import {
-  AiOutlineEye,
-  AiOutlineEdit,
-  AiOutlineCopy,
-  AiOutlineDelete,
-  AiOutlinePlus,
-  AiOutlineFilter,
-  AiOutlineDownload,
-} from "react-icons/ai";
 import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
-import Modall from "../../components/elements/modal/Modal";
-import SearchAndFilters from "../../components/elements/searchAndFilters/SearchAndFilters";
-import Table from "../../components/elements/table/Table";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 
-const ClientList = () => {
+const DynamicClientDashboard = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
-  const translations = {
-    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
-    Clients: language === "ar" ? "العملاء" : "Clients",
-    "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
-    Search: language === "ar" ? "بحث" : "Search",
-    Filters: language === "ar" ? "الفلاتر" : "Filters",
-    Export: language === "ar" ? "تصدير" : "Export",
-    Selected: language === "ar" ? "محدد" : "Selected",
-    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    NoClients: language === "ar" ? "لا يوجد عملاء" : "No clients found",
-    Name: language === "ar" ? "الاسم" : "Name",
-    Email: language === "ar" ? "البريد الإلكتروني" : "Email",
-    Phone: language === "ar" ? "الهاتف" : "Phone",
-    Location: language === "ar" ? "الموقع" : "Location",
-    Actions: language === "ar" ? "الإجراءات" : "Actions",
-    Showing: language === "ar" ? "عرض" : "Showing",
-    Of: language === "ar" ? "من" : "of",
-    Items: language === "ar" ? "عناصر" : "Items",
-    Individual: language === "ar" ? "فردي" : "Individual",
-    Business: language === "ar" ? "تجاري" : "Business",
-    Total: language === "ar" ? "المجموع" : "Total",
-    "This Month": language === "ar" ? "هذا الشهر" : "This Month",
-    View: language === "ar" ? "عرض" : "View",
-    Edit: language === "ar" ? "تعديل" : "Edit",
-    Clone: language === "ar" ? "نسخ" : "Clone",
-    Delete: language === "ar" ? "حذف" : "Delete",
-    "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "Delete Client": language === "ar" ? "حذف العميل" : "Delete Client",
-    "This action cannot be undone":
-      language === "ar"
-        ? "لا يمكن التراجع عن هذا الإجراء"
-        : "This action cannot be undone",
-    Cancel: language === "ar" ? "إلغاء" : "Cancel",
-    "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
-    Close: language === "ar" ? "إغلاق" : "Close",
-    "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
-    "Business Name": language === "ar" ? "اسم النشاط التجاري" : "Business Name",
-    Address: language === "ar" ? "العنوان" : "Address",
-    "VAT Number": language === "ar" ? "الرقم الضريبي" : "VAT Number",
-    "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
-    Notes: language === "ar" ? "ملاحظات" : "Notes",
-    "All Types": language === "ar" ? "جميع الأنواع" : "All Types",
-    Country: language === "ar" ? "البلد" : "Country",
-    City: language === "ar" ? "المدينة" : "City",
-    "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found":
-      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
-    "Export Selected": language === "ar" ? "تصدير المحدد" : "Export Selected",
-    "Export All": language === "ar" ? "تصدير الكل" : "Export All",
-    "Exporting...": language === "ar" ? "جاري التصدير..." : "Exporting...",
-    "Export completed":
-      language === "ar" ? "تم التصدير بنجاح" : "Export completed",
-    "Export failed": language === "ar" ? "فشل التصدير" : "Export failed",
-  };
-
-  // Get clients context
   const {
     clients,
-    isLoading: clientsLoading,
+    loading,
     error,
-    pagination,
     statistics,
     getClients,
-    getClient,
-    deleteClient,
-    getStatistics,
+    getClientStatistics,
+    getBasicClientStatistics,
+    getClientTypeStatistics
   } = useClients();
 
-  // Local state management
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isFocused] = useState(false);
-  const [filterOptions, setFilterOptions] = useState({
-    clientType: "",
-    country: "",
-    city: "",
-    sortBy: "CreatedAt",
-    sortAscending: false,
-  });
-  const [appliedFilters, setAppliedFilters] = useState({
-    clientType: "",
-    country: "",
-    city: "",
-    sortBy: "CreatedAt",
-    sortAscending: false,
-  });
-  const [selectedClients, setSelectedClients] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [clientToDelete, setClientToDelete] = useState(null);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
+  const translations = React.useMemo(() => ({
+    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
+    "Clients Overview": language === "ar" ? "نظرة عامة على العملاء" : "Clients Overview",
+    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "Total Clients": language === "ar" ? "إجمالي العملاء" : "Total Clients",
+    "Individual": language === "ar" ? "فردي" : "Individual",
+    "Business": language === "ar" ? "تجاري" : "Business",
+    "This Month": language === "ar" ? "هذا الشهر" : "This Month",
+    "Recent Clients": language === "ar" ? "العملاء الجدد" : "Recent Clients",
+    "View All Clients": language === "ar" ? "عرض جميع العملاء" : "View All Clients",
+    "No clients found": language === "ar" ? "لم يتم العثور على عملاء" : "No clients found",
+    "Error loading data": language === "ar" ? "خطأ في تحميل البيانات" : "Error loading data",
+    "Retry": language === "ar" ? "المحاولة مرة أخرى" : "Retry",
+    "View": language === "ar" ? "عرض" : "View",
+    "Edit": language === "ar" ? "تعديل" : "Edit",
+    "Clone": language === "ar" ? "نسخ" : "Clone",
+    "Get started by adding your first client": language === "ar" ? "ابدأ بإضافة عميلك الأول" : "Get started by adding your first client",
+    "Manage and view your client information": language === "ar" ? "إدارة ومشاهدة معلومات عملائك" : "Manage and view your client information",
+    "Failed to load some data": language === "ar" ? "فشل في تحميل بعض البيانات" : "Failed to load some data",
+    "Partial data loaded": language === "ar" ? "تم تحميل البيانات جزئياً" : "Partial data loaded"
+  }), [language]);
 
-  // Fetch clients on component mount
+  // Simplified local state - NO INITIAL LOADING STATE
+  const [hasError, setHasError] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [dataRefreshing, setDataRefreshing] = useState(false);
+
+  // Check authentication (but don't block UI)
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        await getClients();
-        await getStatistics();
-      } catch (error) {
-        console.error("Error fetching initial data:", error);
-      }
-    };
-
-    if (token) {
-      fetchInitialData();
-    }
-  }, [token]);
-
-  // Handle search when searchTerm changes (with debounce)
-  useEffect(() => {
-    const delayedSearch = setTimeout(() => {
-      if (searchTerm !== undefined) {
-        handleSearchClients();
-      }
-    }, 500); // 500ms debounce
-
-    return () => clearTimeout(delayedSearch);
-  }, [searchTerm]);
-
-  // Handle filters change - remove auto-apply, only apply on button click
-  useEffect(() => {
-    setSelectedClients([]);
-    setSelectAll(false);
-  }, [clients]);
-
-  useEffect(() => {
-    // Check both Redux state and localStorage
-    const localToken = localStorage.getItem("token");
-
-    if (!token && !localToken) {
+    if (!token && !localStorage.getItem("token")) {
       navigate("/admin-Login");
+      return;
     }
   }, [token, navigate]);
 
-  // Search function
-  const handleSearchClients = async () => {
-    try {
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...appliedFilters,
-      });
-    } catch (error) {
-      console.error("Error searching clients:", error);
-    }
-  };
-
-  // Filter functions - Updated to work properly
-  const handleApplyFilters = async () => {
-    try {
-      setAppliedFilters({ ...filterOptions });
-      await getClients({
-        page: 1,
-        searchTerm: searchTerm,
-        ...filterOptions,
-      });
-      setShowFilters(false);
-    } catch (error) {
-      console.error("Error applying filters:", error);
-    }
-  };
-
-  const handleClearFilters = async () => {
-    const resetFilters = {
-      clientType: "",
-      country: "",
-      city: "",
-      sortBy: "CreatedAt",
-      sortAscending: false,
-    };
-
-    setSearchTerm("");
-    setFilterOptions(resetFilters);
-    setAppliedFilters(resetFilters);
-    setShowFilters(false);
-
-    try {
-      await getClients({ page: 1 });
-    } catch (error) {
-      console.error("Error clearing filters:", error);
-    }
-  };
-
-  // Export functionality - Complete implementation
-  const convertToCSV = (data) => {
-    if (!data || data.length === 0) return "";
-
-    const headers = [
-      "Client Type",
-      "Full Name",
-      "Business Name",
-      "Email",
-      "Mobile",
-      "Telephone",
-      "Street Address 1",
-      "Street Address 2",
-      "City",
-      "State",
-      "Postal Code",
-      "Country",
-      "VAT Number",
-      "Code Number",
-      "Currency",
-      "Category",
-      "Invoicing Method",
-      "Notes",
-      "Created At",
-      "Updated At",
-    ];
-
-    const csvContent = [
-      headers.join(","),
-      ...data.map((client) =>
-        [
-          `"${client.ClientType || ""}"`,
-          `"${client.FullName || ""}"`,
-          `"${client.BusinessName || ""}"`,
-          `"${client.Email || ""}"`,
-          `"${client.Mobile || ""}"`,
-          `"${client.Telephone || ""}"`,
-          `"${client.StreetAddress1 || ""}"`,
-          `"${client.StreetAddress2 || ""}"`,
-          `"${client.City || ""}"`,
-          `"${client.State || ""}"`,
-          `"${client.PostalCode || ""}"`,
-          `"${client.Country || ""}"`,
-          `"${client.VatNumber || ""}"`,
-          `"${client.CodeNumber || ""}"`,
-          `"${client.Currency || ""}"`,
-          `"${client.Category || ""}"`,
-          `"${client.InvoicingMethod || ""}"`,
-          `"${client.Notes || ""}"`,
-          `"${
-            client.CreatedAt
-              ? new Date(client.CreatedAt).toLocaleDateString()
-              : ""
-          }"`,
-          `"${
-            client.UpdatedAt
-              ? new Date(client.UpdatedAt).toLocaleDateString()
-              : ""
-          }"`,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    return csvContent;
-  };
-
-  const downloadCSV = (csvContent, filename) => {
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-      let exportData = [];
-
-      if (selectedClients.length > 0) {
-        // Export selected clients
-        exportData = Array.isArray(clients)
-          ? clients.filter((client) => selectedClients.includes(client.Id))
-          : [];
-      } else {
-        // Export all clients (fetch all pages if needed)
-        exportData = Array.isArray(clients) ? clients : [];
-
-        // If there are more pages, fetch all clients
-        if (pagination && pagination.totalPages > 1) {
+  // Background data fetching - NO LOADING STATE BLOCKING
+  useEffect(() => {
+    let mounted = true;
+    
+    const fetchDataInBackground = async () => {
+      if (hasFetched || !mounted) return;
+      
+      const hasToken = token || localStorage.getItem("token");
+      if (!hasToken) return;
+      
+      try {
+        setHasFetched(true);
+        setHasError(null);
+        
+        // Try to fetch statistics (silently fail if needed)
+        try {
+          await getClientStatistics();
+        } catch (statsError) {
           try {
-            // Fetch all clients for export
-            const allClientsResponse = await getClients({
-              page: 1,
-              pageSize: pagination.totalItems, // Get all items in one request
-              searchTerm: searchTerm,
-              ...appliedFilters,
-            });
-
-            if (allClientsResponse && Array.isArray(allClientsResponse)) {
-              exportData = allClientsResponse;
+            await getBasicClientStatistics();
+          } catch (basicStatsError) {
+            try {
+              await getClientTypeStatistics();
+            } catch (typeStatsError) {
+              console.warn("All statistics endpoints failed");
             }
-          } catch (error) {
-            console.error("Error fetching all clients for export:", error);
-            // Fallback to current page data
-            exportData = Array.isArray(clients) ? clients : [];
           }
         }
+        
+        // Try to fetch clients (silently fail if needed)
+        try {
+          await getClients({ page: 1, pageSize: 6 });
+        } catch (clientsError) {
+          console.warn("Failed to fetch clients:", clientsError);
+        }
+        
+      } catch (error) {
+        console.error("Background fetch error:", error);
+        setHasError(error.message);
+        setHasFetched(false);
       }
+    };
 
-      if (exportData.length === 0) {
-        alert("No data to export");
-        return;
-      }
-
-      const csvContent = convertToCSV(exportData);
-      const filename = `clients_export_${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
-
-      downloadCSV(csvContent, filename);
-
-      // Show success message
-      alert(translations["Export completed"]);
-    } catch (error) {
-      console.error("Error exporting clients:", error);
-      alert(translations["Export failed"]);
-    } finally {
-      setIsExporting(false);
+    if ((token || localStorage.getItem("token")) && !hasFetched) {
+      fetchDataInBackground();
     }
-  };
 
-  // Client selection
-  const handleClientSelection = (clientId) => {
-    setSelectedClients((prev) => {
-      if (prev.includes(clientId)) {
-        return prev.filter((id) => id !== clientId);
-      } else {
-        return [...prev, clientId];
-      }
-    });
-  };
+    return () => {
+      mounted = false;
+    };
+  }, [token, hasFetched, getClients, getClientStatistics, getBasicClientStatistics, getClientTypeStatistics]);
 
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedClients([]);
-    } else {
-      const clientIds = Array.isArray(clients)
-        ? clients.map((client) => client.Id)
-        : [];
-      setSelectedClients(clientIds);
-    }
-    setSelectAll(!selectAll);
-  };
-
-  // Client actions
-  const handleViewClient = async (clientId) => {
-    try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        setSelectedClient(clientData.data);
-        setShowViewModal(true);
-      }
-    } catch (error) {
-      console.error("Error fetching client details:", error);
-      alert("Failed to fetch client details");
-    }
-  };
-
-  const handleEditClient = async (clientId) => {
-    try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        navigate("/admin/new-clients", {
-          state: {
-            editData: clientData.data,
-            isEditing: true,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching client for edit:", error);
-      alert("Failed to fetch client details for editing");
-    }
-  };
-
-  const handleCloneClient = async (clientId) => {
-    try {
-      const clientData = await getClient(clientId);
-      if (clientData && clientData.data) {
-        navigate("/admin/new-clients", {
-          state: {
-            cloneData: {
-              ...clientData.data,
-              FullName: `${clientData.data.FullName || ""} (Copy)`,
-              Email: "",
-              CodeNumber: "",
-              Id: undefined,
-            },
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error cloning client:", error);
-      alert("Failed to clone client");
-    }
-  };
-
-  const handleDeleteClient = (clientId) => {
-    const client = Array.isArray(clients)
-      ? clients.find((c) => c.Id === clientId)
-      : null;
-    if (client) {
-      setClientToDelete(client);
-      setShowDeleteModal(true);
-    } else {
-      alert("Client not found");
-    }
-  };
-
-  const confirmDeleteClient = async () => {
-    if (!clientToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      await deleteClient(clientToDelete.Id);
-      setShowDeleteModal(false);
-      setClientToDelete(null);
-      // Refresh the client list
-      await getClients({
-        searchTerm: searchTerm,
-        ...appliedFilters,
-      });
-    } catch (error) {
-      console.error("Error deleting client:", error);
-      alert("Failed to delete client");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  // Pagination
-  const handlePageChange = async (newPage) => {
-    if (newPage < 1 || newPage > pagination.totalPages) return;
-
-    try {
-      await getClients({
-        page: newPage,
-        searchTerm: searchTerm,
-        ...appliedFilters,
-      });
-    } catch (error) {
-      console.error("Error changing page:", error);
-    }
-  };
+  // Manual refresh
+  const handleRefresh = useCallback(async () => {
+    setDataRefreshing(true);
+    setHasError(null);
+    setHasFetched(false);
+    
+    // Let the useEffect handle the actual fetching
+    setTimeout(() => {
+      setDataRefreshing(false);
+    }, 2000); // Stop refreshing indicator after 2 seconds
+  }, []);
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor }) => (
-    <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+  const StatCard = React.memo(({ title, value, icon: Icon, bgColor, iconColor, trend, isLoading }) => (
+    <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
-          <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {value || 0}
-          </Span>
+          {isLoading ? (
+            <Container className="w-16 h-8 bg-gray-200 animate-pulse rounded mt-1"></Container>
+          ) : (
+            <Span className="text-2xl font-bold text-gray-900 mt-1 block">
+              {value || 0}
+            </Span>
+          )}
+          {trend && !isLoading && (
+            <Container className="flex items-center mt-2">
+              <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+              <Span className="text-sm text-green-600">{trend}</Span>
+            </Container>
+          )}
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
           <Icon className={`w-6 h-6 ${iconColor}`} />
         </Container>
       </Container>
     </Container>
+  ));
+
+  // Client Card Component
+  const ClientCard = React.memo(({ client }) => (
+    <Container className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow">
+      <Container className="flex items-start justify-between">
+        <Container className="flex-1">
+          <Container className="flex items-center gap-2 mb-2">
+            <Span
+              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                client.ClientType === "Individual"
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-green-100 text-green-800"
+              }`}
+            >
+              {translations[client.ClientType] || client.ClientType}
+            </Span>
+          </Container>
+          
+          <h3 className="font-medium text-gray-900 mb-1">
+            {client.ClientType === "Business"
+              ? client.BusinessName || client.FullName || "N/A"
+              : client.FullName || "N/A"}
+          </h3>
+          
+          {client.Email && (
+            <Container className="flex items-center text-sm text-gray-600 mb-1">
+              <Mail className="w-4 h-4 mr-2" />
+              <Span>{client.Email}</Span>
+            </Container>
+          )}
+          
+          {(client.Mobile || client.Telephone) && (
+            <Container className="flex items-center text-sm text-gray-600 mb-1">
+              <Phone className="w-4 h-4 mr-2" />
+              <Span>{client.Mobile || client.Telephone}</Span>
+            </Container>
+          )}
+          
+          {(client.City || client.Country) && (
+            <Container className="flex items-center text-sm text-gray-600 mb-2">
+              <MapPin className="w-4 h-4 mr-2" />
+              <Span>
+                {[client.City, client.Country].filter(Boolean).join(", ")}
+              </Span>
+            </Container>
+          )}
+
+          <Container className="flex gap-1 mt-3">
+            <button
+              onClick={() => navigate(`/admin/clients/${client.Id}`)}
+              className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+              title={translations.View}
+            >
+              <Eye className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => navigate("/admin/new-clients", { 
+                state: { editData: client, isEditing: true } 
+              })}
+              className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200"
+              title={translations.Edit}
+            >
+              <Edit className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => navigate("/admin/new-clients", { 
+                state: { 
+                  cloneData: {
+                    ...client,
+                    FullName: `${client.FullName || ""} (Copy)`,
+                    Email: "",
+                    CodeNumber: "",
+                    Id: undefined,
+                  } 
+                } 
+              })}
+              className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200"
+              title={translations.Clone}
+            >
+              <Copy className="w-3 h-3" />
+            </button>
+          </Container>
+        </Container>
+      </Container>
+    </Container>
+  ));
+
+  // Loading skeleton for client cards
+  const ClientCardSkeleton = () => (
+    <Container className="bg-white p-4 rounded-lg border border-gray-200">
+      <Container className="animate-pulse">
+        <Container className="w-16 h-5 bg-gray-200 rounded mb-2"></Container>
+        <Container className="w-32 h-6 bg-gray-200 rounded mb-2"></Container>
+        <Container className="w-40 h-4 bg-gray-200 rounded mb-1"></Container>
+        <Container className="w-36 h-4 bg-gray-200 rounded mb-1"></Container>
+        <Container className="w-28 h-4 bg-gray-200 rounded mb-3"></Container>
+        <Container className="flex gap-1">
+          <Container className="w-7 h-7 bg-gray-200 rounded"></Container>
+          <Container className="w-7 h-7 bg-gray-200 rounded"></Container>
+          <Container className="w-7 h-7 bg-gray-200 rounded"></Container>
+        </Container>
+      </Container>
+    </Container>
   );
 
-  // Loading state
-  if (!token) {
-    return (
-      <Container className="flex justify-center items-center min-h-screen">
-        <Span className="text-blue-500 text-lg">Loading...</Span>
-      </Container>
-    );
-  }
+  // Get safe array from clients data - handle nested API response structure
+  const clientsArray = React.useMemo(() => {
+    if (!clients) return [];
+    
+    // Handle different possible response structures
+    if (Array.isArray(clients)) {
+      return clients;
+    }
+    
+    // Handle nested response structure: { Data: { $values: [...] } }
+    if (clients.Data && Array.isArray(clients.Data.$values)) {
+      return clients.Data.$values;
+    }
+    
+    // Handle direct $values structure: { $values: [...] }
+    if (Array.isArray(clients.$values)) {
+      return clients.$values;
+    }
+    
+    console.warn('Unexpected clients data structure:', clients);
+    return [];
+  }, [clients]);
+  const isDataLoading = loading || (!hasFetched && !hasError);
 
+  // Debug logging for clients data
+  React.useEffect(() => {
+    console.log('🔍 CLIENTS DATA DEBUG:');
+    console.log('Raw clients from context:', clients);
+    console.log('Processed clientsArray:', clientsArray);
+    console.log('Array length:', clientsArray.length);
+    console.log('Is loading:', isDataLoading);
+  }, [clients, clientsArray, isDataLoading]);
+
+  // SHOW DASHBOARD IMMEDIATELY - NO LOADING SCREEN
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
       <Container className="px-6 py-6">
         <Container className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
-          <Container className="flex items-center gap-4 mb-4 lg:mb-0">
+          <Container className="mb-4 lg:mb-0">
             <h1 className="text-2xl font-bold text-gray-900">
-              {translations.Clients}
+              {translations["Clients Overview"]}
             </h1>
-            {selectedClients.length > 0 && (
-              <Span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {selectedClients.length} {translations.Selected}
+            <Span className="text-gray-600 mt-1">
+              {translations["Manage and view your client information"]}
+            </Span>
+            {hasError && (
+              <Span className="text-red-600 text-xs block mt-1">
+                ⚠️ {hasError}
               </Span>
             )}
           </Container>
-          <Container className="flex gap-3 flex-wrap">
+          <Container className="flex gap-3">
             <FilledButton
               isIcon={true}
-              icon={Filter}
+              icon={RefreshCw}
               iconSize="w-4 h-4"
+              bgColor={dataRefreshing ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"}
+              textColor={dataRefreshing ? "text-gray-500" : "text-gray-700"}
+              rounded="rounded-lg"
+              buttonText=""
+              height="h-10"
+              width="w-10"
+              onClick={handleRefresh}
+              disabled={dataRefreshing}
+            />
+            <FilledButton
               bgColor="bg-gray-100 hover:bg-gray-200"
               textColor="text-gray-700"
               rounded="rounded-lg"
-              buttonText={translations.Filters}
+              buttonText={translations["View All Clients"]}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => setShowFilters(true)}
-            />
-            <FilledButton
-              isIcon={true}
-              icon={Download}
-              iconSize="w-4 h-4"
-              bgColor={
-                isExporting ? "bg-gray-400" : "bg-gray-100 hover:bg-gray-200"
-              }
-              textColor={isExporting ? "text-gray-600" : "text-gray-700"}
-              rounded="rounded-lg"
-              buttonText={
-                isExporting ? translations["Exporting..."] : translations.Export
-              }
-              height="h-10"
-              px="px-4"
-              fontWeight="font-medium"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={handleExport}
-              disabled={isExporting}
+              onClick={() => navigate("/admin/clients")}
             />
             <FilledButton
               isIcon={true}
@@ -588,911 +364,202 @@ const ClientList = () => {
           </Container>
         </Container>
 
-        {/* Statistics Cards */}
-        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        {/* Statistics Cards - Show immediately with loading states */}
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
-            title={`${translations.Total} ${translations.Clients}`}
-            value={statistics?.totalClients || 0}
+            title={translations["Total Clients"]}
+            value={statistics?.totalClients}
             icon={Users}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
+            trend={statistics?.clientsThisMonth ? `+${statistics.clientsThisMonth} this month` : null}
+            isLoading={isDataLoading}
           />
           <StatCard
             title={translations.Individual}
-            value={statistics?.individualClients || 0}
+            value={statistics?.individualClients}
             icon={User}
             bgColor="bg-green-50"
             iconColor="text-green-600"
+            isLoading={isDataLoading}
           />
           <StatCard
             title={translations.Business}
-            value={statistics?.businessClients || 0}
+            value={statistics?.businessClients}
             icon={Building}
             bgColor="bg-purple-50"
             iconColor="text-purple-600"
+            isLoading={isDataLoading}
           />
           <StatCard
             title={translations["This Month"]}
-            value={statistics?.clientsThisMonth || 0}
+            value={statistics?.clientsThisMonth}
             icon={Calendar}
             bgColor="bg-yellow-50"
             iconColor="text-yellow-600"
+            isLoading={isDataLoading}
           />
         </Container>
 
-        {/* Search Bar */}
-        <Container className="mb-6">
-          <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <SearchAndFilters
-              isFocused={isFocused}
-              searchValue={searchTerm}
-              setSearchValue={setSearchTerm}
-            />
-          </Container>
-        </Container>
-
-        {/* Client Table */}
+        {/* Recent Clients - Show immediately */}
         <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {clientsLoading ? (
-            <Container className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <Span className="text-blue-500 text-lg block mt-4">
-                {translations.Loading}
-              </Span>
-            </Container>
-          ) : error ? (
-            <Container className="text-center py-12">
-              <Span className="text-red-500 text-lg block mb-4">
-                Error: {error}
-              </Span>
+          <Container className="px-6 py-4 border-b border-gray-200">
+            <Container className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">
+                {translations["Recent Clients"]}
+              </h2>
               <FilledButton
-                bgColor="bg-blue-600 hover:bg-blue-700"
-                textColor="text-white"
-                rounded="rounded-lg"
-                buttonText="Retry"
-                height="h-10"
-                px="px-4"
+                bgColor="bg-transparent hover:bg-gray-50"
+                textColor="text-blue-600 hover:text-blue-800"
+                rounded="rounded-md"
+                buttonText={translations["View All Clients"]}
+                height="h-8"
+                px="px-3"
                 fontWeight="font-medium"
                 fontSize="text-sm"
-                onClick={() => getClients()}
+                onClick={() => navigate("/admin/clients")}
               />
             </Container>
-          ) : !Array.isArray(clients) || clients.length === 0 ? (
-            <Container className="text-center py-12">
-              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm ||
-                filterOptions.clientType ||
-                filterOptions.country ||
-                filterOptions.city
-                  ? translations["No results found"]
-                  : translations.NoClients}
-              </h3>
-              {(searchTerm ||
-                filterOptions.clientType ||
-                filterOptions.country ||
-                filterOptions.city) && (
+          </Container>
+          
+          <Container className="p-6">
+            {isDataLoading ? (
+              // Show skeleton loading instead of blocking
+              <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, index) => (
+                  <ClientCardSkeleton key={index} />
+                ))}
+              </Container>
+            ) : clientsArray.length === 0 ? (
+              <Container className="text-center py-8">
+                <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {translations["No clients found"]}
+                </h3>
+                <Span className="text-gray-500 mb-4 block">
+                  {translations["Get started by adding your first client"]}
+                </Span>
                 <FilledButton
+                  isIcon={true}
+                  icon={Plus}
+                  iconSize="w-4 h-4"
                   bgColor="bg-blue-600 hover:bg-blue-700"
                   textColor="text-white"
                   rounded="rounded-lg"
-                  buttonText={`${translations["Clear All"]} ${translations.Filters}`}
+                  buttonText={translations["Add Client"]}
                   height="h-10"
                   px="px-4"
                   fontWeight="font-medium"
                   fontSize="text-sm"
-                  onClick={handleClearFilters}
+                  isIconLeft={true}
+                  onClick={() => navigate("/admin/new-clients")}
                 />
-              )}
-            </Container>
-          ) : (
-            <>
-              <Container className="overflow-x-auto">
-                <Table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-3 text-left">
-                        <input
-                          type="checkbox"
-                          checked={selectAll}
-                          onChange={handleSelectAll}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {translations["Client Type"]}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {translations.Name}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        {translations.Email}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        {translations.Phone}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                        {translations.Location}
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {translations.Actions}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {clients.map((client) => (
-                      <tr key={client.Id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedClients.includes(client.Id)}
-                            onChange={() => handleClientSelection(client.Id)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              client.ClientType === "Individual"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {translations[client.ClientType] ||
-                              client.ClientType}
-                          </Span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <Container>
-                            <Span className="text-sm font-medium text-gray-900">
-                              {client.ClientType === "Business"
-                                ? client.BusinessName ||
-                                  client.FullName ||
-                                  "N/A"
-                                : client.FullName || "N/A"}
-                            </Span>
-                            {client.ClientType === "Business" &&
-                              client.FullName &&
-                              client.BusinessName && (
-                                <Span className="text-sm text-gray-500 block">
-                                  {client.FullName}
-                                </Span>
-                              )}
-                            {client.CodeNumber && (
-                              <Span className="text-sm text-gray-500 block">
-                                Code: {client.CodeNumber}
-                              </Span>
-                            )}
-                          </Container>
-                        </td>
-                        <td className="px-6 py-4 hidden md:table-cell">
-                          {client.Email ? (
-                            <a
-                              href={`mailto:${client.Email}`}
-                              className="text-sm text-blue-600 hover:text-blue-800"
-                            >
-                              {client.Email}
-                            </a>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 hidden lg:table-cell">
-                          {client.Mobile || client.Telephone ? (
-                            <Container>
-                              {client.Mobile && (
-                                <Container>
-                                  <a
-                                    href={`tel:${client.Mobile}`}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                  >
-                                    {client.Mobile}
-                                  </a>
-                                  <Span className="text-xs text-gray-500">
-                                    {" "}
-                                    (Mobile)
-                                  </Span>
-                                </Container>
-                              )}
-                              {client.Telephone && (
-                                <Container>
-                                  <a
-                                    href={`tel:${client.Telephone}`}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                  >
-                                    {client.Telephone}
-                                  </a>
-                                  <Span className="text-xs text-gray-500">
-                                    {" "}
-                                    (Tel)
-                                  </Span>
-                                </Container>
-                              )}
-                            </Container>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 hidden xl:table-cell">
-                          {client.City || client.Country ? (
-                            <Container className="flex items-center">
-                              <MapPin className="w-4 h-4 text-gray-400 mr-1" />
-                              <Span className="text-sm text-gray-900">
-                                {[client.City, client.Country]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </Span>
-                            </Container>
-                          ) : (
-                            <Span className="text-sm text-gray-500">-</Span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <Container className="flex justify-center gap-1">
-                            {/* View Button */}
-                            <button
-                              onClick={() => handleViewClient(client.Id)}
-                              className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                              title={translations.View}
-                            >
-                              <AiOutlineEye className="w-3 h-3" />
-                            </button>
-
-                            {/* Edit Button */}
-                            <button
-                              onClick={() => handleEditClient(client.Id)}
-                              className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
-                              title={translations.Edit}
-                            >
-                              <AiOutlineEdit className="w-3 h-3" />
-                            </button>
-
-                            {/* Clone Button */}
-                            <button
-                              onClick={() => handleCloneClient(client.Id)}
-                              className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1"
-                              title={translations.Clone}
-                            >
-                              <AiOutlineCopy className="w-3 h-3" />
-                            </button>
-
-                            {/* Delete Button */}
-                            <button
-                              onClick={() => handleDeleteClient(client.Id)}
-                              className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                              title={translations.Delete}
-                            >
-                              <AiOutlineDelete className="w-3 h-3" />
-                            </button>
-                          </Container>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
               </Container>
-
-              {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
-                <Container className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                  <Span className="text-sm text-gray-500">
-                    {translations.Showing}{" "}
-                    {(pagination.page - 1) * pagination.pageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.page * pagination.pageSize,
-                      pagination.totalItems
-                    )}{" "}
-                    {translations.Of} {pagination.totalItems}{" "}
-                    {translations.Items}
-                  </Span>
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={pagination.page === 1}
-                      onClick={() => handlePageChange(1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={pagination.page === 1}
-                      onClick={() => handlePageChange(pagination.page - 1)}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {pagination.page} / {pagination.totalPages}
-                    </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={pagination.page === pagination.totalPages}
-                      onClick={() => handlePageChange(pagination.page + 1)}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={pagination.page === pagination.totalPages}
-                      onClick={() => handlePageChange(pagination.totalPages)}
-                    />
-                  </Container>
-                </Container>
-              )}
-            </>
-          )}
-        </Container>
-      </Container>
-
-      {/* View Client Modal */}
-      <Modall
-        modalOpen={showViewModal}
-        setModalOpen={setShowViewModal}
-        title={
-          <Container className="flex items-center gap-2">
-            <Eye className="w-5 h-5" />
-            <Span>{translations["Client Details"]}</Span>
+            ) : (
+              <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {clientsArray.slice(0, 6).map((client) => (
+                  <ClientCard key={client.Id} client={client} />
+                ))}
+              </Container>
+            )}
           </Container>
-        }
-        width={800}
-        okText={translations.Edit}
-        cancelText={translations.Close}
-        okAction={() => {
-          setShowViewModal(false);
-          handleEditClient(selectedClient?.Id);
-        }}
-        cancelAction={() => setShowViewModal(false)}
-        body={
-          selectedClient && (
-            <Container className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-              <Container className="space-y-4">
-                <Container>
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations["Client Type"]}
-                  </Span>
-                  <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                      selectedClient.ClientType === "Individual"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {translations[selectedClient.ClientType] ||
-                      selectedClient.ClientType}
-                  </Span>
-                </Container>
+        </Container>
 
-                {selectedClient.ClientType === "Individual" ? (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Name}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.FullName || "N/A"}
-                    </Span>
-                  </Container>
+        {/* Additional Stats and Quick Actions */}
+        <Container className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Client Distribution */}
+          <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Client Distribution</h3>
+            <Container className="space-y-4">
+              <Container className="flex items-center justify-between">
+                <Container className="flex items-center">
+                  <Container className="w-3 h-3 bg-blue-500 rounded-full mr-3"></Container>
+                  <Span className="text-sm text-gray-600">Individual Clients</Span>
+                </Container>
+                {isDataLoading ? (
+                  <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
                 ) : (
-                  <>
-                    <Container>
-                      <Span className="text-sm font-medium text-gray-500">
-                        {translations["Business Name"]}
-                      </Span>
-                      <Span className="text-sm text-gray-900 block mt-1">
-                        {selectedClient.BusinessName || "N/A"}
-                      </Span>
-                    </Container>
-                    {selectedClient.FullName && (
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-500">
-                          Contact Person
-                        </Span>
-                        <Span className="text-sm text-gray-900 block mt-1">
-                          {selectedClient.FullName}
-                        </Span>
-                      </Container>
-                    )}
-                  </>
-                )}
-
-                {selectedClient.CodeNumber && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["Code Number"]}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.CodeNumber}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.Email && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Email}
-                    </Span>
-                    <a
-                      href={`mailto:${selectedClient.Email}`}
-                      className="text-sm text-blue-600 hover:text-blue-800 block mt-1"
-                    >
-                      {selectedClient.Email}
-                    </a>
-                  </Container>
-                )}
-
-                {(selectedClient.Mobile || selectedClient.Telephone) && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Phone}
-                    </Span>
-                    <Container className="mt-1">
-                      {selectedClient.Mobile && (
-                        <Container>
-                          <a
-                            href={`tel:${selectedClient.Mobile}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {selectedClient.Mobile}
-                          </a>
-                          <Span className="text-xs text-gray-500">
-                            {" "}
-                            (Mobile)
-                          </Span>
-                        </Container>
-                      )}
-                      {selectedClient.Telephone && (
-                        <Container>
-                          <a
-                            href={`tel:${selectedClient.Telephone}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {selectedClient.Telephone}
-                          </a>
-                          <Span className="text-xs text-gray-500">
-                            {" "}
-                            (Telephone)
-                          </Span>
-                        </Container>
-                      )}
-                    </Container>
-                  </Container>
+                  <Span className="text-sm font-medium text-gray-900">
+                    {statistics?.individualClients || 0}
+                  </Span>
                 )}
               </Container>
-
-              <Container className="space-y-4">
-                {(selectedClient.StreetAddress1 ||
-                  selectedClient.City ||
-                  selectedClient.Country) && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations.Address}
-                    </Span>
-                    <Container className="mt-1">
-                      {selectedClient.StreetAddress1 && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedClient.StreetAddress1}
-                        </Span>
-                      )}
-                      {selectedClient.StreetAddress2 && (
-                        <Span className="text-sm text-gray-900 block">
-                          {selectedClient.StreetAddress2}
-                        </Span>
-                      )}
-                      <Span className="text-sm text-gray-900 block">
-                        {[
-                          selectedClient.City,
-                          selectedClient.State,
-                          selectedClient.PostalCode,
-                          selectedClient.Country,
-                        ]
-                          .filter(Boolean)
-                          .join(", ")}
-                      </Span>
-                    </Container>
-                  </Container>
-                )}
-
-                {selectedClient.VatNumber && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      {translations["VAT Number"]}
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.VatNumber}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.Currency && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Currency
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.Currency}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.Category && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Category
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.Category}
-                    </Span>
-                  </Container>
-                )}
-
-                {selectedClient.InvoicingMethod && (
-                  <Container>
-                    <Span className="text-sm font-medium text-gray-500">
-                      Invoicing Method
-                    </Span>
-                    <Span className="text-sm text-gray-900 block mt-1">
-                      {selectedClient.InvoicingMethod}
-                    </Span>
-                  </Container>
-                )}
-              </Container>
-
-              {selectedClient.Notes && (
-                <Container className="md:col-span-2">
-                  <Span className="text-sm font-medium text-gray-500">
-                    {translations.Notes}
-                  </Span>
-                  <Span className="text-sm text-gray-900 block mt-1">
-                    {selectedClient.Notes}
-                  </Span>
+              <Container className="flex items-center justify-between">
+                <Container className="flex items-center">
+                  <Container className="w-3 h-3 bg-green-500 rounded-full mr-3"></Container>
+                  <Span className="text-sm text-gray-600">Business Clients</Span>
                 </Container>
-              )}
-
-              {/* Contacts Section */}
-              {selectedClient.Contacts &&
-                Array.isArray(selectedClient.Contacts.$values) &&
-                selectedClient.Contacts.$values.length > 0 && (
-                  <Container className="md:col-span-2">
-                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
-                      Additional Contacts
-                    </Span>
-                    <Container className="border border-gray-200 rounded-lg p-4 space-y-3">
-                      {selectedClient.Contacts.$values.map((contact, index) => (
-                        <Container
-                          key={contact.Id || index}
-                          className={
-                            index > 0 ? "border-t border-gray-200 pt-3" : ""
-                          }
-                        >
-                          <Container className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <Container>
-                              <Span className="text-sm font-medium text-gray-900">
-                                {[contact.FirstName, contact.LastName]
-                                  .filter(Boolean)
-                                  .join(" ")}
-                              </Span>
-                            </Container>
-                            <Container>
-                              {contact.Email && (
-                                <a
-                                  href={`mailto:${contact.Email}`}
-                                  className="text-sm text-blue-600 hover:text-blue-800 block"
-                                >
-                                  {contact.Email}
-                                </a>
-                              )}
-                              {(contact.Mobile || contact.Telephone) && (
-                                <Span className="text-xs text-gray-500">
-                                  {contact.Mobile &&
-                                    `Mobile: ${contact.Mobile}`}
-                                  {contact.Mobile && contact.Telephone && " | "}
-                                  {contact.Telephone &&
-                                    `Tel: ${contact.Telephone}`}
-                                </Span>
-                              )}
-                            </Container>
-                          </Container>
-                        </Container>
-                      ))}
-                    </Container>
-                  </Container>
+                {isDataLoading ? (
+                  <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
+                ) : (
+                  <Span className="text-sm font-medium text-gray-900">
+                    {statistics?.businessClients || 0}
+                  </Span>
                 )}
-
-              {/* Attachments Section */}
-              {selectedClient.Attachments &&
-                Array.isArray(selectedClient.Attachments.$values) &&
-                selectedClient.Attachments.$values.length > 0 && (
-                  <Container className="md:col-span-2">
-                    <Span className="text-sm font-medium text-gray-500 mb-2 block">
-                      Attachments
+              </Container>
+              <Container className="pt-2 border-t border-gray-200">
+                <Container className="flex items-center justify-between">
+                  <Span className="text-sm font-medium text-gray-900">Total</Span>
+                  {isDataLoading ? (
+                    <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
+                  ) : (
+                    <Span className="text-sm font-bold text-gray-900">
+                      {statistics?.totalClients || 0}
                     </Span>
-                    <Container className="flex flex-wrap gap-2">
-                      {selectedClient.Attachments.$values.map(
-                        (attachment, index) => (
-                          <Container
-                            key={attachment.Id || index}
-                            className="border border-gray-200 rounded-lg p-2 flex items-center gap-2"
-                          >
-                            <FileText className="w-4 h-4 text-gray-400" />
-                            <Span className="text-sm text-gray-900">
-                              {attachment.File || "Attachment"}
-                            </Span>
-                          </Container>
-                        )
-                      )}
-                    </Container>
-                  </Container>
-                )}
-
-              <Container className="md:col-span-2 pt-4 border-t border-gray-200">
-                <Container className="text-xs text-gray-500 space-y-1">
-                  <Container>
-                    Created:{" "}
-                    {selectedClient.CreatedAt
-                      ? new Date(selectedClient.CreatedAt).toLocaleDateString()
-                      : "N/A"}
-                  </Container>
-                  {selectedClient.UpdatedAt && (
-                    <Container>
-                      Updated:{" "}
-                      {new Date(selectedClient.UpdatedAt).toLocaleDateString()}
-                    </Container>
                   )}
                 </Container>
               </Container>
             </Container>
-          )
-        }
-      />
-
-      {/* Delete Confirmation Modal */}
-      <Modall
-        modalOpen={showDeleteModal}
-        setModalOpen={setShowDeleteModal}
-        title={
-          <Container className="flex items-center gap-2 text-red-600">
-            <Trash2 className="w-5 h-5" />
-            <Span>{translations["Delete Client"]}</Span>
           </Container>
-        }
-        width={500}
-        okText={translations.Delete}
-        cancelText={translations.Cancel}
-        okAction={confirmDeleteClient}
-        cancelAction={() => setShowDeleteModal(false)}
-        okButtonDisabled={isDeleting}
-        body={
-          <Container className="text-center py-4">
-            <Container className="bg-red-50 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <Trash2 className="w-8 h-8 text-red-600" />
-            </Container>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {translations["Are you sure?"]}
-            </h3>
-            <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will
-              permanently delete the client{" "}
-              <strong>
-                "{clientToDelete?.FullName || clientToDelete?.BusinessName}"
-              </strong>{" "}
-              and all associated data.
-            </Span>
-          </Container>
-        }
-      />
 
-      {/* Filters Sidebar/Offcanvas */}
-      {showFilters && (
-        <Container className="fixed inset-0 z-50 overflow-hidden">
-          <Container
-            className="absolute inset-0"
-            onClick={() => setShowFilters(false)}
-          />
-          <Container className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl">
-            <Container className="p-6">
-              <Container className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-medium text-gray-900">
-                  {translations.Filters}
-                </h3>
-                <FilledButton
-                  isIcon={true}
-                  icon={X}
-                  iconSize="w-4 h-4"
-                  bgColor="bg-gray-100 hover:bg-gray-200"
-                  textColor="text-gray-700"
-                  rounded="rounded-md"
-                  buttonText=""
-                  height="h-8"
-                  width="w-8"
-                  onClick={() => setShowFilters(false)}
-                />
-              </Container>
-
-              <Container className="space-y-4">
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations["Client Type"]}
-                  </label>
-                  <select
-                    value={filterOptions.clientType}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        clientType: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">{translations["All Types"]}</option>
-                    <option value="Individual">
-                      {translations.Individual}
-                    </option>
-                    <option value="Business">{translations.Business}</option>
-                  </select>
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.Country}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={`${translations.Search} ${translations.Country}...`}
-                    value={filterOptions.country}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        country: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {translations.City}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={`${translations.Search} ${translations.City}...`}
-                    value={filterOptions.city}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        city: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </Container>
-
-                <Container>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sort By
-                  </label>
-                  <select
-                    value={filterOptions.sortBy}
-                    onChange={(e) =>
-                      setFilterOptions({
-                        ...filterOptions,
-                        sortBy: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="CreatedAt">Date Created</option>
-                    <option value="FullName">Name</option>
-                    <option value="BusinessName">Business Name</option>
-                    <option value="Email">Email</option>
-                    <option value="ClientType">Client Type</option>
-                  </select>
-                </Container>
-
-                <Container>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={filterOptions.sortAscending}
-                      onChange={(e) =>
-                        setFilterOptions({
-                          ...filterOptions,
-                          sortAscending: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <Span className="ml-2 text-sm text-gray-700">
-                      Sort Ascending
-                    </Span>
-                  </label>
-                </Container>
-
-                {/* Show active filters */}
-                {(appliedFilters.clientType ||
-                  appliedFilters.country ||
-                  appliedFilters.city) && (
-                  <Container className="pt-4 border-t border-gray-200">
-                    <Span className="text-sm font-medium text-gray-700 mb-2 block">
-                      Active Filters:
-                    </Span>
-                    <Container className="space-y-1">
-                      {appliedFilters.clientType && (
-                        <Span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                          Type:{" "}
-                          {translations[appliedFilters.clientType] ||
-                            appliedFilters.clientType}
-                        </Span>
-                      )}
-                      {appliedFilters.country && (
-                        <Span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-1">
-                          Country: {appliedFilters.country}
-                        </Span>
-                      )}
-                      {appliedFilters.city && (
-                        <Span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded ml-1">
-                          City: {appliedFilters.city}
-                        </Span>
-                      )}
-                    </Container>
+          {/* Quick Actions */}
+          <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+            <Container className="space-y-3">
+              <button 
+                onClick={() => navigate("/admin/new-clients")}
+                className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Container className="flex items-center">
+                  <Plus className="w-5 h-5 text-blue-600 mr-3" />
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-900 block">Add New Client</Span>
+                    <Span className="text-xs text-gray-500">Create a new client profile</Span>
                   </Container>
-                )}
-              </Container>
-
-              <Container className="flex gap-3 mt-6">
-                <FilledButton
-                  bgColor="bg-blue-600 hover:bg-blue-700"
-                  textColor="text-white"
-                  rounded="rounded-lg"
-                  buttonText={translations["Apply Filters"]}
-                  height="h-10"
-                  width="flex-1"
-                  fontWeight="font-medium"
-                  fontSize="text-sm"
-                  onClick={handleApplyFilters}
-                />
-                <FilledButton
-                  bgColor="bg-gray-100 hover:bg-gray-200"
-                  textColor="text-gray-700"
-                  rounded="rounded-lg"
-                  buttonText={translations["Clear All"]}
-                  height="h-10"
-                  width="flex-1"
-                  fontWeight="font-medium"
-                  fontSize="text-sm"
-                  onClick={handleClearFilters}
-                />
-              </Container>
+                </Container>
+              </button>
+              
+              <button 
+                onClick={() => navigate("/admin/clients")}
+                className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Container className="flex items-center">
+                  <Users className="w-5 h-5 text-green-600 mr-3" />
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-900 block">View All Clients</Span>
+                    <Span className="text-xs text-gray-500">Browse complete client list</Span>
+                  </Container>
+                </Container>
+              </button>
+              
+              <button 
+                onClick={handleRefresh}
+                className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Container className="flex items-center">
+                  <Activity className="w-5 h-5 text-purple-600 mr-3" />
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-900 block">Refresh Statistics</Span>
+                    <Span className="text-xs text-gray-500">Update dashboard data</Span>
+                  </Container>
+                </Container>
+              </button>
             </Container>
           </Container>
         </Container>
-      )}
+      </Container>
     </Container>
   );
 };
 
-export default ClientList;
+export default DynamicClientDashboard;

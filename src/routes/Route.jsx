@@ -44,14 +44,14 @@ import SmtpSettings from "../pages/SuperAdmin/Settings/SmtpSettings";
 import NewProduct from "../pages/Inventories/ProductsManager/NewProduct";
 import InvoiceDashboard from "../pages/Sale/Invoice/InvoiceDashboard";
 // import InvoiceList from "../pages/Sale/Invoice/InvoiceList";
-import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
+// import InvoiceView from "../pages/Sale/Invoice/InvoiceView";
 import RequisitionList from "../pages/Inventories/Requisition/RequisitionList";
 import NewRequisition from "../pages/Inventories/Requisition/NewRequisition";
 import NewPriceList from "../pages/Inventories/PriceList/NewPriceList";
 import PriceListList from "../pages/Inventories/PriceList/PriceListList";
 import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
 import InvoicesList from "../pages/Sale/InvoicesList";
-import InvoiceForm from "../pages/Sale/InvoiceForm";
+import DaftraInvoiceForm from "../pages/Sale/InvoiceForm";
 import InvoiceDetails from "../pages/Sale/Invoice/InvoiceDetails";
 import PaymentTracking from "../pages/Sale/Invoice/Components/PaymentTracking";
 import ManageEmployees from "../pages/Employee/ManageEmployees";
@@ -83,6 +83,11 @@ import FinanceIncome from "../pages/FinanceManager/FinanceIncome";
 import FinanceExpenses from "../pages/FinanceManager/FinanceExpenses";
 import ExpenseCategories from "../pages/FinanceManager/ExpenseCategories";
 import IncomeCategories from "../pages/FinanceManager/IncomeCategories";
+import InvoiceManagementPage from "../pages/Sale/Invoice/InvoiceManagementPage";
+import InvoiceDemoApp from "../pages/Sale/Invoice/InvoiceDetailsPage";
+import ClientsListPage from "../pages/clients/ClientsListPage";
+import ClientDetailPage from "../pages/clients/ClientDetailPage";
+// import InvoiceApp from "../pages/Sale/InvoiceApp/InvoiceApp";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -367,6 +372,18 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
+      path: "/admin/ManageClients",
+      component: ClientsListPage,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/ViewClients-Details/:clientId",
+      component: ClientDetailPage,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
       path: "/admin/new-clients",
       component: NewClient,
       roles: ["Admin", "Manager", "Employee"],
@@ -511,15 +528,36 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
+
     {
-      path: "/admin/new-invoices",
-      component: InvoiceForm,
+      path: "/admin/invoices/All-Invoices-list-with description",
+      component: InvoiceManagementPage,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+
+    {
+      path: "/admin/invoices/new",
+      component: DaftraInvoiceForm,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+
+    //  {
+    //   path: "/admin/invoices/Test",
+    //   component: InvoiceApp,
+    //   roles: ["Admin", "Manager", "Employee"],
+    //   layout: true,
+    // },
+    {
+      path: "/admin/invoices/edit/:id",
+      component: DaftraInvoiceForm,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
     {
-      path: "/admin/invoices/edit/:id",
-      component: InvoiceForm,
+      path: "/admin/showinvoices/Details/:invoiceId",
+      component: InvoiceDemoApp,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
@@ -542,12 +580,12 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-    {
-      path: "/admin/invoice-view/:id",
-      component: InvoiceView,
-      roles: ["Admin", "Manager", "Employee"],
-      layout: true,
-    },
+    // {
+    //   path: "/admin/invoice-view/:id",
+    //   component: InvoiceView,
+    //   roles: ["Admin", "Manager", "Employee"],
+    //   layout: true,
+    // },
     //update new
     {
       path: "/admin/company-branches",

@@ -1140,7 +1140,12 @@ const ExpenseCategories = () => {
 
   const handleAddCategory = async () => {
     try {
-      await createExpenseCategory(categoryForm);
+      await createExpenseCategory({
+        Name: categoryForm.Name,
+        Description: categoryForm.Description,
+        Color: categoryForm.Color,
+        IsActive: categoryForm.IsActive !== null ? categoryForm.IsActive : true, // Ensure IsActive is never null
+      });
       setShowAddModal(false);
       resetForm();
       getExpenseCategories();

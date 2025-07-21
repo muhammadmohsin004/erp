@@ -97,11 +97,6 @@ const InvoiceDashboard = () => {
     getStatistics,
     getAgingReport,
     refreshInvoices,
-    getOverdueInvoices,
-    getTotalInvoiceAmount,
-    getTotalPaidAmount,
-    getTotalOutstandingAmount,
-    getInvoicesByStatus,
   } = useInvoices();
 
   const { clients, getClients } = useClients();
@@ -113,6 +108,45 @@ const InvoiceDashboard = () => {
   const [overdueInvoices, setOverdueInvoices] = useState([]);
   const [topClients, setTopClients] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
+
+  // Helper function to extract invoice data from the API response structure
+  const extractInvoiceData = (invoiceResponse) => {
+    if (!invoiceResponse) return [];
+    
+    // If it's the full API response with Data.$values
+    if (invoiceResponse.Data && invoiceResponse.Data.$values) {
+      return invoiceResponse.Data.$values;
+    }
+    
+    // If it's just the Data object with $values
+    if (invoiceResponse.$values) {
+      return invoiceResponse.$values;
+    }
+    
+    // If it's a direct array
+    if (Array.isArray(invoiceResponse)) {
+      return invoiceResponse;
+    }
+    
+    return [];
+  };
+
+  // Helper function to extract statistics data
+  const extractStatisticsData = (statisticsResponse) => {
+    if (!statisticsResponse) return null;
+    
+    // If it's the full API response with Data
+    if (statisticsResponse.Data) {
+      return statisticsResponse.Data;
+    }
+    
+    // If it's direct statistics object
+    if (statisticsResponse.TotalInvoices !== undefined) {
+      return statisticsResponse;
+    }
+    
+    return null;
+  };
 
   // Load data on mount
   useEffect(() => {
@@ -137,27 +171,28 @@ const InvoiceDashboard = () => {
     }
   };
 
-  // Process data when invoices change
+  // Process data when invoices or statistics change
   useEffect(() => {
-    if (invoices.length > 0) {
-      processInvoiceData();
+    const invoiceArray = extractInvoiceData(invoices);
+    if (invoiceArray.length > 0) {
+      processInvoiceData(invoiceArray);
     }
-  }, [invoices]);
+  }, [invoices, statistics]);
 
-  const processInvoiceData = () => {
+  const processInvoiceData = (invoiceArray) => {
     // Get recent invoices (last 5)
-    const recent = invoices
+    const recent = [...invoiceArray]
       .sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt))
       .slice(0, 5);
     setRecentInvoices(recent);
 
     // Get overdue invoices
-    const overdue = getOverdueInvoices();
+    const overdue = invoiceArray.filter(invoice => invoice.IsOverdue === true);
     setOverdueInvoices(overdue);
 
     // Calculate top clients
     const clientInvoices = {};
-    invoices.forEach(invoice => {
+    invoiceArray.forEach(invoice => {
       if (!clientInvoices[invoice.ClientId]) {
         clientInvoices[invoice.ClientId] = {
           clientName: invoice.ClientName,
@@ -166,7 +201,7 @@ const InvoiceDashboard = () => {
           invoiceCount: 0,
         };
       }
-      clientInvoices[invoice.ClientId].totalAmount += invoice.TotalAmount;
+      clientInvoices[invoice.ClientId].totalAmount += (invoice.TotalAmount || 0);
       clientInvoices[invoice.ClientId].invoiceCount++;
     });
 
@@ -176,11 +211,11 @@ const InvoiceDashboard = () => {
     setTopClients(topClientsList);
 
     // Generate monthly data (last 6 months)
-    const monthlyStats = generateMonthlyData(invoices);
+    const monthlyStats = generateMonthlyData(invoiceArray);
     setMonthlyData(monthlyStats);
   };
 
-  const generateMonthlyData = (invoices) => {
+  const generateMonthlyData = (invoiceArray) => {
     const months = [];
     const now = new Date();
     
@@ -188,14 +223,14 @@ const InvoiceDashboard = () => {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = date.toLocaleString('default', { month: 'short' });
       
-      const monthInvoices = invoices.filter(invoice => {
+      const monthInvoices = invoiceArray.filter(invoice => {
         const invoiceDate = new Date(invoice.InvoiceDate);
         return invoiceDate.getMonth() === date.getMonth() && 
                invoiceDate.getFullYear() === date.getFullYear();
       });
 
-      const totalAmount = monthInvoices.reduce((sum, inv) => sum + inv.TotalAmount, 0);
-      const paidAmount = monthInvoices.filter(inv => inv.Status === 'Paid').reduce((sum, inv) => sum + inv.TotalAmount, 0);
+      const totalAmount = monthInvoices.reduce((sum, inv) => sum + (inv.TotalAmount || 0), 0);
+      const paidAmount = monthInvoices.filter(inv => inv.Status === 'Paid').reduce((sum, inv) => sum + (inv.PaidAmount || 0), 0);
       
       months.push({
         month: monthName,
@@ -221,18 +256,12 @@ const InvoiceDashboard = () => {
       currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   // Format date
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString();
-  };
-
-  // Calculate percentage change
-  const calculatePercentageChange = (current, previous) => {
-    if (previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
   };
 
   // Get status color and icon
@@ -260,6 +289,12 @@ const InvoiceDashboard = () => {
     return diffDays;
   };
 
+  // Get invoice counts by status
+  const getInvoicesByStatus = (status) => {
+    const invoiceArray = extractInvoiceData(invoices);
+    return invoiceArray.filter(invoice => invoice.Status === status);
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -270,10 +305,19 @@ const InvoiceDashboard = () => {
     );
   }
 
-  const draftCount = getInvoicesByStatus('Draft').length;
-  const sentCount = getInvoicesByStatus('Sent').length;
-  const paidCount = getInvoicesByStatus('Paid').length;
-  const overdueCount = overdueInvoices.length;
+  // Get statistics data
+  const statsData = extractStatisticsData(statistics);
+  
+  // Use API statistics if available, otherwise calculate from invoices
+  const draftCount = statsData?.DraftInvoices ?? getInvoicesByStatus('Draft').length;
+  const sentCount = statsData?.SentInvoices ?? getInvoicesByStatus('Sent').length;
+  const paidCount = statsData?.PaidInvoices ?? getInvoicesByStatus('Paid').length;
+  const overdueCount = statsData?.OverdueInvoices ?? overdueInvoices.length;
+  const totalRevenue = statsData?.TotalRevenue ?? 0;
+  const outstandingAmount = statsData?.OutstandingAmount ?? 0;
+  const totalInvoices = statsData?.TotalInvoices ?? extractInvoiceData(invoices).length;
+  const collectionRate = statsData?.CollectionRate ?? 0;
+  const averageInvoiceValue = statsData?.AverageInvoiceValue ?? 0;
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -352,7 +396,7 @@ const InvoiceDashboard = () => {
                   {translations["Total Revenue"]}
                 </Span>
                 <Span className="text-2xl font-bold text-gray-900 block">
-                  {formatCurrency(statistics.totalRevenue || 0)}
+                  {formatCurrency(totalRevenue)}
                 </Span>
                 <Container className="flex items-center gap-1 mt-2">
                   <TrendingUp className="w-4 h-4 text-green-500" />
@@ -375,7 +419,7 @@ const InvoiceDashboard = () => {
                   {translations.Outstanding}
                 </Span>
                 <Span className="text-2xl font-bold text-gray-900 block">
-                  {formatCurrency(statistics.outstandingAmount || 0)}
+                  {formatCurrency(outstandingAmount)}
                 </Span>
                 <Container className="flex items-center gap-1 mt-2">
                   <TrendingDown className="w-4 h-4 text-red-500" />
@@ -398,7 +442,7 @@ const InvoiceDashboard = () => {
                   {translations["Total Invoices"]}
                 </Span>
                 <Span className="text-2xl font-bold text-gray-900 block">
-                  {statistics.totalInvoices || 0}
+                  {totalInvoices}
                 </Span>
                 <Container className="flex items-center gap-1 mt-2">
                   <TrendingUp className="w-4 h-4 text-blue-500" />
@@ -421,7 +465,7 @@ const InvoiceDashboard = () => {
                   {translations["Collection Rate"]}
                 </Span>
                 <Span className="text-2xl font-bold text-gray-900 block">
-                  {statistics.collectionRate ? `${statistics.collectionRate.toFixed(1)}%` : '0%'}
+                  {collectionRate.toFixed(1)}%
                 </Span>
                 <Container className="flex items-center gap-1 mt-2">
                   <TrendingUp className="w-4 h-4 text-green-500" />
@@ -682,7 +726,7 @@ const InvoiceDashboard = () => {
                 </thead>
                 <tbody>
                   {overdueInvoices.map((invoice) => {
-                    const daysOverdue = Math.abs(getDaysDifference(invoice.DueDate));
+                    const daysOverdue = invoice.DaysOverdue || Math.abs(getDaysDifference(invoice.DueDate));
                     return (
                       <tr key={invoice.Id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4">

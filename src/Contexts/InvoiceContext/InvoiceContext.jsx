@@ -53,6 +53,8 @@ const initialState = {
     pageSize: 25,
     totalItems: 0,
     totalPages: 0,
+    HasPreviousPage: false,
+    HasNextPage: false,
   },
   // Filter states
   searchTerm: '',
@@ -68,7 +70,7 @@ const initialState = {
   isOverdue: null,
   sortBy: 'InvoiceNumber',
   sortAscending: false,
-  // Statistics
+  // Statistics - Updated to match API response structure
   statistics: {
     totalInvoices: 0,
     draftInvoices: 0,
@@ -143,19 +145,25 @@ const invoicesReducer = (state, action) => {
       };
 
     case INVOICES_ACTIONS.SET_INVOICES:
-      const invoicesData = action.payload.Data || action.payload.data || action.payload;
-      return {
-        ...state,
-        invoices: Array.isArray(invoicesData) ? invoicesData : [],
-        pagination: {
-          page: action.payload.Paginations?.CurrentPage || action.payload.page || state.pagination.page,
-          pageSize: action.payload.Paginations?.PageSize || action.payload.pageSize || state.pagination.pageSize,
-          totalItems: action.payload.Paginations?.TotalItems || action.payload.totalItems || invoicesData.length,
-          totalPages: action.payload.Paginations?.TotalPages || action.payload.totalPages || Math.ceil((action.payload.Paginations?.TotalItems || invoicesData.length) / (action.payload.Paginations?.PageSize || state.pagination.pageSize)),
-        },
-        isLoading: false,
-        error: null,
-      };
+      {
+        const invoicesData = action.payload.Data || action.payload.data || action.payload;
+        const paginationData = action.payload.Paginations || action.payload.pagination;
+        
+        return {
+          ...state,
+          invoices: Array.isArray(invoicesData) ? invoicesData : (invoicesData?.$values || []),
+          pagination: {
+            page: paginationData?.CurrentPage || paginationData?.PageNumber || paginationData?.page || state.pagination.page,
+            pageSize: paginationData?.PageSize || paginationData?.pageSize || state.pagination.pageSize,
+            totalItems: paginationData?.TotalItems || paginationData?.totalItems || 0,
+            totalPages: paginationData?.TotalPages || paginationData?.totalPages || 0,
+            HasPreviousPage: paginationData?.HasPreviousPage || false,
+            HasNextPage: paginationData?.HasNextPage || false,
+          },
+          isLoading: false,
+          error: null,
+        };
+      }
 
     case INVOICES_ACTIONS.SET_CURRENT_INVOICE:
       return {
@@ -281,12 +289,27 @@ const invoicesReducer = (state, action) => {
       };
 
     case INVOICES_ACTIONS.SET_STATISTICS:
-      return {
-        ...state,
-        statistics: action.payload,
-        isLoading: false,
-        error: null,
-      };
+      {
+        // Convert PascalCase API response to camelCase for component usage
+        const apiStats = action.payload.Data || action.payload;
+        return {
+          ...state,
+          statistics: {
+            totalInvoices: apiStats.TotalInvoices || 0,
+            draftInvoices: apiStats.DraftInvoices || 0,
+            sentInvoices: apiStats.SentInvoices || 0,
+            paidInvoices: apiStats.PaidInvoices || 0,
+            voidedInvoices: apiStats.VoidedInvoices || 0,
+            overdueInvoices: apiStats.OverdueInvoices || 0,
+            totalRevenue: apiStats.TotalRevenue || 0,
+            outstandingAmount: apiStats.OutstandingAmount || 0,
+            averageInvoiceValue: apiStats.AverageInvoiceValue || 0,
+            collectionRate: apiStats.CollectionRate || 0,
+          },
+          isLoading: false,
+          error: null,
+        };
+      }
 
     case INVOICES_ACTIONS.SET_AGING_REPORT:
       return {
@@ -335,12 +358,16 @@ const InvoicesContext = createContext();
 export const InvoicesProvider = ({ children }) => {
   const [state, dispatch] = useReducer(invoicesReducer, initialState);
 
-  // Helper function to handle API errors
+  // Create stable functions that don't change on every render
   const handleApiError = useCallback((error) => {
     let errorMessage = 'An unexpected error occurred';
     
-    if (error.response?.data?.message) {
+    if (error.response?.data?.Message) {
+      errorMessage = error.response.data.Message;
+    } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
+    } else if (error.response?.data?.ValidationErrors) {
+      errorMessage = error.response.data.ValidationErrors.join(', ');
     } else if (error.response?.data?.validationErrors) {
       errorMessage = error.response.data.validationErrors.join(', ');
     } else if (error.message) {
@@ -355,24 +382,24 @@ export const InvoicesProvider = ({ children }) => {
     throw new Error(errorMessage);
   }, []);
 
-  // Build query parameters for API calls
-  const buildQueryParams = useCallback((options = {}) => {
+  // Build query parameters for API calls - FIXED: Remove unnecessary dependencies
+  const buildQueryParams = useCallback((currentState, options = {}) => {
     const params = {
-      page: options.page || state.pagination.page,
-      pageSize: options.pageSize || state.pagination.pageSize,
-      search: options.search !== undefined ? options.search : state.searchTerm,
-      status: options.status !== undefined ? options.status : state.status,
-      clientId: options.clientId !== undefined ? options.clientId : state.clientId,
-      startDate: options.startDate !== undefined ? options.startDate : state.startDate,
-      endDate: options.endDate !== undefined ? options.endDate : state.endDate,
-      dueDateStart: options.dueDateStart !== undefined ? options.dueDateStart : state.dueDateStart,
-      dueDateEnd: options.dueDateEnd !== undefined ? options.dueDateEnd : state.dueDateEnd,
-      minAmount: options.minAmount !== undefined ? options.minAmount : state.minAmount,
-      maxAmount: options.maxAmount !== undefined ? options.maxAmount : state.maxAmount,
-      currency: options.currency !== undefined ? options.currency : state.currency,
-      isOverdue: options.isOverdue !== undefined ? options.isOverdue : state.isOverdue,
-      sortBy: options.sortBy || state.sortBy,
-      sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sortAscending,
+      page: options.page || currentState.pagination.page,
+      pageSize: options.pageSize || currentState.pagination.pageSize,
+      search: options.search !== undefined ? options.search : currentState.searchTerm,
+      status: options.status !== undefined ? options.status : currentState.status,
+      clientId: options.clientId !== undefined ? options.clientId : currentState.clientId,
+      startDate: options.startDate !== undefined ? options.startDate : currentState.startDate,
+      endDate: options.endDate !== undefined ? options.endDate : currentState.endDate,
+      dueDateStart: options.dueDateStart !== undefined ? options.dueDateStart : currentState.dueDateStart,
+      dueDateEnd: options.dueDateEnd !== undefined ? options.dueDateEnd : currentState.dueDateEnd,
+      minAmount: options.minAmount !== undefined ? options.minAmount : currentState.minAmount,
+      maxAmount: options.maxAmount !== undefined ? options.maxAmount : currentState.maxAmount,
+      currency: options.currency !== undefined ? options.currency : currentState.currency,
+      isOverdue: options.isOverdue !== undefined ? options.isOverdue : currentState.isOverdue,
+      sortBy: options.sortBy || currentState.sortBy,
+      sortAscending: options.sortAscending !== undefined ? options.sortAscending : currentState.sortAscending,
     };
 
     // Remove null/undefined values
@@ -383,147 +410,237 @@ export const InvoicesProvider = ({ children }) => {
     });
 
     return params;
-  }, [state]);
+  }, []);
 
-  // Invoices API methods
-  const invoicesApi = {
-    // Get invoices with advanced filtering
-    getInvoices: async (options = {}) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+  // FIXED: Remove state from dependency array to prevent infinite loops
+  const getInvoices = useCallback(async (options = {}) => {
+    try {
+      console.log("=== GET INVOICES DEBUG START ===");
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
 
-        const params = buildQueryParams(options);
-        const response = await apiClient.get('/invoices', { params });
+      // Get current state at the time of function call instead of using state in dependencies
+      const currentState = {
+        pagination: state.pagination,
+        searchTerm: state.searchTerm,
+        status: state.status,
+        clientId: state.clientId,
+        startDate: state.startDate,
+        endDate: state.endDate,
+        dueDateStart: state.dueDateStart,
+        dueDateEnd: state.dueDateEnd,
+        minAmount: state.minAmount,
+        maxAmount: state.maxAmount,
+        currency: state.currency,
+        isOverdue: state.isOverdue,
+        sortBy: state.sortBy,
+        sortAscending: state.sortAscending,
+      };
+      
+      const params = buildQueryParams(currentState, options);
+      console.log("API call params:", params);
+      
+      const response = await apiClient.get('/invoices', { params });
+      console.log("Raw API response:", response.data);
 
-        
-        dispatch({
-          type: INVOICES_ACTIONS.SET_INVOICES,
-          payload: response.data.Data.$values,
-        });
+      // Handle the response structure with $values
+      const invoicesData = response.data.Data?.$values || response.data.Data || [];
+      
+      dispatch({
+        type: INVOICES_ACTIONS.SET_INVOICES,
+        payload: {
+          Data: invoicesData,
+          Paginations: response.data.Paginations
+        },
+      });
 
-        return response.data.Data.$values;
-      } catch (error) {
-        handleApiError(error);
+      console.log("=== GET INVOICES DEBUG END ===");
+      return invoicesData;
+    } catch (error) {
+      console.error("=== GET INVOICES ERROR ===", error);
+      handleApiError(error);
+    }
+  }, [buildQueryParams, handleApiError]); // REMOVED 'state' from dependency array
+
+  const getInvoice = useCallback(async (invoiceId) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.get(`/invoices/${invoiceId}`);
+      const invoiceData = response.data.Data || response.data.data || response.data;
+      
+      dispatch({
+        type: INVOICES_ACTIONS.SET_CURRENT_INVOICE,
+        payload: invoiceData,
+      });
+
+      return { data: invoiceData };
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  const createInvoice = useCallback(async (invoiceData) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      console.log("=== CREATE INVOICE DEBUG ===");
+      console.log("Raw invoice data received:", invoiceData);
+
+      const formattedData = {
+        ClientId: parseInt(invoiceData.ClientId),
+        InvoiceNumber: invoiceData.InvoiceNumber || null,
+        InvoiceDate: invoiceData.InvoiceDate,
+        DueDate: invoiceData.DueDate || null,
+        Status: invoiceData.Status || "Draft",
+        Currency: invoiceData.Currency || "USD",
+        ExchangeRate: invoiceData.ExchangeRate || 1,
+        PaymentTerms: invoiceData.PaymentTerms || null,
+        Notes: invoiceData.Notes || null,
+        InternalNotes: invoiceData.InternalNotes || null,
+        PurchaseOrderNumber: invoiceData.PurchaseOrderNumber || null,
+        DiscountAmount: invoiceData.DiscountAmount || 0,
+        ShippingAmount: invoiceData.ShippingAmount || 0,
+        IsRecurring: invoiceData.IsRecurring || false,
+        Items: invoiceData.Items?.map(item => ({
+          ProductId: item.ProductId && item.ProductId > 0 ? parseInt(item.ProductId) : null,
+          ServiceId: item.ServiceId && item.ServiceId > 0 ? parseInt(item.ServiceId) : null,
+          Description: item.Description || item.ItemName || "",
+          Quantity: parseFloat(item.Quantity) || 1,
+          UnitPrice: parseFloat(item.UnitPrice) || 0,
+          Discount: parseFloat(item.Discount) || 0,
+          DiscountType: item.DiscountType || "percentage",
+          TaxRate: parseFloat(item.TaxRate) || 0,
+        })) || []
+      };
+
+      console.log("Formatted data for API:", formattedData);
+
+      if (!formattedData.ClientId || formattedData.ClientId <= 0) {
+        throw new Error("Client ID is required and must be valid");
       }
-    },
 
-    // Get single invoice by ID
-    getInvoice: async (invoiceId) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.get(`/invoices/${invoiceId}`);
-        
-        const invoiceData = response.data.Data || response.data.data || response.data;
-        
-        dispatch({
-          type: INVOICES_ACTIONS.SET_CURRENT_INVOICE,
-          payload: invoiceData,
-        });
-
-        return { data: invoiceData };
-      } catch (error) {
-        handleApiError(error);
+      if (!formattedData.Items || formattedData.Items.length === 0) {
+        throw new Error("At least one invoice item is required");
       }
-    },
 
-    // Create new invoice
-    createInvoice: async (invoiceData) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+      const response = await apiClient.post('/invoices', formattedData);
+      const newInvoice = response.data.Data || response.data.data || response.data;
 
-        const response = await apiClient.post('/invoices', invoiceData);
+      dispatch({
+        type: INVOICES_ACTIONS.ADD_INVOICE,
+        payload: newInvoice,
+      });
 
-        const newInvoice = response.data.Data || response.data.data || response.data;
+      return response.data;
+    } catch (error) {
+      console.error("Create invoice error:", error);
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
-        dispatch({
-          type: INVOICES_ACTIONS.ADD_INVOICE,
-          payload: newInvoice,
-        });
+  const updateInvoice = useCallback(async (invoiceId, invoiceData) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
 
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+      const formattedData = {
+        clientId: invoiceData.clientId,
+        invoiceNumber: invoiceData.invoiceNumber,
+        invoiceDate: invoiceData.invoiceDate,
+        dueDate: invoiceData.dueDate || null,
+        status: invoiceData.status,
+        currency: invoiceData.currency,
+        exchangeRate: invoiceData.exchangeRate,
+        paymentTerms: invoiceData.paymentTerms || null,
+        notes: invoiceData.notes || null,
+        internalNotes: invoiceData.internalNotes || null,
+        purchaseOrderNumber: invoiceData.purchaseOrderNumber || null,
+        discountAmount: invoiceData.discountAmount || 0,
+        shippingAmount: invoiceData.shippingAmount || 0,
+        items: invoiceData.items?.map(item => ({
+          productId: item.productId > 0 ? item.productId : null,
+          serviceId: item.serviceId > 0 ? item.serviceId : null,
+          description: item.description || item.itemName,
+          quantity: item.quantity || 1,
+          unitPrice: item.unitPrice || 0,
+          discount: item.discount || 0,
+          discountType: item.discountType || "percentage",
+          taxRate: item.taxRate || 0,
+        })) || []
+      };
 
-    // Update existing invoice
-    updateInvoice: async (invoiceId, invoiceData) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+      const response = await apiClient.put(`/invoices/${invoiceId}`, formattedData);
+      const updatedInvoice = response.data.Data || response.data.data || response.data;
 
-        const response = await apiClient.put(`/invoices/${invoiceId}`, invoiceData);
+      dispatch({
+        type: INVOICES_ACTIONS.UPDATE_INVOICE,
+        payload: updatedInvoice,
+      });
 
-        const updatedInvoice = response.data.Data || response.data.data || response.data;
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
+  const deleteInvoice = useCallback(async (invoiceId, hardDelete = false) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.delete(`/invoices/${invoiceId}`, {
+        params: { hardDelete }
+      });
+      
+      dispatch({
+        type: INVOICES_ACTIONS.DELETE_INVOICE,
+        payload: invoiceId,
+      });
+
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  const sendInvoice = useCallback(async (invoiceId, sendData = {}) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.post(`/invoices/${invoiceId}/send`, sendData);
+
+      // Update the invoice status in the list if we have it
+      const currentInvoice = state.invoices.find(inv => inv.Id === invoiceId);
+      if (currentInvoice) {
+        const updatedInvoice = { ...currentInvoice, Status: 'Sent', EmailSent: true };
         dispatch({
           type: INVOICES_ACTIONS.UPDATE_INVOICE,
           payload: updatedInvoice,
         });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
       }
-    },
 
-    // Delete invoice
-    deleteInvoice: async (invoiceId, hardDelete = false) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
-        const response = await apiClient.delete(`/invoices/${invoiceId}`, {
-          params: { hardDelete }
-        });
-        
-        dispatch({
-          type: INVOICES_ACTIONS.DELETE_INVOICE,
-          payload: invoiceId,
-        });
+  const markInvoiceAsPaid = useCallback(async (invoiceId, paymentData) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
 
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+      const response = await apiClient.post(`/invoices/${invoiceId}/mark-paid`, paymentData);
 
-    // Send invoice to client
-    sendInvoice: async (invoiceId, sendData = {}) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.post(`/invoices/${invoiceId}/send`, sendData);
-
-        // Update the invoice status in the list
-        const updatedInvoice = { ...state.currentInvoice, Status: 'Sent', EmailSent: true };
-        dispatch({
-          type: INVOICES_ACTIONS.UPDATE_INVOICE,
-          payload: updatedInvoice,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Mark invoice as paid
-    markInvoiceAsPaid: async (invoiceId, paymentData) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.post(`/invoices/${invoiceId}/mark-paid`, paymentData);
-
-        // Update the invoice status in the list
+      // Update the invoice status in the list
+      const currentInvoice = state.invoices.find(inv => inv.Id === invoiceId);
+      if (currentInvoice) {
         const updatedInvoice = { 
-          ...state.currentInvoice, 
+          ...currentInvoice, 
           Status: 'Paid', 
           PaidAmount: paymentData.amount,
           BalanceAmount: 0 
@@ -532,271 +649,320 @@ export const InvoicesProvider = ({ children }) => {
           type: INVOICES_ACTIONS.UPDATE_INVOICE,
           payload: updatedInvoice,
         });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
       }
-    },
 
-    // Void invoice
-    voidInvoice: async (invoiceId, voidData) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
-        const response = await apiClient.post(`/invoices/${invoiceId}/void`, voidData);
+  const voidInvoice = useCallback(async (invoiceId, voidData) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
 
-        // Update the invoice status in the list
-        const updatedInvoice = { ...state.currentInvoice, Status: 'Voided', IsVoided: true };
+      const response = await apiClient.post(`/invoices/${invoiceId}/void`, voidData);
+
+      // Update the invoice status in the list
+      const currentInvoice = state.invoices.find(inv => inv.Id === invoiceId);
+      if (currentInvoice) {
+        const updatedInvoice = { ...currentInvoice, Status: 'Voided', IsVoided: true };
         dispatch({
           type: INVOICES_ACTIONS.UPDATE_INVOICE,
           payload: updatedInvoice,
         });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
       }
-    },
 
-    // Get invoice statistics
-    getStatistics: async (startDate = null, endDate = null) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
-        const params = {};
-        if (startDate) params.startDate = startDate;
-        if (endDate) params.endDate = endDate;
-
-        const response = await apiClient.get('/invoices/statistics', { params });
-        
-        const statsData = response.data.Data || response.data.data || response.data;
-        
-        dispatch({
-          type: INVOICES_ACTIONS.SET_STATISTICS,
-          payload: statsData,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Get aging report
-    getAgingReport: async () => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.get('/invoices/aging-report');
-        
-        const agingData = response.data.Data || response.data.data || response.data;
-        
-        dispatch({
-          type: INVOICES_ACTIONS.SET_AGING_REPORT,
-          payload: agingData,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Duplicate invoice
-    duplicateInvoice: async (invoiceId, duplicateData) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.post(`/invoices/${invoiceId}/duplicate`, duplicateData);
-
-        const duplicatedInvoice = response.data.Data || response.data.data || response.data;
-
-        dispatch({
-          type: INVOICES_ACTIONS.ADD_INVOICE,
-          payload: duplicatedInvoice,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Get client details for invoice creation
-    getClientDetails: async (clientId) => {
-      try {
-        dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
-        dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-
-        const response = await apiClient.get(`/invoices/client-details/${clientId}`);
-        
-        const clientData = response.data.Data || response.data.data || response.data;
-        
-        dispatch({
-          type: INVOICES_ACTIONS.SET_CLIENT_DETAILS,
-          payload: clientData,
-        });
-
-        return response.data;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
-
-    // Clear current invoice
-    clearCurrentInvoice: () => {
-      dispatch({ type: INVOICES_ACTIONS.CLEAR_CURRENT_INVOICE });
-    },
-
-    // Clear error manually
-    clearError: () => {
+  const getStatistics = useCallback(async (startDate = null, endDate = null) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
-    },
 
-    // Set search term
-    setSearchTerm: (searchTerm) => {
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      const response = await apiClient.get('/invoices/statistics', { params });
+      console.log("Statistics API response:", response.data);
+      
       dispatch({
-        type: INVOICES_ACTIONS.SET_SEARCH_TERM,
-        payload: searchTerm,
+        type: INVOICES_ACTIONS.SET_STATISTICS,
+        payload: response.data, // This should contain the Data property
       });
-    },
 
-    // Set status filter
-    setStatus: (status) => {
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  const getAgingReport = useCallback(async () => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.get('/invoices/aging-report');
+      const agingData = response.data.Data || response.data.data || response.data;
+      
       dispatch({
-        type: INVOICES_ACTIONS.SET_STATUS,
-        payload: status,
+        type: INVOICES_ACTIONS.SET_AGING_REPORT,
+        payload: agingData,
       });
-    },
 
-    // Set client ID filter
-    setClientId: (clientId) => {
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  const duplicateInvoice = useCallback(async (invoiceId, duplicateData) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.post(`/invoices/${invoiceId}/duplicate`, duplicateData);
+      const duplicatedInvoice = response.data.Data || response.data.data || response.data;
+
       dispatch({
-        type: INVOICES_ACTIONS.SET_CLIENT_ID,
-        payload: clientId,
+        type: INVOICES_ACTIONS.ADD_INVOICE,
+        payload: duplicatedInvoice,
       });
-    },
 
-    // Set date range filter
-    setDateRange: (startDate, endDate) => {
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
+
+  const getClientDetails = useCallback(async (clientId) => {
+    try {
+      dispatch({ type: INVOICES_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+
+      const response = await apiClient.get(`/invoices/client-details/${clientId}`);
+      const clientData = response.data.Data || response.data.data || response.data;
+      
       dispatch({
-        type: INVOICES_ACTIONS.SET_DATE_RANGE,
-        payload: { startDate, endDate },
+        type: INVOICES_ACTIONS.SET_CLIENT_DETAILS,
+        payload: clientData,
       });
-    },
 
-    // Set due date range filter
-    setDueDateRange: (dueDateStart, dueDateEnd) => {
-      dispatch({
-        type: INVOICES_ACTIONS.SET_DUE_DATE_RANGE,
-        payload: { dueDateStart, dueDateEnd },
-      });
-    },
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
+    }
+  }, [handleApiError]);
 
-    // Set amount range filter
-    setAmountRange: (minAmount, maxAmount) => {
-      dispatch({
-        type: INVOICES_ACTIONS.SET_AMOUNT_RANGE,
-        payload: { minAmount, maxAmount },
-      });
-    },
+  // Clear current invoice
+  const clearCurrentInvoice = useCallback(() => {
+    dispatch({ type: INVOICES_ACTIONS.CLEAR_CURRENT_INVOICE });
+  }, []);
 
-    // Set currency filter
-    setCurrency: (currency) => {
-      dispatch({
-        type: INVOICES_ACTIONS.SET_CURRENCY,
-        payload: currency,
-      });
-    },
+  // Clear error manually
+  const clearError = useCallback(() => {
+    dispatch({ type: INVOICES_ACTIONS.CLEAR_ERROR });
+  }, []);
 
-    // Set overdue filter
-    setOverdue: (isOverdue) => {
-      dispatch({
-        type: INVOICES_ACTIONS.SET_OVERDUE,
-        payload: isOverdue,
-      });
-    },
+  // Set search term
+  const setSearchTerm = useCallback((searchTerm) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_SEARCH_TERM,
+      payload: searchTerm,
+    });
+  }, []);
 
-    // Set sorting
-    setSort: (sortBy, sortAscending) => {
-      dispatch({
-        type: INVOICES_ACTIONS.SET_SORT,
-        payload: { sortBy, sortAscending },
-      });
-    },
+  // Set status filter
+  const setStatus = useCallback((status) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_STATUS,
+      payload: status,
+    });
+  }, []);
 
-    // Set pagination
-    setPagination: (paginationData) => {
-      dispatch({
-        type: INVOICES_ACTIONS.SET_PAGINATION,
-        payload: paginationData,
-      });
-    },
+  // Set client ID filter
+  const setClientId = useCallback((clientId) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_CLIENT_ID,
+      payload: clientId,
+    });
+  }, []);
 
-    // Reset all filters
-    resetFilters: () => {
-      dispatch({ type: INVOICES_ACTIONS.RESET_FILTERS });
-    },
+  // Set date range filter
+  const setDateRange = useCallback((startDate, endDate) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_DATE_RANGE,
+      payload: { startDate, endDate },
+    });
+  }, []);
 
-    // Refresh invoices (reload with current filters)
-    refreshInvoices: async () => {
-      return await invoicesApi.getInvoices();
-    },
+  // Set due date range filter
+  const setDueDateRange = useCallback((dueDateStart, dueDateEnd) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_DUE_DATE_RANGE,
+      payload: { dueDateStart, dueDateEnd },
+    });
+  }, []);
 
-    // Search invoices (convenience method)
-    searchInvoices: async (searchTerm) => {
-      invoicesApi.setSearchTerm(searchTerm);
-      return await invoicesApi.getInvoices({ searchTerm, page: 1 });
-    },
+  // Set amount range filter
+  const setAmountRange = useCallback((minAmount, maxAmount) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_AMOUNT_RANGE,
+      payload: { minAmount, maxAmount },
+    });
+  }, []);
 
-    // Filter by status (convenience method)
-    filterByStatus: async (status) => {
-      invoicesApi.setStatus(status);
-      return await invoicesApi.getInvoices({ status, page: 1 });
-    },
+  // Set currency filter
+  const setCurrency = useCallback((currency) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_CURRENCY,
+      payload: currency,
+    });
+  }, []);
 
-    // Filter by client (convenience method)
-    filterByClient: async (clientId) => {
-      invoicesApi.setClientId(clientId);
-      return await invoicesApi.getInvoices({ clientId, page: 1 });
-    },
+  // Set overdue filter
+  const setOverdue = useCallback((isOverdue) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_OVERDUE,
+      payload: isOverdue,
+    });
+  }, []);
 
-    // Sort invoices (convenience method)
-    sortInvoices: async (sortBy, sortAscending = true) => {
-      invoicesApi.setSort(sortBy, sortAscending);
-      return await invoicesApi.getInvoices({ sortBy, sortAscending, page: 1 });
-    },
+  // Set sorting
+  const setSort = useCallback((sortBy, sortAscending) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_SORT,
+      payload: { sortBy, sortAscending },
+    });
+  }, []);
 
-    // Go to specific page
-    goToPage: async (page) => {
-      invoicesApi.setPagination({ page });
-      return await invoicesApi.getInvoices({ page });
-    },
+  // Set pagination
+  const setPagination = useCallback((paginationData) => {
+    dispatch({
+      type: INVOICES_ACTIONS.SET_PAGINATION,
+      payload: paginationData,
+    });
+  }, []);
 
-    // Change page size
-    changePageSize: async (pageSize) => {
-      invoicesApi.setPagination({ pageSize, page: 1 });
-      return await invoicesApi.getInvoices({ pageSize, page: 1 });
-    },
-  };
+  // Reset all filters
+  const resetFilters = useCallback(() => {
+    dispatch({ type: INVOICES_ACTIONS.RESET_FILTERS });
+  }, []);
 
-  // Context value
+  // Refresh invoices (reload with current filters) - FIXED: Remove state dependency
+  const refreshInvoices = useCallback(async () => {
+    return await getInvoices();
+  }, [getInvoices]);
+
+  // Search invoices (convenience method)
+  const searchInvoices = useCallback(async (searchTerm) => {
+    setSearchTerm(searchTerm);
+    return await getInvoices({ search: searchTerm, page: 1 });
+  }, [getInvoices, setSearchTerm]);
+
+  // Filter by status (convenience method)
+  const filterByStatus = useCallback(async (status) => {
+    setStatus(status);
+    return await getInvoices({ status, page: 1 });
+  }, [getInvoices, setStatus]);
+
+  // Filter by client (convenience method)
+  const filterByClient = useCallback(async (clientId) => {
+    setClientId(clientId);
+    return await getInvoices({ clientId, page: 1 });
+  }, [getInvoices, setClientId]);
+
+  // Sort invoices (convenience method)
+  const sortInvoices = useCallback(async (sortBy, sortAscending = true) => {
+    setSort(sortBy, sortAscending);
+    return await getInvoices({ sortBy, sortAscending, page: 1 });
+  }, [getInvoices, setSort]);
+
+  // Go to specific page
+  const goToPage = useCallback(async (page) => {
+    setPagination({ page });
+    return await getInvoices({ page });
+  }, [getInvoices, setPagination]);
+
+  // Change page size
+  const changePageSize = useCallback(async (pageSize) => {
+    setPagination({ pageSize, page: 1 });
+    return await getInvoices({ pageSize, page: 1 });
+  }, [getInvoices, setPagination]);
+
+  // Context value with stable functions
   const contextValue = {
     // State
-    ...state,
+    invoices: state.invoices,
+    currentInvoice: state.currentInvoice,
+    loading: state.isLoading,
+    error: state.error,
+    pagination: state.pagination,
+    searchTerm: state.searchTerm,
+    status: state.status,
+    clientId: state.clientId,
+    startDate: state.startDate,
+    endDate: state.endDate,
+    dueDateStart: state.dueDateStart,
+    dueDateEnd: state.dueDateEnd,
+    minAmount: state.minAmount,
+    maxAmount: state.maxAmount,
+    currency: state.currency,
+    isOverdue: state.isOverdue,
+    sortBy: state.sortBy,
+    sortAscending: state.sortAscending,
+    statistics: state.statistics,
+    agingReport: state.agingReport,
+    clientDetails: state.clientDetails,
     
     // API methods
-    ...invoicesApi,
+    getInvoices,
+    getInvoice,
+    createInvoice,
+    updateInvoice,
+    deleteInvoice,
+    sendInvoice,
+    markInvoiceAsPaid,
+    voidInvoice,
+    getStatistics,
+    getAgingReport,
+    duplicateInvoice,
+    getClientDetails,
+    clearCurrentInvoice,
+    clearError,
+    
+    // Filter methods
+    setSearchTerm,
+    setStatus,
+    setClientId,
+    setDateRange,
+    setDueDateRange,
+    setAmountRange,
+    setCurrency,
+    setOverdue,
+    setSort,
+    setPagination,
+    resetFilters,
+    
+    // Convenience methods
+    refreshInvoices,
+    searchInvoices,
+    filterByStatus,
+    filterByClient,
+    sortInvoices,
+    goToPage,
+    changePageSize,
 
     // Utility methods
     getTotalPages: () => Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
-    hasNextPage: () => state.pagination.page < Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
-    hasPrevPage: () => state.pagination.page > 1,
+    hasNextPage: () => state.pagination.HasNextPage,
+    hasPrevPage: () => state.pagination.HasPreviousPage,
     getInvoiceById: (invoiceId) => state.invoices.find(invoice => invoice.Id === invoiceId),
     isInvoiceLoaded: (invoiceId) => state.invoices.some(invoice => invoice.Id === invoiceId),
     
@@ -830,7 +996,7 @@ export const InvoicesProvider = ({ children }) => {
       );
     },
     
-    // Calculate totals
+    // Calculate totals - these now calculate from current invoices list
     getTotalInvoiceAmount: () => state.invoices.reduce((total, invoice) => total + (invoice.TotalAmount || 0), 0),
     getTotalPaidAmount: () => state.invoices.reduce((total, invoice) => total + (invoice.PaidAmount || 0), 0),
     getTotalOutstandingAmount: () => state.invoices.reduce((total, invoice) => total + (invoice.BalanceAmount || 0), 0),

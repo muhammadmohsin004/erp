@@ -37,6 +37,7 @@ export const sidebarTranslations = {
     // Regular Menu Items
     companyBranches: "Company Branches",
     clients: "Clients",
+    ManageClients: "Manage Clients",
     inventory: "Inventory",
     inventoryOverview: "Inventory Overview",
     warehouses: "Warehouses",
@@ -65,8 +66,10 @@ export const sidebarTranslations = {
     sales: "Sales",
     invoiceDashboard: "Invoice Dashboard",
     allInvoices: "All Invoices",
+    ManageInvoices: "Manage Invoices",
 
     // Finance
+    bankAccount: "Bank Account",
     finance: "Finance",
     incomes: "Incomes",
     incomescatagories: "Incomes Catagories",
@@ -127,6 +130,7 @@ export const sidebarTranslations = {
     // Regular Menu Items
     companyBranches: "فروع الشركة",
     clients: "العملاء",
+    ManageClients: "ادارة العملاء",
     inventory: "المخزون",
     inventoryOverview: "نظرة عامة على المخزون",
     warehouses: "المستودعات",
@@ -155,8 +159,10 @@ export const sidebarTranslations = {
     sales: "المبيعات",
     invoiceDashboard: "لوحة تحكم الفواتير",
     allInvoices: "جميع الفواتير",
+    ManageInvoices: "ادارة الفواتير",
 
     // Finance
+    bankAccount: "حساب البنك",
     finance: "المالية",
     incomes: "الإيرادات",
     expenses: "المصروفات",
