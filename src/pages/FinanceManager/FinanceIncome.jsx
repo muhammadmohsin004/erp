@@ -1,42 +1,143 @@
-import React, { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Plus, Download, Filter, Search, TrendingUp, DollarSign, Calendar, Eye, Edit, Trash2, MoreVertical, AlertCircle } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { 
+  Plus, Search, Calendar, 
+  Eye, Edit, Trash2, MoreVertical, AlertCircle,
+  CreditCard, Banknote, Smartphone, 
+  RefreshCw, FileText, X, Filter
+} from 'lucide-react';
 
+// Import your real contexts
 import { useFinanceIncomes } from '../../Contexts/FinanceContext/FinanceIncomeContext';
 import { useIncomeCategory } from '../../Contexts/IncomeCategoryContext/IncomeCategoryContext';
-import Container from '../../components/elements/container/Container';
-import BodyHeader from '../../components/elements/bodyHeader/BodyHeader';
-import FilledButton from '../../components/elements/elements/buttons/filledButton/FilledButton';
-import Card from '../../components/elements/card/Card';
-import SelectBox from '../../components/elements/selectBox/SelectBox';
-import InputField from '../../components/elements/inputField/InputField';
-import Dropdown from '../../components/elements/dropdown/Dropdown';
-import Table from '../../components/elements/table/Table';
-import Thead from '../../components/elements/thead/Thead';
-import TR from '../../components/elements/tr/TR';
-import TH from '../../components/elements/th/TH';
-import Tbody from '../../components/elements/tbody/Tbody';
-import TD from '../../components/elements/td/TD';
-import Badge from '../../components/elements/Badge/Badge';
-import Pagination from '../../components/elements/Pagination/Pagination';
-import Modall from '../../components/elements/modal/Modal';
-import OutlineButton from '../../components/elements/elements/buttons/OutlineButton/OutlineButton';
-import SearchAndFilters from '../../components/elements/searchAndFilters/SearchAndFilters';
-import Skeleton from '../../components/elements/skeleton/Skeleton';
 
+// Simple UI Components
+const Card = ({ children, className = "", ...props }) => (
+  <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`} {...props}>
+    {children}
+  </div>
+);
+
+const Button = ({ children, variant = "primary", size = "md", icon: Icon, disabled, className = "", ...props }) => {
+  const baseClasses = "inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const variants = {
+    primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
+    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500",
+    success: "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500",
+    danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+    outline: "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500"
+  };
+  const sizes = {
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base"
+  };
+
+  return (
+    <button
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      disabled={disabled}
+      {...props}
+    >
+      {Icon && <Icon className="w-4 h-4 mr-2" />}
+      {children}
+    </button>
+  );
+};
+
+const Input = ({ label, error, className = "", ...props }) => (
+  <div className="space-y-1">
+    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    <input
+      className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-300' : ''} ${className}`}
+      {...props}
+    />
+    {error && <p className="text-sm text-red-600">{error}</p>}
+  </div>
+);
+
+const Select = ({ label, error, children, className = "", ...props }) => (
+  <div className="space-y-1">
+    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    <select
+      className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-300' : ''} ${className}`}
+      {...props}
+    >
+      {children}
+    </select>
+    {error && <p className="text-sm text-red-600">{error}</p>}
+  </div>
+);
+
+const Badge = ({ children, variant = "default", className = "" }) => {
+  const variants = {
+    default: "bg-gray-100 text-gray-800",
+    success: "bg-green-100 text-green-800",
+    warning: "bg-yellow-100 text-yellow-800",
+    danger: "bg-red-100 text-red-800",
+    info: "bg-blue-100 text-blue-800"
+  };
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+      {children}
+    </span>
+  );
+};
+
+const Modal = ({ isOpen, onClose, title, children, footer }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
+        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-lg">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="p-6">{children}</div>
+          {footer && <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">{footer}</div>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Dropdown = ({ trigger, children, className = "" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
+        {trigger}
+      </div>
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
+          <div className={`absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 ${className}`}>
+            {children}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// Main Component
 const FinanceIncome = () => {
   // Finance Income Context
   const {
     incomes,
     statistics,
-    comparison,
     pagination,
     filters,
     loading,
     error,
     getIncomes,
     getIncomeStatistics,
-    getIncomeVsExpenseComparison,
     createIncome,
     updateIncome,
     deleteIncome,
@@ -45,22 +146,19 @@ const FinanceIncome = () => {
     filterByCategory,
     filterByDateRange,
     changePage,
-    changePageSize
+    resetFilters
   } = useFinanceIncomes();
 
   // Income Category Context
   const {
-    incomeCategories,
-    loading: categoriesLoading,
-    error: categoriesError,
-    getIncomeCategories,
-    getIncomeCategoriesDropdown,
     getActiveIncomeCategories
   } = useIncomeCategory();
 
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedDateRange, setSelectedDateRange] = useState('Custom');
+  const [selectedSortBy, setSelectedSortBy] = useState('Date (Newest First)');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingIncome, setEditingIncome] = useState(null);
@@ -80,15 +178,10 @@ const FinanceIncome = () => {
   });
 
   useEffect(() => {
-    // Load both income data and categories
     const loadData = async () => {
       try {
-        console.log("Loading income data and categories...");
         await getIncomes();
         await getIncomeStatistics();
-        await getIncomeVsExpenseComparison();
-        await getIncomeCategories(); // Load income categories from IncomeCategoryContext
-        console.log("Data loading completed");
       } catch (error) {
         console.error("Error loading data:", error);
       }
@@ -97,46 +190,18 @@ const FinanceIncome = () => {
     loadData();
   }, []);
 
-  // Debug useEffect to monitor category changes
-  useEffect(() => {
-    console.log("Categories updated:", incomeCategories);
-    console.log("Categories loading:", categoriesLoading);
-    console.log("Categories error:", categoriesError);
-  }, [incomeCategories, categoriesLoading, categoriesError]);
-
-  useEffect(() => {
-    const delayedSearch = setTimeout(() => {
-      if (searchValue) {
-        searchIncomes(searchValue);
-      } else {
-        getIncomes();
-      }
-    }, 500);
-
-    return () => clearTimeout(delayedSearch);
-  }, [searchValue]);
-
-  // Get categories for dropdown from IncomeCategoryContext
-  const getCategoryOptions = () => {
-    const activeCategories = getActiveIncomeCategories();
-    return [
-      { value: '', label: 'All Categories' },
-      ...activeCategories.map(cat => ({ 
-        value: cat.Id, 
-        label: cat.Name,
-        color: cat.Color 
-      }))
-    ];
-  };
-
-  // Get categories for form selection (excluding "All Categories" option)
-  const getFormCategoryOptions = () => {
-    const activeCategories = getActiveIncomeCategories();
-    return activeCategories.map(cat => ({ 
-      value: cat.Id, 
-      label: cat.Name,
-      color: cat.Color 
-    }));
+  // Helper function to safely get incomes array
+  const getIncomesArray = () => {
+    if (Array.isArray(incomes)) {
+      return incomes;
+    }
+    if (incomes?.Data?.$values) {
+      return incomes.Data.$values;
+    }
+    if (incomes?.$values) {
+      return incomes.$values;
+    }
+    return [];
   };
 
   // Get category name by ID
@@ -174,14 +239,37 @@ const FinanceIncome = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      searchIncomes(searchValue);
+    } else {
+      getIncomes();
+    }
+  };
+
+  const handleReset = () => {
+    setSearchValue('');
+    setSelectedCategory('');
+    setSelectedStatus('');
+    setSelectedDateRange('Custom');
+    setSelectedSortBy('Date (Newest First)');
+    setDateRange({ start: '', end: '' });
+    resetFilters();
+    getIncomes();
+  };
+
   const handleCategoryFilter = (categoryId) => {
     setSelectedCategory(categoryId);
-    filterByCategory(categoryId);
+    if (categoryId) {
+      filterByCategory(categoryId);
+    }
   };
 
   const handleStatusFilter = (status) => {
     setSelectedStatus(status);
-    filterByStatus(status);
+    if (status) {
+      filterByStatus(status);
+    }
   };
 
   const handleDateRangeFilter = () => {
@@ -190,10 +278,13 @@ const FinanceIncome = () => {
     }
   };
 
+  const handleSortChange = (sortOption) => {
+    setSelectedSortBy(sortOption);
+    // You can implement sorting logic here based on the selected option
+  };
+
   const handleAddIncome = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
@@ -201,7 +292,6 @@ const FinanceIncome = () => {
       setShowAddModal(false);
       resetForm();
       await getIncomes();
-      console.log('Income added successfully!');
     } catch (error) {
       console.error('Error adding income:', error);
     } finally {
@@ -210,18 +300,15 @@ const FinanceIncome = () => {
   };
 
   const handleEditIncome = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
-      await updateIncome(editingIncome.id, incomeForm);
+      await updateIncome(editingIncome.Id, incomeForm);
       setShowEditModal(false);
       setEditingIncome(null);
       resetForm();
       await getIncomes();
-      console.log('Income updated successfully!');
     } catch (error) {
       console.error('Error updating income:', error);
     } finally {
@@ -234,7 +321,6 @@ const FinanceIncome = () => {
       try {
         await deleteIncome(id);
         await getIncomes();
-        console.log('Income deleted successfully!');
       } catch (error) {
         console.error('Error deleting income:', error);
       }
@@ -244,14 +330,14 @@ const FinanceIncome = () => {
   const openEditModal = (income) => {
     setEditingIncome(income);
     setIncomeForm({
-      description: income.description || '',
-      amount: income.amount || '',
-      incomeDate: income.incomeDate || '',
-      categoryId: income.categoryId || '',
-      customerId: income.customerId || '',
-      paymentMethod: income.paymentMethod || '',
-      isRecurring: income.isRecurring || false,
-      notes: income.notes || ''
+      description: income.Description || '',
+      amount: income.Amount || '',
+      incomeDate: income.IncomeDate ? income.IncomeDate.split('T')[0] : '',
+      categoryId: income.CategoryId || '',
+      customerId: income.CustomerId || '',
+      paymentMethod: income.PaymentMethod || '',
+      isRecurring: income.IsRecurring || false,
+      notes: income.Notes || ''
     });
     setFormErrors({});
     setShowEditModal(true);
@@ -271,19 +357,31 @@ const FinanceIncome = () => {
     setFormErrors({});
   };
 
-  const handleModalClose = (modalType) => {
-    if (modalType === 'add') {
-      setShowAddModal(false);
-    } else if (modalType === 'edit') {
-      setShowEditModal(false);
-      setEditingIncome(null);
-    }
-    resetForm();
+  const getStatusBadge = (status) => {
+    const variants = {
+      'Received': 'success',
+      'Pending': 'warning',
+      'Cancelled': 'danger',
+      'Confirmed': 'success'
+    };
+    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
+  };
+
+  const getPaymentMethodIcon = (method) => {
+    const icons = {
+      'Cash': Banknote,
+      'Bank Transfer': CreditCard,
+      'Credit Card': CreditCard,
+      'Digital Wallet': Smartphone,
+      'Check': FileText
+    };
+    const Icon = icons[method] || CreditCard;
+    return <Icon className="w-4 h-4" />;
   };
 
   const statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'Confirmed', label: 'Confirmed' },
+    { value: '', label: 'All' },
+    { value: 'Received', label: 'Received' },
     { value: 'Pending', label: 'Pending' },
     { value: 'Cancelled', label: 'Cancelled' }
   ];
@@ -296,406 +394,483 @@ const FinanceIncome = () => {
     { value: 'Digital Wallet', label: 'Digital Wallet' }
   ];
 
-  const getStatusBadge = (status) => {
-    const variants = {
-      'Confirmed': 'success',
-      'Pending': 'warning',
-      'Cancelled': 'danger'
-    };
-    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
-  };
+  const dateRangeOptions = [
+    { value: 'Custom', label: 'Custom' },
+    { value: 'Today', label: 'Today' },
+    { value: 'Week', label: 'This Week' },
+    { value: 'Month', label: 'This Month' }
+  ];
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const sortOptions = [
+    'Date (Newest First)',
+    'Date (Oldest First)',
+    'Amount (High to Low)',
+    'Amount (Low to High)'
+  ];
 
-  if (loading && incomes.length === 0) {
+  const incomesList = getIncomesArray();
+
+  if (loading && incomesList.length === 0) {
     return (
-      <Container className="p-6 space-y-6">
-        <BodyHeader heading="Income Management" subHeading="Track and manage your income sources" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="p-6">
-              <Skeleton height="100px" width="100%" />
-            </Card>
-          ))}
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white p-6 rounded-lg">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="p-6 space-y-6">
-      {/* Error Display */}
-      {(error || categoriesError) && (
-        <Card className="p-4 bg-red-50 border-red-200">
-          <div className="flex items-center space-x-2 text-red-700">
-            <AlertCircle size={20} />
-            <span className="font-medium">Error:</span>
-            <span>{error || categoriesError}</span>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Error Display */}
+        {error && (
+          <Card className="p-4 mb-6 bg-red-50 border-red-200">
+            <div className="flex items-center space-x-2 text-red-700">
+              <AlertCircle className="w-5 h-5" />
+              <span className="font-medium">Error:</span>
+              <span>{error}</span>
+            </div>
+          </Card>
+        )}
+
+        {/* Statistics Cards - Simple 3 column layout like your reference */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-blue-600 text-black">
+            <div className="p-6">
+              <h3 className="text-sm font-medium opacity-90">Last 7 Days</h3>
+              <p className="text-2xl font-bold mt-2">
+                Rs. {statistics?.last7Days?.toLocaleString() || '0'}
+              </p>
+            </div>
+          </Card>
+          
+          <Card className="bg-blue-600 text-black">
+            <div className="p-6">
+              <h3 className="text-sm font-medium opacity-90">Last 30 Days</h3>
+              <p className="text-2xl font-bold mt-2">
+                Rs. {statistics?.last30Days?.toLocaleString() || '0'}
+              </p>
+            </div>
+          </Card>
+          
+          <Card className="bg-blue-600 text-black">
+            <div className="p-6">
+              <h3 className="text-sm font-medium opacity-90">Last 365 Days</h3>
+              <p className="text-2xl font-bold mt-2">
+                Rs. {statistics?.last365Days?.toLocaleString() || '0'}
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Search Section */}
+        <Card className="p-6 mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Search</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Code</label>
+              <Input
+                type="text"
+                placeholder="Search by code..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <div className="flex space-x-2">
+                <Select 
+                  value={selectedDateRange} 
+                  onChange={(e) => setSelectedDateRange(e.target.value)}
+                  className="text-sm"
+                >
+                  {dateRangeOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </Select>
+                <Input
+                  type="date"
+                  placeholder="From"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                  className="text-sm"
+                />
+                <Input
+                  type="date"
+                  placeholder="To"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <Select
+                value={selectedCategory}
+                onChange={(e) => handleCategoryFilter(e.target.value)}
+              >
+                <option value="">Any category</option>
+                {getActiveIncomeCategories()?.map(cat => (
+                  <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
+                ))}
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <Select
+                value={selectedStatus}
+                onChange={(e) => handleStatusFilter(e.target.value)}
+              >
+                {statusOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button icon={Filter} onClick={() => {
+              handleSearch();
+              handleDateRangeFilter();
+            }}>
+              Advanced Search
+            </Button>
+            <Button variant="outline" onClick={handleReset}>
+              Reset
+            </Button>
+            <Button 
+              variant="success" 
+              icon={Search}
+              onClick={handleSearch}
+            >
+              Search
+            </Button>
           </div>
         </Card>
-      )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <BodyHeader heading="Income Management" subHeading="Track and manage your income sources" />
-        <div className="flex items-center space-x-3">
-          <OutlineButton
-            icon={Download}
-            isIcon
-            isIconLeft
-            buttonText="Export"
-            borderColor="border-gray-300"
-            borderWidth="border"
-            rounded="rounded-md"
-            bgColor="bg-white"
-            textColor="text-gray-700"
-            height="h-10"
-            px="px-4"
-            hover="hover:bg-gray-50"
-            onClick={() => console.log('Export data')}
-          />
-          <FilledButton
-            icon={Plus}
-            isIcon
-            isIconLeft
-            buttonText="Add Income"
-            onClick={() => setShowAddModal(true)}
-          />
-        </div>
-      </div>
-
-      {/* Filters */}
-      <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-          <div className="md:col-span-2">
-            <SearchAndFilters
-              searchValue={searchValue}
-              setSearchValue={setSearchValue}
-              placeholder="Search income records..."
-            />
+        {/* Results Section */}
+        <Card>
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Results</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Sort By: 
+                  <select 
+                    className="ml-2 text-sm border-gray-300 rounded"
+                    value={selectedSortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </p>
+              </div>
+              <Button icon={Plus} onClick={() => setShowAddModal(true)}>
+                Add Income
+              </Button>
+            </div>
           </div>
-          
-          <SelectBox
-            placeholder="Filter by Category"
-            value={selectedCategory}
-            handleChange={handleCategoryFilter}
-            optionList={getCategoryOptions()}
-            width="w-full"
-          />
-          
-          <SelectBox
-            placeholder="Filter by Status"
-            value={selectedStatus}
-            handleChange={handleStatusFilter}
-            optionList={statusOptions}
-            width="w-full"
-          />
-          
-          <InputField
-            type="date"
-            placeholder="Start Date"
-            value={dateRange.start}
-            onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-            width="w-full"
-          />
-          
-          <FilledButton
-            buttonText="Apply Filters"
-            onClick={handleDateRangeFilter}
-            height="h-10"
-          />
-        </div>
-      </Card>
 
-      {/* Income Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <Table>
-            <Thead className="bg-gray-50">
-              <TR>
-                <TH>Description</TH>
-                <TH>Amount</TH>
-                <TH>Date</TH>
-                <TH>Category</TH>
-                <TH>Payment Method</TH>
-                <TH>Status</TH>
-                <TH>Actions</TH>
-              </TR>
-            </Thead>
-            <Tbody>
-              {incomes.map((income) => (
-                <TR key={income.id}>
-                  <TD className="font-medium text-gray-900">{income.description}</TD>
-                  <TD className="font-semibold text-green-600">
-                    ${income.amount?.toLocaleString()}
-                  </TD>
-                  <TD>{new Date(income.incomeDate).toLocaleDateString()}</TD>
-                  <TD>
-                    <div className="flex items-center space-x-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: income.categoryColor || '#6B7280' }}
-                      />
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code & Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {incomesList.map((income) => (
+                  <tr key={income.Id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {income.CodeNumber} - {new Date(income.IncomeDate).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{income.Description}</div>
+                      {income.Notes && <div className="text-xs text-gray-500">{income.Notes}</div>}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant="info">
-                        {income.categoryName || getCategoryNameById(income.categoryId)}
+                        {income.CategoryName || getCategoryNameById(income.CategoryId)}
                       </Badge>
-                    </div>
-                  </TD>
-                  <TD>{income.paymentMethod}</TD>
-                  <TD>{getStatusBadge(income.status)}</TD>
-                  <TD>
-                    <Dropdown
-                      buttonText=""
-                      icon={MoreVertical}
-                      items={[
-                        { label: 'View Details', action: () => console.log('View', income.id) },
-                        { label: 'Edit', action: () => openEditModal(income) },
-                        { label: 'Delete', action: () => handleDeleteIncome(income.id) }
-                      ]}
-                      onSelect={(item) => item.action()}
-                      buttonClassName="p-2 rounded-md hover:bg-gray-100"
-                    />
-                  </TD>
-                </TR>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-green-600">
+                        Rs. {income.Amount?.toLocaleString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(income.Status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Dropdown
+                        trigger={<MoreVertical className="w-4 h-4 text-gray-400" />}
+                      >
+                        <button 
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => console.log('View', income.Id)}
+                          role="menuitem"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Details
+                        </button>
+                        <button 
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => openEditModal(income)}
+                          role="menuitem"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </button>
+                        <button 
+                          className="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteIncome(income.Id)}
+                          role="menuitem"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </button>
+                      </Dropdown>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {incomesList.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-500">
+                <Search className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-sm font-medium text-gray-900 mb-1">No income records found</h3>
+                <p className="text-sm text-gray-500">Try adjusting your search criteria or add a new income record.</p>
+                <Button className="mt-4" onClick={() => setShowAddModal(true)}>
+                  Add Income
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {incomesList.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="flex items-center text-sm text-gray-700">
+                Showing {((pagination?.CurrentPage - 1) * pagination?.PageSize) + 1} to{' '}
+                {Math.min(pagination?.CurrentPage * pagination?.PageSize, pagination?.TotalItems)} of{' '}
+                {pagination?.TotalItems} results
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination?.CurrentPage === 1}
+                  onClick={() => changePage(pagination?.CurrentPage - 1)}
+                >
+                  Previous
+                </Button>
+                {[...Array(Math.min(5, pagination?.TotalPages || 1))].map((_, i) => {
+                  const page = i + 1;
+                  return (
+                    <Button
+                      key={page}
+                      variant={pagination?.CurrentPage === page ? "primary" : "outline"}
+                      size="sm"
+                      onClick={() => changePage(page)}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination?.CurrentPage === pagination?.TotalPages}
+                  onClick={() => changePage(pagination?.CurrentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Add Income Modal */}
+        <Modal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          title="Add New Income"
+          footer={
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddIncome} disabled={isSubmitting}>
+                {isSubmitting ? 'Adding...' : 'Add Income'}
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <Input
+              label="Description *"
+              placeholder="Enter income description"
+              value={incomeForm.description}
+              onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
+              error={formErrors.description}
+            />
+
+            <Input
+              label="Amount *"
+              type="number"
+              step="0.01"
+              placeholder="Enter amount"
+              value={incomeForm.amount}
+              onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
+              error={formErrors.amount}
+            />
+
+            <Input
+              label="Date *"
+              type="date"
+              value={incomeForm.incomeDate}
+              onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
+              error={formErrors.incomeDate}
+            />
+
+            <Select
+              label="Category *"
+              value={incomeForm.categoryId}
+              onChange={(e) => setIncomeForm({...incomeForm, categoryId: e.target.value})}
+              error={formErrors.categoryId}
+            >
+              <option value="">Select category</option>
+              {getActiveIncomeCategories()?.map(cat => (
+                <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
               ))}
-            </Tbody>
-          </Table>
-        </div>
-        
-        {incomes.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <DollarSign size={48} className="mx-auto mb-4 opacity-50" />
-            <p>No income records found</p>
-          </div>
-        )}
-        
-        <div className="px-6 py-4 border-t border-gray-200">
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={changePage}
-          />
-        </div>
-      </Card>
+            </Select>
 
-      {/* Add Income Modal */}
-      <Modall
-        title="Add New Income"
-        modalOpen={showAddModal}
-        setModalOpen={() => handleModalClose('add')}
-        okText={isSubmitting ? "Adding..." : "Add Income"}
-        cancelText="Cancel"
-        okAction={handleAddIncome}
-        cancelAction={() => handleModalClose('add')}
-        okDisabled={isSubmitting}
-        width={600}
-        body={
-          <div className="space-y-4">
-            <div>
-              <InputField
-                label="Description *"
-                placeholder="Enter income description"
-                value={incomeForm.description}
-                onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
-                width="w-full"
-              />
-              {formErrors.description && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
-              )}
-            </div>
+            <Select
+              label="Payment Method *"
+              value={incomeForm.paymentMethod}
+              onChange={(e) => setIncomeForm({...incomeForm, paymentMethod: e.target.value})}
+              error={formErrors.paymentMethod}
+            >
+              <option value="">Select payment method</option>
+              {paymentMethodOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </Select>
 
-            <div>
-              <InputField
-                label="Amount *"
-                type="number"
-                step="0.01"
-                placeholder="Enter amount"
-                value={incomeForm.amount}
-                onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
-                width="w-full"
-              />
-              {formErrors.amount && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.amount}</p>
-              )}
-            </div>
-
-            <div>
-              <InputField
-                label="Date *"
-                type="date"
-                value={incomeForm.incomeDate}
-                onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
-                width="w-full"
-              />
-              {formErrors.incomeDate && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.incomeDate}</p>
-              )}
-            </div>
-
-            <div>
-              <SelectBox
-                label="Category *"
-                placeholder={categoriesLoading ? "Loading categories..." : "Select category"}
-                value={incomeForm.categoryId}
-                handleChange={(value) => setIncomeForm({...incomeForm, categoryId: value})}
-                optionList={categoriesLoading ? [] : getFormCategoryOptions()}
-                width="w-full"
-                disabled={categoriesLoading}
-              />
-              {formErrors.categoryId && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.categoryId}</p>
-              )}
-              {categoriesLoading && (
-                <p className="text-blue-500 text-sm mt-1">Loading categories...</p>
-              )}
-              {!categoriesLoading && getFormCategoryOptions().length === 0 && (
-                <p className="text-yellow-600 text-sm mt-1">No active categories found. Please create categories first.</p>
-              )}
-            </div>
-
-            <div>
-              <SelectBox
-                label="Payment Method *"
-                placeholder="Select payment method"
-                value={incomeForm.paymentMethod}
-                handleChange={(value) => setIncomeForm({...incomeForm, paymentMethod: value})}
-                optionList={paymentMethodOptions}
-                width="w-full"
-              />
-              {formErrors.paymentMethod && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.paymentMethod}</p>
-              )}
-            </div>
-
-            <InputField
+            <Input
               label="Notes"
               placeholder="Additional notes (optional)"
               value={incomeForm.notes}
               onChange={(e) => setIncomeForm({...incomeForm, notes: e.target.value})}
-              width="w-full"
+            />
+          </div>
+        </Modal>
+
+        {/* Edit Income Modal */}
+        <Modal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          title="Edit Income"
+          footer={
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={() => setShowEditModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditIncome} disabled={isSubmitting}>
+                {isSubmitting ? 'Updating...' : 'Update Income'}
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <Input
+              label="Description *"
+              placeholder="Enter income description"
+              value={incomeForm.description}
+              onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
+              error={formErrors.description}
             />
 
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <div className="flex items-center space-x-2 text-red-700">
-                  <AlertCircle size={16} />
-                  <span className="text-sm">{error}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        }
-      />
+            <Input
+              label="Amount *"
+              type="number"
+              step="0.01"
+              placeholder="Enter amount"
+              value={incomeForm.amount}
+              onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
+              error={formErrors.amount}
+            />
 
-      {/* Edit Income Modal */}
-      <Modall
-        title="Edit Income"
-        modalOpen={showEditModal}
-        setModalOpen={() => handleModalClose('edit')}
-        okText={isSubmitting ? "Updating..." : "Update Income"}
-        cancelText="Cancel"
-        okAction={handleEditIncome}
-        cancelAction={() => handleModalClose('edit')}
-        okDisabled={isSubmitting}
-        width={600}
-        body={
-          <div className="space-y-4">
-            <div>
-              <InputField
-                label="Description *"
-                placeholder="Enter income description"
-                value={incomeForm.description}
-                onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
-                width="w-full"
-              />
-              {formErrors.description && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
-              )}
-            </div>
+            <Input
+              label="Date *"
+              type="date"
+              value={incomeForm.incomeDate}
+              onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
+              error={formErrors.incomeDate}
+            />
 
-            <div>
-              <InputField
-                label="Amount *"
-                type="number"
-                step="0.01"
-                placeholder="Enter amount"
-                value={incomeForm.amount}
-                onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
-                width="w-full"
-              />
-              {formErrors.amount && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.amount}</p>
-              )}
-            </div>
+            <Select
+              label="Category *"
+              value={incomeForm.categoryId}
+              onChange={(e) => setIncomeForm({...incomeForm, categoryId: e.target.value})}
+              error={formErrors.categoryId}
+            >
+              <option value="">Select category</option>
+              {getActiveIncomeCategories()?.map(cat => (
+                <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
+              ))}
+            </Select>
 
-            <div>
-              <InputField
-                label="Date *"
-                type="date"
-                value={incomeForm.incomeDate}
-                onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
-                width="w-full"
-              />
-              {formErrors.incomeDate && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.incomeDate}</p>
-              )}
-            </div>
+            <Select
+              label="Payment Method *"
+              value={incomeForm.paymentMethod}
+              onChange={(e) => setIncomeForm({...incomeForm, paymentMethod: e.target.value})}
+              error={formErrors.paymentMethod}
+            >
+              <option value="">Select payment method</option>
+              {paymentMethodOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </Select>
 
-            <div>
-              <SelectBox
-                label="Category *"
-                placeholder={categoriesLoading ? "Loading categories..." : "Select category"}
-                value={incomeForm.categoryId}
-                handleChange={(value) => setIncomeForm({...incomeForm, categoryId: value})}
-                optionList={categoriesLoading ? [] : getFormCategoryOptions()}
-                width="w-full"
-                disabled={categoriesLoading}
-              />
-              {formErrors.categoryId && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.categoryId}</p>
-              )}
-              {categoriesLoading && (
-                <p className="text-blue-500 text-sm mt-1">Loading categories...</p>
-              )}
-              {!categoriesLoading && getFormCategoryOptions().length === 0 && (
-                <p className="text-yellow-600 text-sm mt-1">No active categories found. Please create categories first.</p>
-              )}
-            </div>
-
-            <div>
-              <SelectBox
-                label="Payment Method *"
-                placeholder="Select payment method"
-                value={incomeForm.paymentMethod}
-                handleChange={(value) => setIncomeForm({...incomeForm, paymentMethod: value})}
-                optionList={paymentMethodOptions}
-                width="w-full"
-              />
-              {formErrors.paymentMethod && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.paymentMethod}</p>
-              )}
-            </div>
-
-            <InputField
+            <Input
               label="Notes"
               placeholder="Additional notes (optional)"
               value={incomeForm.notes}
               onChange={(e) => setIncomeForm({...incomeForm, notes: e.target.value})}
-              width="w-full"
             />
-
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <div className="flex items-center space-x-2 text-red-700">
-                  <AlertCircle size={16} />
-                  <span className="text-sm">{error}</span>
-                </div>
-              </div>
-            )}
           </div>
-        }
-      />
-    </Container>
+        </Modal>
+      </div>
+    </div>
   );
 };
 

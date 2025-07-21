@@ -65,12 +65,12 @@ import StockMovementsList from "../pages/Inventories/StockManager/StockMovements
 import StockTransactionForm from "../pages/Inventories/StockManager/StockTransactionForm";
 import StockMovementsReportView from "../pages/Inventories/StockManager/StockMovementsReportView";
 import FinanceDashboard from "../pages/FinanceManager/FinanceDashboard";
-import IncomeList from "../pages/FinanceManager/IncomeList";
+// import IncomeList from "../pages/FinanceManager/IncomeList";
 import ExpenseList from "../pages/FinanceManager/ExpenseList";
 import FinancialReports from "../pages/FinanceManager/FinancialReports";
 import BalanceSheet from "../pages/FinanceManager/BalanceSheet";
-import NewExpense from "../pages/FinanceManager/NewExpense";
-import NewIncome from "../pages/FinanceManager/NewIncome";
+// import NewExpense from "../pages/FinanceManager/NewExpense";
+// import NewIncome from "../pages/FinanceManager/NewIncome";
 import SalaryComponent from "../pages/Salary/SalaryComponent";
 import Overtime from "../pages/Salary/Overtime";
 import AttendanceModule from "../pages/HRModule/Attendance/AttendanceModule";
@@ -717,12 +717,12 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-    {
-      path: "/admin/finance/income/new",
-      component: NewIncome,
-      roles: ["Admin", "Manager", "Employee"],
-      layout: true,
-    },
+    // {
+    //   path: "/admin/finance/income/new",
+    //   component: NewIncome,
+    //   roles: ["Admin", "Manager", "Employee"],
+    //   layout: true,
+    // },
     {
       path: "/admin/finance/expenses",
       component: FinanceExpenses,
@@ -747,12 +747,12 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-    {
-      path: "/admin/finance/expense/new",
-      component: NewExpense,
-      roles: ["Admin", "Manager", "Employee"],
-      layout: true,
-    },
+    // {
+    //   path: "/admin/finance/expense/new",
+    //   component: NewExpense,
+    //   roles: ["Admin", "Manager", "Employee"],
+    //   layout: true,
+    // },
     {
       path: "/admin/finance/balance",
       component: BalanceSheet,
