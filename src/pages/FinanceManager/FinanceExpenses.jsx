@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import {
   BarChart,
   Bar,
@@ -31,7 +30,6 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { useFinanceExpenses } from "../../Contexts/FinanceContext/FinanceExpensesContext";
 import Container from "../../components/elements/container/Container";
 import BodyHeader from "../../components/elements/bodyHeader/BodyHeader";
 import Card from "../../components/elements/card/Card";
@@ -47,12 +45,13 @@ import TH from "../../components/elements/th/TH";
 import TD from "../../components/elements/td/TD";
 import Dropdown from "../../components/elements/dropdown/Dropdown";
 import Pagination from "../../components/elements/Pagination/Pagination";
-import Modall from "../../components/elements/modal/Modal";
 import InputField from "../../components/elements/inputField/InputField";
 import CheckboxField from "../../components/elements/checkbox/CheckboxField";
 import Tbody from "../../components/elements/tbody/Tbody";
+import { Modal } from "antd";
+import { useFinanceIncomes } from "../../Contexts/FinanceContext/FinanceIncomeContext";
 
-// Badge component if not imported
+// Badge component
 const Badge = ({ variant, children }) => {
   const variants = {
     warning: "bg-yellow-100 text-yellow-800 border border-yellow-200",
@@ -73,9 +72,56 @@ const Badge = ({ variant, children }) => {
   );
 };
 
-const FinanceExpenses = () => {
+// Modal component
+const Modall = ({
+  title,
+  okAction,
+  cancelAction,
+  body,
+  okText,
+  cancelText,
+  open,
+  onCancel,
+  okButtonDisabled = false,
+  cancelButtonDisabled = false,
+  width = 550,
+}) => {
+  return (
+    <Modal
+      title={title}
+      centered
+      open={open}
+      okText={okText}
+      cancelText={cancelText}
+      onOk={okAction}
+      onCancel={onCancel || cancelAction}
+      width={width}
+      okButtonProps={{
+        style: {
+          backgroundColor: "#0077b6",
+          borderColor: "#0077b6",
+          color: "white",
+        },
+        disabled: okButtonDisabled,
+      }}
+      cancelButtonProps={{
+        style: {
+          backgroundColor: "transparent",
+          borderColor: "#0077b6",
+          color: "#0077b6",
+          border: "2px solid",
+        },
+        disabled: cancelButtonDisabled,
+      }}
+    >
+      {body}
+    </Modal>
+  );
+};
+
+const FinanceIncome = () => {
   const {
-    expenses,
+    incomes,
     statistics,
     trends,
     categories,
@@ -83,22 +129,22 @@ const FinanceExpenses = () => {
     filters,
     loading,
     error,
-    getExpenses,
-    getExpenseStatistics,
-    getExpenseTrends,
-    getExpenseCategories,
-    createExpense,
-    updateExpense,
-    deleteExpense,
-    approveExpense,
-    rejectExpense,
-    searchExpenses,
+    getIncomes,
+    getIncomeStatistics,
+    getIncomeTrends,
+    getIncomeCategories,
+    createIncome,
+    updateIncome,
+    deleteIncome,
+    approveIncome,
+    rejectIncome,
+    searchIncomes,
     filterByStatus,
     filterByCategory,
     filterByDateRange,
     changePage,
     changePageSize,
-  } = useFinanceExpenses();
+  } = useFinanceIncomes();
 
   const [searchValue, setSearchValue] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -106,18 +152,18 @@ const FinanceExpenses = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [editingExpense, setEditingExpense] = useState(null);
-  const [approvingExpense, setApprovingExpense] = useState(null);
+  const [editingIncome, setEditingIncome] = useState(null);
+  const [approvingIncome, setApprovingIncome] = useState(null);
   const [approvalAction, setApprovalAction] = useState("");
   const [approvalNotes, setApprovalNotes] = useState("");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
 
-  const [expenseForm, setExpenseForm] = useState({
+  const [incomeForm, setIncomeForm] = useState({
     description: "",
     amount: "",
-    expenseDate: "",
+    incomeDate: "",
     categoryId: "",
-    vendorId: "",
+    customerId: "",
     paymentMethod: "",
     isRecurring: false,
     notes: "",
@@ -134,18 +180,17 @@ const FinanceExpenses = () => {
   });
 
   useEffect(() => {
-    getExpenses();
-    getExpenseStatistics();
-    // getExpenseTrends();
-    getExpenseCategories();
+    getIncomes();
+    getIncomeStatistics();
+    getIncomeCategories();
   }, []);
 
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
       if (searchValue) {
-        searchExpenses(searchValue);
+        searchIncomes(searchValue);
       } else {
-        getExpenses();
+        getIncomes();
       }
     }, 500);
 
@@ -168,36 +213,51 @@ const FinanceExpenses = () => {
     }
   };
 
-  const handleAddExpense = async () => {
+  const handleAddIncome = async () => {
+    // Add validation
+    if (
+      !incomeForm.description ||
+      !incomeForm.amount ||
+      !incomeForm.incomeDate ||
+      !incomeForm.categoryId
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
     try {
-      await createExpense(expenseForm);
+      console.log("Submitting income form:", incomeForm); // Debug log
+      await createIncome(incomeForm);
       setShowAddModal(false);
       resetForm();
-      getExpenses();
+      getIncomes();
+      // Add success message
+      alert("Income added successfully!");
     } catch (error) {
-      console.error("Error adding expense:", error);
+      console.error("Error adding income:", error);
+      alert("Error adding income: " + (error.message || "Unknown error"));
     }
   };
 
-  const handleEditExpense = async () => {
+  const handleEditIncome = async () => {
     try {
-      await updateExpense(editingExpense.id, expenseForm);
+      await updateIncome(editingIncome.id, incomeForm);
       setShowEditModal(false);
-      setEditingExpense(null);
+      setEditingIncome(null);
       resetForm();
-      getExpenses();
+      getIncomes();
     } catch (error) {
-      console.error("Error updating expense:", error);
+      console.error("Error updating income:", error);
     }
   };
 
-  const handleDeleteExpense = async (expenseId) => {
-    if (window.confirm("Are you sure you want to delete this expense?")) {
+  const handleDeleteIncome = async (incomeId) => {
+    if (window.confirm("Are you sure you want to delete this income?")) {
       try {
-        await deleteExpense(expenseId);
-        getExpenses();
+        await deleteIncome(incomeId);
+        getIncomes();
       } catch (error) {
-        console.error("Error deleting expense:", error);
+        console.error("Error deleting income:", error);
       }
     }
   };
@@ -205,27 +265,27 @@ const FinanceExpenses = () => {
   const handleApprovalAction = async () => {
     try {
       if (approvalAction === "approve") {
-        await approveExpense(approvingExpense.id, approvalNotes);
+        await approveIncome(approvingIncome.id, approvalNotes);
       } else if (approvalAction === "reject") {
-        await rejectExpense(approvingExpense.id, approvalNotes);
+        await rejectIncome(approvingIncome.id, approvalNotes);
       }
       setShowApprovalModal(false);
-      setApprovingExpense(null);
+      setApprovingIncome(null);
       setApprovalAction("");
       setApprovalNotes("");
-      getExpenses();
+      getIncomes();
     } catch (error) {
       console.error("Error processing approval:", error);
     }
   };
 
   const resetForm = () => {
-    setExpenseForm({
+    setIncomeForm({
       description: "",
       amount: "",
-      expenseDate: "",
+      incomeDate: "",
       categoryId: "",
-      vendorId: "",
+      customerId: "",
       paymentMethod: "",
       isRecurring: false,
       notes: "",
@@ -242,62 +302,67 @@ const FinanceExpenses = () => {
     });
   };
 
-  const openEditModal = (expense) => {
-    setEditingExpense(expense);
-    setExpenseForm({
-      description: expense.description,
-      amount: expense.amount,
-      expenseDate: expense.expenseDate,
-      categoryId: expense.categoryId,
-      vendorId: expense.vendorId,
-      paymentMethod: expense.paymentMethod,
-      isRecurring: expense.isRecurring,
-      notes: expense.notes,
-      currency: expense.currency,
-      exchangeRate: expense.exchangeRate,
-      taxRate: expense.taxRate,
-      taxAmount: expense.taxAmount,
-      totalAmount: expense.totalAmount,
-      referenceNumber: expense.referenceNumber,
-      recurringPattern: expense.recurringPattern,
-      recurringInterval: expense.recurringInterval,
-      nextRecurringDate: expense.nextRecurringDate,
-      items: expense.items || [],
+  const openEditModal = (income) => {
+    setEditingIncome(income);
+    setIncomeForm({
+      description: income.Description,
+      amount: income.Amount,
+      incomeDate: income.IncomeDate.split("T")[0],
+      categoryId: income.CategoryId,
+      customerId: income.CustomerId || "",
+      paymentMethod: income.PaymentMethod || "",
+      isRecurring: income.IsRecurring || false,
+      notes: income.Notes || "",
+      currency: income.Currency || "USD",
+      exchangeRate: income.ExchangeRate || 1,
+      taxRate: income.TaxRate || 0,
+      taxAmount: income.TaxAmount || 0,
+      totalAmount: income.TotalAmount || income.Amount,
+      referenceNumber: income.ReferenceNumber || "",
+      recurringPattern: income.RecurringPattern || "",
+      recurringInterval: income.RecurringInterval || 0,
+      nextRecurringDate: income.NextRecurringDate
+        ? income.NextRecurringDate.split("T")[0]
+        : "",
+      items: income.Items || [],
     });
     setShowEditModal(true);
   };
 
-  const openApprovalModal = (expense, action) => {
-    setApprovingExpense(expense);
+  const openApprovalModal = (income, action) => {
+    setApprovingIncome(income);
     setApprovalAction(action);
     setShowApprovalModal(true);
   };
 
   const handleFormChange = (field, value) => {
-    setExpenseForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    console.log("Form field changed:", field, value); // Debug log
 
-    // Calculate total amount when amount or tax changes
-    if (field === "amount" || field === "taxRate") {
-      const amount =
-        field === "amount"
-          ? parseFloat(value) || 0
-          : parseFloat(expenseForm.amount) || 0;
-      const taxRate =
-        field === "taxRate"
-          ? parseFloat(value) || 0
-          : parseFloat(expenseForm.taxRate) || 0;
-      const taxAmount = (amount * taxRate) / 100;
-      const totalAmount = amount + taxAmount;
-
-      setExpenseForm((prev) => ({
+    setIncomeForm((prev) => {
+      const newForm = {
         ...prev,
-        taxAmount,
-        totalAmount: totalAmount.toFixed(2),
-      }));
-    }
+        [field]: value,
+      };
+
+      // Calculate tax and total when amount or tax rate changes
+      if (field === "amount" || field === "taxRate") {
+        const amount =
+          field === "amount"
+            ? parseFloat(value) || 0
+            : parseFloat(newForm.amount) || 0;
+        const taxRate =
+          field === "taxRate"
+            ? parseFloat(value) || 0
+            : parseFloat(newForm.taxRate) || 0;
+        const taxAmount = (amount * taxRate) / 100;
+        const totalAmount = amount + taxAmount;
+
+        newForm.taxAmount = taxAmount;
+        newForm.totalAmount = totalAmount.toFixed(2);
+      }
+
+      return newForm;
+    });
   };
 
   const getStatusBadge = (status) => {
@@ -322,7 +387,6 @@ const FinanceExpenses = () => {
     }).format(amount);
   };
 
-  // Helper functions to extract data from your statistics structure
   const getCurrentMonthAmount = () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
@@ -348,7 +412,6 @@ const FinanceExpenses = () => {
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
-  // Modal handlers for your Modal component
   const handleAddModalClose = () => {
     setShowAddModal(false);
     resetForm();
@@ -356,42 +419,40 @@ const FinanceExpenses = () => {
 
   const handleEditModalClose = () => {
     setShowEditModal(false);
-    setEditingExpense(null);
+    setEditingIncome(null);
     resetForm();
   };
 
   const handleApprovalModalClose = () => {
     setShowApprovalModal(false);
-    setApprovingExpense(null);
+    setApprovingIncome(null);
     setApprovalAction("");
     setApprovalNotes("");
   };
 
-  // Dropdown handlers
-  const handleDropdownSelect = (expense, item) => {
+  const handleDropdownSelect = (income, item) => {
     switch (item.action) {
       case "edit":
-        openEditModal(expense);
+        openEditModal(income);
         break;
       case "approve":
-        openApprovalModal(expense, "approve");
+        openApprovalModal(income, "approve");
         break;
       case "reject":
-        openApprovalModal(expense, "reject");
+        openApprovalModal(income, "reject");
         break;
       case "delete":
-        handleDeleteExpense(expense.Id);
+        handleDeleteIncome(income.Id);
         break;
       default:
         break;
     }
   };
 
-  // Create dropdown items for each expense
-  const getDropdownItems = (expense) => {
+  const getDropdownItems = (income) => {
     const items = [{ label: "Edit", action: "edit" }];
 
-    if (expense.Status === "pending") {
+    if (income.Status === "pending") {
       items.push(
         { label: "Approve", action: "approve" },
         { label: "Reject", action: "reject" }
@@ -402,7 +463,6 @@ const FinanceExpenses = () => {
     return items;
   };
 
-  console.log("expenses", expenses);
   if (loading) {
     return (
       <Container>
@@ -423,15 +483,15 @@ const FinanceExpenses = () => {
       </Container>
     );
   }
-  console.log("statistics", statistics);
 
   return (
     <Container>
       <div className="space-y-6">
         <BodyHeader
-          title="Expense Management"
-          subtitle="Track and manage your business expenses"
+          title="Income Management"
+          subtitle="Track and manage your business income"
         />
+
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="p-6">
@@ -462,7 +522,7 @@ const FinanceExpenses = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Draft Expenses
+                    Draft Incomes
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
                     {getPendingApprovalCount()}
@@ -498,11 +558,11 @@ const FinanceExpenses = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Average Expense
+                    Average Income
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {statistics?.AverageExpenseAmount
-                      ? formatCurrency(statistics.AverageExpenseAmount)
+                    {statistics?.AverageIncomeAmount
+                      ? formatCurrency(statistics.AverageIncomeAmount)
                       : "$0.00"}
                   </dd>
                 </dl>
@@ -510,6 +570,7 @@ const FinanceExpenses = () => {
             </div>
           </Card>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           {/* Status Breakdown */}
           <Card className="p-6">
@@ -527,7 +588,7 @@ const FinanceExpenses = () => {
                   </span>
                   <div className="text-right">
                     <span className="text-sm font-medium text-gray-900">
-                      {status.Count} expenses
+                      {status.Count} incomes
                     </span>
                     <div className="text-sm text-gray-500">
                       {formatCurrency(status.Amount)}
@@ -560,7 +621,7 @@ const FinanceExpenses = () => {
                   </span>
                   <div className="text-right">
                     <span className="text-sm font-medium text-gray-900">
-                      {trend.Count} expenses
+                      {trend.Count} incomes
                     </span>
                     <div className="text-sm text-gray-500">
                       {formatCurrency(trend.Amount)}
@@ -571,6 +632,7 @@ const FinanceExpenses = () => {
             </div>
           </Card>
         </div>
+
         {/* Search and Filters */}
         <Card className="p-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -579,7 +641,7 @@ const FinanceExpenses = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
                   type="text"
-                  placeholder="Search expenses..."
+                  placeholder="Search incomes..."
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
@@ -611,7 +673,7 @@ const FinanceExpenses = () => {
               />
               <OutlineButton onClick={() => setShowAddModal(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Expense
+                Add Income
               </OutlineButton>
             </div>
           </div>
@@ -639,7 +701,7 @@ const FinanceExpenses = () => {
             </FilledButton>
           </div>
 
-          {/* Expenses Table */}
+          {/* Incomes Table */}
           <Table>
             <Thead>
               <TR>
@@ -652,19 +714,19 @@ const FinanceExpenses = () => {
               </TR>
             </Thead>
             <Tbody>
-              {expenses?.map((expense) => (
-                <TR key={expense.Id}>
-                  <TD>{expense.Description}</TD>
-                  <TD>{formatCurrency(expense.Amount, expense.Currency)}</TD>
-                  <TD>{expense.CategoryName}</TD>
-                  <TD>{new Date(expense.ExpenseDate).toLocaleDateString()}</TD>
-                  <TD>{getStatusBadge(expense.Status)}</TD>
+              {incomes?.map((income) => (
+                <TR key={income.Id}>
+                  <TD>{income.Description}</TD>
+                  <TD>{formatCurrency(income.Amount, income.Currency)}</TD>
+                  <TD>{income.CategoryName}</TD>
+                  <TD>{new Date(income.IncomeDate).toLocaleDateString()}</TD>
+                  <TD>{getStatusBadge(income.Status)}</TD>
                   <TD>
                     <Dropdown
                       buttonText=""
                       icon={MoreVertical}
-                      items={getDropdownItems(expense)}
-                      onSelect={(item) => handleDropdownSelect(expense, item)}
+                      items={getDropdownItems(income)}
+                      onSelect={(item) => handleDropdownSelect(income, item)}
                       buttonClassName="p-2 hover:bg-gray-100 rounded-md border-none shadow-none"
                     />
                   </TD>
@@ -682,20 +744,28 @@ const FinanceExpenses = () => {
             onPageSizeChange={changePageSize}
           />
         </Card>
+
+        {/* Add Income Modal */}
         <Modall
-          modalOpen={showAddModal}
-          setModalOpen={handleAddModalClose}
-          title="Add New Expense"
-          okText="Add Expense"
+          title="Add New Income"
+          okText="Add Income"
           cancelText="Cancel"
-          okAction={handleAddExpense}
+          okAction={handleAddIncome}
           cancelAction={handleAddModalClose}
           width={800}
+          open={showAddModal}
+          onCancel={handleAddModalClose}
+          okButtonDisabled={
+            !incomeForm.description ||
+            !incomeForm.amount ||
+            !incomeForm.incomeDate ||
+            !incomeForm.categoryId
+          }
           body={
             <div className="space-y-4">
               <InputField
                 label="Description"
-                value={expenseForm.description}
+                value={incomeForm.description}
                 onChange={(e) =>
                   handleFormChange("description", e.target.value)
                 }
@@ -706,16 +776,16 @@ const FinanceExpenses = () => {
                 <InputField
                   label="Amount"
                   type="number"
-                  value={expenseForm.amount}
+                  value={incomeForm.amount}
                   onChange={(e) => handleFormChange("amount", e.target.value)}
                   required
                 />
                 <InputField
-                  label="Expense Date"
+                  label="Income Date"
                   type="date"
-                  value={expenseForm.expenseDate}
+                  value={incomeForm.incomeDate}
                   onChange={(e) =>
-                    handleFormChange("expenseDate", e.target.value)
+                    handleFormChange("incomeDate", e.target.value)
                   }
                   required
                 />
@@ -724,8 +794,11 @@ const FinanceExpenses = () => {
               <div className="grid grid-cols-2 gap-4">
                 <SelectBox
                   label="Category"
-                  value={expenseForm.categoryId}
-                  onChange={(value) => handleFormChange("categoryId", value)}
+                  value={incomeForm.categoryId}
+                  onChange={(value) => {
+                    console.log("Category selected:", value); // Debug log
+                    handleFormChange("categoryId", value);
+                  }}
                   options={
                     categories?.map((cat) => ({
                       value: cat.id,
@@ -736,7 +809,7 @@ const FinanceExpenses = () => {
                 />
                 <SelectBox
                   label="Payment Method"
-                  value={expenseForm.paymentMethod}
+                  value={incomeForm.paymentMethod}
                   onChange={(value) => handleFormChange("paymentMethod", value)}
                   options={[
                     { value: "cash", label: "Cash" },
@@ -751,7 +824,7 @@ const FinanceExpenses = () => {
               <div className="grid grid-cols-3 gap-4">
                 <SelectBox
                   label="Currency"
-                  value={expenseForm.currency}
+                  value={incomeForm.currency}
                   onChange={(value) => handleFormChange("currency", value)}
                   options={[
                     { value: "USD", label: "USD" },
@@ -763,36 +836,36 @@ const FinanceExpenses = () => {
                 <InputField
                   label="Tax Rate (%)"
                   type="number"
-                  value={expenseForm.taxRate}
+                  value={incomeForm.taxRate}
                   onChange={(e) => handleFormChange("taxRate", e.target.value)}
                 />
                 <InputField
                   label="Total Amount"
                   type="number"
-                  value={expenseForm.totalAmount}
+                  value={incomeForm.totalAmount}
                   readOnly
                 />
               </div>
 
               <InputField
                 label="Reference Number"
-                value={expenseForm.referenceNumber}
+                value={incomeForm.referenceNumber}
                 onChange={(e) =>
                   handleFormChange("referenceNumber", e.target.value)
                 }
               />
 
               <CheckboxField
-                label="Recurring Expense"
-                checked={expenseForm.isRecurring}
+                label="Recurring Income"
+                checked={incomeForm.isRecurring}
                 onChange={(checked) => handleFormChange("isRecurring", checked)}
               />
 
-              {expenseForm.isRecurring && (
+              {incomeForm.isRecurring && (
                 <div className="grid grid-cols-2 gap-4">
                   <SelectBox
                     label="Recurring Pattern"
-                    value={expenseForm.recurringPattern}
+                    value={incomeForm.recurringPattern}
                     onChange={(value) =>
                       handleFormChange("recurringPattern", value)
                     }
@@ -806,7 +879,7 @@ const FinanceExpenses = () => {
                   <InputField
                     label="Next Recurring Date"
                     type="date"
-                    value={expenseForm.nextRecurringDate}
+                    value={incomeForm.nextRecurringDate}
                     onChange={(e) =>
                       handleFormChange("nextRecurringDate", e.target.value)
                     }
@@ -818,27 +891,28 @@ const FinanceExpenses = () => {
                 label="Notes"
                 as="textarea"
                 rows={3}
-                value={expenseForm.notes}
+                value={incomeForm.notes}
                 onChange={(e) => handleFormChange("notes", e.target.value)}
               />
             </div>
           }
         />
-        {/* Edit Expense Modal */}
+
+        {/* Edit Income Modal */}
         <Modall
-          modalOpen={showEditModal}
-          setModalOpen={handleEditModalClose}
-          title="Edit Expense"
-          okText="Update Expense"
+          title="Edit Income"
+          okText="Update Income"
           cancelText="Cancel"
-          okAction={handleEditExpense}
+          okAction={handleEditIncome}
           cancelAction={handleEditModalClose}
           width={800}
+          open={showEditModal}
+          onCancel={handleEditModalClose}
           body={
             <div className="space-y-4">
               <InputField
                 label="Description"
-                value={expenseForm.description}
+                value={incomeForm.description}
                 onChange={(e) =>
                   handleFormChange("description", e.target.value)
                 }
@@ -849,16 +923,16 @@ const FinanceExpenses = () => {
                 <InputField
                   label="Amount"
                   type="number"
-                  value={expenseForm.amount}
+                  value={incomeForm.amount}
                   onChange={(e) => handleFormChange("amount", e.target.value)}
                   required
                 />
                 <InputField
-                  label="Expense Date"
+                  label="Income Date"
                   type="date"
-                  value={expenseForm.expenseDate}
+                  value={incomeForm.incomeDate}
                   onChange={(e) =>
-                    handleFormChange("expenseDate", e.target.value)
+                    handleFormChange("incomeDate", e.target.value)
                   }
                   required
                 />
@@ -867,7 +941,7 @@ const FinanceExpenses = () => {
               <div className="grid grid-cols-2 gap-4">
                 <SelectBox
                   label="Category"
-                  value={expenseForm.categoryId}
+                  value={incomeForm.categoryId}
                   onChange={(value) => handleFormChange("categoryId", value)}
                   options={
                     categories?.map((cat) => ({
@@ -879,7 +953,7 @@ const FinanceExpenses = () => {
                 />
                 <SelectBox
                   label="Payment Method"
-                  value={expenseForm.paymentMethod}
+                  value={incomeForm.paymentMethod}
                   onChange={(value) => handleFormChange("paymentMethod", value)}
                   options={[
                     { value: "cash", label: "Cash" },
@@ -894,7 +968,7 @@ const FinanceExpenses = () => {
               <div className="grid grid-cols-3 gap-4">
                 <SelectBox
                   label="Currency"
-                  value={expenseForm.currency}
+                  value={incomeForm.currency}
                   onChange={(value) => handleFormChange("currency", value)}
                   options={[
                     { value: "USD", label: "USD" },
@@ -906,36 +980,36 @@ const FinanceExpenses = () => {
                 <InputField
                   label="Tax Rate (%)"
                   type="number"
-                  value={expenseForm.taxRate}
+                  value={incomeForm.taxRate}
                   onChange={(e) => handleFormChange("taxRate", e.target.value)}
                 />
                 <InputField
                   label="Total Amount"
                   type="number"
-                  value={expenseForm.totalAmount}
+                  value={incomeForm.totalAmount}
                   readOnly
                 />
               </div>
 
               <InputField
                 label="Reference Number"
-                value={expenseForm.referenceNumber}
+                value={incomeForm.referenceNumber}
                 onChange={(e) =>
                   handleFormChange("referenceNumber", e.target.value)
                 }
               />
 
               <CheckboxField
-                label="Recurring Expense"
-                checked={expenseForm.isRecurring}
+                label="Recurring Income"
+                checked={incomeForm.isRecurring}
                 onChange={(checked) => handleFormChange("isRecurring", checked)}
               />
 
-              {expenseForm.isRecurring && (
+              {incomeForm.isRecurring && (
                 <div className="grid grid-cols-2 gap-4">
                   <SelectBox
                     label="Recurring Pattern"
-                    value={expenseForm.recurringPattern}
+                    value={incomeForm.recurringPattern}
                     onChange={(value) =>
                       handleFormChange("recurringPattern", value)
                     }
@@ -949,7 +1023,7 @@ const FinanceExpenses = () => {
                   <InputField
                     label="Next Recurring Date"
                     type="date"
-                    value={expenseForm.nextRecurringDate}
+                    value={incomeForm.nextRecurringDate}
                     onChange={(e) =>
                       handleFormChange("nextRecurringDate", e.target.value)
                     }
@@ -961,48 +1035,49 @@ const FinanceExpenses = () => {
                 label="Notes"
                 as="textarea"
                 rows={3}
-                value={expenseForm.notes}
+                value={incomeForm.notes}
                 onChange={(e) => handleFormChange("notes", e.target.value)}
               />
             </div>
           }
         />
+
         {/* Approval Modal */}
         <Modall
-          modalOpen={showApprovalModal}
-          setModalOpen={handleApprovalModalClose}
           title={`${
             approvalAction === "approve" ? "Approve" : "Reject"
-          } Expense`}
+          } Income`}
           okText={approvalAction === "approve" ? "Approve" : "Reject"}
           cancelText="Cancel"
           okAction={handleApprovalAction}
           cancelAction={handleApprovalModalClose}
           width={600}
+          open={showApprovalModal}
+          onCancel={handleApprovalModalClose}
           body={
             <div className="space-y-4">
-              {approvingExpense && (
+              {approvingIncome && (
                 <div className="bg-gray-50 p-4 rounded-md">
                   <h4 className="font-medium text-gray-900 mb-2">
-                    Expense Details
+                    Income Details
                   </h4>
                   <div className="text-sm text-gray-600">
                     <p>
                       <strong>Description:</strong>{" "}
-                      {approvingExpense.Description}
+                      {approvingIncome.Description}
                     </p>
                     <p>
                       <strong>Amount:</strong>{" "}
-                      {formatCurrency(approvingExpense.Amount)}
+                      {formatCurrency(approvingIncome.Amount)}
                     </p>
                     <p>
                       <strong>Date:</strong>{" "}
                       {new Date(
-                        approvingExpense.ExpenseDate
+                        approvingIncome.IncomeDate
                       ).toLocaleDateString()}
                     </p>
                     <p>
-                      <strong>Category:</strong> {approvingExpense.CategoryName}
+                      <strong>Category:</strong> {approvingIncome.CategoryName}
                     </p>
                   </div>
                 </div>
@@ -1026,4 +1101,4 @@ const FinanceExpenses = () => {
   );
 };
 
-export default FinanceExpenses;
+export default FinanceIncome;
