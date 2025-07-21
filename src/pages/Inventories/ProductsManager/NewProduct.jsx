@@ -71,11 +71,9 @@ const InputField = React.memo(
             placeholder={placeholder}
             rows={4}
             disabled={disabled}
-            className={`block w-full ${
-              Icon ? "pl-10" : "pl-3"
-            } pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              error ? "border-red-500" : ""
-            } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+            className={`block w-full ${Icon ? "pl-10" : "pl-3"
+              } pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? "border-red-500" : ""
+              } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
         ) : as === "select" ? (
           <select
@@ -83,11 +81,9 @@ const InputField = React.memo(
             value={value || ""}
             onChange={(e) => onChange(name, e.target.value)}
             disabled={disabled}
-            className={`block w-full ${
-              Icon ? "pl-10" : "pl-3"
-            } pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              error ? "border-red-500" : ""
-            } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+            className={`block w-full ${Icon ? "pl-10" : "pl-3"
+              } pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? "border-red-500" : ""
+              } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
           >
             {placeholder && <option value="">{placeholder}</option>}
             {name === "Status" && (
@@ -165,11 +161,9 @@ const InputField = React.memo(
             min={min}
             max={max}
             step={step}
-            className={`block w-full ${
-              Icon ? "pl-10" : "pl-3"
-            } pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              error ? "border-red-500" : ""
-            } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+            className={`block w-full ${Icon ? "pl-10" : "pl-3"
+              } pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? "border-red-500" : ""
+              } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
         )}
       </Container>
@@ -209,7 +203,7 @@ const NewProduct = () => {
   // Import supplier context separately since it's not part of ProductsManager
   const { getSuppliers, suppliers } = useSupplier
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
-      useSupplier()
+    useSupplier()
     : { getSuppliers: null, suppliers: null };
 
   // Memoize translations to prevent re-creation
@@ -507,7 +501,7 @@ const NewProduct = () => {
     [images.length]
   );
 
-  // Remove image
+  // Remove image 
   const removeImage = useCallback(
     (index) => {
       setImages((prev) => {
@@ -804,8 +798,8 @@ const NewProduct = () => {
                   isSaving
                     ? "Saving..."
                     : isEditing
-                    ? translations["Update Product"]
-                    : translations["Save Product"]
+                      ? translations["Update Product"]
+                      : translations["Save Product"]
                 }
                 height="h-10"
                 px="px-6"
