@@ -17,13 +17,14 @@ import {
   CreditCard,
   Tag,
   FileIcon,
+  Upload as UploadIcon,
 } from "lucide-react";
 import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 
-// Move InputField component outside to prevent re-creation
+// InputField component with enhanced styling
 const InputField = React.memo(({ 
   label, 
   name, 
@@ -34,17 +35,19 @@ const InputField = React.memo(({
   onChange, 
   error,
   icon: Icon,
-  as = "input"
+  as = "input",
+  options = [],
+  className = ""
 }) => (
-  <Container className="space-y-2">
+  <Container className={`space-y-1.5 ${className}`}>
     <label className="block text-sm font-medium text-gray-700">
       {label}
       {required && <Span className="text-red-500 ml-1">*</Span>}
     </label>
     <Container className="relative">
       {Icon && (
-        <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-400" />
+        <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+          <Icon className="h-4 w-4 text-gray-400" />
         </Container>
       )}
       {as === "textarea" ? (
@@ -53,58 +56,22 @@ const InputField = React.memo(({
           value={value || ""}
           onChange={(e) => onChange(name, e.target.value)}
           placeholder={placeholder}
-          rows={4}
-          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
+          rows={3}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${error ? 'border-red-500' : ''}`}
         />
       ) : as === "select" ? (
         <select
           name={name}
           value={value || ""}
           onChange={(e) => onChange(name, e.target.value)}
-          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-8 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white ${error ? 'border-red-500' : ''}`}
         >
           {placeholder && <option value="">{placeholder}</option>}
-          {name === "ClientType" && (
-            <>
-              <option value="Individual">Individual</option>
-              <option value="Business">Business</option>
-            </>
-          )}
-          {name === "Currency" && (
-            <>
-              <option value="USD">USD - US Dollar</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="SAR">SAR - Saudi Riyal</option>
-              <option value="AED">AED - UAE Dirham</option>
-              <option value="PKR">PKR - Pakistani Rupee</option>
-            </>
-          )}
-          {name === "InvoicingMethod" && (
-            <>
-              <option value="Email">Email</option>
-              <option value="Print">Print</option>
-              <option value="Both">Both</option>
-            </>
-          )}
-          {name === "Country" && (
-            <>
-              <option value="United States (US)">United States (US)</option>
-              <option value="Germany (DE)">Germany (DE)</option>
-              <option value="Australia (AU)">Australia (AU)</option>
-              <option value="Saudi Arabia (SA)">Saudi Arabia (SA)</option>
-              <option value="UAE (AE)">UAE (AE)</option>
-              <option value="Pakistan (PK)">Pakistan (PK)</option>
-              <option value="Denmark">Denmark</option>
-            </>
-          )}
-          {name === "DisplayLanguage" && (
-            <>
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
-            </>
-          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       ) : (
         <input
@@ -113,22 +80,47 @@ const InputField = React.memo(({
           value={value || ""}
           onChange={(e) => onChange(name, e.target.value)}
           placeholder={placeholder}
-          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''}`}
+          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${error ? 'border-red-500' : ''}`}
         />
       )}
+      {as === "select" && (
+        <Container className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </Container>
+      )}
     </Container>
-    {error && <Span className="text-red-500 text-sm">{error}</Span>}
+    {error && <Span className="text-red-500 text-xs">{error}</Span>}
   </Container>
 ));
 
-// Move Section component outside to prevent re-creation
-const Section = React.memo(({ title, children, icon: Icon }) => (
-  <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <Container className="flex items-center gap-3 mb-6">
-      {Icon && <Icon className="w-5 h-5 text-blue-600" />}
-      <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+// Radio Button Group Component
+const RadioGroup = React.memo(({ label, name, options, value, onChange, error, required = false }) => (
+  <Container className="space-y-1.5">
+    <label className="block text-sm font-medium text-gray-700">
+      {label}
+      {required && <Span className="text-red-500 ml-1">*</Span>}
+    </label>
+    <Container className="flex gap-6">
+      {options.map((option) => (
+        <label key={option.value} className="flex items-center cursor-pointer">
+          <input
+            type="radio"
+            name={name}
+            value={option.value}
+            checked={value === option.value}
+            onChange={(e) => onChange(name, e.target.value)}
+            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+          />
+          <Container className="ml-2 flex items-center gap-2">
+            {option.icon && <option.icon className="w-4 h-4 text-gray-500" />}
+            <Span className="text-sm text-gray-700">{option.label}</Span>
+          </Container>
+        </label>
+      ))}
     </Container>
-    {children}
+    {error && <Span className="text-red-500 text-xs">{error}</Span>}
   </Container>
 ));
 
@@ -140,71 +132,54 @@ const NewClient = () => {
   
   const { createClient, updateClient } = useClients();
 
-  // Memoize translations to prevent re-creation
+  // Translations
   const translations = React.useMemo(() => ({
-    "New Client": language === "ar" ? "عميل جديد" : "New Client",
+    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
     "Edit Client": language === "ar" ? "تعديل العميل" : "Edit Client",
-    "Client Information": language === "ar" ? "معلومات العميل" : "Client Information",
-    "Contact Information": language === "ar" ? "معلومات الاتصال" : "Contact Information",
-    "Address Information": language === "ar" ? "معلومات العنوان" : "Address Information",
-    "Additional Information": language === "ar" ? "معلومات إضافية" : "Additional Information",
-    "Additional Contacts": language === "ar" ? "جهات اتصال إضافية" : "Additional Contacts",
-    "Attachments": language === "ar" ? "المرفقات" : "Attachments",
+    "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
+    "Account Details": language === "ar" ? "تفاصيل الحساب" : "Account Details",
     "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
     "Individual": language === "ar" ? "فردي" : "Individual",
     "Business": language === "ar" ? "تجاري" : "Business",
-    "Full Name": language === "ar" ? "الاسم الكامل" : "Full Name",
     "Business Name": language === "ar" ? "اسم النشاط التجاري" : "Business Name",
-    "Contact Person": language === "ar" ? "الشخص المسؤول" : "Contact Person",
-    "Email": language === "ar" ? "البريد الإلكتروني" : "Email",
-    "Mobile": language === "ar" ? "الهاتف المحمول" : "Mobile",
+    "First Name": language === "ar" ? "الاسم الأول" : "First Name",
+    "Last Name": language === "ar" ? "اسم العائلة" : "Last Name",
     "Telephone": language === "ar" ? "الهاتف الثابت" : "Telephone",
-    "Website": language === "ar" ? "الموقع الإلكتروني" : "Website",
+    "Mobile": language === "ar" ? "الهاتف المحمول" : "Mobile",
     "Street Address 1": language === "ar" ? "العنوان الأول" : "Street Address 1",
     "Street Address 2": language === "ar" ? "العنوان الثاني" : "Street Address 2",
     "City": language === "ar" ? "المدينة" : "City",
-    "State": language === "ar" ? "الولاية/المنطقة" : "State/Province",
+    "State": language === "ar" ? "الولاية/المنطقة" : "State",
     "Postal Code": language === "ar" ? "الرمز البريدي" : "Postal Code",
     "Country": language === "ar" ? "البلد" : "Country",
-    "VAT Number": language === "ar" ? "الرقم الضريبي" : "VAT Number",
-    "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
+    "Vat number": language === "ar" ? "الرقم الضريبي" : "Vat number",
+    "Add Secondary Address": language === "ar" ? "إضافة عنوان ثانوي" : "Add Secondary Address",
+    "Contacts List": language === "ar" ? "قائمة جهات الاتصال" : "Contacts List",
+    "Add": language === "ar" ? "إضافة" : "Add",
     "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
-    "Currency": language === "ar" ? "العملة" : "Currency",
-    "Category": language === "ar" ? "الفئة" : "Category",
-    "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
     "Invoicing Method": language === "ar" ? "طريقة الفوترة" : "Invoicing Method",
+    "Currency": language === "ar" ? "العملة" : "Currency",
+    "Email": language === "ar" ? "البريد الإلكتروني" : "Email",
+    "Category": language === "ar" ? "الفئة" : "Category",
     "Notes": language === "ar" ? "ملاحظات" : "Notes",
-    "First Name": language === "ar" ? "الاسم الأول" : "First Name",
-    "Last Name": language === "ar" ? "اسم العائلة" : "Last Name",
-    "Add Contact": language === "ar" ? "إضافة جهة اتصال" : "Add Contact",
-    "Upload Files": language === "ar" ? "رفع الملفات" : "Upload Files",
-    "Save Client": language === "ar" ? "حفظ العميل" : "Save Client",
-    "Update Client": language === "ar" ? "تحديث العميل" : "Update Client",
+    "Attachments": language === "ar" ? "المرفقات" : "Attachments",
+    "Display Language": language === "ar" ? "لغة العرض" : "Display Language",
+    "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
+    "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
+    "Save": language === "ar" ? "حفظ" : "Save",
     "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Back": language === "ar" ? "رجوع" : "Back",
     "Required": language === "ar" ? "مطلوب" : "Required",
-    "Optional": language === "ar" ? "اختياري" : "Optional",
-    "Remove": language === "ar" ? "إزالة" : "Remove",
-    "Choose Files": language === "ar" ? "اختر الملفات" : "Choose Files",
-    "No files selected": language === "ar" ? "لم يتم اختيار ملفات" : "No files selected",
+    "Drop file here or select from your computer": language === "ar" ? "اسحب الملف هنا أو اختر من جهاز الكمبيوتر" : "Drop file here or select from your computer",
   }), [language]);
 
-  // Check if editing (from location state or URL)
-  const isEditing = location.state?.isEditing || false;
-  const cloneData = location.state?.cloneData;
-  const editData = location.state?.editData;
-
-  // Form state - Updated with required backend fields
+  // Form state - Updated to match controller defaults exactly
   const [formData, setFormData] = useState({
     ClientType: "Individual",
-    FullName: "",
     BusinessName: "",
     FirstName: "",
     LastName: "",
-    Email: "",
-    Mobile: "",
     Telephone: "",
-    Website: "",
+    Mobile: "",
     StreetAddress1: "",
     StreetAddress2: "",
     City: "",
@@ -212,15 +187,18 @@ const NewClient = () => {
     PostalCode: "",
     Country: "",
     VatNumber: "",
-    TaxNumber: "", // Added for backend compatibility
-    CodeNumber: "",
-    Currency: "USD",
-    Category: "",
-    PaymentTerms: "", // Added for backend compatibility
-    InvoicingMethod: "Email",
-    Notes: "",
-    DisplayLanguage: "en",
     HasSecondaryAddress: false,
+    CodeNumber: "",
+    InvoicingMethod: "Email", // Controller default
+    Currency: "USD", // FIXED: Controller defaults to USD
+    Email: "",
+    Category: "",
+    Notes: "",
+    DisplayLanguage: "en", // Form uses "en", will convert to "English" for controller
+    // Required backend fields - match controller expectations
+    FullName: "",
+    TaxNumber: "", // FIXED: Empty string as controller expects
+    PaymentTerms: "", // FIXED: Empty string as controller expects
   });
 
   const [contacts, setContacts] = useState([]);
@@ -229,24 +207,72 @@ const NewClient = () => {
   const [attachmentsToRemove, setAttachmentsToRemove] = useState([]);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
-  // Initialize form data if editing or cloning
+  // Check if editing
+  const isEditing = location.state?.isEditing || false;
+  const cloneData = location.state?.cloneData;
+  const editData = location.state?.editData;
+
+  // Currency options - FIXED: USD first to match controller default
+  const currencyOptions = [
+    { value: "USD", label: "USD - US Dollar" },
+    { value: "EUR", label: "EUR - Euro" },
+    { value: "PKR", label: "PKR - Pakistani Rupee" },
+    { value: "SAR", label: "SAR - Saudi Riyal" },
+    { value: "AED", label: "AED - UAE Dirham" },
+  ];
+
+  // Country options
+  const countryOptions = [
+    { value: "", label: "Select Country" },
+    { value: "Pakistan (PK)", label: "Pakistan (PK)" },
+    { value: "United States (US)", label: "United States (US)" },
+    { value: "Germany (DE)", label: "Germany (DE)" },
+    { value: "Australia (AU)", label: "Australia (AU)" },
+    { value: "Saudi Arabia (SA)", label: "Saudi Arabia (SA)" },
+    { value: "UAE (AE)", label: "UAE (AE)" },
+    { value: "Denmark", label: "Denmark" },
+  ];
+
+  // Invoicing method options
+  const invoicingOptions = [
+    { value: "Email", label: "Email" },
+    { value: "Print", label: "Print (Offline)" },
+    { value: "Both", label: "Both" },
+  ];
+
+  // Language options
+  const languageOptions = [
+    { value: "en", label: "English" },
+    { value: "ar", label: "العربية" },
+    { value: "fr", label: "Français" },
+    { value: "de", label: "Deutsch" },
+  ];
+
+  // Client type options
+  const clientTypeOptions = [
+    { value: "Individual", label: translations["Individual"], icon: User },
+    { value: "Business", label: translations["Business"], icon: Building },
+  ];
+
+  // Initialize form data - Fixed to match controller defaults
   useEffect(() => {
     if (cloneData) {
-      // Ensure all required fields are strings when cloning
       const sanitizedCloneData = {
         ...cloneData,
         Id: undefined,
         CodeNumber: "",
         Email: "",
-        // Ensure required NOT NULL fields are strings
+        // FIXED: Ensure required fields match controller expectations
         Mobile: cloneData.Mobile || "",
         Telephone: cloneData.Telephone || "",
         TaxNumber: cloneData.TaxNumber || "",
         PaymentTerms: cloneData.PaymentTerms || "",
-        Currency: cloneData.Currency || "USD",
+        Currency: cloneData.Currency || "USD", // FIXED: Controller default
         ClientType: cloneData.ClientType || "Individual",
         DisplayLanguage: cloneData.DisplayLanguage || "en",
+        InvoicingMethod: cloneData.InvoicingMethod || "Email",
       };
       
       setFormData(sanitizedCloneData);
@@ -257,17 +283,17 @@ const NewClient = () => {
         setContacts(cloneData.Contacts);
       }
     } else if (editData) {
-      // Ensure all required fields are strings when editing
       const sanitizedEditData = {
         ...editData,
-        // Ensure required NOT NULL fields are strings
+        // FIXED: Ensure required fields match controller expectations
         Mobile: editData.Mobile || "",
         Telephone: editData.Telephone || "",
         TaxNumber: editData.TaxNumber || "",
         PaymentTerms: editData.PaymentTerms || "",
-        Currency: editData.Currency || "USD",
+        Currency: editData.Currency || "USD", // FIXED: Controller default
         ClientType: editData.ClientType || "Individual",
         DisplayLanguage: editData.DisplayLanguage || "en",
+        InvoicingMethod: editData.InvoicingMethod || "Email",
       };
       
       setFormData(sanitizedEditData);
@@ -278,7 +304,6 @@ const NewClient = () => {
         setContacts(editData.Contacts);
       }
 
-      // Handle existing attachments
       if (editData.Attachments && Array.isArray(editData.Attachments.$values)) {
         setExistingAttachments(editData.Attachments.$values);
       } else if (editData.Attachments && Array.isArray(editData.Attachments)) {
@@ -293,37 +318,33 @@ const NewClient = () => {
     }
   }, [token, navigate]);
 
-  // Memoize event handlers to prevent re-creation
+  // Event handlers
   const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value || "" // Ensure values are never null/undefined
+      [field]: value || ""
     }));
     
-    // Clear error when user starts typing
-    setErrors(prev => {
-      if (prev[field]) {
+    if (errors[field]) {
+      setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
-      }
-      return prev;
-    });
-  }, []);
+      });
+    }
+  }, [errors]);
 
-  // Handle contact changes
   const handleContactChange = useCallback((index, field, value) => {
     setContacts(prev => {
       const newContacts = [...prev];
       newContacts[index] = {
         ...newContacts[index],
-        [field]: value || "" // Ensure values are never null/undefined
+        [field]: value || ""
       };
       return newContacts;
     });
   }, []);
 
-  // Add new contact
   const addContact = useCallback(() => {
     setContacts(prev => [...prev, {
       FirstName: "",
@@ -334,16 +355,34 @@ const NewClient = () => {
     }]);
   }, []);
 
-  // Remove contact
   const removeContact = useCallback((index) => {
     setContacts(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Handle file uploads
-  const handleFileUpload = useCallback((event) => {
-    const files = Array.from(event.target.files);
-    
-    // Validate file types and sizes
+  // File handling
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    setDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
+  }, []);
+
+  const handleFileSelect = useCallback((e) => {
+    const files = Array.from(e.target.files);
+    processFiles(files);
+  }, []);
+
+  const processFiles = useCallback((files) => {
     const validFiles = files.filter(file => {
       const allowedTypes = [
         'image/jpeg', 'image/jpg', 'image/png', 
@@ -371,90 +410,110 @@ const NewClient = () => {
     setAttachments(prev => [...prev, ...validFiles]);
   }, []);
 
-  // Remove new attachment
   const removeAttachment = useCallback((index) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Remove existing attachment
   const removeExistingAttachment = useCallback((attachment) => {
     setExistingAttachments(prev => prev.filter(att => att.Id !== attachment.Id));
     setAttachmentsToRemove(prev => [...prev, attachment.Id]);
   }, []);
 
-  // Validate form - Updated to match backend requirements
+  // Validation - Updated to match controller validation exactly
   const validateForm = useCallback(() => {
     const newErrors = {};
 
-    // Required field validation based on client type
+    // CRITICAL: Match controller validation logic exactly
     if (formData.ClientType === "Individual") {
-      if (!formData.FullName?.trim()) {
-        newErrors.FullName = translations.Required;
+      // Controller checks: dto.ClientType == "Individual" && string.IsNullOrWhiteSpace(dto.FullName)
+      const fullName = formData.FullName?.trim() || 
+                      `${formData.FirstName?.trim() || ""} ${formData.LastName?.trim() || ""}`.trim();
+      if (!fullName) {
+        newErrors.FirstName = "Full Name is required for Individual clients";
       }
     } else if (formData.ClientType === "Business") {
+      // Controller checks: dto.ClientType == "Business" && string.IsNullOrWhiteSpace(dto.BusinessName)
       if (!formData.BusinessName?.trim()) {
-        newErrors.BusinessName = translations.Required;
+        newErrors.BusinessName = "Business Name is required for Business clients";
       }
     }
 
-    // Email validation
-    if (formData.Email && !/\S+@\S+\.\S+/.test(formData.Email)) {
-      newErrors.Email = "Invalid email format";
+    // Email validation - match controller logic exactly
+    if (formData.Email && formData.Email.trim()) {
+      // Controller uses System.Net.Mail.MailAddress for validation
+      if (!/\S+@\S+\.\S+/.test(formData.Email)) {
+        newErrors.Email = "Invalid email format";
+      }
     }
 
-    // Website validation
-    if (formData.Website && !/^https?:\/\/.+/.test(formData.Website)) {
-      newErrors.Website = "Website must start with http:// or https://";
-    }
+    // Remove frontend-only validations that controller doesn't enforce
+    // TaxNumber and PaymentTerms can be empty per controller logic
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, translations]);
+  }, [formData]);
 
-  // Sanitize form data before submission - Match backend expectations
+  // Sanitize form data - FIXED to send DisplayLanguage correctly
   const sanitizeFormData = useCallback(() => {
+    // CRITICAL: Map DisplayLanguage from form codes to full names
+    let displayLanguage = "English"; // Default
+    if (formData.DisplayLanguage === "ar") displayLanguage = "Arabic";
+    else if (formData.DisplayLanguage === "fr") displayLanguage = "French"; 
+    else if (formData.DisplayLanguage === "de") displayLanguage = "German";
+    else if (formData.DisplayLanguage === "en") displayLanguage = "English";
+
+    // CRITICAL: Build FullName correctly based on ClientType per controller validation
+    let fullName = "";
+    if (formData.ClientType === "Business") {
+      fullName = formData.BusinessName?.trim() || "";
+    } else {
+      // For Individual clients, controller validates FullName is required
+      fullName = formData.FullName?.trim() || 
+                `${formData.FirstName?.trim() || ""} ${formData.LastName?.trim() || ""}`.trim();
+    }
+
     const sanitized = {
-      ...formData,
-      // Ensure all required NOT NULL fields are strings
-      Mobile: formData.Mobile || "",
-      Telephone: formData.Telephone || "",
-      TaxNumber: formData.TaxNumber || "",
-      PaymentTerms: formData.PaymentTerms || "",
-      Currency: formData.Currency || "USD",
+      // CRITICAL: Controller validation requires these exact values
       ClientType: formData.ClientType || "Individual",
-      DisplayLanguage: formData.DisplayLanguage || "en",
+      Currency: formData.Currency || "USD", // Controller defaults to USD
+      InvoicingMethod: formData.InvoicingMethod || "Email",
+      DisplayLanguage: displayLanguage, // FIXED: Send full language name
       
-      // Clean up optional fields
+      // CRITICAL: Required NOT NULL fields - must match controller expectations
+      Mobile: formData.Mobile?.trim() || "",
+      Telephone: formData.Telephone?.trim() || "",
+      TaxNumber: formData.TaxNumber?.trim() || "", // Empty string as controller expects
+      PaymentTerms: formData.PaymentTerms?.trim() || "", // Empty string as controller expects
+      
+      // CRITICAL: Name fields - exact mapping to controller
+      FullName: fullName,
+      BusinessName: formData.BusinessName?.trim() || "",
+      FirstName: formData.FirstName?.trim() || "",
+      LastName: formData.LastName?.trim() || "",
+      
+      // Contact and Address fields
       Email: formData.Email?.trim() || "",
-      Website: formData.Website?.trim() || "",
       StreetAddress1: formData.StreetAddress1?.trim() || "",
       StreetAddress2: formData.StreetAddress2?.trim() || "",
       City: formData.City?.trim() || "",
       State: formData.State?.trim() || "",
       PostalCode: formData.PostalCode?.trim() || "",
       Country: formData.Country?.trim() || "",
+      
+      // Optional fields
       VatNumber: formData.VatNumber?.trim() || "",
       CodeNumber: formData.CodeNumber?.trim() || "",
       Category: formData.Category?.trim() || "",
       Notes: formData.Notes?.trim() || "",
       
-      // Handle names based on client type
-      FullName: formData.ClientType === "Individual" ? formData.FullName?.trim() || "" : formData.FullName?.trim() || "",
-      BusinessName: formData.ClientType === "Business" ? formData.BusinessName?.trim() || "" : formData.BusinessName?.trim() || "",
-      FirstName: formData.FirstName?.trim() || "",
-      LastName: formData.LastName?.trim() || "",
-      
-      // Boolean fields
+      // Boolean field
       HasSecondaryAddress: Boolean(formData.HasSecondaryAddress),
+      
+      // CRITICAL: Backend duplicate fields - exact names expected
+      MobileNumber: formData.Mobile?.trim() || "",
+      Phone: formData.Telephone?.trim() || "",
+      Address: "", // Controller builds this automatically
     };
-
-    // Filter out empty strings for optional fields to avoid unnecessary data
-    Object.keys(sanitized).forEach(key => {
-      if (sanitized[key] === "" && !['Mobile', 'Telephone', 'TaxNumber', 'PaymentTerms', 'Currency', 'ClientType', 'DisplayLanguage'].includes(key)) {
-        // Keep required fields as empty strings, set others to null
-        sanitized[key] = null;
-      }
-    });
 
     return sanitized;
   }, [formData]);
@@ -471,7 +530,6 @@ const NewClient = () => {
     try {
       const sanitizedData = sanitizeFormData();
       
-      // Filter contacts to only include those with at least one field filled
       const validContacts = contacts.filter(contact => 
         contact.FirstName?.trim() || contact.LastName?.trim() || contact.Email?.trim() || contact.Mobile?.trim() || contact.Telephone?.trim()
       ).map(contact => ({
@@ -485,13 +543,8 @@ const NewClient = () => {
       const submitData = {
         ...sanitizedData,
         contacts: validContacts,
-        // Include attachments to remove only for updates
         ...(isEditing && { attachmentsToRemove: attachmentsToRemove })
       };
-
-      console.log('Submitting data:', submitData);
-      console.log('Attachments:', attachments);
-      console.log('Attachments to remove:', attachmentsToRemove);
 
       let response;
       if (isEditing && editData?.Id) {
@@ -507,10 +560,7 @@ const NewClient = () => {
       }
     } catch (error) {
       console.error("Error saving client:", error);
-      
-      // Show specific error message if available
-      const errorMessage = error.message || "Failed to save client. Please try again.";
-      alert(errorMessage);
+      alert(error.message || "Failed to save client. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -519,49 +569,55 @@ const NewClient = () => {
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
-      <Container className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <Container className="px-6 py-4">
+      <Container className="bg-teal-600 text-white sticky top-0 z-50">
+        <Container className="px-4 py-3">
           <Container className="flex items-center justify-between">
             <Container className="flex items-center gap-4">
               <FilledButton
                 isIcon={true}
                 icon={ArrowLeft}
                 iconSize="w-4 h-4"
-                bgColor="bg-gray-100 hover:bg-gray-200"
-                textColor="text-gray-700"
+                bgColor="bg-white/10 hover:bg-white/20"
+                textColor="text-white"
                 rounded="rounded-md"
                 buttonText=""
-                height="h-10"
-                width="w-10"
+                height="h-8"
+                width="w-8"
                 onClick={() => navigate("/admin/clients")}
               />
-              <h1 className="text-2xl font-bold text-gray-900">
-                {isEditing ? translations["Edit Client"] : translations["New Client"]}
-              </h1>
+              <nav className="flex items-center gap-2 text-sm">
+                <Span className="opacity-80">Clients</Span>
+                <Span className="opacity-60">›</Span>
+                <Span className="font-medium">
+                  {isEditing ? translations["Edit Client"] : translations["Add Client"]}
+                </Span>
+              </nav>
             </Container>
-            <Container className="flex gap-3">
+            <Container className="flex gap-2">
               <FilledButton
-                bgColor="bg-gray-100 hover:bg-gray-200"
-                textColor="text-gray-700"
-                rounded="rounded-lg"
+                isIcon={true}
+                icon={X}
+                iconSize="w-4 h-4"
+                bgColor="bg-white/10 hover:bg-white/20"
+                textColor="text-white"
+                rounded="rounded-md"
                 buttonText={translations.Cancel}
-                height="h-10"
-                px="px-4"
-                fontWeight="font-medium"
+                height="h-8"
+                px="px-3"
                 fontSize="text-sm"
+                isIconLeft={true}
                 onClick={() => navigate("/admin/clients")}
               />
               <FilledButton
                 isIcon={true}
                 icon={Save}
                 iconSize="w-4 h-4"
-                bgColor="bg-blue-600 hover:bg-blue-700"
+                bgColor="bg-green-600 hover:bg-green-700"
                 textColor="text-white"
-                rounded="rounded-lg"
-                buttonText={isSaving ? "Saving..." : (isEditing ? translations["Update Client"] : translations["Save Client"])}
-                height="h-10"
-                px="px-6"
-                fontWeight="font-medium"
+                rounded="rounded-md"
+                buttonText={isSaving ? "Saving..." : translations.Save}
+                height="h-8"
+                px="px-4"
                 fontSize="text-sm"
                 isIconLeft={true}
                 disabled={isSaving}
@@ -572,436 +628,425 @@ const NewClient = () => {
         </Container>
       </Container>
 
-      {/* Form Content */}
-      <Container className="px-6 py-6 max-w-6xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Client Information */}
-          <Section title={translations["Client Information"]} icon={User}>
-            <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label={translations["Client Type"]}
-                name="ClientType"
-                as="select"
-                required
-                value={formData.ClientType}
-                onChange={handleInputChange}
-                error={errors.ClientType}
-                icon={formData.ClientType === "Individual" ? User : Building}
-              />
-              
-              {formData.ClientType === "Individual" ? (
-                <>
-                  <InputField
-                    label={translations["Full Name"]}
-                    name="FullName"
+      {/* Main Content */}
+      <Container className="p-4 max-w-7xl mx-auto">
+        <form onSubmit={handleSubmit}>
+          <Container className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Client Details - Left Column */}
+            <Container className="space-y-6">
+              <Container className="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-100">
+                  {translations["Client Details"]}
+                </h2>
+                
+                <Container className="space-y-5">
+                  {/* Client Type */}
+                  <RadioGroup
+                    label={translations["Client Type"]}
+                    name="ClientType"
+                    options={clientTypeOptions}
+                    value={formData.ClientType}
+                    onChange={handleInputChange}
+                    error={errors.ClientType}
                     required
-                    placeholder="Enter full name"
-                    value={formData.FullName}
-                    onChange={handleInputChange}
-                    error={errors.FullName}
-                    icon={User}
                   />
-                  <InputField
-                    label={translations["First Name"]}
-                    name="FirstName"
-                    placeholder="Enter first name"
-                    value={formData.FirstName}
-                    onChange={handleInputChange}
-                    icon={User}
-                  />
-                  <InputField
-                    label={translations["Last Name"]}
-                    name="LastName"
-                    placeholder="Enter last name"
-                    value={formData.LastName}
-                    onChange={handleInputChange}
-                    icon={User}
-                  />
-                </>
-              ) : (
-                <>
-                  <InputField
-                    label={translations["Business Name"]}
-                    name="BusinessName"
-                    required
-                    placeholder="Enter business name"
-                    value={formData.BusinessName}
-                    onChange={handleInputChange}
-                    error={errors.BusinessName}
-                    icon={Building}
-                  />
-                  <InputField
-                    label={translations["Contact Person"]}
-                    name="FullName"
-                    placeholder="Enter contact person name"
-                    value={formData.FullName}
-                    onChange={handleInputChange}
-                    icon={User}
-                  />
-                  <InputField
-                    label={translations["First Name"]}
-                    name="FirstName"
-                    placeholder="Enter first name"
-                    value={formData.FirstName}
-                    onChange={handleInputChange}
-                    icon={User}
-                  />
-                  <InputField
-                    label={translations["Last Name"]}
-                    name="LastName"
-                    placeholder="Enter last name"
-                    value={formData.LastName}
-                    onChange={handleInputChange}
-                    icon={User}
-                  />
-                </>
-              )}
-              
-              <InputField
-                label={translations["Code Number"]}
-                name="CodeNumber"
-                placeholder="Auto-generated if left empty"
-                value={formData.CodeNumber}
-                onChange={handleInputChange}
-                icon={Tag}
-              />
-            </Container>
-          </Section>
 
-          {/* Contact Information */}
-          <Section title={translations["Contact Information"]} icon={Mail}>
-            <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label={translations["Email"]}
-                name="Email"
-                type="email"
-                placeholder="Enter email address"
-                value={formData.Email}
-                onChange={handleInputChange}
-                error={errors.Email}
-                icon={Mail}
-              />
-              <InputField
-                label={translations["Mobile"]}
-                name="Mobile"
-                type="tel"
-                placeholder="Enter mobile number"
-                value={formData.Mobile}
-                onChange={handleInputChange}
-                icon={Phone}
-              />
-              <InputField
-                label={translations["Telephone"]}
-                name="Telephone"
-                type="tel"
-                placeholder="Enter telephone number"
-                value={formData.Telephone}
-                onChange={handleInputChange}
-                icon={Phone}
-              />
-              <InputField
-                label={translations["Website"]}
-                name="Website"
-                type="url"
-                placeholder="https://example.com"
-                value={formData.Website}
-                onChange={handleInputChange}
-                error={errors.Website}
-              />
-            </Container>
-          </Section>
-
-          {/* Address Information */}
-          <Section title={translations["Address Information"]} icon={MapPin}>
-            <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label={translations["Street Address 1"]}
-                name="StreetAddress1"
-                placeholder="Enter street address"
-                value={formData.StreetAddress1}
-                onChange={handleInputChange}
-                icon={MapPin}
-              />
-              <InputField
-                label={translations["Street Address 2"]}
-                name="StreetAddress2"
-                placeholder="Apartment, suite, etc."
-                value={formData.StreetAddress2}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["City"]}
-                name="City"
-                placeholder="Enter city"
-                value={formData.City}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["State"]}
-                name="State"
-                placeholder="Enter state/province"
-                value={formData.State}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["Postal Code"]}
-                name="PostalCode"
-                placeholder="Enter postal code"
-                value={formData.PostalCode}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["Country"]}
-                name="Country"
-                as="select"
-                placeholder="Select country"
-                value={formData.Country}
-                onChange={handleInputChange}
-              />
-              <Container className="md:col-span-2">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.HasSecondaryAddress || false}
-                    onChange={(e) => handleInputChange("HasSecondaryAddress", e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <Span className="ml-2 text-sm text-gray-700">Has Secondary Address</Span>
-                </label>
-              </Container>
-            </Container>
-          </Section>
-
-          {/* Additional Information */}
-          <Section title={translations["Additional Information"]} icon={CreditCard}>
-            <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label={translations["VAT Number"]}
-                name="VatNumber"
-                placeholder="Enter VAT number"
-                value={formData.VatNumber}
-                onChange={handleInputChange}
-                icon={CreditCard}
-              />
-              <InputField
-                label={translations["Tax Number"]}
-                name="TaxNumber"
-                placeholder="Enter tax number"
-                value={formData.TaxNumber}
-                onChange={handleInputChange}
-                icon={CreditCard}
-              />
-              <InputField
-                label={translations["Currency"]}
-                name="Currency"
-                as="select"
-                value={formData.Currency}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["Category"]}
-                name="Category"
-                placeholder="Enter category (e.g., Premium, Corporate)"
-                value={formData.Category}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["Payment Terms"]}
-                name="PaymentTerms"
-                placeholder="Enter payment terms (e.g., Net 30)"
-                value={formData.PaymentTerms}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label={translations["Invoicing Method"]}
-                name="InvoicingMethod"
-                as="select"
-                value={formData.InvoicingMethod}
-                onChange={handleInputChange}
-              />
-              <InputField
-                label="Display Language"
-                name="DisplayLanguage"
-                as="select"
-                value={formData.DisplayLanguage}
-                onChange={handleInputChange}
-              />
-              <Container></Container>
-              <Container className="md:col-span-2">
-                <InputField
-                  label={translations["Notes"]}
-                  name="Notes"
-                  as="textarea"
-                  placeholder="Enter any additional notes"
-                  value={formData.Notes}
-                  onChange={handleInputChange}
-                />
-              </Container>
-            </Container>
-          </Section>
-
-          {/* Additional Contacts */}
-          <Section title={translations["Additional Contacts"]} icon={User}>
-            <Container className="space-y-4">
-              {contacts.map((contact, index) => (
-                <Container key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <Container className="flex justify-between items-center mb-4">
-                    <Span className="font-medium text-gray-900">Contact {index + 1}</Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={Trash2}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-red-100 hover:bg-red-200"
-                      textColor="text-red-600"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      onClick={() => removeContact(index)}
+                  {/* Business Name */}
+                  {formData.ClientType === "Business" && (
+                    <InputField
+                      label={translations["Business Name"]}
+                      name="BusinessName"
+                      required
+                      placeholder="Enter business name"
+                      value={formData.BusinessName}
+                      onChange={handleInputChange}
+                      error={errors.BusinessName}
+                      icon={Building}
                     />
-                  </Container>
-                  <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  )}
+
+                  {/* Name Fields */}
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InputField
                       label={translations["First Name"]}
                       name="FirstName"
                       placeholder="Enter first name"
-                      value={contact.FirstName || ""}
-                      onChange={(field, value) => handleContactChange(index, field, value)}
+                      value={formData.FirstName}
+                      onChange={handleInputChange}
+                      error={errors.FirstName}
+                      icon={User}
                     />
                     <InputField
                       label={translations["Last Name"]}
                       name="LastName"
                       placeholder="Enter last name"
-                      value={contact.LastName || ""}
-                      onChange={(field, value) => handleContactChange(index, field, value)}
+                      value={formData.LastName}
+                      onChange={handleInputChange}
+                      icon={User}
                     />
+                  </Container>
+
+                  {/* Phone Fields */}
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InputField
-                      label={translations["Email"]}
-                      name="Email"
-                      type="email"
-                      placeholder="Enter email"
-                      value={contact.Email || ""}
-                      onChange={(field, value) => handleContactChange(index, field, value)}
+                      label={translations["Telephone"]}
+                      name="Telephone"
+                      type="tel"
+                      placeholder="Enter telephone"
+                      value={formData.Telephone}
+                      onChange={handleInputChange}
+                      icon={Phone}
                     />
                     <InputField
                       label={translations["Mobile"]}
                       name="Mobile"
                       type="tel"
                       placeholder="Enter mobile"
-                      value={contact.Mobile || ""}
-                      onChange={(field, value) => handleContactChange(index, field, value)}
+                      value={formData.Mobile}
+                      onChange={handleInputChange}
+                      icon={Phone}
+                    />
+                  </Container>
+
+                  {/* Address Fields */}
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField
+                      label={translations["Street Address 1"]}
+                      name="StreetAddress1"
+                      placeholder="Enter address"
+                      value={formData.StreetAddress1}
+                      onChange={handleInputChange}
+                      icon={MapPin}
                     />
                     <InputField
-                      label={translations["Telephone"]}
-                      name="Telephone"
-                      type="tel"
-                      placeholder="Enter telephone"
-                      value={contact.Telephone || ""}
-                      onChange={(field, value) => handleContactChange(index, field, value)}
+                      label={translations["Street Address 2"]}
+                      name="StreetAddress2"
+                      placeholder="Apartment, suite, etc."
+                      value={formData.StreetAddress2}
+                      onChange={handleInputChange}
                     />
                   </Container>
-                </Container>
-              ))}
-              
-              <FilledButton
-                isIcon={true}
-                icon={Plus}
-                iconSize="w-4 h-4"
-                bgColor="bg-blue-100 hover:bg-blue-200"
-                textColor="text-blue-700"
-                rounded="rounded-lg"
-                buttonText={translations["Add Contact"]}
-                height="h-10"
-                px="px-4"
-                fontWeight="font-medium"
-                fontSize="text-sm"
-                isIconLeft={true}
-                onClick={addContact}
-              />
-            </Container>
-          </Section>
 
-          {/* Attachments */}
-          <Section title={translations["Attachments"]} icon={FileText}>
-            <Container className="space-y-4">
-              <Container>
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
-                />
-                <label htmlFor="file-upload">
-                  <Container className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 cursor-pointer transition-colors">
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <Span className="text-gray-600">{translations["Choose Files"]}</Span>
-                    <Span className="text-sm text-gray-400 block">PDF, DOC, XLS, Images (Max 10MB each)</Span>
+                  <Container className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <InputField
+                      label={translations["City"]}
+                      name="City"
+                      placeholder="Enter city"
+                      value={formData.City}
+                      onChange={handleInputChange}
+                    />
+                    <InputField
+                      label={translations["State"]}
+                      name="State"
+                      placeholder="Enter state"
+                      value={formData.State}
+                      onChange={handleInputChange}
+                    />
+                    <InputField
+                      label={translations["Postal Code"]}
+                      name="PostalCode"
+                      placeholder="Enter postal code"
+                      value={formData.PostalCode}
+                      onChange={handleInputChange}
+                    />
                   </Container>
-                </label>
+
+                  <InputField
+                    label={translations["Country"]}
+                    name="Country"
+                    as="select"
+                    options={countryOptions}
+                    value={formData.Country}
+                    onChange={handleInputChange}
+                  />
+
+                  <InputField
+                    label={translations["Vat number"]}
+                    name="VatNumber"
+                    placeholder="(optional)"
+                    value={formData.VatNumber}
+                    onChange={handleInputChange}
+                    icon={CreditCard}
+                  />
+
+                  {/* Secondary Address Checkbox */}
+                  <Container className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="HasSecondaryAddress"
+                      checked={formData.HasSecondaryAddress || false}
+                      onChange={(e) => handleInputChange("HasSecondaryAddress", e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="HasSecondaryAddress" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      {translations["Add Secondary Address"]}
+                    </label>
+                  </Container>
+
+                  {/* Contacts List */}
+                  {/* <Container className="space-y-4">
+                    <Container className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-gray-700">{translations["Contacts List"]}</h3>
+                      <FilledButton
+                        isIcon={true}
+                        icon={Plus}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-blue-50 hover:bg-blue-100"
+                        textColor="text-blue-600"
+                        rounded="rounded-md"
+                        buttonText={translations["Add"]}
+                        height="h-7"
+                        px="px-3"
+                        fontSize="text-xs"
+                        isIconLeft={true}
+                        onClick={addContact}
+                      />
+                    </Container>
+
+                    {contacts.map((contact, index) => (
+                      <Container key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <Container className="flex justify-between items-center mb-3">
+                          <Span className="text-sm font-medium text-gray-900">Contact {index + 1}</Span>
+                          <FilledButton
+                            isIcon={true}
+                            icon={Trash2}
+                            iconSize="w-3 h-3"
+                            bgColor="bg-red-100 hover:bg-red-200"
+                            textColor="text-red-600"
+                            rounded="rounded-md"
+                            buttonText=""
+                            height="h-6"
+                            width="w-6"
+                            onClick={() => removeContact(index)}
+                          />
+                        </Container>
+                        <Container className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <InputField
+                            label={translations["First Name"]}
+                            name="FirstName"
+                            placeholder="First name"
+                            value={contact.FirstName || ""}
+                            onChange={(field, value) => handleContactChange(index, field, value)}
+                          />
+                          <InputField
+                            label={translations["Last Name"]}
+                            name="LastName"
+                            placeholder="Last name"
+                            value={contact.LastName || ""}
+                            onChange={(field, value) => handleContactChange(index, field, value)}
+                          />
+                          <InputField
+                            label={translations["Email"]}
+                            name="Email"
+                            type="email"
+                            placeholder="Email"
+                            value={contact.Email || ""}
+                            onChange={(field, value) => handleContactChange(index, field, value)}
+                          />
+                          <InputField
+                            label={translations["Mobile"]}
+                            name="Mobile"
+                            type="tel"
+                            placeholder="Mobile"
+                            value={contact.Mobile || ""}
+                            onChange={(field, value) => handleContactChange(index, field, value)}
+                          />
+                        </Container>
+                      </Container>
+                    ))}
+                  </Container> */}
+                </Container>
               </Container>
-
-              {/* Existing Attachments (for editing) */}
-              {existingAttachments.length > 0 && (
-                <Container className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">Existing Attachments</h4>
-                  {existingAttachments.map((attachment) => (
-                    <Container key={attachment.Id} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
-                      <Container className="flex items-center gap-3">
-                        <FileIcon className="w-5 h-5 text-blue-400" />
-                        <Span className="text-sm text-gray-900">{attachment.FileName || attachment.File}</Span>
-                        <Span className="text-xs text-blue-600">(Existing)</Span>
-                      </Container>
-                      <FilledButton
-                        isIcon={true}
-                        icon={X}
-                        iconSize="w-4 h-4"
-                        bgColor="bg-red-100 hover:bg-red-200"
-                        textColor="text-red-600"
-                        rounded="rounded-md"
-                        buttonText=""
-                        height="h-8"
-                        width="w-8"
-                        onClick={() => removeExistingAttachment(attachment)}
-                      />
-                    </Container>
-                  ))}
-                </Container>
-              )}
-
-              {/* New Attachments */}
-              {attachments.length > 0 && (
-                <Container className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">New Attachments</h4>
-                  {attachments.map((file, index) => (
-                    <Container key={index} className="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-200">
-                      <Container className="flex items-center gap-3">
-                        <FileIcon className="w-5 h-5 text-green-400" />
-                        <Span className="text-sm text-gray-900">{file.name}</Span>
-                        <Span className="text-xs text-gray-500">
-                          ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                        </Span>
-                        <Span className="text-xs text-green-600">(New)</Span>
-                      </Container>
-                      <FilledButton
-                        isIcon={true}
-                        icon={X}
-                        iconSize="w-4 h-4"
-                        bgColor="bg-red-100 hover:bg-red-200"
-                        textColor="text-red-600"
-                        rounded="rounded-md"
-                        buttonText=""
-                        height="h-8"
-                        width="w-8"
-                        onClick={() => removeAttachment(index)}
-                      />
-                    </Container>
-                  ))}
-                </Container>
-              )}
             </Container>
-          </Section>
+
+            {/* Account Details - Right Column */}
+            <Container className="space-y-6">
+              <Container className="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-100">
+                  {translations["Account Details"]}
+                </h2>
+                
+                <Container className="space-y-5">
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField
+                      label={translations["Code Number"]}
+                      name="CodeNumber"
+                      placeholder="000002"
+                      value={formData.CodeNumber}
+                      onChange={handleInputChange}
+                      icon={Tag}
+                    />
+                    <InputField
+                      label={translations["Invoicing Method"]}
+                      name="InvoicingMethod"
+                      as="select"
+                      options={invoicingOptions}
+                      value={formData.InvoicingMethod}
+                      onChange={handleInputChange}
+                    />
+                  </Container>
+
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField
+                      label={translations["Currency"]}
+                      name="Currency"
+                      as="select"
+                      options={currencyOptions}
+                      value={formData.Currency}
+                      onChange={handleInputChange}
+                    />
+                    <InputField
+                      label={translations["Tax Number"]}
+                      name="TaxNumber"
+                      placeholder="Enter tax number"
+                      value={formData.TaxNumber}
+                      onChange={handleInputChange}
+                      error={errors.TaxNumber}
+                      icon={CreditCard}
+                    />
+                  </Container>
+
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InputField
+                      label={translations["Payment Terms"]}
+                      name="PaymentTerms"
+                      placeholder="e.g., Net 30, Cash on Delivery"
+                      value={formData.PaymentTerms}
+                      onChange={handleInputChange}
+                      error={errors.PaymentTerms}
+                    />
+                    <InputField
+                      label={translations["Email"]}
+                      name="Email"
+                      type="email"
+                      placeholder="Enter email"
+                      value={formData.Email}
+                      onChange={handleInputChange}
+                      error={errors.Email}
+                      icon={Mail}
+                    />
+                  </Container>
+
+                  <InputField
+                    label={translations["Category"]}
+                    name="Category"
+                    placeholder="Enter category"
+                    value={formData.Category}
+                    onChange={handleInputChange}
+                  />
+
+                  <InputField
+                    label={translations["Notes"]}
+                    name="Notes"
+                    as="textarea"
+                    placeholder="Enter notes"
+                    value={formData.Notes}
+                    onChange={handleInputChange}
+                  />
+
+                  {/* Attachments */}
+                  <Container className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {translations["Attachments"]}
+                    </label>
+                    
+                    <Container
+                      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+                        dragOver 
+                          ? 'border-blue-400 bg-blue-50' 
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => document.getElementById('file-upload').click()}
+                    >
+                      <UploadIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <Span className="text-sm text-gray-600">
+                        {translations["Drop file here or select from your computer"]}
+                      </Span>
+                    </Container>
+
+                    <input
+                      type="file"
+                      id="file-upload"
+                      multiple
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
+                    />
+
+                    {/* File Lists */}
+                    {existingAttachments.length > 0 && (
+                      <Container className="space-y-2">
+                        <h4 className="text-xs font-medium text-gray-600">Existing Files</h4>
+                        {existingAttachments.map((attachment) => (
+                          <Container key={attachment.Id} className="flex items-center justify-between bg-blue-50 p-2 rounded border border-blue-200">
+                            <Container className="flex items-center gap-2">
+                              <FileIcon className="w-4 h-4 text-blue-400" />
+                              <Span className="text-xs text-gray-900 truncate">
+                                {attachment.FileName || attachment.File}
+                              </Span>
+                            </Container>
+                            <FilledButton
+                              isIcon={true}
+                              icon={X}
+                              iconSize="w-3 h-3"
+                              bgColor="bg-red-100 hover:bg-red-200"
+                              textColor="text-red-600"
+                              rounded="rounded-md"
+                              buttonText=""
+                              height="h-6"
+                              width="w-6"
+                              onClick={() => removeExistingAttachment(attachment)}
+                            />
+                          </Container>
+                        ))}
+                      </Container>
+                    )}
+
+                    {attachments.length > 0 && (
+                      <Container className="space-y-2">
+                        <h4 className="text-xs font-medium text-gray-600">New Files</h4>
+                        {attachments.map((file, index) => (
+                          <Container key={index} className="flex items-center justify-between bg-green-50 p-2 rounded border border-green-200">
+                            <Container className="flex items-center gap-2">
+                              <FileIcon className="w-4 h-4 text-green-400" />
+                              <Span className="text-xs text-gray-900 truncate">{file.name}</Span>
+                              <Span className="text-xs text-gray-500">
+                                ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                              </Span>
+                            </Container>
+                            <FilledButton
+                              isIcon={true}
+                              icon={X}
+                              iconSize="w-3 h-3"
+                              bgColor="bg-red-100 hover:bg-red-200"
+                              textColor="text-red-600"
+                              rounded="rounded-md"
+                              buttonText=""
+                              height="h-6"
+                              width="w-6"
+                              onClick={() => removeAttachment(index)}
+                            />
+                          </Container>
+                        ))}
+                      </Container>
+                    )}
+                  </Container>
+
+                  <InputField
+                    label={translations["Display Language"]}
+                    name="DisplayLanguage"
+                    as="select"
+                    options={languageOptions}
+                    value={formData.DisplayLanguage}
+                    onChange={handleInputChange}
+                  />
+                </Container>
+              </Container>
+            </Container>
+          </Container>
         </form>
       </Container>
     </Container>
