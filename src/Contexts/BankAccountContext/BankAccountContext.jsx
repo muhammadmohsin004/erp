@@ -53,6 +53,11 @@ const actionTypes = {
   RESET_STATE: "RESET_STATE",
 };
 
+// Helper function to ensure array
+const ensureArray = (value) => {
+  return Array.isArray(value) ? value : [];
+};
+
 // Reducer
 const bankAccountReducer = (state, action) => {
   switch (action.type) {
@@ -65,7 +70,7 @@ const bankAccountReducer = (state, action) => {
     case actionTypes.SET_BANK_ACCOUNTS:
       return {
         ...state,
-        bankAccounts: action.payload,
+        bankAccounts: ensureArray(action.payload),
         loading: false,
         error: null,
       };
@@ -81,7 +86,7 @@ const bankAccountReducer = (state, action) => {
     case actionTypes.SET_BANK_ACCOUNT_TRANSACTIONS:
       return {
         ...state,
-        bankAccountTransactions: action.payload,
+        bankAccountTransactions: ensureArray(action.payload),
         loading: false,
         error: null,
       };
@@ -97,7 +102,7 @@ const bankAccountReducer = (state, action) => {
     case actionTypes.SET_RECENT_TRANSACTIONS:
       return {
         ...state,
-        recentTransactions: action.payload,
+        recentTransactions: ensureArray(action.payload),
         loading: false,
         error: null,
       };
@@ -115,33 +120,23 @@ const bankAccountReducer = (state, action) => {
       };
 
     case actionTypes.ADD_BANK_ACCOUNT: {
-      // Handle adding bank account to the nested structure
-      const currentBankAccounts = state.bankAccounts?.Data || [];
-      const updatedBankAccountsAdd = [...currentBankAccounts, action.payload];
+      const currentBankAccounts = ensureArray(state.bankAccounts);
       return {
         ...state,
-        bankAccounts: {
-          ...state.bankAccounts,
-          Data: updatedBankAccountsAdd,
-        },
+        bankAccounts: [...currentBankAccounts, action.payload],
         loading: false,
         error: null,
       };
     }
 
     case actionTypes.UPDATE_BANK_ACCOUNT: {
-      // Handle updating bank account in the nested structure
-      const currentBankAccountsUpdate = state.bankAccounts?.Data || [];
-      const updatedBankAccountsUpdate = currentBankAccountsUpdate.map(
-        (account) =>
-          account.Id === action.payload.Id ? action.payload : account
+      const currentBankAccounts = ensureArray(state.bankAccounts);
+      const updatedBankAccounts = currentBankAccounts.map((account) =>
+        account.Id === action.payload.Id ? action.payload : account
       );
       return {
         ...state,
-        bankAccounts: {
-          ...state.bankAccounts,
-          Data: updatedBankAccountsUpdate,
-        },
+        bankAccounts: updatedBankAccounts,
         currentBankAccount:
           state.currentBankAccount?.Id === action.payload.Id
             ? action.payload
@@ -152,17 +147,13 @@ const bankAccountReducer = (state, action) => {
     }
 
     case actionTypes.DELETE_BANK_ACCOUNT: {
-      // Handle deleting bank account from the nested structure
-      const currentBankAccountsDelete = state.bankAccounts?.Data || [];
-      const updatedBankAccountsDelete = currentBankAccountsDelete.filter(
+      const currentBankAccounts = ensureArray(state.bankAccounts);
+      const updatedBankAccounts = currentBankAccounts.filter(
         (account) => account.Id !== action.payload
       );
       return {
         ...state,
-        bankAccounts: {
-          ...state.bankAccounts,
-          Data: updatedBankAccountsDelete,
-        },
+        bankAccounts: updatedBankAccounts,
         currentBankAccount:
           state.currentBankAccount?.Id === action.payload
             ? null
@@ -173,20 +164,15 @@ const bankAccountReducer = (state, action) => {
     }
 
     case actionTypes.TOGGLE_BANK_ACCOUNT_STATUS: {
-      // Handle toggling bank account status
-      const currentBankAccountsToggle = state.bankAccounts?.Data || [];
-      const updatedBankAccountsToggle = currentBankAccountsToggle.map(
-        (account) =>
-          account.Id === action.payload.id
-            ? { ...account, IsActive: action.payload.isActive }
-            : account
+      const currentBankAccounts = ensureArray(state.bankAccounts);
+      const updatedBankAccounts = currentBankAccounts.map((account) =>
+        account.Id === action.payload.id
+          ? { ...account, IsActive: action.payload.isActive }
+          : account
       );
       return {
         ...state,
-        bankAccounts: {
-          ...state.bankAccounts,
-          Data: updatedBankAccountsToggle,
-        },
+        bankAccounts: updatedBankAccounts,
         currentBankAccount:
           state.currentBankAccount?.Id === action.payload.id
             ? { ...state.currentBankAccount, IsActive: action.payload.isActive }
@@ -197,20 +183,14 @@ const bankAccountReducer = (state, action) => {
     }
 
     case actionTypes.SET_DEFAULT_BANK_ACCOUNT: {
-      // Handle setting default bank account
-      const currentBankAccountsDefault = state.bankAccounts?.Data || [];
-      const updatedBankAccountsDefault = currentBankAccountsDefault.map(
-        (account) => ({
-          ...account,
-          IsDefault: account.Id === action.payload,
-        })
-      );
+      const currentBankAccounts = ensureArray(state.bankAccounts);
+      const updatedBankAccounts = currentBankAccounts.map((account) => ({
+        ...account,
+        IsDefault: account.Id === action.payload,
+      }));
       return {
         ...state,
-        bankAccounts: {
-          ...state.bankAccounts,
-          Data: updatedBankAccountsDefault,
-        },
+        bankAccounts: updatedBankAccounts,
         currentBankAccount:
           state.currentBankAccount?.Id === action.payload
             ? { ...state.currentBankAccount, IsDefault: true }
@@ -312,81 +292,83 @@ export const BankAccountProvider = ({ children }) => {
     dispatch({ type: actionTypes.SET_FILTERS, payload: filters });
   }, []);
 
-  // Get bank accounts with pagination and filters (removed isActive query)
-  const getBankAccounts = useCallback(
-    async (params = {}) => {
-      try {
-        dispatch({ type: actionTypes.SET_LOADING, payload: true });
+  // Get bank accounts with pagination and filters
+const getBankAccounts = useCallback(
+  async (params = {}) => {
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-        const queryParams = new URLSearchParams();
+      const queryParams = new URLSearchParams();
 
-        // Only add non-empty parameters
-        if (params.page || state.pagination.CurrentPage) {
-          queryParams.append(
-            "page",
-            params.page || state.pagination.CurrentPage
-          );
-        }
-        if (params.pageSize || state.pagination.PageSize) {
-          queryParams.append(
-            "pageSize",
-            params.pageSize || state.pagination.PageSize
-          );
-        }
-        if (params.search || state.filters.search) {
-          queryParams.append("search", params.search || state.filters.search);
-        }
-        if (params.accountType || state.filters.accountType) {
-          queryParams.append(
-            "accountType",
-            params.accountType || state.filters.accountType
-          );
-        }
-        if (params.currency || state.filters.currency) {
-          queryParams.append(
-            "currency",
-            params.currency || state.filters.currency
-          );
-        }
-        // Removed isActive parameter completely
-        if (params.sortBy || state.filters.sortBy) {
-          queryParams.append("sortBy", params.sortBy || state.filters.sortBy);
-        }
-        if (
-          params.sortAscending !== undefined ||
-          state.filters.sortAscending !== undefined
-        ) {
-          queryParams.append(
-            "sortAscending",
-            params.sortAscending !== undefined
-              ? params.sortAscending
-              : state.filters.sortAscending
-          );
-        }
-
-        const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
-
-        if (response.Success) {
-          // Store the complete response to maintain the API structure
-          dispatch({
-            type: actionTypes.SET_BANK_ACCOUNTS,
-            payload: response.Data.$values,
-          });
-          if (response.Paginations) {
-            dispatch({
-              type: actionTypes.SET_PAGINATION,
-              payload: response.Paginations,
-            });
-          }
-        } else {
-          throw new Error(response.Message || "Failed to fetch bank accounts");
-        }
-      } catch (error) {
-        dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+      // Only add non-empty parameters
+      if (params.page || state.pagination.CurrentPage) {
+        queryParams.append(
+          "page",
+          params.page || state.pagination.CurrentPage
+        );
       }
-    },
-    [state.pagination.CurrentPage, state.pagination.PageSize, state.filters]
-  );
+      if (params.pageSize || state.pagination.PageSize) {
+        queryParams.append(
+          "pageSize",
+          params.pageSize || state.pagination.PageSize
+        );
+      }
+      if (params.search || state.filters.search) {
+        queryParams.append("search", params.search || state.filters.search);
+      }
+      if (params.accountType || state.filters.accountType) {
+        queryParams.append(
+          "accountType",
+          params.accountType || state.filters.accountType
+        );
+      }
+      if (params.currency || state.filters.currency) {
+        queryParams.append(
+          "currency",
+          params.currency || state.filters.currency
+        );
+      }
+      if (params.sortBy || state.filters.sortBy) {
+        queryParams.append("sortBy", params.sortBy || state.filters.sortBy);
+      }
+      if (
+        params.sortAscending !== undefined ||
+        state.filters.sortAscending !== undefined
+      ) {
+        queryParams.append(
+          "sortAscending",
+          params.sortAscending !== undefined
+            ? params.sortAscending
+            : state.filters.sortAscending
+        );
+      }
+
+      const response = await makeApiCall(`${API_BASE_URL}?${queryParams}`);
+
+      if (response.Success) {
+        // FIX: Extract the actual array from response.Data.$values
+        const bankAccountsData = response.Data?.$values || response.Data || [];
+        
+        dispatch({
+          type: actionTypes.SET_BANK_ACCOUNTS,
+          payload: bankAccountsData,
+        });
+        
+        if (response.Paginations) {
+          dispatch({
+            type: actionTypes.SET_PAGINATION,
+            payload: response.Paginations,
+          });
+        }
+      } else {
+        throw new Error(response.Message || "Failed to fetch bank accounts");
+      }
+    } catch (error) {
+      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+    }
+  },
+  [state.pagination.CurrentPage, state.pagination.PageSize, state.filters]
+);
 
   // Get single bank account
   const getBankAccount = useCallback(async (id) => {
@@ -437,7 +419,7 @@ export const BankAccountProvider = ({ children }) => {
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
+      throw error;
     }
   }, []);
 
@@ -462,7 +444,7 @@ export const BankAccountProvider = ({ children }) => {
       }
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
-      return null;
+      throw error;
     }
   }, []);
 
@@ -525,7 +507,8 @@ export const BankAccountProvider = ({ children }) => {
 
         if (response.Success) {
           // Get the current account to determine new status
-          const currentAccount = state.bankAccounts?.Data?.find(
+          const currentBankAccounts = ensureArray(state.bankAccounts);
+          const currentAccount = currentBankAccounts.find(
             (acc) => acc.Id === id
           );
           const newStatus = !currentAccount?.IsActive;
@@ -644,7 +627,7 @@ export const BankAccountProvider = ({ children }) => {
     [state.filters, getBankAccounts]
   );
 
-  // Filter bank accounts by status (kept for backward compatibility but doesn't affect API query)
+  // Filter bank accounts by status
   const filterBankAccountsByStatus = useCallback(
     async (isActive) => {
       const updatedFilters = { ...state.filters, isActive };
@@ -674,7 +657,7 @@ export const BankAccountProvider = ({ children }) => {
       });
       await getBankAccounts({ page });
     },
-    [state.pagination, state.filters, getBankAccounts]
+    [state.pagination, getBankAccounts]
   );
 
   // Change page size
@@ -691,7 +674,7 @@ export const BankAccountProvider = ({ children }) => {
       });
       await getBankAccounts({ pageSize, page: 1 });
     },
-    [state.pagination, state.filters, getBankAccounts]
+    [state.pagination, getBankAccounts]
   );
 
   // Reset state
@@ -701,22 +684,24 @@ export const BankAccountProvider = ({ children }) => {
 
   // Get active bank accounts (helper function)
   const getActiveBankAccounts = useCallback(() => {
-    return state.bankAccounts?.filter((account) => account.IsActive) || [];
+    const bankAccounts = ensureArray(state.bankAccounts);
+    return bankAccounts.filter((account) => account.IsActive);
   }, [state.bankAccounts]);
 
   // Get default bank account (helper function)
   const getDefaultBankAccount = useCallback(() => {
-    return state.bankAccounts?.find((account) => account.IsDefault) || null;
+    const bankAccounts = ensureArray(state.bankAccounts);
+    return bankAccounts.find((account) => account.IsDefault) || null;
   }, [state.bankAccounts]);
 
   // Context value
   const value = {
     // State
-    bankAccounts: state.bankAccounts,
+    bankAccounts: ensureArray(state.bankAccounts),
     currentBankAccount: state.currentBankAccount,
-    bankAccountTransactions: state.bankAccountTransactions,
+    bankAccountTransactions: ensureArray(state.bankAccountTransactions),
     balanceHistory: state.balanceHistory,
-    recentTransactions: state.recentTransactions,
+    recentTransactions: ensureArray(state.recentTransactions),
     loading: state.loading,
     error: state.error,
     pagination: state.pagination,

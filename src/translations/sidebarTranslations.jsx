@@ -69,6 +69,7 @@ export const sidebarTranslations = {
     ManageInvoices: "Manage Invoices",
 
     // Finance
+    bankAccount: "Bank Account",
     finance: "Finance",
     incomes: "Incomes",
     incomescatagories: "Incomes Catagories",
@@ -161,6 +162,7 @@ export const sidebarTranslations = {
     ManageInvoices: "ادارة الفواتير",
 
     // Finance
+    bankAccount: "حساب البنك",
     finance: "المالية",
     incomes: "الإيرادات",
     expenses: "المصروفات",

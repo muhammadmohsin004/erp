@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useRef } from 'react';
 
 // Types/Interfaces
 const initialState = {
@@ -53,7 +53,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         overview: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -62,7 +61,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         balance: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -71,7 +69,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         cashFlow: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -80,7 +77,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         profitLoss: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -89,7 +85,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         expenseAnalysis: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -98,7 +93,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         incomeAnalysis: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -107,7 +101,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         trends: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -116,7 +109,6 @@ const financeDashboardReducer = (state, action) => {
       return { 
         ...state, 
         pendingApprovals: action.payload, 
-        loading: false,
         error: null,
         lastUpdated: new Date()
       };
@@ -141,40 +133,166 @@ const financeDashboardReducer = (state, action) => {
 // Context
 const FinanceDashboardContext = createContext();
 
-// API Base URL - adjust according to your setup
-const API_BASE_URL = '/api/financedashboard';
+// API Base URL - Fixed to match actual API
+const API_BASE_URL = 'https://api.speed-erp.com/api/FinanceDashboard';
 
-// Utility function for API calls
+// Token storage in memory - Fixed to initialize with your token
+let authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0IiwiQ29tcGFueUlkIjoiMjMiLCJ1c2VyX2lkIjoiNCIsImNvbXBhbnlfaWQiOiIyMyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiI0IiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiRmF5eWF6QGdtYWlsLmNvbSIsImNvbXBhbnlfbmFtZSI6IkNvZGVzaW5jIiwianRpIjoiYmQ5YjMxNGUtY2EwZC00MmEyLTlkNDQtMTcwNTFmODQwMjFlIiwiaWF0IjoxNzUzMDgzMDcwLCJleHAiOjE3NTMxNjk0NzAsImlzcyI6IkVzb2x1dGlvbkFwaSIsImF1ZCI6IkVzb2x1dGlvbkNsaWVudCJ9.QDCtkHWafFwjNumEGPikZ0-gaG7NPD-vTeNnLYjRL7E';
+
+// Set token function for authentication
+export const setAuthToken = (token) => {
+  authToken = token;
+};
+
+// Utility function for API calls with enhanced error handling
 const apiCall = async (url, options = {}) => {
+  console.log('🔗 API Call:', url);
+  
+  console.log('🔑 Token exists:', !!authToken);
+  
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
-      // Add authorization header if needed
-      // 'Authorization': `Bearer ${getAuthToken()}`
+      'accept': '*/*',
+      ...(authToken && { 'Authorization': `Bearer ${authToken}` })
     },
     ...options
   };
 
-  const response = await fetch(url, defaultOptions);
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  try {
+    console.log('📤 Making request to:', url);
+    const response = await fetch(url, defaultOptions);
+    
+    console.log('📥 Response status:', response.status, response.statusText);
+    
+    const contentType = response.headers.get('content-type');
+    console.log('📄 Content-Type:', contentType);
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication failed. Please login again.');
+      }
+      if (response.status === 404) {
+        throw new Error(`API endpoint not found: ${url}`);
+      }
+      if (response.status >= 500) {
+        throw new Error(`Server error (${response.status}). Please try again later.`);
+      }
+    }
+    
+    // If response is HTML instead of JSON, it means the endpoint doesn't exist
+    if (contentType && contentType.includes('text/html')) {
+      throw new Error(`API endpoint returned HTML instead of JSON. Check if the endpoint ${url} exists.`);
+    }
+    
+    let result;
+    try {
+      const text = await response.text();
+      console.log('📄 Raw response:', text.substring(0, 200) + '...');
+      result = JSON.parse(text);
+    } catch (parseError) {
+      console.error('❌ JSON Parse Error:', parseError);
+      throw new Error(`Invalid JSON response from server. The API might be returning HTML or malformed data.`);
+    }
+    
+    console.log('✅ Parsed response:', result);
+    
+    // Handle the backend response structure {Success, Message, Data}
+    if (result.Success === false) {
+      throw new Error(result.Message || 'API request failed');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('❌ API Call Error:', error);
+    
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new Error('Network error. Check if the API server is running and accessible.');
+    }
+    
+    throw error;
   }
+};
+
+// Data transformation utilities
+const transformCashFlowData = (data) => {
+  if (!data || !data.DailyBreakdown) return null;
   
-  return response.json();
+  const chartData = data.DailyBreakdown.$values?.map(day => ({
+    period: new Date(day.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    income: day.Inflows || 0,
+    expenses: day.Outflows || 0,
+    netFlow: day.NetFlow || 0
+  })) || [];
+  
+  return {
+    ...data,
+    chartData
+  };
+};
+
+const transformTrendsData = (data) => {
+  if (!data || !data.Trends) return null;
+  
+  const monthlyComparison = data.Trends.$values?.map(trend => ({
+    month: trend.Period,
+    income: trend.Income || 0,
+    expenses: trend.Expenses || 0,
+    profit: trend.Profit || 0
+  })) || [];
+  
+  return {
+    ...data,
+    monthlyComparison
+  };
+};
+
+const transformExpenseAnalysis = (data) => {
+  if (!data || !data.CategoryBreakdown) return null;
+  
+  const topCategories = data.CategoryBreakdown.$values?.map(category => ({
+    name: category.CategoryName,
+    amount: category.Amount,
+    percentage: category.Percentage
+  })) || [];
+  
+  return {
+    ...data,
+    topCategories
+  };
+};
+
+const transformPendingApprovals = (data) => {
+  if (!data) return null;
+  
+  const items = data.PendingExpenses.$values?.map(expense => ({
+    description: expense.Description,
+    amount: expense.Amount,
+    date: new Date(expense.CreatedAt).toLocaleDateString(),
+    id: expense.Id
+  })) || [];
+  
+  return {
+    total: data.PendingCount || 0,
+    totalAmount: data.TotalPendingAmount || 0,
+    items
+  };
 };
 
 // Provider Component
 export const FinanceDashboardProvider = ({ children }) => {
   const [state, dispatch] = useReducer(financeDashboardReducer, initialState);
+  const isLoadingRef = useRef(false);
 
   // Helper functions
   const setLoading = (loading) => {
+    isLoadingRef.current = loading;
     dispatch({ type: ActionTypes.SET_LOADING, payload: loading });
   };
 
   const setError = (error) => {
+    console.error('Dashboard Error:', error);
+    setLoading(false);
     dispatch({ type: ActionTypes.SET_ERROR, payload: error });
   };
 
@@ -198,9 +316,6 @@ export const FinanceDashboardProvider = ({ children }) => {
   // Dashboard Overview
   const getFinanceOverview = useCallback(async (startDate = null, endDate = null) => {
     try {
-      setLoading(true);
-      clearError();
-      
       const params = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
@@ -210,40 +325,45 @@ export const FinanceDashboardProvider = ({ children }) => {
       
       const response = await apiCall(url);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_OVERVIEW, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch finance overview');
-      }
+      // Transform the data to match frontend expectations
+      const transformedData = {
+        monthlyIncome: response.Data?.TotalIncome || 0,
+        monthlyExpenses: response.Data?.TotalExpenses || 0,
+        incomeChange: response.Data?.IncomeGrowth || 0,
+        expenseChange: response.Data?.ExpenseGrowth || 0,
+        netProfit: response.Data?.NetProfit || 0,
+        profitChange: response.Data?.ProfitGrowth || 0
+      };
+      
+      dispatch({ type: ActionTypes.SET_OVERVIEW, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Current Balance
   const getCurrentBalance = useCallback(async () => {
     try {
-      setLoading(true);
-      clearError();
-      
       const response = await apiCall(`${API_BASE_URL}/balance`);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_BALANCE, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch current balance');
-      }
+      const transformedData = {
+        totalBalance: response.Data?.TotalBankBalance || response.Data?.CurrentBalance || 0,
+        balanceChange: response.Data?.BalanceChange || 0,
+        bankAccounts: response.Data?.BankAccounts?.$values || [],
+        lastUpdated: response.Data?.LastUpdated
+      };
+      
+      dispatch({ type: ActionTypes.SET_BALANCE, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Cash Flow Analysis
   const getCashFlowAnalysis = useCallback(async (startDate = null, endDate = null, period = 'daily') => {
     try {
-      setLoading(true);
-      clearError();
-      
       const params = { period };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
@@ -252,23 +372,18 @@ export const FinanceDashboardProvider = ({ children }) => {
       const url = `${API_BASE_URL}/cash-flow?${queryString}`;
       
       const response = await apiCall(url);
+      const transformedData = transformCashFlowData(response.Data);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_CASH_FLOW, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch cash flow analysis');
-      }
+      dispatch({ type: ActionTypes.SET_CASH_FLOW, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Profit & Loss Summary
   const getProfitLossSummary = useCallback(async (startDate = null, endDate = null) => {
     try {
-      setLoading(true);
-      clearError();
-      
       const params = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
@@ -278,22 +393,24 @@ export const FinanceDashboardProvider = ({ children }) => {
       
       const response = await apiCall(url);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_PROFIT_LOSS, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch profit & loss summary');
-      }
+      const transformedData = {
+        netProfit: response.Data?.NetProfit || 0,
+        profitChange: 0, // Calculate if needed
+        totalIncome: response.Data?.TotalIncome || 0,
+        totalExpenses: response.Data?.TotalExpenses || 0,
+        profitMargin: response.Data?.ProfitMargin || 0
+      };
+      
+      dispatch({ type: ActionTypes.SET_PROFIT_LOSS, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Expense Analysis
   const getExpenseAnalysis = useCallback(async (startDate = null, endDate = null, topCategories = 10) => {
     try {
-      setLoading(true);
-      clearError();
-      
       const params = { topCategories };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
@@ -302,23 +419,18 @@ export const FinanceDashboardProvider = ({ children }) => {
       const url = `${API_BASE_URL}/expense-analysis?${queryString}`;
       
       const response = await apiCall(url);
+      const transformedData = transformExpenseAnalysis(response.Data);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_EXPENSE_ANALYSIS, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch expense analysis');
-      }
+      dispatch({ type: ActionTypes.SET_EXPENSE_ANALYSIS, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Income Analysis
   const getIncomeAnalysis = useCallback(async (startDate = null, endDate = null, topCategories = 10) => {
     try {
-      setLoading(true);
-      clearError();
-      
       const params = { topCategories };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
@@ -327,139 +439,97 @@ export const FinanceDashboardProvider = ({ children }) => {
       const url = `${API_BASE_URL}/income-analysis?${queryString}`;
       
       const response = await apiCall(url);
+      const transformedData = transformExpenseAnalysis(response.Data); // Same structure
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_INCOME_ANALYSIS, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch income analysis');
-      }
+      dispatch({ type: ActionTypes.SET_INCOME_ANALYSIS, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Financial Trends
   const getFinancialTrends = useCallback(async (period = 'monthly', periods = 12) => {
     try {
-      setLoading(true);
-      clearError();
-      
       const params = { period, periods };
       const queryString = buildQueryString(params);
       const url = `${API_BASE_URL}/trends?${queryString}`;
       
       const response = await apiCall(url);
+      const transformedData = transformTrendsData(response.Data);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_TRENDS, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch financial trends');
-      }
+      dispatch({ type: ActionTypes.SET_TRENDS, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
   // Pending Approvals
   const getPendingApprovals = useCallback(async () => {
     try {
-      setLoading(true);
-      clearError();
-      
       const response = await apiCall(`${API_BASE_URL}/pending-approvals`);
+      const transformedData = transformPendingApprovals(response.Data);
       
-      if (response.success) {
-        dispatch({ type: ActionTypes.SET_PENDING_APPROVALS, payload: response.data });
-      } else {
-        throw new Error(response.message || 'Failed to fetch pending approvals');
-      }
+      dispatch({ type: ActionTypes.SET_PENDING_APPROVALS, payload: transformedData });
+      return transformedData;
     } catch (error) {
-      setError(error.message);
+      throw error;
     }
   }, []);
 
-  // Comprehensive Dashboard Refresh
+  // Comprehensive Dashboard Refresh with better error handling
   const refreshDashboard = useCallback(async (customFilters = {}) => {
+    if (isLoadingRef.current) {
+      console.log('⚠️ Refresh already in progress, skipping...');
+      return;
+    }
+
     try {
       setLoading(true);
       clearError();
       
       const filters = { ...state.filters, ...customFilters };
+      console.log('🔄 Refreshing dashboard with filters:', filters);
       
-      // Fetch all dashboard data in parallel
+      // Fetch all dashboard data in parallel with individual error handling
       const promises = [
-        getFinanceOverview(filters.startDate, filters.endDate),
-        getCurrentBalance(),
-        getCashFlowAnalysis(filters.startDate, filters.endDate, filters.period),
-        getProfitLossSummary(filters.startDate, filters.endDate),
-        getExpenseAnalysis(filters.startDate, filters.endDate, filters.topCategories),
-        getIncomeAnalysis(filters.startDate, filters.endDate, filters.topCategories),
-        getFinancialTrends(filters.period, filters.periods),
-        getPendingApprovals()
+        getFinanceOverview(filters.startDate, filters.endDate).catch(err => ({ error: err.message, type: 'overview' })),
+        getCurrentBalance().catch(err => ({ error: err.message, type: 'balance' })),
+        getCashFlowAnalysis(filters.startDate, filters.endDate, filters.period).catch(err => ({ error: err.message, type: 'cashFlow' })),
+        getProfitLossSummary(filters.startDate, filters.endDate).catch(err => ({ error: err.message, type: 'profitLoss' })),
+        getExpenseAnalysis(filters.startDate, filters.endDate, filters.topCategories).catch(err => ({ error: err.message, type: 'expenseAnalysis' })),
+        getIncomeAnalysis(filters.startDate, filters.endDate, filters.topCategories).catch(err => ({ error: err.message, type: 'incomeAnalysis' })),
+        getFinancialTrends(filters.period, filters.periods).catch(err => ({ error: err.message, type: 'trends' })),
+        getPendingApprovals().catch(err => ({ error: err.message, type: 'pendingApprovals' }))
       ];
       
-      // Wait for all promises to resolve
-      await Promise.allSettled(promises);
+      const results = await Promise.allSettled(promises);
       
-      // Update filters
-      dispatch({ type: ActionTypes.SET_FILTERS, payload: filters });
-      
-    } catch (error) {
-      setError(error.message);
-    }
-  }, [
-    state.filters,
-    getFinanceOverview,
-    getCurrentBalance,
-    getCashFlowAnalysis,
-    getProfitLossSummary,
-    getExpenseAnalysis,
-    getIncomeAnalysis,
-    getFinancialTrends,
-    getPendingApprovals
-  ]);
-
-  // Quick refresh for specific data
-  const quickRefresh = useCallback(async (sections = []) => {
-    try {
-      setLoading(true);
-      clearError();
-      
-      const promises = [];
-      
-      sections.forEach(section => {
-        switch (section) {
-          case 'overview':
-            promises.push(getFinanceOverview(state.filters.startDate, state.filters.endDate));
-            break;
-          case 'balance':
-            promises.push(getCurrentBalance());
-            break;
-          case 'cashFlow':
-            promises.push(getCashFlowAnalysis(state.filters.startDate, state.filters.endDate, state.filters.period));
-            break;
-          case 'profitLoss':
-            promises.push(getProfitLossSummary(state.filters.startDate, state.filters.endDate));
-            break;
-          case 'expenseAnalysis':
-            promises.push(getExpenseAnalysis(state.filters.startDate, state.filters.endDate, state.filters.topCategories));
-            break;
-          case 'incomeAnalysis':
-            promises.push(getIncomeAnalysis(state.filters.startDate, state.filters.endDate, state.filters.topCategories));
-            break;
-          case 'trends':
-            promises.push(getFinancialTrends(state.filters.period, state.filters.periods));
-            break;
-          case 'pendingApprovals':
-            promises.push(getPendingApprovals());
-            break;
+      // Check for errors in individual requests
+      const errors = [];
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          errors.push(`Request ${index} failed: ${result.reason?.message || result.reason}`);
+        } else if (result.value?.error) {
+          errors.push(`${result.value.type}: ${result.value.error}`);
         }
       });
       
-      await Promise.allSettled(promises);
+      if (errors.length > 0) {
+        const errorMessage = `Some requests failed:\n${errors.join('\n')}`;
+        setError(errorMessage);
+        console.error('🚨 Dashboard errors:', errors);
+      } else {
+        console.log('✅ Dashboard refresh completed successfully');
+        dispatch({ type: ActionTypes.SET_FILTERS, payload: filters });
+      }
       
     } catch (error) {
-      setError(error.message);
+      console.error('🚨 Dashboard refresh failed:', error);
+      setError(error.message || 'Failed to refresh dashboard');
+    } finally {
+      setLoading(false);
     }
   }, [
     state.filters,
@@ -545,7 +615,6 @@ export const FinanceDashboardProvider = ({ children }) => {
     
     // Refresh methods
     refreshDashboard,
-    quickRefresh,
     
     // Filter management
     setFilters,
@@ -579,163 +648,4 @@ export const useFinanceDashboard = () => {
     throw new Error('useFinanceDashboard must be used within a FinanceDashboardProvider');
   }
   return context;
-};
-
-// Additional custom hooks for specific functionality
-export const useDashboardOverview = () => {
-  const { 
-    overview, 
-    loading, 
-    error, 
-    getFinanceOverview, 
-    setDateRange,
-    setCurrentMonth,
-    setCurrentYear
-  } = useFinanceDashboard();
-  
-  return {
-    overview,
-    loading,
-    error,
-    getFinanceOverview,
-    setDateRange,
-    setCurrentMonth,
-    setCurrentYear
-  };
-};
-
-export const useBalanceInfo = () => {
-  const { 
-    balance, 
-    loading, 
-    error, 
-    getCurrentBalance 
-  } = useFinanceDashboard();
-  
-  return {
-    balance,
-    loading,
-    error,
-    getCurrentBalance
-  };
-};
-
-export const useCashFlowAnalysis = () => {
-  const { 
-    cashFlow, 
-    loading, 
-    error, 
-    getCashFlowAnalysis,
-    setPeriod 
-  } = useFinanceDashboard();
-  
-  return {
-    cashFlow,
-    loading,
-    error,
-    getCashFlowAnalysis,
-    setPeriod
-  };
-};
-
-export const useProfitLossReport = () => {
-  const { 
-    profitLoss, 
-    loading, 
-    error, 
-    getProfitLossSummary,
-    setDateRange 
-  } = useFinanceDashboard();
-  
-  return {
-    profitLoss,
-    loading,
-    error,
-    getProfitLossSummary,
-    setDateRange
-  };
-};
-
-export const useExpenseAnalysis = () => {
-  const { 
-    expenseAnalysis, 
-    loading, 
-    error, 
-    getExpenseAnalysis 
-  } = useFinanceDashboard();
-  
-  return {
-    expenseAnalysis,
-    loading,
-    error,
-    getExpenseAnalysis
-  };
-};
-
-export const useIncomeAnalysis = () => {
-  const { 
-    incomeAnalysis, 
-    loading, 
-    error, 
-    getIncomeAnalysis 
-  } = useFinanceDashboard();
-  
-  return {
-    incomeAnalysis,
-    loading,
-    error,
-    getIncomeAnalysis
-  };
-};
-
-export const useFinancialTrends = () => {
-  const { 
-    trends, 
-    loading, 
-    error, 
-    getFinancialTrends,
-    setPeriod 
-  } = useFinanceDashboard();
-  
-  return {
-    trends,
-    loading,
-    error,
-    getFinancialTrends,
-    setPeriod
-  };
-};
-
-export const usePendingApprovals = () => {
-  const { 
-    pendingApprovals, 
-    loading, 
-    error, 
-    getPendingApprovals 
-  } = useFinanceDashboard();
-  
-  return {
-    pendingApprovals,
-    loading,
-    error,
-    getPendingApprovals
-  };
-};
-
-export const useDashboardRefresh = () => {
-  const { 
-    loading, 
-    error, 
-    refreshDashboard, 
-    quickRefresh,
-    lastUpdated 
-  } = useFinanceDashboard();
-  
-  return {
-    loading,
-    error,
-    refreshDashboard,
-    quickRefresh,
-    lastUpdated
-  };
 };
