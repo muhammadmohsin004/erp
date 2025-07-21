@@ -225,7 +225,7 @@ const Dropdown = ({ trigger, children, className = "" }) => {
 // Income Receipt Component
 const IncomeReceipt = ({ income, company }) => {
   const formatCurrency = (amount) => {
-    return `Rs. ${amount?.toLocaleString() || '0'}`;
+    return `SAR. ${amount?.toLocaleString() || '0'}`;
   };
 
   const formatDate = (dateString) => {
@@ -1227,7 +1227,7 @@ const FinanceIncome = () => {
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 7 Days</h3>
               <p className="text-2xl font-bold mt-2">
-                Rs. {statistics?.last7Days?.toLocaleString() || '0'}
+                SAR. {statistics?.last7Days?.toLocaleString() || '0'}
               </p>
             </div>
           </Card>
@@ -1236,7 +1236,7 @@ const FinanceIncome = () => {
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 30 Days</h3>
               <p className="text-2xl font-bold mt-2">
-                Rs. {statistics?.last30Days?.toLocaleString() || '0'}
+                SAR. {statistics?.last30Days?.toLocaleString() || '0'}
               </p>
             </div>
           </Card>
@@ -1245,7 +1245,7 @@ const FinanceIncome = () => {
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 365 Days</h3>
               <p className="text-2xl font-bold mt-2">
-                Rs. {statistics?.last365Days?.toLocaleString() || '0'}
+                SAR. {statistics?.last365Days?.toLocaleString() || '0'}
               </p>
             </div>
           </Card>
@@ -1401,7 +1401,7 @@ const FinanceIncome = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-semibold text-green-600">
-                        Rs. {income.Amount?.toLocaleString()}
+                        SAR. {income.Amount?.toLocaleString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
