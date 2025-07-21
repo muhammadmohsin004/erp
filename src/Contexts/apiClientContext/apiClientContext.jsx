@@ -131,26 +131,52 @@ const clientsReducer = (state, action) => {
         error: null,
       };
 
-    case CLIENTS_ACTIONS.SET_CLIENTS:
-      {
-        const responseData = action.payload;
-        const clientsData = responseData.Data || responseData.data || responseData;
-        
-        return {
-          ...state,
-          clients: Array.isArray(clientsData) ? clientsData : [],
-          pagination: {
-            page: responseData.Page || state.pagination.page,
-            pageSize: responseData.PageSize || state.pagination.pageSize,
-            totalItems: responseData.TotalItems || (Array.isArray(clientsData) ? clientsData.length : 0),
-            totalPages: responseData.Paginations?.TotalPages || 
-                       Math.ceil((responseData.TotalItems || (Array.isArray(clientsData) ? clientsData.length : 0)) / 
-                                (responseData.PageSize || state.pagination.pageSize)),
-          },
-          isLoading: false,
-          error: null,
-        };
-      }
+   // REPLACE this case in your clientsReducer:
+
+case CLIENTS_ACTIONS.SET_CLIENTS:
+  {
+    const responseData = action.payload;
+    
+    // FIXED: Handle nested $values structure properly
+    let clientsData = [];
+    
+    if (responseData.Data && responseData.Data.$values && Array.isArray(responseData.Data.$values)) {
+      // Handle: { Data: { $values: [...] } }
+      clientsData = responseData.Data.$values;
+    } else if (responseData.Data && Array.isArray(responseData.Data)) {
+      // Handle: { Data: [...] }
+      clientsData = responseData.Data;
+    } else if (responseData.data && responseData.data.$values && Array.isArray(responseData.data.$values)) {
+      // Handle: { data: { $values: [...] } }
+      clientsData = responseData.data.$values;
+    } else if (responseData.data && Array.isArray(responseData.data)) {
+      // Handle: { data: [...] }
+      clientsData = responseData.data;
+    } else if (Array.isArray(responseData)) {
+      // Handle: [...]
+      clientsData = responseData;
+    }
+    
+    console.log('🔧 Context SET_CLIENTS Debug:');
+    console.log('Response structure:', responseData);
+    console.log('Extracted clients array:', clientsData);
+    console.log('Clients count:', clientsData.length);
+    
+    return {
+      ...state,
+      clients: clientsData,
+      pagination: {
+        page: responseData.Page || state.pagination.page,
+        pageSize: responseData.PageSize || state.pagination.pageSize,
+        totalItems: responseData.TotalItems || clientsData.length,
+        totalPages: responseData.Paginations?.TotalPages || 
+                   Math.ceil((responseData.TotalItems || clientsData.length) / 
+                            (responseData.PageSize || state.pagination.pageSize)),
+      },
+      isLoading: false,
+      error: null,
+    };
+  }
 
     case CLIENTS_ACTIONS.SET_CURRENT_CLIENT:
       return {
@@ -333,54 +359,66 @@ export const ClientsProvider = ({ children }) => {
     throw new Error(errorMessage);
   }, []);
 
-  // Enhanced getClients to match controller parameters
-  const getClients = useCallback(async (options = {}) => {
-    try {
-      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+  // REPLACE your getClients method with this:
 
-      const params = {
-        page: options.page || state.pagination.page,
-        pageSize: options.pageSize || state.pagination.pageSize,
-        search: options.search || state.filters.search,
-        clientType: options.clientType || state.filters.clientType,
-        category: options.category || state.filters.category,
-        currency: options.currency || state.filters.currency,
-        startDate: options.startDate || state.filters.startDate,
-        endDate: options.endDate || state.filters.endDate,
-        sortBy: options.sortBy || state.sorting.sortBy,
-        sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sorting.sortAscending,
-      };
+const getClients = useCallback(async (options = {}) => {
+  try {
+    dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+    dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-      // Remove empty params
-      Object.keys(params).forEach((key) => {
-        if (
-          params[key] === "" ||
-          params[key] === null ||
-          params[key] === undefined
-        ) {
-          delete params[key];
-        }
-      });
+    const params = {
+      page: options.page || state.pagination.page,
+      pageSize: options.pageSize || state.pagination.pageSize,
+      search: options.search || state.filters.search,
+      clientType: options.clientType || state.filters.clientType,
+      category: options.category || state.filters.category,
+      currency: options.currency || state.filters.currency,
+      startDate: options.startDate || state.filters.startDate,
+      endDate: options.endDate || state.filters.endDate,
+      sortBy: options.sortBy || state.sorting.sortBy,
+      sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sorting.sortAscending,
+    };
 
-      // Store fetch options for refresh
-      dispatch({
-        type: CLIENTS_ACTIONS.SET_LAST_FETCH_OPTIONS,
-        payload: params,
-      });
+    // Remove empty params
+    Object.keys(params).forEach((key) => {
+      if (
+        params[key] === "" ||
+        params[key] === null ||
+        params[key] === undefined
+      ) {
+        delete params[key];
+      }
+    });
 
-      const response = await apiClient.get("/clients", { params });
+    // Store fetch options for refresh
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_LAST_FETCH_OPTIONS,
+      payload: params,
+    });
 
-      dispatch({
-        type: CLIENTS_ACTIONS.SET_CLIENTS,
-        payload: response.data,
-      });
+    console.log('🚀 Fetching clients with params:', params);
 
-      return response.data;
-    } catch (error) {
-      handleApiError(error);
-    }
-  }, [state.pagination, state.filters, state.sorting, handleApiError]);
+    const response = await apiClient.get("/clients", { params });
+
+    console.log('✅ Raw API response:', response.data);
+    console.log('📦 Response structure check:');
+    console.log('- Has Data:', !!response.data.Data);
+    console.log('- Has Data.$values:', !!response.data.Data?.$values);
+    console.log('- $values is array:', Array.isArray(response.data.Data?.$values));
+    console.log('- $values length:', response.data.Data?.$values?.length || 0);
+
+    // CRITICAL: Pass the complete response to reducer
+    dispatch({
+      type: CLIENTS_ACTIONS.SET_CLIENTS,
+      payload: response.data, // Pass complete response, let reducer handle extraction
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('❌ getClients error:', error);
+    handleApiError(error);
+  }
+}, [state.pagination, state.filters, state.sorting, handleApiError]);
 
   // Get single client with full details
   const getClient = useCallback(async (clientId) => {

@@ -311,6 +311,12 @@ export const useSidebarData = () => {
         path: getRoleBasedPath("/clients"),
         roles: ["Admin", "Manager", "Employee"],
       },
+       {
+        icon: Users,
+        label: t.ManageClients,
+        path: getRoleBasedPath("/ManageClients"),
+        roles: ["Admin", "Manager", "Employee"],
+      },
       {
         icon: Package,
         label: t.inventory,

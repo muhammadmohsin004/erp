@@ -28,7 +28,6 @@ const DynamicClientDashboard = () => {
   const language = useSelector((state) => state.language?.language || "en");
   const token = useSelector((state) => state.auth?.token);
 
-  // UPDATED: Use the updated context with new methods
   const {
     clients,
     loading,
@@ -62,98 +61,64 @@ const DynamicClientDashboard = () => {
     "Partial data loaded": language === "ar" ? "تم تحميل البيانات جزئياً" : "Partial data loaded"
   }), [language]);
 
-  // Local state
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  // Simplified local state - NO INITIAL LOADING STATE
   const [hasError, setHasError] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
-  const [partialDataLoaded, setPartialDataLoaded] = useState(false);
+  const [dataRefreshing, setDataRefreshing] = useState(false);
 
-  // Check authentication like in your NewClient component
+  // Check authentication (but don't block UI)
   useEffect(() => {
-    if (!token) {
-      const localToken = localStorage.getItem("token");
-      if (!localToken) {
-        navigate("/admin-Login");
-        return;
-      }
+    if (!token && !localStorage.getItem("token")) {
+      navigate("/admin-Login");
+      return;
     }
   }, [token, navigate]);
 
-  // UPDATED: Enhanced fetch logic with fallback endpoints
+  // Background data fetching - NO LOADING STATE BLOCKING
   useEffect(() => {
     let mounted = true;
     
-    const fetchInitialData = async () => {
-      // Prevent multiple calls
+    const fetchDataInBackground = async () => {
       if (hasFetched || !mounted) return;
       
-      console.log("🚀 Starting dashboard data fetch...");
-      console.log("Token:", token ? "Present" : "Missing");
+      const hasToken = token || localStorage.getItem("token");
+      if (!hasToken) return;
       
       try {
-        if (!mounted) return;
-        setIsInitialLoading(true);
-        setHasError(null);
         setHasFetched(true);
-        setPartialDataLoaded(false);
+        setHasError(null);
         
-        // Try to fetch comprehensive statistics first
-        console.log("📊 Fetching comprehensive client statistics...");
+        // Try to fetch statistics (silently fail if needed)
         try {
           await getClientStatistics();
-          console.log("✅ Comprehensive statistics fetched successfully");
         } catch (statsError) {
-          console.warn("⚠️ Comprehensive statistics failed, trying basic stats...", statsError);
-          
           try {
-            // Fallback to basic statistics
             await getBasicClientStatistics();
-            console.log("✅ Basic statistics fetched as fallback");
-            setPartialDataLoaded(true);
           } catch (basicStatsError) {
-            console.warn("⚠️ Basic statistics also failed, trying type stats...", basicStatsError);
-            
             try {
-              // Last fallback to type statistics
               await getClientTypeStatistics();
-              console.log("✅ Type statistics fetched as last fallback");
-              setPartialDataLoaded(true);
             } catch (typeStatsError) {
-              console.error("❌ All statistics endpoints failed:", typeStatsError);
-              // Continue without statistics
+              console.warn("All statistics endpoints failed");
             }
           }
         }
         
-        if (!mounted) return;
-        
-        console.log("👥 Fetching recent clients...");
+        // Try to fetch clients (silently fail if needed)
         try {
           await getClients({ page: 1, pageSize: 6 });
-          console.log("✅ Clients fetched successfully");
         } catch (clientsError) {
-          console.error("❌ Failed to fetch clients:", clientsError);
-          throw clientsError; // This is more critical, so throw
+          console.warn("Failed to fetch clients:", clientsError);
         }
-        
-        if (!mounted) return;
-        console.log("✅ Dashboard data loaded successfully");
         
       } catch (error) {
-        if (!mounted) return;
-        console.error("❌ Error fetching dashboard data:", error);
-        setHasError(error.message || "Failed to load dashboard data");
-        setHasFetched(false); // Reset on error so user can retry
-      } finally {
-        if (mounted) {
-          setIsInitialLoading(false);
-        }
+        console.error("Background fetch error:", error);
+        setHasError(error.message);
+        setHasFetched(false);
       }
     };
 
-    // Only fetch if we have a token and haven't fetched yet
     if ((token || localStorage.getItem("token")) && !hasFetched) {
-      fetchInitialData();
+      fetchDataInBackground();
     }
 
     return () => {
@@ -161,62 +126,32 @@ const DynamicClientDashboard = () => {
     };
   }, [token, hasFetched, getClients, getClientStatistics, getBasicClientStatistics, getClientTypeStatistics]);
 
-  // UPDATED: Enhanced refresh with fallback logic
+  // Manual refresh
   const handleRefresh = useCallback(async () => {
-    try {
-      setHasError(null);
-      setHasFetched(false); // Reset to allow refetch
-      setIsInitialLoading(true);
-      setPartialDataLoaded(false);
-      
-      console.log("🔄 Refreshing dashboard data...");
-      
-      // Try comprehensive statistics first, with fallbacks
-      try {
-        await getClientStatistics();
-        console.log("✅ Comprehensive statistics refreshed");
-      } catch (error) {
-        console.warn("⚠️ Comprehensive stats refresh failed, trying basic...");
-        try {
-          await getBasicClientStatistics();
-          setPartialDataLoaded(true);
-          console.log("✅ Basic statistics refreshed as fallback");
-        } catch (basicError) {
-          console.warn("⚠️ Basic stats refresh failed, trying type stats...");
-          try {
-            await getClientTypeStatistics();
-            setPartialDataLoaded(true);
-            console.log("✅ Type statistics refreshed as fallback");
-          } catch (typeError) {
-            console.error("❌ All statistics refresh failed");
-          }
-        }
-      }
-      
-      // Refresh clients
-      await getClients({ page: 1, pageSize: 6 });
-      console.log("✅ Dashboard data refreshed successfully");
-      
-      setHasFetched(true);
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-      setHasError(error.message || "Failed to refresh data");
-      setHasFetched(false);
-    } finally {
-      setIsInitialLoading(false);
-    }
-  }, [getClients, getClientStatistics, getBasicClientStatistics, getClientTypeStatistics]);
+    setDataRefreshing(true);
+    setHasError(null);
+    setHasFetched(false);
+    
+    // Let the useEffect handle the actual fetching
+    setTimeout(() => {
+      setDataRefreshing(false);
+    }, 2000); // Stop refreshing indicator after 2 seconds
+  }, []);
 
   // Statistics Card Component
-  const StatCard = React.memo(({ title, value, icon: Icon, bgColor, iconColor, trend }) => (
+  const StatCard = React.memo(({ title, value, icon: Icon, bgColor, iconColor, trend, isLoading }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
-          <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {value || 0}
-          </Span>
-          {trend && (
+          {isLoading ? (
+            <Container className="w-16 h-8 bg-gray-200 animate-pulse rounded mt-1"></Container>
+          ) : (
+            <Span className="text-2xl font-bold text-gray-900 mt-1 block">
+              {value || 0}
+            </Span>
+          )}
+          {trend && !isLoading && (
             <Container className="flex items-center mt-2">
               <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
               <Span className="text-sm text-green-600">{trend}</Span>
@@ -276,7 +211,6 @@ const DynamicClientDashboard = () => {
             </Container>
           )}
 
-          {/* Quick Actions */}
           <Container className="flex gap-1 mt-3">
             <button
               onClick={() => navigate(`/admin/clients/${client.Id}`)}
@@ -317,61 +251,58 @@ const DynamicClientDashboard = () => {
     </Container>
   ));
 
-  // Loading state
-  if (isInitialLoading) {
-    return (
-      <Container className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Container className="text-center">
-          <Container className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></Container>
-          <Span className="text-blue-500 text-lg">{translations.Loading}</Span>
-          {partialDataLoaded && (
-            <Span className="text-yellow-600 text-sm block mt-2">
-              {translations["Partial data loaded"]}
-            </Span>
-          )}
+  // Loading skeleton for client cards
+  const ClientCardSkeleton = () => (
+    <Container className="bg-white p-4 rounded-lg border border-gray-200">
+      <Container className="animate-pulse">
+        <Container className="w-16 h-5 bg-gray-200 rounded mb-2"></Container>
+        <Container className="w-32 h-6 bg-gray-200 rounded mb-2"></Container>
+        <Container className="w-40 h-4 bg-gray-200 rounded mb-1"></Container>
+        <Container className="w-36 h-4 bg-gray-200 rounded mb-1"></Container>
+        <Container className="w-28 h-4 bg-gray-200 rounded mb-3"></Container>
+        <Container className="flex gap-1">
+          <Container className="w-7 h-7 bg-gray-200 rounded"></Container>
+          <Container className="w-7 h-7 bg-gray-200 rounded"></Container>
+          <Container className="w-7 h-7 bg-gray-200 rounded"></Container>
         </Container>
       </Container>
-    );
-  }
+    </Container>
+  );
 
-  // Error state
-  if (hasError || error) {
-    return (
-      <Container className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Container className="text-center">
-          <Container className="bg-red-50 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <Activity className="w-8 h-8 text-red-600" />
-          </Container>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {translations["Error loading data"]}
-          </h3>
-          <Span className="text-gray-500 mb-4 block">{hasError || error}</Span>
-          <FilledButton
-            isIcon={true}
-            icon={RefreshCw}
-            iconSize="w-4 h-4"
-            bgColor="bg-blue-600 hover:bg-blue-700"
-            textColor="text-white"
-            rounded="rounded-lg"
-            buttonText={translations.Retry}
-            height="h-10"
-            px="px-4"
-            fontWeight="font-medium"
-            fontSize="text-sm"
-            isIconLeft={true}
-            onClick={handleRefresh}
-          />
-        </Container>
-      </Container>
-    );
-  }
+  // Get safe array from clients data - handle nested API response structure
+  const clientsArray = React.useMemo(() => {
+    if (!clients) return [];
+    
+    // Handle different possible response structures
+    if (Array.isArray(clients)) {
+      return clients;
+    }
+    
+    // Handle nested response structure: { Data: { $values: [...] } }
+    if (clients.Data && Array.isArray(clients.Data.$values)) {
+      return clients.Data.$values;
+    }
+    
+    // Handle direct $values structure: { $values: [...] }
+    if (Array.isArray(clients.$values)) {
+      return clients.$values;
+    }
+    
+    console.warn('Unexpected clients data structure:', clients);
+    return [];
+  }, [clients]);
+  const isDataLoading = loading || (!hasFetched && !hasError);
 
-  // Get safe array from clients data
-  const clientsArray = Array.isArray(clients) ? clients : [];
+  // Debug logging for clients data
+  React.useEffect(() => {
+    console.log('🔍 CLIENTS DATA DEBUG:');
+    console.log('Raw clients from context:', clients);
+    console.log('Processed clientsArray:', clientsArray);
+    console.log('Array length:', clientsArray.length);
+    console.log('Is loading:', isDataLoading);
+  }, [clients, clientsArray, isDataLoading]);
 
-  // Debug log for statistics
-  console.log('📊 Current statistics:', statistics);
-
+  // SHOW DASHBOARD IMMEDIATELY - NO LOADING SCREEN
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -384,9 +315,9 @@ const DynamicClientDashboard = () => {
             <Span className="text-gray-600 mt-1">
               {translations["Manage and view your client information"]}
             </Span>
-            {partialDataLoaded && (
-              <Span className="text-yellow-600 text-xs block mt-1">
-                ⚠️ {translations["Failed to load some data"]}
+            {hasError && (
+              <Span className="text-red-600 text-xs block mt-1">
+                ⚠️ {hasError}
               </Span>
             )}
           </Container>
@@ -395,14 +326,14 @@ const DynamicClientDashboard = () => {
               isIcon={true}
               icon={RefreshCw}
               iconSize="w-4 h-4"
-              bgColor={loading ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"}
-              textColor={loading ? "text-gray-500" : "text-gray-700"}
+              bgColor={dataRefreshing ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"}
+              textColor={dataRefreshing ? "text-gray-500" : "text-gray-700"}
               rounded="rounded-lg"
               buttonText=""
               height="h-10"
               width="w-10"
               onClick={handleRefresh}
-              disabled={loading}
+              disabled={dataRefreshing}
             />
             <FilledButton
               bgColor="bg-gray-100 hover:bg-gray-200"
@@ -433,40 +364,44 @@ const DynamicClientDashboard = () => {
           </Container>
         </Container>
 
-        {/* UPDATED: Statistics Cards with proper data mapping */}
+        {/* Statistics Cards - Show immediately with loading states */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title={translations["Total Clients"]}
-            value={statistics?.totalClients || 0}
+            value={statistics?.totalClients}
             icon={Users}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
             trend={statistics?.clientsThisMonth ? `+${statistics.clientsThisMonth} this month` : null}
+            isLoading={isDataLoading}
           />
           <StatCard
             title={translations.Individual}
-            value={statistics?.individualClients || 0}
+            value={statistics?.individualClients}
             icon={User}
             bgColor="bg-green-50"
             iconColor="text-green-600"
+            isLoading={isDataLoading}
           />
           <StatCard
             title={translations.Business}
-            value={statistics?.businessClients || 0}
+            value={statistics?.businessClients}
             icon={Building}
             bgColor="bg-purple-50"
             iconColor="text-purple-600"
+            isLoading={isDataLoading}
           />
           <StatCard
             title={translations["This Month"]}
-            value={statistics?.clientsThisMonth || 0}
+            value={statistics?.clientsThisMonth}
             icon={Calendar}
             bgColor="bg-yellow-50"
             iconColor="text-yellow-600"
+            isLoading={isDataLoading}
           />
         </Container>
 
-        {/* Recent Clients */}
+        {/* Recent Clients - Show immediately */}
         <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
           <Container className="px-6 py-4 border-b border-gray-200">
             <Container className="flex items-center justify-between">
@@ -488,10 +423,12 @@ const DynamicClientDashboard = () => {
           </Container>
           
           <Container className="p-6">
-            {loading ? (
-              <Container className="text-center py-8">
-                <Container className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></Container>
-                <Span className="text-gray-500">{translations.Loading}</Span>
+            {isDataLoading ? (
+              // Show skeleton loading instead of blocking
+              <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, index) => (
+                  <ClientCardSkeleton key={index} />
+                ))}
               </Container>
             ) : clientsArray.length === 0 ? (
               <Container className="text-center py-8">
@@ -528,7 +465,7 @@ const DynamicClientDashboard = () => {
           </Container>
         </Container>
 
-        {/* UPDATED: Additional Stats Section with better error handling */}
+        {/* Additional Stats and Quick Actions */}
         <Container className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Client Distribution */}
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -539,36 +476,37 @@ const DynamicClientDashboard = () => {
                   <Container className="w-3 h-3 bg-blue-500 rounded-full mr-3"></Container>
                   <Span className="text-sm text-gray-600">Individual Clients</Span>
                 </Container>
-                <Span className="text-sm font-medium text-gray-900">
-                  {statistics?.individualClients || 0}
-                </Span>
+                {isDataLoading ? (
+                  <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
+                ) : (
+                  <Span className="text-sm font-medium text-gray-900">
+                    {statistics?.individualClients || 0}
+                  </Span>
+                )}
               </Container>
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center">
                   <Container className="w-3 h-3 bg-green-500 rounded-full mr-3"></Container>
                   <Span className="text-sm text-gray-600">Business Clients</Span>
                 </Container>
-                <Span className="text-sm font-medium text-gray-900">
-                  {statistics?.businessClients || 0}
-                </Span>
-              </Container>
-              {statistics?.otherClients > 0 && (
-                <Container className="flex items-center justify-between">
-                  <Container className="flex items-center">
-                    <Container className="w-3 h-3 bg-gray-500 rounded-full mr-3"></Container>
-                    <Span className="text-sm text-gray-600">Other Clients</Span>
-                  </Container>
+                {isDataLoading ? (
+                  <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
+                ) : (
                   <Span className="text-sm font-medium text-gray-900">
-                    {statistics.otherClients}
+                    {statistics?.businessClients || 0}
                   </Span>
-                </Container>
-              )}
+                )}
+              </Container>
               <Container className="pt-2 border-t border-gray-200">
                 <Container className="flex items-center justify-between">
                   <Span className="text-sm font-medium text-gray-900">Total</Span>
-                  <Span className="text-sm font-bold text-gray-900">
-                    {statistics?.totalClients || 0}
-                  </Span>
+                  {isDataLoading ? (
+                    <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
+                  ) : (
+                    <Span className="text-sm font-bold text-gray-900">
+                      {statistics?.totalClients || 0}
+                    </Span>
+                  )}
                 </Container>
               </Container>
             </Container>
@@ -619,16 +557,6 @@ const DynamicClientDashboard = () => {
             </Container>
           </Container>
         </Container>
-
-        {/* ADDED: Debug info (remove in production) */}
-        {process.env.NODE_ENV === 'development' && statistics && (
-          <Container className="mt-8 bg-gray-100 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Debug Info:</h4>
-            <pre className="text-xs text-gray-600 overflow-auto">
-              {JSON.stringify(statistics, null, 2)}
-            </pre>
-          </Container>
-        )}
       </Container>
     </Container>
   );
