@@ -569,9 +569,9 @@ const NewClient = () => {
   return (
     <Container className="min-h-screen bg-gray-50">
       {/* Header */}
-      <Container className="bg-teal-600 text-white sticky top-0 z-50">
-        <Container className="px-4 py-3">
-          <Container className="flex items-center justify-between">
+      <Container className="bg-gray-100 rounded-full sticky top-0 z-50">
+        <Container className="px-4 py-3 ">
+          <Container className="flex">
             <Container className="flex items-center gap-4">
               <FilledButton
                 isIcon={true}
@@ -593,7 +593,7 @@ const NewClient = () => {
                 </Span>
               </nav>
             </Container>
-            <Container className="flex gap-2">
+            <div className="flex text-end gap-2">
               <FilledButton
                 isIcon={true}
                 icon={X}
@@ -623,7 +623,7 @@ const NewClient = () => {
                 disabled={isSaving}
                 onClick={handleSubmit}
               />
-            </Container>
+            </div>
           </Container>
         </Container>
       </Container>

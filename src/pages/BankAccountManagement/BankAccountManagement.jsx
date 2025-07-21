@@ -568,7 +568,7 @@ const BankAccountManagement = () => {
 
   // Handle delete action
   const handleDelete = async (accountId) => {
-    if (window.confirm(translations["Are you sure?"])) {
+    if (window.confirm("Are you sure? You want to delete this account.")) {
       await deleteBankAccount(accountId);
       await getBankAccounts();
     }
@@ -669,7 +669,7 @@ const BankAccountManagement = () => {
             </Container>
 
 
-            <Container className="flex text-end  gap-2">
+            <div className=" flex gap-2 text-end  ">
               <OutlineButton
                 buttonText={translations.Export}
                 icon={Download}
@@ -705,7 +705,7 @@ const BankAccountManagement = () => {
                 onClick={() => console.log("Import")}
               />
               <FilledButton
-                buttonText={"Add New Account"}
+                buttonText={"Add "}
                 icon={Plus}
                 isIcon={true}
                 isIconLeft={true}
@@ -715,7 +715,7 @@ const BankAccountManagement = () => {
                   setIsFormModalOpen(true);
                 }}
               />
-            </Container>
+            </div>
           </Container>
         </Container>
       </Container>
@@ -899,7 +899,7 @@ const BankAccountManagement = () => {
                           </p>
                         </Container>
                         <FilledButton
-                          buttonText={translations["Add New Account"]}
+                          buttonText={"Add New Account"}
                           icon={Plus}
                           isIcon={true}
                           isIconLeft={true}
