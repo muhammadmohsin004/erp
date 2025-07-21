@@ -699,7 +699,7 @@ const IncomeDetailsPage = ({
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-purple-600 text-white px-6 py-4 rounded-t-lg">
+        <div className="bg-purple-600 text-black px-6 py-4 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button 
@@ -1223,7 +1223,7 @@ const FinanceIncome = () => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-blue-600 text-white">
+          <Card className="bg-blue-600 text-balack">
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 7 Days</h3>
               <p className="text-2xl font-bold mt-2">
@@ -1232,7 +1232,7 @@ const FinanceIncome = () => {
             </div>
           </Card>
           
-          <Card className="bg-blue-600 text-white">
+          <Card className="bg-blue-600 text-black">
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 30 Days</h3>
               <p className="text-2xl font-bold mt-2">
@@ -1241,7 +1241,7 @@ const FinanceIncome = () => {
             </div>
           </Card>
           
-          <Card className="bg-blue-600 text-white">
+          <Card className="bg-blue-600 text-black">
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 365 Days</h3>
               <p className="text-2xl font-bold mt-2">
