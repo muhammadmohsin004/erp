@@ -729,7 +729,7 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-       {
+    {
       path: "/admin/finance/settings",
       component: FinanceSettings,
       roles: ["Admin", "Manager", "Employee"],
@@ -743,7 +743,7 @@ const getRouteConfig = () => {
     },
     {
       path: "/admin/finance/expenses",
-      component: ExpenseList,
+      component: FinanceExpenses,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

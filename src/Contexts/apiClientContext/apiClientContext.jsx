@@ -131,52 +131,52 @@ const clientsReducer = (state, action) => {
         error: null,
       };
 
-   // REPLACE this case in your clientsReducer:
+    // REPLACE this case in your clientsReducer:
 
-case CLIENTS_ACTIONS.SET_CLIENTS:
-  {
-    const responseData = action.payload;
-    
-    // FIXED: Handle nested $values structure properly
-    let clientsData = [];
-    
-    if (responseData.Data && responseData.Data.$values && Array.isArray(responseData.Data.$values)) {
-      // Handle: { Data: { $values: [...] } }
-      clientsData = responseData.Data.$values;
-    } else if (responseData.Data && Array.isArray(responseData.Data)) {
-      // Handle: { Data: [...] }
-      clientsData = responseData.Data;
-    } else if (responseData.data && responseData.data.$values && Array.isArray(responseData.data.$values)) {
-      // Handle: { data: { $values: [...] } }
-      clientsData = responseData.data.$values;
-    } else if (responseData.data && Array.isArray(responseData.data)) {
-      // Handle: { data: [...] }
-      clientsData = responseData.data;
-    } else if (Array.isArray(responseData)) {
-      // Handle: [...]
-      clientsData = responseData;
-    }
-    
-    console.log('🔧 Context SET_CLIENTS Debug:');
-    console.log('Response structure:', responseData);
-    console.log('Extracted clients array:', clientsData);
-    console.log('Clients count:', clientsData.length);
-    
-    return {
-      ...state,
-      clients: clientsData,
-      pagination: {
-        page: responseData.Page || state.pagination.page,
-        pageSize: responseData.PageSize || state.pagination.pageSize,
-        totalItems: responseData.TotalItems || clientsData.length,
-        totalPages: responseData.Paginations?.TotalPages || 
-                   Math.ceil((responseData.TotalItems || clientsData.length) / 
-                            (responseData.PageSize || state.pagination.pageSize)),
-      },
-      isLoading: false,
-      error: null,
-    };
-  }
+    case CLIENTS_ACTIONS.SET_CLIENTS:
+      {
+        const responseData = action.payload;
+
+        // FIXED: Handle nested $values structure properly
+        let clientsData = [];
+
+        if (responseData.Data && responseData.Data.$values && Array.isArray(responseData.Data.$values)) {
+          // Handle: { Data: { $values: [...] } }
+          clientsData = responseData.Data.$values;
+        } else if (responseData.Data && Array.isArray(responseData.Data)) {
+          // Handle: { Data: [...] }
+          clientsData = responseData.Data;
+        } else if (responseData.data && responseData.data.$values && Array.isArray(responseData.data.$values)) {
+          // Handle: { data: { $values: [...] } }
+          clientsData = responseData.data.$values;
+        } else if (responseData.data && Array.isArray(responseData.data)) {
+          // Handle: { data: [...] }
+          clientsData = responseData.data;
+        } else if (Array.isArray(responseData)) {
+          // Handle: [...]
+          clientsData = responseData;
+        }
+
+        console.log('🔧 Context SET_CLIENTS Debug:');
+        console.log('Response structure:', responseData);
+        console.log('Extracted clients array:', clientsData);
+        console.log('Clients count:', clientsData.length);
+
+        return {
+          ...state,
+          clients: clientsData,
+          pagination: {
+            page: responseData.Page || state.pagination.page,
+            pageSize: responseData.PageSize || state.pagination.pageSize,
+            totalItems: responseData.TotalItems || clientsData.length,
+            totalPages: responseData.Paginations?.TotalPages ||
+              Math.ceil((responseData.TotalItems || clientsData.length) /
+                (responseData.PageSize || state.pagination.pageSize)),
+          },
+          isLoading: false,
+          error: null,
+        };
+      }
 
     case CLIENTS_ACTIONS.SET_CURRENT_CLIENT:
       return {
@@ -258,7 +258,7 @@ case CLIENTS_ACTIONS.SET_CLIENTS:
     case CLIENTS_ACTIONS.SET_STATISTICS:
       {
         const statsData = action.payload;
-        
+
         // Map backend response to frontend state structure
         const mappedStats = {
           totalClients: statsData.TotalClients || 0,
@@ -329,7 +329,7 @@ export const ClientsProvider = ({ children }) => {
     } else if (error.response?.data?.message) {
       errorMessage = error.response.data.message;
     } else if (error.response?.data?.ValidationErrors) {
-      errorMessage = Array.isArray(error.response.data.ValidationErrors) 
+      errorMessage = Array.isArray(error.response.data.ValidationErrors)
         ? error.response.data.ValidationErrors.join(", ")
         : error.response.data.ValidationErrors;
     } else if (error.response?.data?.validationErrors) {
@@ -361,64 +361,64 @@ export const ClientsProvider = ({ children }) => {
 
   // REPLACE your getClients method with this:
 
-const getClients = useCallback(async (options = {}) => {
-  try {
-    dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
-    dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
+  const getClients = useCallback(async (options = {}) => {
+    try {
+      dispatch({ type: CLIENTS_ACTIONS.SET_LOADING, payload: true });
+      dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
-    const params = {
-      page: options.page || state.pagination.page,
-      pageSize: options.pageSize || state.pagination.pageSize,
-      search: options.search || state.filters.search,
-      clientType: options.clientType || state.filters.clientType,
-      category: options.category || state.filters.category,
-      currency: options.currency || state.filters.currency,
-      startDate: options.startDate || state.filters.startDate,
-      endDate: options.endDate || state.filters.endDate,
-      sortBy: options.sortBy || state.sorting.sortBy,
-      sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sorting.sortAscending,
-    };
+      const params = {
+        page: options.page || state.pagination.page,
+        pageSize: options.pageSize || state.pagination.pageSize,
+        search: options.search || state.filters.search,
+        clientType: options.clientType || state.filters.clientType,
+        category: options.category || state.filters.category,
+        currency: options.currency || state.filters.currency,
+        startDate: options.startDate || state.filters.startDate,
+        endDate: options.endDate || state.filters.endDate,
+        sortBy: options.sortBy || state.sorting.sortBy,
+        sortAscending: options.sortAscending !== undefined ? options.sortAscending : state.sorting.sortAscending,
+      };
 
-    // Remove empty params
-    Object.keys(params).forEach((key) => {
-      if (
-        params[key] === "" ||
-        params[key] === null ||
-        params[key] === undefined
-      ) {
-        delete params[key];
-      }
-    });
+      // Remove empty params
+      Object.keys(params).forEach((key) => {
+        if (
+          params[key] === "" ||
+          params[key] === null ||
+          params[key] === undefined
+        ) {
+          delete params[key];
+        }
+      });
 
-    // Store fetch options for refresh
-    dispatch({
-      type: CLIENTS_ACTIONS.SET_LAST_FETCH_OPTIONS,
-      payload: params,
-    });
+      // Store fetch options for refresh
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_LAST_FETCH_OPTIONS,
+        payload: params,
+      });
 
-    console.log('🚀 Fetching clients with params:', params);
+      console.log('🚀 Fetching clients with params:', params);
 
-    const response = await apiClient.get("/clients", { params });
+      const response = await apiClient.get("/clients", { params });
 
-    console.log('✅ Raw API response:', response.data);
-    console.log('📦 Response structure check:');
-    console.log('- Has Data:', !!response.data.Data);
-    console.log('- Has Data.$values:', !!response.data.Data?.$values);
-    console.log('- $values is array:', Array.isArray(response.data.Data?.$values));
-    console.log('- $values length:', response.data.Data?.$values?.length || 0);
+      console.log('✅ Raw API response:', response.data);
+      console.log('📦 Response structure check:');
+      console.log('- Has Data:', !!response.data.Data);
+      console.log('- Has Data.$values:', !!response.data.Data?.$values);
+      console.log('- $values is array:', Array.isArray(response.data.Data?.$values));
+      console.log('- $values length:', response.data.Data?.$values?.length || 0);
 
-    // CRITICAL: Pass the complete response to reducer
-    dispatch({
-      type: CLIENTS_ACTIONS.SET_CLIENTS,
-      payload: response.data, // Pass complete response, let reducer handle extraction
-    });
+      // CRITICAL: Pass the complete response to reducer
+      dispatch({
+        type: CLIENTS_ACTIONS.SET_CLIENTS,
+        payload: response.data, // Pass complete response, let reducer handle extraction
+      });
 
-    return response.data;
-  } catch (error) {
-    console.error('❌ getClients error:', error);
-    handleApiError(error);
-  }
-}, [state.pagination, state.filters, state.sorting, handleApiError]);
+      return response.data;
+    } catch (error) {
+      console.error('❌ getClients error:', error);
+      handleApiError(error);
+    }
+  }, [state.pagination, state.filters, state.sorting, handleApiError]);
 
   // Get single client with full details
   const getClient = useCallback(async (clientId) => {
@@ -455,8 +455,8 @@ const getClients = useCallback(async (options = {}) => {
         fullName = clientData.BusinessName?.trim() || "";
       } else {
         // For Individual, use FullName directly or build from FirstName + LastName
-        fullName = clientData.FullName?.trim() || 
-                  `${clientData.FirstName?.trim() || ""} ${clientData.LastName?.trim() || ""}`.trim();
+        fullName = clientData.FullName?.trim() ||
+          `${clientData.FirstName?.trim() || ""} ${clientData.LastName?.trim() || ""}`.trim();
       }
 
       // FIXED: Build complete client data matching controller model exactly
@@ -466,22 +466,22 @@ const getClients = useCallback(async (options = {}) => {
         Currency: clientData.Currency || "USD",
         InvoicingMethod: clientData.InvoicingMethod || "Email",
         DisplayLanguage: clientData.DisplayLanguage || "English", // FIXED: Send directly, no conversion
-        
+
         // CRITICAL: Required NOT NULL fields - ensure string.Empty for nulls
         Mobile: clientData.Mobile?.trim() || "",
         Telephone: clientData.Telephone?.trim() || "",
         TaxNumber: clientData.TaxNumber?.trim() || "",
         PaymentTerms: clientData.PaymentTerms?.trim() || "",
-        
+
         // CRITICAL: Name fields - exact mapping to controller
         FullName: fullName,
         BusinessName: clientData.BusinessName?.trim() || "",
         FirstName: clientData.FirstName?.trim() || "",
         LastName: clientData.LastName?.trim() || "",
-        
+
         // Contact fields
         Email: clientData.Email?.trim() || "",
-        
+
         // Address fields  
         StreetAddress1: clientData.StreetAddress1?.trim() || "",
         StreetAddress2: clientData.StreetAddress2?.trim() || "",
@@ -489,16 +489,16 @@ const getClients = useCallback(async (options = {}) => {
         State: clientData.State?.trim() || "",
         PostalCode: clientData.PostalCode?.trim() || "",
         Country: clientData.Country?.trim() || "",
-        
+
         // Optional fields
         VatNumber: clientData.VatNumber?.trim() || "",
         CodeNumber: clientData.CodeNumber?.trim() || "",
         Category: clientData.Category?.trim() || "",
         Notes: clientData.Notes?.trim() || "",
-        
+
         // Boolean fields
         HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
-        
+
         // CRITICAL: Backend expected duplicate fields
         MobileNumber: clientData.Mobile?.trim() || "",
         Phone: clientData.Telephone?.trim() || "",
@@ -548,7 +548,7 @@ const getClients = useCallback(async (options = {}) => {
       console.log('BusinessName:', completeClientData.BusinessName);
       console.log('Email:', completeClientData.Email);
       console.log('DisplayLanguage:', completeClientData.DisplayLanguage);
-      
+
       // Validate critical fields before sending
       if (completeClientData.ClientType === "Individual" && !completeClientData.FullName) {
         throw new Error("FullName is required for Individual clients");
@@ -556,7 +556,7 @@ const getClients = useCallback(async (options = {}) => {
       if (completeClientData.ClientType === "Business" && !completeClientData.BusinessName) {
         throw new Error("BusinessName is required for Business clients");
       }
-      
+
       console.log('=== FormData being sent ===');
       for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
@@ -597,7 +597,7 @@ const getClients = useCallback(async (options = {}) => {
       if (error.response?.status === 500) {
         console.error('🚨 SERVER ERROR: Check server logs for detailed error information');
       }
-      
+
       handleApiError(error);
     }
   }, [handleApiError]);
@@ -609,7 +609,7 @@ const getClients = useCallback(async (options = {}) => {
       dispatch({ type: CLIENTS_ACTIONS.CLEAR_ERROR });
 
       const formData = new FormData();
-      
+
       // FIXED: Build complete update data with proper defaults
       const completeData = {
         // Required core fields
@@ -617,22 +617,22 @@ const getClients = useCallback(async (options = {}) => {
         Currency: clientData.Currency || "USD", // FIXED: Use USD as controller default
         InvoicingMethod: clientData.InvoicingMethod || "Email",
         DisplayLanguage: clientData.DisplayLanguage || "English", // FIXED: Use full name as controller expects
-        
+
         // FIXED: Required NOT NULL fields with proper defaults
         Mobile: clientData.Mobile?.trim() || "",
         Telephone: clientData.Telephone?.trim() || "",
         TaxNumber: clientData.TaxNumber?.trim() || "", // FIXED: Empty string as controller expects
         PaymentTerms: clientData.PaymentTerms?.trim() || "", // FIXED: Empty string as controller expects
-        
+
         // Name fields
         FullName: clientData.FullName?.trim() || "",
         BusinessName: clientData.BusinessName?.trim() || "",
         FirstName: clientData.FirstName?.trim() || "",
         LastName: clientData.LastName?.trim() || "",
-        
+
         // Contact fields
         Email: clientData.Email?.trim() || "",
-        
+
         // Address fields
         StreetAddress1: clientData.StreetAddress1?.trim() || "",
         StreetAddress2: clientData.StreetAddress2?.trim() || "",
@@ -640,16 +640,16 @@ const getClients = useCallback(async (options = {}) => {
         State: clientData.State?.trim() || "",
         PostalCode: clientData.PostalCode?.trim() || "",
         Country: clientData.Country?.trim() || "",
-        
+
         // Optional fields
         VatNumber: clientData.VatNumber?.trim() || "",
         CodeNumber: clientData.CodeNumber?.trim() || "",
         Category: clientData.Category?.trim() || "",
         Notes: clientData.Notes?.trim() || "",
-        
+
         // Boolean fields
         HasSecondaryAddress: Boolean(clientData.HasSecondaryAddress),
-        
+
         // FIXED: Backend expected duplicate fields
         MobileNumber: clientData.Mobile?.trim() || "",
         Phone: clientData.Telephone?.trim() || "",
@@ -762,15 +762,15 @@ const getClients = useCallback(async (options = {}) => {
       return response.data;
     } catch (error) {
       console.error('❌ Statistics API error:', error);
-      
+
       // Try fallback to basic statistics if main endpoint fails
       try {
         console.log('🔄 Trying basic statistics endpoint...');
         const basicResponse = await apiClient.get("/clients/statistics/basic");
         console.log('📊 Basic statistics response:', basicResponse.data);
-        
+
         const basicData = basicResponse.data.Data || basicResponse.data.data || basicResponse.data;
-        
+
         // Map basic response to expected structure
         const mappedBasicStats = {
           TotalClients: basicData.TotalClients || 0,
@@ -809,7 +809,7 @@ const getClients = useCallback(async (options = {}) => {
 
       const response = await apiClient.get("/clients/statistics/basic");
       const basicData = response.data.Data || response.data.data || response.data;
-      
+
       // Map basic response to expected structure
       const mappedBasicStats = {
         TotalClients: basicData.TotalClients || 0,
@@ -846,7 +846,7 @@ const getClients = useCallback(async (options = {}) => {
 
       const response = await apiClient.get("/clients/statistics/types");
       const typeData = response.data.Data || response.data.data || response.data;
-      
+
       // Map type response to expected structure
       const mappedTypeStats = {
         TotalClients: typeData.TotalClients || 0,
@@ -929,19 +929,19 @@ const getClients = useCallback(async (options = {}) => {
     filters: state.filters,
     sorting: state.sorting,
     statistics: state.statistics,
-    
+
     // Core CRUD operations
     getClients,
     getClient,
     createClient,
     updateClient,
     deleteClient,
-    
+
     // UPDATED: Statistics with multiple endpoints
     getClientStatistics,
     getBasicClientStatistics,
     getClientTypeStatistics,
-    
+
     // State management
     setFilters,
     setSorting,
@@ -950,7 +950,7 @@ const getClients = useCallback(async (options = {}) => {
     clearCurrentClient,
     clearError,
     refreshClients,
-    
+
     // Utility methods
     getTotalPages: () =>
       Math.ceil(state.pagination.totalItems / state.pagination.pageSize),
@@ -962,14 +962,14 @@ const getClients = useCallback(async (options = {}) => {
       state.clients.find((client) => client.Id === clientId),
     isClientLoaded: (clientId) =>
       state.clients.some((client) => client.Id === clientId),
-    
+
     // Filter helpers
     setSearchFilter: (search) => setFilters({ search }),
     setClientTypeFilter: (clientType) => setFilters({ clientType }),
     setCategoryFilter: (category) => setFilters({ category }),
     setCurrencyFilter: (currency) => setFilters({ currency }),
     setDateRangeFilter: (startDate, endDate) => setFilters({ startDate, endDate }),
-    
+
     // Quick actions
     searchClients: (searchTerm) => {
       setFilters({ search: searchTerm });

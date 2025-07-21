@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from "react";
 
 // Types/Interfaces
 const initialState = {
@@ -12,47 +17,47 @@ const initialState = {
   filters: {
     page: 1,
     pageSize: 25,
-    search: '',
-    status: '',
+    search: "",
+    status: "",
     categoryId: null,
     vendorId: null,
     startDate: null,
     endDate: null,
     minAmount: null,
     maxAmount: null,
-    currency: '',
-    paymentMethod: '',
+    currency: "",
+    paymentMethod: "",
     isRecurring: null,
-    sortBy: 'ExpenseDate',
-    sortAscending: false
+    sortBy: "ExpenseDate",
+    sortAscending: false,
   },
   pagination: {
     currentPage: 1,
     pageNumber: 1,
     pageSize: 25,
     totalItems: 0,
-    totalPages: 0
-  }
+    totalPages: 0,
+  },
 };
 
 // Action Types
 const ActionTypes = {
-  SET_LOADING: 'SET_LOADING',
-  SET_ERROR: 'SET_ERROR',
-  SET_EXPENSES: 'SET_EXPENSES',
-  SET_CURRENT_EXPENSE: 'SET_CURRENT_EXPENSE',
-  SET_CATEGORIES: 'SET_CATEGORIES',
-  SET_STATISTICS: 'SET_STATISTICS',
-  SET_TRENDS: 'SET_TRENDS',
-  SET_FILTERS: 'SET_FILTERS',
-  SET_PAGINATION: 'SET_PAGINATION',
-  ADD_EXPENSE: 'ADD_EXPENSE',
-  UPDATE_EXPENSE: 'UPDATE_EXPENSE',
-  DELETE_EXPENSE: 'DELETE_EXPENSE',
-  APPROVE_EXPENSE: 'APPROVE_EXPENSE',
-  REJECT_EXPENSE: 'REJECT_EXPENSE',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  RESET_STATE: 'RESET_STATE'
+  SET_LOADING: "SET_LOADING",
+  SET_ERROR: "SET_ERROR",
+  SET_EXPENSES: "SET_EXPENSES",
+  SET_CURRENT_EXPENSE: "SET_CURRENT_EXPENSE",
+  SET_CATEGORIES: "SET_CATEGORIES",
+  SET_STATISTICS: "SET_STATISTICS",
+  SET_TRENDS: "SET_TRENDS",
+  SET_FILTERS: "SET_FILTERS",
+  SET_PAGINATION: "SET_PAGINATION",
+  ADD_EXPENSE: "ADD_EXPENSE",
+  UPDATE_EXPENSE: "UPDATE_EXPENSE",
+  DELETE_EXPENSE: "DELETE_EXPENSE",
+  APPROVE_EXPENSE: "APPROVE_EXPENSE",
+  REJECT_EXPENSE: "REJECT_EXPENSE",
+  CLEAR_ERROR: "CLEAR_ERROR",
+  RESET_STATE: "RESET_STATE",
 };
 
 // Reducer
@@ -70,7 +75,7 @@ const financeExpensesReducer = (state, action) => {
         expenses: action.payload.data || [],
         pagination: action.payload.pagination || state.pagination,
         loading: false,
-        error: null
+        error: null,
       };
 
     case ActionTypes.SET_CURRENT_EXPENSE:
@@ -89,53 +94,80 @@ const financeExpensesReducer = (state, action) => {
       return { ...state, filters: { ...state.filters, ...action.payload } };
 
     case ActionTypes.SET_PAGINATION:
-      return { ...state, pagination: { ...state.pagination, ...action.payload } };
+      return {
+        ...state,
+        pagination: { ...state.pagination, ...action.payload },
+      };
 
     case ActionTypes.ADD_EXPENSE:
       return {
         ...state,
         expenses: [action.payload, ...state.expenses],
-        loading: false
+        loading: false,
       };
 
     case ActionTypes.UPDATE_EXPENSE:
       return {
         ...state,
-        expenses: state.expenses.map(expense =>
+        expenses: state.expenses.map((expense) =>
           expense.Id === action.payload.Id ? action.payload : expense
         ),
-        currentExpense: state.currentExpense?.Id === action.payload.Id ? action.payload : state.currentExpense,
-        loading: false
+        currentExpense:
+          state.currentExpense?.Id === action.payload.Id
+            ? action.payload
+            : state.currentExpense,
+        loading: false,
       };
 
     case ActionTypes.DELETE_EXPENSE:
       return {
         ...state,
-        expenses: state.expenses.filter(expense => expense.Id !== action.payload),
-        currentExpense: state.currentExpense?.Id === action.payload ? null : state.currentExpense,
-        loading: false
+        expenses: state.expenses.filter(
+          (expense) => expense.Id !== action.payload
+        ),
+        currentExpense:
+          state.currentExpense?.Id === action.payload
+            ? null
+            : state.currentExpense,
+        loading: false,
       };
 
     case ActionTypes.APPROVE_EXPENSE:
       return {
         ...state,
-        expenses: state.expenses.map(expense =>
-          expense.Id === action.payload.id ? { ...expense, Status: 'Approved', ...action.payload.data } : expense
+        expenses: state.expenses.map((expense) =>
+          expense.Id === action.payload.id
+            ? { ...expense, Status: "Approved", ...action.payload.data }
+            : expense
         ),
-        currentExpense: state.currentExpense?.Id === action.payload.id ?
-          { ...state.currentExpense, Status: 'Approved', ...action.payload.data } : state.currentExpense,
-        loading: false
+        currentExpense:
+          state.currentExpense?.Id === action.payload.id
+            ? {
+                ...state.currentExpense,
+                Status: "Approved",
+                ...action.payload.data,
+              }
+            : state.currentExpense,
+        loading: false,
       };
 
     case ActionTypes.REJECT_EXPENSE:
       return {
         ...state,
-        expenses: state.expenses.map(expense =>
-          expense.Id === action.payload.id ? { ...expense, Status: 'Rejected', ...action.payload.data } : expense
+        expenses: state.expenses.map((expense) =>
+          expense.Id === action.payload.id
+            ? { ...expense, Status: "Rejected", ...action.payload.data }
+            : expense
         ),
-        currentExpense: state.currentExpense?.Id === action.payload.id ?
-          { ...state.currentExpense, Status: 'Rejected', ...action.payload.data } : state.currentExpense,
-        loading: false
+        currentExpense:
+          state.currentExpense?.Id === action.payload.id
+            ? {
+                ...state.currentExpense,
+                Status: "Rejected",
+                ...action.payload.data,
+              }
+            : state.currentExpense,
+        loading: false,
       };
 
     case ActionTypes.CLEAR_ERROR:
@@ -153,10 +185,10 @@ const financeExpensesReducer = (state, action) => {
 const FinanceExpensesContext = createContext();
 
 // API Base URL
-const API_BASE_URL = 'https://api.speed-erp.com/api/FinanceExpenses';
+const API_BASE_URL = "https://api.speed-erp.com/api/FinanceExpenses";
 
 const getAuthToken = () => {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
+  return localStorage.getItem("token") || sessionStorage.getItem("token");
 };
 
 // Utility function for API calls
@@ -165,23 +197,25 @@ const apiCall = async (url, options = {}) => {
 
   const defaultOptions = {
     headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options.headers
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
     },
-    ...options
+    ...options,
   };
 
   // Handle FormData for file uploads
   if (options.body instanceof FormData) {
-    delete defaultOptions.headers['Content-Type'];
+    delete defaultOptions.headers["Content-Type"];
   }
 
   const response = await fetch(url, { ...defaultOptions });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.Message || `HTTP error! status: ${response.status}`);
+    throw new Error(
+      errorData.Message || `HTTP error! status: ${response.status}`
+    );
   }
 
   return response.json();
@@ -209,7 +243,7 @@ export const FinanceExpensesProvider = ({ children }) => {
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
+      if (value !== null && value !== undefined && value !== "") {
         params.append(key, value.toString());
       }
     });
@@ -218,38 +252,41 @@ export const FinanceExpensesProvider = ({ children }) => {
   };
 
   // Core CRUD Operations
-  const getExpenses = useCallback(async (customFilters = {}) => {
-    try {
-      setLoading(true);
-      clearError();
+  const getExpenses = useCallback(
+    async (customFilters = {}) => {
+      try {
+        setLoading(true);
+        clearError();
 
-      const filters = { ...state.filters, ...customFilters };
-      const queryString = buildQueryString(filters);
-      const url = `${API_BASE_URL}?${queryString}`;
+        const filters = { ...state.filters, ...customFilters };
+        const queryString = buildQueryString(filters);
+        const url = `${API_BASE_URL}?${queryString}`;
 
-      const response = await apiCall(url);
+        const response = await apiCall(url);
 
-      if (response.Success) {
-        // Handle both single object and array responses
-        const expenseData = Array.isArray(response.Data) ? response.Data : [response.Data];
+        if (response.Success) {
+          // Handle both single object and array responses
+          const expenseData = response?.Data?.$values || [];
 
-        console.log("Expense Data:", expenseData);
-        
-        dispatch({
-          type: ActionTypes.SET_EXPENSES,
-          payload: {
-            data: expenseData,
-            pagination: response.Pagination || state.pagination
-          }
-        });
-        dispatch({ type: ActionTypes.SET_FILTERS, payload: filters });
-      } else {
-        throw new Error(response.Message || 'Failed to fetch expenses');
+          console.log("Expense Data:", expenseData);
+
+          dispatch({
+            type: ActionTypes.SET_EXPENSES,
+            payload: {
+              data: expenseData,
+              pagination: response.Pagination || state.pagination,
+            },
+          });
+          dispatch({ type: ActionTypes.SET_FILTERS, payload: filters });
+        } else {
+          throw new Error(response.Message || "Failed to fetch expenses");
+        }
+      } catch (error) {
+        setError(error.message);
       }
-    } catch (error) {
-      setError(error.message);
-    }
-  }, [state.filters]);
+    },
+    [state.filters]
+  );
 
   const getExpense = useCallback(async (id) => {
     try {
@@ -261,9 +298,12 @@ export const FinanceExpensesProvider = ({ children }) => {
       console.log("This is hte new data ", response);
 
       if (response.Success) {
-        dispatch({ type: ActionTypes.SET_CURRENT_EXPENSE, payload: response.Data });
+        dispatch({
+          type: ActionTypes.SET_CURRENT_EXPENSE,
+          payload: response.Data,
+        });
       } else {
-        throw new Error(response.Message || 'Failed to fetch expense');
+        throw new Error(response.Message || "Failed to fetch expense");
       }
     } catch (error) {
       setError(error.message);
@@ -278,39 +318,42 @@ export const FinanceExpensesProvider = ({ children }) => {
       // Prepare the data according to API structure
       const payload = {
         CompanyId: expenseData.companyId || 0,
-        CodeNumber: expenseData.codeNumber || '',
+        CodeNumber: expenseData.codeNumber || "",
         ExpenseDate: expenseData.expenseDate,
         CategoryId: parseInt(expenseData.categoryId) || 0,
         VendorId: parseInt(expenseData.vendorId) || 0,
         Description: expenseData.description,
         Amount: parseFloat(expenseData.amount) || 0,
-        Currency: expenseData.currency || 'USD',
+        Currency: expenseData.currency || "USD",
         ExchangeRate: parseFloat(expenseData.exchangeRate) || 1,
         PaymentMethod: expenseData.paymentMethod,
         BankAccountId: parseInt(expenseData.bankAccountId) || 0,
-        Status: expenseData.status || 'Pending',
+        Status: expenseData.status || "Pending",
         TaxAmount: parseFloat(expenseData.taxAmount) || 0,
         TaxRate: parseFloat(expenseData.taxRate) || 0,
-        TotalAmount: parseFloat(expenseData.totalAmount) || parseFloat(expenseData.amount) || 0,
-        Notes: expenseData.notes || '',
-        ReferenceNumber: expenseData.referenceNumber || '',
+        TotalAmount:
+          parseFloat(expenseData.totalAmount) ||
+          parseFloat(expenseData.amount) ||
+          0,
+        Notes: expenseData.notes || "",
+        ReferenceNumber: expenseData.referenceNumber || "",
         IsRecurring: expenseData.isRecurring || false,
-        RecurringPattern: expenseData.recurringPattern || '',
+        RecurringPattern: expenseData.recurringPattern || "",
         RecurringInterval: parseInt(expenseData.recurringInterval) || 0,
         NextRecurringDate: expenseData.nextRecurringDate || null,
-        Items: expenseData.items || []
+        Items: expenseData.items || [],
       };
 
       const response = await apiCall(API_BASE_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
+        method: "POST",
+        body: JSON.stringify(payload),
       });
 
       if (response.Success) {
         dispatch({ type: ActionTypes.ADD_EXPENSE, payload: response.Data });
         return response.Data;
       } else {
-        throw new Error(response.Message || 'Failed to create expense');
+        throw new Error(response.Message || "Failed to create expense");
       }
     } catch (error) {
       setError(error.message);
@@ -327,39 +370,42 @@ export const FinanceExpensesProvider = ({ children }) => {
       const payload = {
         Id: id,
         CompanyId: expenseData.companyId || 0,
-        CodeNumber: expenseData.codeNumber || '',
+        CodeNumber: expenseData.codeNumber || "",
         ExpenseDate: expenseData.expenseDate,
         CategoryId: parseInt(expenseData.categoryId) || 0,
         VendorId: parseInt(expenseData.vendorId) || 0,
         Description: expenseData.description,
         Amount: parseFloat(expenseData.amount) || 0,
-        Currency: expenseData.currency || 'USD',
+        Currency: expenseData.currency || "USD",
         ExchangeRate: parseFloat(expenseData.exchangeRate) || 1,
         PaymentMethod: expenseData.paymentMethod,
         BankAccountId: parseInt(expenseData.bankAccountId) || 0,
-        Status: expenseData.status || 'Pending',
+        Status: expenseData.status || "Pending",
         TaxAmount: parseFloat(expenseData.taxAmount) || 0,
         TaxRate: parseFloat(expenseData.taxRate) || 0,
-        TotalAmount: parseFloat(expenseData.totalAmount) || parseFloat(expenseData.amount) || 0,
-        Notes: expenseData.notes || '',
-        ReferenceNumber: expenseData.referenceNumber || '',
+        TotalAmount:
+          parseFloat(expenseData.totalAmount) ||
+          parseFloat(expenseData.amount) ||
+          0,
+        Notes: expenseData.notes || "",
+        ReferenceNumber: expenseData.referenceNumber || "",
         IsRecurring: expenseData.isRecurring || false,
-        RecurringPattern: expenseData.recurringPattern || '',
+        RecurringPattern: expenseData.recurringPattern || "",
         RecurringInterval: parseInt(expenseData.recurringInterval) || 0,
         NextRecurringDate: expenseData.nextRecurringDate || null,
-        Items: expenseData.items || []
+        Items: expenseData.items || [],
       };
 
       const response = await apiCall(`${API_BASE_URL}/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(payload)
+        method: "PUT",
+        body: JSON.stringify(payload),
       });
 
       if (response.Success) {
         dispatch({ type: ActionTypes.UPDATE_EXPENSE, payload: response.Data });
         return response.Data;
       } else {
-        throw new Error(response.Message || 'Failed to update expense');
+        throw new Error(response.Message || "Failed to update expense");
       }
     } catch (error) {
       setError(error.message);
@@ -372,13 +418,15 @@ export const FinanceExpensesProvider = ({ children }) => {
       setLoading(true);
       clearError();
 
-      const url = `${API_BASE_URL}/${id}${hardDelete ? '?hardDelete=true' : ''}`;
-      const response = await apiCall(url, { method: 'DELETE' });
+      const url = `${API_BASE_URL}/${id}${
+        hardDelete ? "?hardDelete=true" : ""
+      }`;
+      const response = await apiCall(url, { method: "DELETE" });
 
       if (response.Success) {
         dispatch({ type: ActionTypes.DELETE_EXPENSE, payload: id });
       } else {
-        throw new Error(response.Message || 'Failed to delete expense');
+        throw new Error(response.Message || "Failed to delete expense");
       }
     } catch (error) {
       setError(error.message);
@@ -387,29 +435,29 @@ export const FinanceExpensesProvider = ({ children }) => {
   }, []);
 
   // Expense Status Management
-  const approveExpense = useCallback(async (id, notes = '') => {
+  const approveExpense = useCallback(async (id, notes = "") => {
     try {
       setLoading(true);
       clearError();
 
       const response = await apiCall(`${API_BASE_URL}/${id}/approve`, {
-        method: 'POST',
-        body: JSON.stringify({ notes })
+        method: "POST",
+        body: JSON.stringify({ notes }),
       });
 
       if (response.Success) {
         dispatch({
           type: ActionTypes.APPROVE_EXPENSE,
-          payload: { 
-            id, 
-            data: { 
-              ApprovalNotes: notes, 
-              ApprovedDate: new Date().toISOString() 
-            } 
-          }
+          payload: {
+            id,
+            data: {
+              ApprovalNotes: notes,
+              ApprovedDate: new Date().toISOString(),
+            },
+          },
         });
       } else {
-        throw new Error(response.Message || 'Failed to approve expense');
+        throw new Error(response.Message || "Failed to approve expense");
       }
     } catch (error) {
       setError(error.message);
@@ -423,23 +471,23 @@ export const FinanceExpensesProvider = ({ children }) => {
       clearError();
 
       const response = await apiCall(`${API_BASE_URL}/${id}/reject`, {
-        method: 'POST',
-        body: JSON.stringify({ reason })
+        method: "POST",
+        body: JSON.stringify({ reason }),
       });
 
       if (response.Success) {
         dispatch({
           type: ActionTypes.REJECT_EXPENSE,
-          payload: { 
-            id, 
-            data: { 
-              RejectionReason: reason, 
-              RejectedDate: new Date().toISOString() 
-            } 
-          }
+          payload: {
+            id,
+            data: {
+              RejectionReason: reason,
+              RejectedDate: new Date().toISOString(),
+            },
+          },
         });
       } else {
-        throw new Error(response.Message || 'Failed to reject expense');
+        throw new Error(response.Message || "Failed to reject expense");
       }
     } catch (error) {
       setError(error.message);
@@ -448,49 +496,58 @@ export const FinanceExpensesProvider = ({ children }) => {
   }, []);
 
   // Analytics and Reports
-  const getExpenseStatistics = useCallback(async (startDate = null, endDate = null) => {
-    try {
-      setLoading(true);
-      clearError();
+  const getExpenseStatistics = useCallback(
+    async (startDate = null, endDate = null) => {
+      try {
+        setLoading(true);
+        clearError();
 
-      const params = new URLSearchParams();
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
+        const params = new URLSearchParams();
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
 
-      const url = `${API_BASE_URL}/statistics?${params.toString()}`;
-      const response = await apiCall(url);
+        const url = `${API_BASE_URL}/statistics?${params.toString()}`;
+        const response = await apiCall(url);
 
-      if (response.Success) {
-        dispatch({ type: ActionTypes.SET_STATISTICS, payload: response.Data });
-      } else {
-        throw new Error(response.Message || 'Failed to fetch statistics');
+        if (response.Success) {
+          dispatch({
+            type: ActionTypes.SET_STATISTICS,
+            payload: response.Data,
+          });
+        } else {
+          throw new Error(response.Message || "Failed to fetch statistics");
+        }
+      } catch (error) {
+        setError(error.message);
       }
-    } catch (error) {
-      setError(error.message);
-    }
-  }, []);
+    },
+    []
+  );
 
-  const getExpenseTrends = useCallback(async (period = 'monthly', months = 12) => {
-    try {
-      setLoading(true);
-      clearError();
+  const getExpenseTrends = useCallback(
+    async (period = "monthly", months = 12) => {
+      try {
+        setLoading(true);
+        clearError();
 
-      const params = new URLSearchParams();
-      params.append('period', period);
-      params.append('months', months.toString());
+        const params = new URLSearchParams();
+        params.append("period", period);
+        params.append("months", months.toString());
 
-      const url = `${API_BASE_URL}/trends?${params.toString()}`;
-      const response = await apiCall(url);
+        const url = `${API_BASE_URL}/trends?${params.toString()}`;
+        const response = await apiCall(url);
 
-      if (response.Success) {
-        dispatch({ type: ActionTypes.SET_TRENDS, payload: response.Data });
-      } else {
-        throw new Error(response.Message || 'Failed to fetch trends');
+        if (response.Success) {
+          dispatch({ type: ActionTypes.SET_TRENDS, payload: response.Data });
+        } else {
+          throw new Error(response.Message || "Failed to fetch trends");
+        }
+      } catch (error) {
+        setError(error.message);
       }
-    } catch (error) {
-      setError(error.message);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Categories Management
   const getExpenseCategories = useCallback(async () => {
@@ -501,10 +558,12 @@ export const FinanceExpensesProvider = ({ children }) => {
       const response = await apiCall(`${API_BASE_URL}/categories`);
 
       if (response.Success) {
-        const categoriesData = Array.isArray(response.Data) ? response.Data : [response.Data];
+        const categoriesData = Array.isArray(response.Data)
+          ? response.Data
+          : [response.Data];
         dispatch({ type: ActionTypes.SET_CATEGORIES, payload: categoriesData });
       } else {
-        throw new Error(response.Message || 'Failed to fetch categories');
+        throw new Error(response.Message || "Failed to fetch categories");
       }
     } catch (error) {
       setError(error.message);
@@ -524,60 +583,87 @@ export const FinanceExpensesProvider = ({ children }) => {
     dispatch({ type: ActionTypes.SET_PAGINATION, payload: newPagination });
   }, []);
 
-  const changePage = useCallback((newPage) => {
-    const newFilters = { ...state.filters, page: newPage };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const changePage = useCallback(
+    (newPage) => {
+      const newFilters = { ...state.filters, page: newPage };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const changePageSize = useCallback((newPageSize) => {
-    const newFilters = { ...state.filters, pageSize: newPageSize, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const changePageSize = useCallback(
+    (newPageSize) => {
+      const newFilters = { ...state.filters, pageSize: newPageSize, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
   // Search and filter methods
-  const searchExpenses = useCallback((searchTerm) => {
-    const newFilters = { ...state.filters, search: searchTerm, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const searchExpenses = useCallback(
+    (searchTerm) => {
+      const newFilters = { ...state.filters, search: searchTerm, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const filterByStatus = useCallback((status) => {
-    const newFilters = { ...state.filters, status, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const filterByStatus = useCallback(
+    (status) => {
+      const newFilters = { ...state.filters, status, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const filterByCategory = useCallback((categoryId) => {
-    const newFilters = { ...state.filters, categoryId, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const filterByCategory = useCallback(
+    (categoryId) => {
+      const newFilters = { ...state.filters, categoryId, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const filterByVendor = useCallback((vendorId) => {
-    const newFilters = { ...state.filters, vendorId, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const filterByVendor = useCallback(
+    (vendorId) => {
+      const newFilters = { ...state.filters, vendorId, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const filterByDateRange = useCallback((startDate, endDate) => {
-    const newFilters = { ...state.filters, startDate, endDate, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const filterByDateRange = useCallback(
+    (startDate, endDate) => {
+      const newFilters = { ...state.filters, startDate, endDate, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const filterByAmountRange = useCallback((minAmount, maxAmount) => {
-    const newFilters = { ...state.filters, minAmount, maxAmount, page: 1 };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const filterByAmountRange = useCallback(
+    (minAmount, maxAmount) => {
+      const newFilters = { ...state.filters, minAmount, maxAmount, page: 1 };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
-  const sortExpenses = useCallback((sortBy, sortAscending = true) => {
-    const newFilters = { ...state.filters, sortBy, sortAscending };
-    dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
-    getExpenses(newFilters);
-  }, [state.filters, getExpenses]);
+  const sortExpenses = useCallback(
+    (sortBy, sortAscending = true) => {
+      const newFilters = { ...state.filters, sortBy, sortAscending };
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: newFilters });
+      getExpenses(newFilters);
+    },
+    [state.filters, getExpenses]
+  );
 
   // Utility methods
   const clearCurrentExpense = useCallback(() => {
@@ -630,7 +716,7 @@ export const FinanceExpensesProvider = ({ children }) => {
     // Utility methods
     clearError,
     clearCurrentExpense,
-    resetState
+    resetState,
   };
 
   return (
@@ -644,14 +730,24 @@ export const FinanceExpensesProvider = ({ children }) => {
 export const useFinanceExpenses = () => {
   const context = useContext(FinanceExpensesContext);
   if (!context) {
-    throw new Error('useFinanceExpenses must be used within a FinanceExpensesProvider');
+    throw new Error(
+      "useFinanceExpenses must be used within a FinanceExpensesProvider"
+    );
   }
   return context;
 };
 
 // Additional custom hooks for specific functionality
 export const useExpenseList = () => {
-  const { expenses, pagination, loading, error, getExpenses, changePage, changePageSize } = useFinanceExpenses();
+  const {
+    expenses,
+    pagination,
+    loading,
+    error,
+    getExpenses,
+    changePage,
+    changePageSize,
+  } = useFinanceExpenses();
 
   return {
     expenses,
@@ -660,12 +756,13 @@ export const useExpenseList = () => {
     error,
     getExpenses,
     changePage,
-    changePageSize
+    changePageSize,
   };
 };
 
 export const useExpenseDetails = (id) => {
-  const { currentExpense, loading, error, getExpense, clearCurrentExpense } = useFinanceExpenses();
+  const { currentExpense, loading, error, getExpense, clearCurrentExpense } =
+    useFinanceExpenses();
 
   React.useEffect(() => {
     if (id) {
@@ -680,7 +777,7 @@ export const useExpenseDetails = (id) => {
   return {
     expense: currentExpense,
     loading,
-    error
+    error,
   };
 };
 
@@ -695,7 +792,7 @@ export const useExpenseSearch = () => {
     filterByDateRange,
     filterByAmountRange,
     sortExpenses,
-    resetFilters
+    resetFilters,
   } = useFinanceExpenses();
 
   return {
@@ -708,7 +805,7 @@ export const useExpenseSearch = () => {
     filterByDateRange,
     filterByAmountRange,
     sortExpenses,
-    resetFilters
+    resetFilters,
   };
 };
 
@@ -719,7 +816,7 @@ export const useExpenseAnalytics = () => {
     loading,
     error,
     getExpenseStatistics,
-    getExpenseTrends
+    getExpenseTrends,
   } = useFinanceExpenses();
 
   return {
@@ -728,22 +825,18 @@ export const useExpenseAnalytics = () => {
     loading,
     error,
     getExpenseStatistics,
-    getExpenseTrends
+    getExpenseTrends,
   };
 };
 
 export const useExpenseApproval = () => {
-  const {
-    loading,
-    error,
-    approveExpense,
-    rejectExpense
-  } = useFinanceExpenses();
+  const { loading, error, approveExpense, rejectExpense } =
+    useFinanceExpenses();
 
   return {
     loading,
     error,
     approveExpense,
-    rejectExpense
+    rejectExpense,
   };
 };

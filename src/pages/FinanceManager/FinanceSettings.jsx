@@ -25,7 +25,9 @@ const FinanceSettings = () => {
           {/* Expenses Categories */}
           <div
             className="bg-white rounded-lg shadow-sm p-8 flex flex-col items-center justify-center min-h-[200px] hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => handleNavigation("/finance/expenses/categories")}
+            onClick={() =>
+              handleNavigation("/admin/finance/expenses/catagories")
+            }
           >
             <div className="flex items-center mb-6">
               <Triangle className="w-8 h-8 text-indigo-600 fill-current" />
@@ -42,7 +44,9 @@ const FinanceSettings = () => {
           {/* Incomes Categories */}
           <div
             className="bg-white rounded-lg shadow-sm p-8 flex flex-col items-center justify-center min-h-[200px] hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => handleNavigation("/finance/incomes/categories")}
+            onClick={() =>
+              handleNavigation("/admin/finance/incomes/categories")
+            }
           >
             <div className="flex items-center mb-6">
               <Triangle className="w-8 h-8 text-indigo-600 fill-current" />
