@@ -51,7 +51,7 @@ import NewPriceList from "../pages/Inventories/PriceList/NewPriceList";
 import PriceListList from "../pages/Inventories/PriceList/PriceListList";
 import NewInvoice from "../pages/Sale/Invoice/NewInvoice";
 import InvoicesList from "../pages/Sale/InvoicesList";
-import DaftraInvoiceForm from '../pages/Sale/InvoiceForm';
+import DaftraInvoiceForm from "../pages/Sale/InvoiceForm";
 import InvoiceDetails from "../pages/Sale/Invoice/InvoiceDetails";
 import PaymentTracking from "../pages/Sale/Invoice/Components/PaymentTracking";
 import ManageEmployees from "../pages/Employee/ManageEmployees";
@@ -81,12 +81,13 @@ import VendorsManagement from "../pages/Vendors/VendorsManagement";
 import BankAccountManagement from "../pages/BankAccountManagement/BankAccountManagement";
 import FinanceIncome from "../pages/FinanceManager/FinanceIncome";
 import FinanceExpenses from "../pages/FinanceManager/FinanceExpenses";
-import ExpenseCategories from "../pages/FinanceManager/ExpenseCategories"
-import IncomeCategories from "../pages/FinanceManager/IncomeCategories"
+import ExpenseCategories from "../pages/FinanceManager/ExpenseCategories";
+import IncomeCategories from "../pages/FinanceManager/IncomeCategories";
 import InvoiceManagementPage from "../pages/Sale/Invoice/InvoiceManagementPage";
 import InvoiceDemoApp from "../pages/Sale/Invoice/InvoiceDetailsPage";
 import ClientsListPage from "../pages/clients/ClientsListPage";
 import ClientDetailPage from "../pages/clients/ClientDetailPage";
+import FinanceSettings from "../pages/FinanceManager/FinanceSettings";
 // import InvoiceApp from "../pages/Sale/InvoiceApp/InvoiceApp";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -376,7 +377,8 @@ const getRouteConfig = () => {
       component: ClientsListPage,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
-    },{
+    },
+    {
       path: "/admin/ViewClients-Details/:clientId",
       component: ClientDetailPage,
       roles: ["Admin", "Manager", "Employee"],
@@ -521,8 +523,8 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
-      path: "/admin/invoices/list",
+    {
+      path: "/admin/invoices",
       component: InvoicesList,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
@@ -535,7 +537,7 @@ const getRouteConfig = () => {
       layout: true,
     },
 
-     {
+    {
       path: "/admin/invoices/new",
       component: DaftraInvoiceForm,
       roles: ["Admin", "Manager", "Employee"],
@@ -560,19 +562,19 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/invoices/:id",
       component: InvoiceDetails,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/payments",
       component: PaymentTracking,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-   
+
     {
       path: "/admin/new-invoice",
       component: NewInvoice,
@@ -728,6 +730,12 @@ const getRouteConfig = () => {
       layout: true,
     },
     {
+      path: "/admin/finance/settings",
+      component: FinanceSettings,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
       path: "/admin/finance/expenses/catagories",
       component: ExpenseCategories,
       roles: ["Admin", "Manager", "Employee"],
@@ -735,7 +743,7 @@ const getRouteConfig = () => {
     },
     {
       path: "/admin/finance/expenses",
-      component: ExpenseList,
+      component: FinanceExpenses,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

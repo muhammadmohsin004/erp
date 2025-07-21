@@ -16,12 +16,15 @@ import {
   RefreshCw,
   Eye,
   Edit,
-  Copy
+  Copy,
+  Trash2,
 } from "lucide-react";
 import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
+import Modall from "../../components/elements/modal/Modal";
+import { AiOutlineDelete } from "react-icons/ai";
 
 const DynamicClientDashboard = () => {
   const navigate = useNavigate();
@@ -30,36 +33,54 @@ const DynamicClientDashboard = () => {
 
   const {
     clients,
+    deleteClient,
     loading,
     error,
     statistics,
     getClients,
     getClientStatistics,
     getBasicClientStatistics,
-    getClientTypeStatistics
+    getClientTypeStatistics,
   } = useClients();
 
-  const translations = React.useMemo(() => ({
-    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
-    "Clients Overview": language === "ar" ? "نظرة عامة على العملاء" : "Clients Overview",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "Total Clients": language === "ar" ? "إجمالي العملاء" : "Total Clients",
-    "Individual": language === "ar" ? "فردي" : "Individual",
-    "Business": language === "ar" ? "تجاري" : "Business",
-    "This Month": language === "ar" ? "هذا الشهر" : "This Month",
-    "Recent Clients": language === "ar" ? "العملاء الجدد" : "Recent Clients",
-    "View All Clients": language === "ar" ? "عرض جميع العملاء" : "View All Clients",
-    "No clients found": language === "ar" ? "لم يتم العثور على عملاء" : "No clients found",
-    "Error loading data": language === "ar" ? "خطأ في تحميل البيانات" : "Error loading data",
-    "Retry": language === "ar" ? "المحاولة مرة أخرى" : "Retry",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Get started by adding your first client": language === "ar" ? "ابدأ بإضافة عميلك الأول" : "Get started by adding your first client",
-    "Manage and view your client information": language === "ar" ? "إدارة ومشاهدة معلومات عملائك" : "Manage and view your client information",
-    "Failed to load some data": language === "ar" ? "فشل في تحميل بعض البيانات" : "Failed to load some data",
-    "Partial data loaded": language === "ar" ? "تم تحميل البيانات جزئياً" : "Partial data loaded"
-  }), [language]);
+  const translations = React.useMemo(
+    () => ({
+      "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
+      "Clients Overview":
+        language === "ar" ? "نظرة عامة على العملاء" : "Clients Overview",
+      Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+      "Total Clients": language === "ar" ? "إجمالي العملاء" : "Total Clients",
+      Individual: language === "ar" ? "فردي" : "Individual",
+      Business: language === "ar" ? "تجاري" : "Business",
+      "This Month": language === "ar" ? "هذا الشهر" : "This Month",
+      "Recent Clients": language === "ar" ? "العملاء الجدد" : "Recent Clients",
+      "View All Clients":
+        language === "ar" ? "عرض جميع العملاء" : "View All Clients",
+      "No clients found":
+        language === "ar" ? "لم يتم العثور على عملاء" : "No clients found",
+      "Error loading data":
+        language === "ar" ? "خطأ في تحميل البيانات" : "Error loading data",
+      Retry: language === "ar" ? "المحاولة مرة أخرى" : "Retry",
+      View: language === "ar" ? "عرض" : "View",
+      Edit: language === "ar" ? "تعديل" : "Edit",
+      Clone: language === "ar" ? "نسخ" : "Clone",
+      "Get started by adding your first client":
+        language === "ar"
+          ? "ابدأ بإضافة عميلك الأول"
+          : "Get started by adding your first client",
+      "Manage and view your client information":
+        language === "ar"
+          ? "إدارة ومشاهدة معلومات عملائك"
+          : "Manage and view your client information",
+      "Failed to load some data":
+        language === "ar"
+          ? "فشل في تحميل بعض البيانات"
+          : "Failed to load some data",
+      "Partial data loaded":
+        language === "ar" ? "تم تحميل البيانات جزئياً" : "Partial data loaded",
+    }),
+    [language]
+  );
 
   // Simplified local state - NO INITIAL LOADING STATE
   const [hasError, setHasError] = useState(null);
@@ -77,17 +98,17 @@ const DynamicClientDashboard = () => {
   // Background data fetching - NO LOADING STATE BLOCKING
   useEffect(() => {
     let mounted = true;
-    
+
     const fetchDataInBackground = async () => {
       if (hasFetched || !mounted) return;
-      
+
       const hasToken = token || localStorage.getItem("token");
       if (!hasToken) return;
-      
+
       try {
         setHasFetched(true);
         setHasError(null);
-        
+
         // Try to fetch statistics (silently fail if needed)
         try {
           await getClientStatistics();
@@ -102,14 +123,13 @@ const DynamicClientDashboard = () => {
             }
           }
         }
-        
+
         // Try to fetch clients (silently fail if needed)
         try {
           await getClients({ page: 1, pageSize: 6 });
         } catch (clientsError) {
           console.warn("Failed to fetch clients:", clientsError);
         }
-        
       } catch (error) {
         console.error("Background fetch error:", error);
         setHasError(error.message);
@@ -124,46 +144,88 @@ const DynamicClientDashboard = () => {
     return () => {
       mounted = false;
     };
-  }, [token, hasFetched, getClients, getClientStatistics, getBasicClientStatistics, getClientTypeStatistics]);
+  }, [
+    token,
+    hasFetched,
+    getClients,
+    getClientStatistics,
+    getBasicClientStatistics,
+    getClientTypeStatistics,
+  ]);
 
   // Manual refresh
   const handleRefresh = useCallback(async () => {
     setDataRefreshing(true);
     setHasError(null);
     setHasFetched(false);
-    
+
     // Let the useEffect handle the actual fetching
     setTimeout(() => {
       setDataRefreshing(false);
     }, 2000); // Stop refreshing indicator after 2 seconds
   }, []);
+  const [warehouseToDelete, setWarehouseToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const confirmDeleteWarehouse = async () => {
+    if (!warehouseToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteClient(warehouseToDelete.Id);
+      setShowDeleteModal(false);
+      setWarehouseToDelete(null);
+      // Refresh the warehouse list
+      await getClients();
+    } catch (error) {
+      console.error("Error deleting Client:", error);
+      alert("Failed to delete Client");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteClient = (ClientId) => {
+    const warehouse = Array.isArray(clients)
+      ? clients.find((w) => w.Id === ClientId)
+      : null;
+    if (warehouse) {
+      setWarehouseToDelete(warehouse);
+      setShowDeleteModal(true);
+    } else {
+      alert("Client not found");
+    }
+  };
 
   // Statistics Card Component
-  const StatCard = React.memo(({ title, value, icon: Icon, bgColor, iconColor, trend, isLoading }) => (
-    <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <Container className="flex items-center justify-between">
-        <Container>
-          <Span className="text-gray-500 text-sm font-medium">{title}</Span>
-          {isLoading ? (
-            <Container className="w-16 h-8 bg-gray-200 animate-pulse rounded mt-1"></Container>
-          ) : (
-            <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-              {value || 0}
-            </Span>
-          )}
-          {trend && !isLoading && (
-            <Container className="flex items-center mt-2">
-              <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-              <Span className="text-sm text-green-600">{trend}</Span>
-            </Container>
-          )}
-        </Container>
-        <Container className={`${bgColor} p-3 rounded-lg`}>
-          <Icon className={`w-6 h-6 ${iconColor}`} />
+  const StatCard = React.memo(
+    ({ title, value, icon: Icon, bgColor, iconColor, trend, isLoading }) => (
+      <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <Container className="flex items-center justify-between">
+          <Container>
+            <Span className="text-gray-500 text-sm font-medium">{title}</Span>
+            {isLoading ? (
+              <Container className="w-16 h-8 bg-gray-200 animate-pulse rounded mt-1"></Container>
+            ) : (
+              <Span className="text-2xl font-bold text-gray-900 mt-1 block">
+                {value || 0}
+              </Span>
+            )}
+            {trend && !isLoading && (
+              <Container className="flex items-center mt-2">
+                <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                <Span className="text-sm text-green-600">{trend}</Span>
+              </Container>
+            )}
+          </Container>
+          <Container className={`${bgColor} p-3 rounded-lg`}>
+            <Icon className={`w-6 h-6 ${iconColor}`} />
+          </Container>
         </Container>
       </Container>
-    </Container>
-  ));
+    )
+  );
 
   // Client Card Component
   const ClientCard = React.memo(({ client }) => (
@@ -181,27 +243,27 @@ const DynamicClientDashboard = () => {
               {translations[client.ClientType] || client.ClientType}
             </Span>
           </Container>
-          
+
           <h3 className="font-medium text-gray-900 mb-1">
             {client.ClientType === "Business"
               ? client.BusinessName || client.FullName || "N/A"
               : client.FullName || "N/A"}
           </h3>
-          
+
           {client.Email && (
             <Container className="flex items-center text-sm text-gray-600 mb-1">
               <Mail className="w-4 h-4 mr-2" />
               <Span>{client.Email}</Span>
             </Container>
           )}
-          
+
           {(client.Mobile || client.Telephone) && (
             <Container className="flex items-center text-sm text-gray-600 mb-1">
               <Phone className="w-4 h-4 mr-2" />
               <Span>{client.Mobile || client.Telephone}</Span>
             </Container>
           )}
-          
+
           {(client.City || client.Country) && (
             <Container className="flex items-center text-sm text-gray-600 mb-2">
               <MapPin className="w-4 h-4 mr-2" />
@@ -220,30 +282,41 @@ const DynamicClientDashboard = () => {
               <Eye className="w-3 h-3" />
             </button>
             <button
-              onClick={() => navigate("/admin/new-clients", { 
-                state: { editData: client, isEditing: true } 
-              })}
+              onClick={() =>
+                navigate("/admin/new-clients", {
+                  state: { editData: client, isEditing: true },
+                })
+              }
               className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200"
               title={translations.Edit}
             >
               <Edit className="w-3 h-3" />
             </button>
             <button
-              onClick={() => navigate("/admin/new-clients", { 
-                state: { 
-                  cloneData: {
-                    ...client,
-                    FullName: `${client.FullName || ""} (Copy)`,
-                    Email: "",
-                    CodeNumber: "",
-                    Id: undefined,
-                  } 
-                } 
-              })}
+              onClick={() =>
+                navigate("/admin/new-clients", {
+                  state: {
+                    cloneData: {
+                      ...client,
+                      FullName: `${client.FullName || ""} (Copy)`,
+                      Email: "",
+                      CodeNumber: "",
+                      Id: undefined,
+                    },
+                  },
+                })
+              }
               className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200"
               title={translations.Clone}
             >
               <Copy className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => handleDeleteClient(client.Id)}
+              className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+              title={translations.Delete}
+            >
+              <AiOutlineDelete className="w-3 h-3" />
             </button>
           </Container>
         </Container>
@@ -272,34 +345,34 @@ const DynamicClientDashboard = () => {
   // Get safe array from clients data - handle nested API response structure
   const clientsArray = React.useMemo(() => {
     if (!clients) return [];
-    
+
     // Handle different possible response structures
     if (Array.isArray(clients)) {
       return clients;
     }
-    
+
     // Handle nested response structure: { Data: { $values: [...] } }
     if (clients.Data && Array.isArray(clients.Data.$values)) {
       return clients.Data.$values;
     }
-    
+
     // Handle direct $values structure: { $values: [...] }
     if (Array.isArray(clients.$values)) {
       return clients.$values;
     }
-    
-    console.warn('Unexpected clients data structure:', clients);
+
+    console.warn("Unexpected clients data structure:", clients);
     return [];
   }, [clients]);
   const isDataLoading = loading || (!hasFetched && !hasError);
 
   // Debug logging for clients data
   React.useEffect(() => {
-    console.log('🔍 CLIENTS DATA DEBUG:');
-    console.log('Raw clients from context:', clients);
-    console.log('Processed clientsArray:', clientsArray);
-    console.log('Array length:', clientsArray.length);
-    console.log('Is loading:', isDataLoading);
+    console.log("🔍 CLIENTS DATA DEBUG:");
+    console.log("Raw clients from context:", clients);
+    console.log("Processed clientsArray:", clientsArray);
+    console.log("Array length:", clientsArray.length);
+    console.log("Is loading:", isDataLoading);
   }, [clients, clientsArray, isDataLoading]);
 
   // SHOW DASHBOARD IMMEDIATELY - NO LOADING SCREEN
@@ -326,7 +399,9 @@ const DynamicClientDashboard = () => {
               isIcon={true}
               icon={RefreshCw}
               iconSize="w-4 h-4"
-              bgColor={dataRefreshing ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"}
+              bgColor={
+                dataRefreshing ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"
+              }
               textColor={dataRefreshing ? "text-gray-500" : "text-gray-700"}
               rounded="rounded-lg"
               buttonText=""
@@ -372,7 +447,11 @@ const DynamicClientDashboard = () => {
             icon={Users}
             bgColor="bg-blue-50"
             iconColor="text-blue-600"
-            trend={statistics?.clientsThisMonth ? `+${statistics.clientsThisMonth} this month` : null}
+            trend={
+              statistics?.clientsThisMonth
+                ? `+${statistics.clientsThisMonth} this month`
+                : null
+            }
             isLoading={isDataLoading}
           />
           <StatCard
@@ -421,7 +500,7 @@ const DynamicClientDashboard = () => {
               />
             </Container>
           </Container>
-          
+
           <Container className="p-6">
             {isDataLoading ? (
               // Show skeleton loading instead of blocking
@@ -469,12 +548,16 @@ const DynamicClientDashboard = () => {
         <Container className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Client Distribution */}
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Client Distribution</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Client Distribution
+            </h3>
             <Container className="space-y-4">
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center">
                   <Container className="w-3 h-3 bg-blue-500 rounded-full mr-3"></Container>
-                  <Span className="text-sm text-gray-600">Individual Clients</Span>
+                  <Span className="text-sm text-gray-600">
+                    Individual Clients
+                  </Span>
                 </Container>
                 {isDataLoading ? (
                   <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
@@ -487,7 +570,9 @@ const DynamicClientDashboard = () => {
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center">
                   <Container className="w-3 h-3 bg-green-500 rounded-full mr-3"></Container>
-                  <Span className="text-sm text-gray-600">Business Clients</Span>
+                  <Span className="text-sm text-gray-600">
+                    Business Clients
+                  </Span>
                 </Container>
                 {isDataLoading ? (
                   <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
@@ -499,7 +584,9 @@ const DynamicClientDashboard = () => {
               </Container>
               <Container className="pt-2 border-t border-gray-200">
                 <Container className="flex items-center justify-between">
-                  <Span className="text-sm font-medium text-gray-900">Total</Span>
+                  <Span className="text-sm font-medium text-gray-900">
+                    Total
+                  </Span>
                   {isDataLoading ? (
                     <Container className="w-8 h-4 bg-gray-200 animate-pulse rounded"></Container>
                   ) : (
@@ -514,49 +601,96 @@ const DynamicClientDashboard = () => {
 
           {/* Quick Actions */}
           <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Quick Actions
+            </h3>
             <Container className="space-y-3">
-              <button 
+              <button
                 onClick={() => navigate("/admin/new-clients")}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 <Container className="flex items-center">
                   <Plus className="w-5 h-5 text-blue-600 mr-3" />
                   <Container>
-                    <Span className="text-sm font-medium text-gray-900 block">Add New Client</Span>
-                    <Span className="text-xs text-gray-500">Create a new client profile</Span>
+                    <Span className="text-sm font-medium text-gray-900 block">
+                      Add New Client
+                    </Span>
+                    <Span className="text-xs text-gray-500">
+                      Create a new client profile
+                    </Span>
                   </Container>
                 </Container>
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => navigate("/admin/clients")}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 <Container className="flex items-center">
                   <Users className="w-5 h-5 text-green-600 mr-3" />
                   <Container>
-                    <Span className="text-sm font-medium text-gray-900 block">View All Clients</Span>
-                    <Span className="text-xs text-gray-500">Browse complete client list</Span>
+                    <Span className="text-sm font-medium text-gray-900 block">
+                      View All Clients
+                    </Span>
+                    <Span className="text-xs text-gray-500">
+                      Browse complete client list
+                    </Span>
                   </Container>
                 </Container>
               </button>
-              
-              <button 
+
+              <button
                 onClick={handleRefresh}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 <Container className="flex items-center">
                   <Activity className="w-5 h-5 text-purple-600 mr-3" />
                   <Container>
-                    <Span className="text-sm font-medium text-gray-900 block">Refresh Statistics</Span>
-                    <Span className="text-xs text-gray-500">Update dashboard data</Span>
+                    <Span className="text-sm font-medium text-gray-900 block">
+                      Refresh Statistics
+                    </Span>
+                    <Span className="text-xs text-gray-500">
+                      Update dashboard data
+                    </Span>
                   </Container>
                 </Container>
               </button>
             </Container>
           </Container>
         </Container>
+
+        <Modall
+          modalOpen={showDeleteModal}
+          setModalOpen={setShowDeleteModal}
+          title={
+            <Container className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              <Span>{translations["Delete Warehouse"]}</Span>
+            </Container>
+          }
+          width={500}
+          okText={translations.Delete}
+          cancelText={translations.Cancel}
+          okAction={confirmDeleteWarehouse}
+          cancelAction={() => setShowDeleteModal(false)}
+          okButtonDisabled={isDeleting}
+          body={
+            <Container className="text-center py-4">
+              <Container className="bg-red-50 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Trash2 className="w-8 h-8 text-red-600" />
+              </Container>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {translations["Are you sure?"]}
+              </h3>
+              <Span className="text-gray-500 mb-4 block">
+                {translations["This action cannot be undone"]}. This will
+                permanently delete the Client{" "}
+                <strong>"{warehouseToDelete?.Name}"</strong> and all associated
+                data.
+              </Span>
+            </Container>
+          }
+        />
       </Container>
     </Container>
   );
