@@ -58,10 +58,8 @@ const expenseCategoryReducer = (state, action) => {
     case actionTypes.SET_LOADING:
       return { ...state, loading: action.payload };
 
-
     case actionTypes.SET_ERROR:
       return { ...state, error: action.payload, loading: false };
-
 
     case actionTypes.SET_EXPENSE_CATEGORIES:
       return {
@@ -71,7 +69,6 @@ const expenseCategoryReducer = (state, action) => {
         error: null,
       };
 
-
     case actionTypes.SET_CURRENT_EXPENSE_CATEGORY:
       return {
         ...state,
@@ -79,7 +76,6 @@ const expenseCategoryReducer = (state, action) => {
         loading: false,
         error: null,
       };
-
 
     case actionTypes.SET_CATEGORY_EXPENSES:
       return {
@@ -89,7 +85,6 @@ const expenseCategoryReducer = (state, action) => {
         error: null,
       };
 
-
     case actionTypes.SET_CATEGORY_STATISTICS:
       return {
         ...state,
@@ -97,7 +92,6 @@ const expenseCategoryReducer = (state, action) => {
         loading: false,
         error: null,
       };
-
 
     case actionTypes.SET_RECENT_EXPENSES:
       return {
@@ -107,10 +101,7 @@ const expenseCategoryReducer = (state, action) => {
         error: null,
       };
 
-
     case actionTypes.SET_PAGINATION:
-      return {
-        ...state,
       return {
         ...state,
         expenseCategories: {
@@ -122,27 +113,22 @@ const expenseCategoryReducer = (state, action) => {
         },
       };
 
-
     case actionTypes.SET_FILTERS:
       return {
         ...state,
         filters: { ...state.filters, ...action.payload },
       };
 
-
     case actionTypes.ADD_EXPENSE_CATEGORY:
-      return {
-        ...state,
       return {
         ...state,
         expenseCategories: {
           ...state.expenseCategories,
-          Data: [...state.expenseCategories.Data, action.payload],
+          Data: [...state.expenseCategories.Data.$values, action.payload],
         },
         loading: false,
         error: null,
       };
-
 
     case actionTypes.UPDATE_EXPENSE_CATEGORY:
       return {
@@ -161,7 +147,6 @@ const expenseCategoryReducer = (state, action) => {
         error: null,
       };
 
-
     case actionTypes.DELETE_EXPENSE_CATEGORY:
       return {
         ...state,
@@ -178,7 +163,6 @@ const expenseCategoryReducer = (state, action) => {
         loading: false,
         error: null,
       };
-
 
     case actionTypes.TOGGLE_EXPENSE_CATEGORY_STATUS:
       return {
@@ -202,14 +186,11 @@ const expenseCategoryReducer = (state, action) => {
         error: null,
       };
 
-
     case actionTypes.CLEAR_ERROR:
       return { ...state, error: null };
 
-
     case actionTypes.RESET_STATE:
       return initialState;
-
 
     default:
       return state;
@@ -231,7 +212,6 @@ const getAuthToken = () => {
 const makeApiCall = async (url, options = {}) => {
   const token = getAuthToken();
 
-
   const defaultOptions = {
     headers: {
       "Content-Type": "application/json",
@@ -250,7 +230,6 @@ const makeApiCall = async (url, options = {}) => {
         errorData.Message || `HTTP error! status: ${response.status}`
       );
     }
-
 
     const data = await response.json();
     console.log("API response:", data); // Debug log
@@ -354,9 +333,7 @@ export const ExpenseCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-
       const response = await makeApiCall(`${API_BASE_URL}/${id}`);
-
 
       if (response.Success) {
         dispatch({
@@ -374,29 +351,22 @@ export const ExpenseCategoryProvider = ({ children }) => {
   }, []);
 
   // Create expense category
-  // Create expense category - Updated to match API requirements
   const createExpenseCategory = useCallback(async (categoryData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-      // Ensure payload matches exactly what API expects (PascalCase)
+      // Send only the 4 required fields (PascalCase)
       const payload = {
         Name: categoryData.name,
         Description: categoryData.description,
         Color: categoryData.color,
-        Icon: categoryData.icon || null,
-        IsActive: categoryData.isActive !== false,
-        DisplayOrder: categoryData.displayOrder || 0,
-        BudgetLimit: categoryData.budgetLimit || 0,
-        AllowOverBudget: categoryData.allowOverBudget !== false,
+        IsActive: categoryData.isActive
       };
-
 
       const response = await makeApiCall(API_BASE_URL, {
         method: "POST",
         body: JSON.stringify(payload),
       });
-
 
       if (response.Success) {
         dispatch({
@@ -420,24 +390,18 @@ export const ExpenseCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-
-      // Ensure payload matches exactly what API expects (PascalCase)
+      // Send only the 4 required fields (PascalCase)
       const payload = {
         Name: categoryData.name,
         Description: categoryData.description,
-        Color: categoryData.color || null,
-        IsActive: categoryData.isActive !== false,
-        DisplayOrder: categoryData.displayOrder || 0,
-        BudgetLimit: categoryData.budgetLimit || 0,
-        AllowOverBudget: categoryData.allowOverBudget !== false,
+        Color: categoryData.color,
+        IsActive: categoryData.isActive
       };
-
 
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
         method: "PUT",
         body: JSON.stringify(payload),
       });
-
 
       if (response.Success) {
         dispatch({
@@ -461,11 +425,9 @@ export const ExpenseCategoryProvider = ({ children }) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-
       const response = await makeApiCall(`${API_BASE_URL}/${id}`, {
         method: "DELETE",
       });
-
 
       if (response.Success) {
         dispatch({ type: actionTypes.DELETE_EXPENSE_CATEGORY, payload: id });
@@ -550,7 +512,6 @@ export const ExpenseCategoryProvider = ({ children }) => {
   const getCategoryExpenses = useCallback(async (id, params = {}) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
-
 
       const queryParams = new URLSearchParams();
       if (params.page) queryParams.append("Page", params.page);
@@ -659,7 +620,6 @@ export const ExpenseCategoryProvider = ({ children }) => {
     pagination: state.expenseCategories.Paginations,
     filters: state.filters,
 
-
     // Actions
     getExpenseCategories,
     getExpenseCategory,
@@ -678,7 +638,6 @@ export const ExpenseCategoryProvider = ({ children }) => {
     clearError,
     setLoading,
     resetState,
-
 
     // Helper functions
     getActiveExpenseCategories,

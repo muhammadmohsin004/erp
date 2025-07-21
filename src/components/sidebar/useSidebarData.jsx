@@ -476,19 +476,24 @@ export const useSidebarData = () => {
             path: getRoleBasedPath("/finance/incomes"),
             icon: TrendingUp,
           },
-          {
-            label: t.incomescatagories,
-            path: getRoleBasedPath("/finance/incomes/categories"),
-            icon: TrendingUp,
-          },
+          // {
+          //   label: t.incomescatagories,
+          //   path: getRoleBasedPath("/finance/incomes/categories"),
+          //   icon: TrendingUp,
+          // },
           {
             label: t.expenses,
             path: getRoleBasedPath("/finance/expenses"),
             icon: TrendingDown,
           },
-          {
-            label: t.expensescatagories,
-            path: getRoleBasedPath("/finance/expenses/catagories"),
+          // {
+          //   label: t.expensescatagories,
+          //   path: getRoleBasedPath("/finance/expenses/catagories"),
+          //   icon: TrendingDown,
+          // },
+                    {
+            label: t.financeSetting,
+            path: getRoleBasedPath("/finance/settings"),
             icon: TrendingDown,
           },
           

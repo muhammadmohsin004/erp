@@ -76,6 +76,7 @@ export const sidebarTranslations = {
     expenses: "Expenses",
     expensescatagories: "Expenses Catagories",
     balanceSheet: "Balance Sheet",
+    financesetting: "Finance Settings",
 
     //vendor
     vendor: "Vendors",
@@ -164,6 +165,7 @@ export const sidebarTranslations = {
     // Finance
     bankAccount: "حساب البنك",
     finance: "المالية",
+    financesetting: "المالية",
     incomes: "الإيرادات",
     expenses: "المصروفات",
     balanceSheet: "الميزانية العمومية",
