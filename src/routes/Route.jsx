@@ -81,8 +81,8 @@ import VendorsManagement from "../pages/Vendors/VendorsManagement";
 import BankAccountManagement from "../pages/BankAccountManagement/BankAccountManagement";
 import FinanceIncome from "../pages/FinanceManager/FinanceIncome";
 import FinanceExpenses from "../pages/FinanceManager/FinanceExpenses";
-import ExpenseCategories from "../pages/FinanceManager/ExpenseCategories"
-import IncomeCategories from "../pages/FinanceManager/IncomeCategories"
+import ExpenseCategories from "../pages/FinanceManager/ExpenseCategories";
+import IncomeCategories from "../pages/FinanceManager/IncomeCategories";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
   switch (userRole) {
@@ -505,14 +505,14 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
-      path: "/admin/invoices/list",
+    {
+      path: "/admin/invoices",
       component: InvoicesList,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
-      path: "/admin/invoices/new",
+    {
+      path: "/admin/new-invoices",
       component: InvoiceForm,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
@@ -523,19 +523,19 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/invoices/:id",
       component: InvoiceDetails,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-     {
+    {
       path: "/admin/payments",
       component: PaymentTracking,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
-   
+
     {
       path: "/admin/new-invoice",
       component: NewInvoice,

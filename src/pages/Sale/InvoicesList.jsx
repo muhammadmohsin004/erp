@@ -47,55 +47,60 @@ const InvoicesList = () => {
   const token = useSelector((state) => state.auth?.token);
 
   const translations = {
-    "Invoices": language === "ar" ? "الفواتير" : "Invoices",
+    Invoices: language === "ar" ? "الفواتير" : "Invoices",
     "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
-    "Search invoices...": language === "ar" ? "البحث في الفواتير..." : "Search invoices...",
-    "Filter": language === "ar" ? "تصفية" : "Filter",
-    "Status": language === "ar" ? "الحالة" : "Status",
+    "Search invoices...":
+      language === "ar" ? "البحث في الفواتير..." : "Search invoices...",
+    Filter: language === "ar" ? "تصفية" : "Filter",
+    Status: language === "ar" ? "الحالة" : "Status",
     "All Statuses": language === "ar" ? "جميع الحالات" : "All Statuses",
-    "Client": language === "ar" ? "العميل" : "Client",
+    Client: language === "ar" ? "العميل" : "Client",
     "All Clients": language === "ar" ? "جميع العملاء" : "All Clients",
     "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
     "Invoice Date": language === "ar" ? "تاريخ الفاتورة" : "Invoice Date",
     "Due Date": language === "ar" ? "تاريخ الاستحقاق" : "Due Date",
-    "Amount": language === "ar" ? "المبلغ" : "Amount",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Delete": language === "ar" ? "حذف" : "Delete",
-    "Send": language === "ar" ? "إرسال" : "Send",
-    "Download": language === "ar" ? "تحميل" : "Download",
-    "Draft": language === "ar" ? "مسودة" : "Draft",
-    "Sent": language === "ar" ? "مرسل" : "Sent",
-    "Paid": language === "ar" ? "مدفوع" : "Paid",
-    "Overdue": language === "ar" ? "متأخر" : "Overdue",
-    "Voided": language === "ar" ? "ملغي" : "Voided",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No invoices found": language === "ar" ? "لم يتم العثور على فواتير" : "No invoices found",
+    Amount: language === "ar" ? "المبلغ" : "Amount",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Clone: language === "ar" ? "نسخ" : "Clone",
+    Delete: language === "ar" ? "حذف" : "Delete",
+    Send: language === "ar" ? "إرسال" : "Send",
+    Download: language === "ar" ? "تحميل" : "Download",
+    Draft: language === "ar" ? "مسودة" : "Draft",
+    Sent: language === "ar" ? "مرسل" : "Sent",
+    Paid: language === "ar" ? "مدفوع" : "Paid",
+    Overdue: language === "ar" ? "متأخر" : "Overdue",
+    Voided: language === "ar" ? "ملغي" : "Voided",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "No invoices found":
+      language === "ar" ? "لم يتم العثور على فواتير" : "No invoices found",
     "Total Invoices": language === "ar" ? "إجمالي الفواتير" : "Total Invoices",
     "Total Amount": language === "ar" ? "إجمالي المبلغ" : "Total Amount",
     "Paid Amount": language === "ar" ? "المبلغ المدفوع" : "Paid Amount",
-    "Outstanding": language === "ar" ? "المستحق" : "Outstanding",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "Showing": language === "ar" ? "عرض" : "Showing",
-    "of": language === "ar" ? "من" : "of",
-    "results": language === "ar" ? "نتائج" : "results",
+    Outstanding: language === "ar" ? "المستحق" : "Outstanding",
+    Previous: language === "ar" ? "السابق" : "Previous",
+    Next: language === "ar" ? "التالي" : "Next",
+    Showing: language === "ar" ? "عرض" : "Showing",
+    of: language === "ar" ? "من" : "of",
+    results: language === "ar" ? "نتائج" : "results",
     "Clear Filters": language === "ar" ? "مسح المرشحات" : "Clear Filters",
     "Apply Filters": language === "ar" ? "تطبيق المرشحات" : "Apply Filters",
-    "Export": language === "ar" ? "تصدير" : "Export",
-    "Refresh": language === "ar" ? "تحديث" : "Refresh",
-    "Settings": language === "ar" ? "الإعدادات" : "Settings",
+    Export: language === "ar" ? "تصدير" : "Export",
+    Refresh: language === "ar" ? "تحديث" : "Refresh",
+    Settings: language === "ar" ? "الإعدادات" : "Settings",
     "Date Range": language === "ar" ? "نطاق التاريخ" : "Date Range",
-    "From": language === "ar" ? "من" : "From",
-    "To": language === "ar" ? "إلى" : "To",
+    From: language === "ar" ? "من" : "From",
+    To: language === "ar" ? "إلى" : "To",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Confirm": language === "ar" ? "تأكيد" : "Confirm",
-    "Success": language === "ar" ? "نجح" : "Success",
-    "Error": language === "ar" ? "خطأ" : "Error",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    Confirm: language === "ar" ? "تأكيد" : "Confirm",
+    Success: language === "ar" ? "نجح" : "Success",
+    Error: language === "ar" ? "خطأ" : "Error",
   };
 
   // Context hooks
@@ -128,10 +133,7 @@ const InvoicesList = () => {
     getTotalOutstandingAmount,
   } = useInvoices();
 
-  const {
-    clients,
-    getClients,
-  } = useClients();
+  const { clients, getClients } = useClients();
 
   // Local state
   const [searchTerm, setSearchTermLocal] = useState("");
@@ -155,11 +157,7 @@ const InvoicesList = () => {
 
     const loadData = async () => {
       try {
-        await Promise.all([
-          getInvoices(),
-          getClients(),
-          getStatistics(),
-        ]);
+        await Promise.all([getInvoices(), getClients(), getStatistics()]);
       } catch (error) {
         console.error("Error loading data:", error);
       }
@@ -223,20 +221,20 @@ const InvoicesList = () => {
 
   const handleEdit = (invoice) => {
     navigate(`/admin/invoices/edit/${invoice.Id}`, {
-      state: { editData: invoice, isEditing: true }
+      state: { editData: invoice, isEditing: true },
     });
   };
 
   const handleClone = (invoice) => {
-    navigate("/admin/invoices/new", {
+    navigate("/admin/new-invoice", {
       state: {
         cloneData: {
           ...invoice,
           InvoiceNumber: `${invoice.InvoiceNumber}-Copy`,
           Id: undefined,
           Status: "Draft",
-        }
-      }
+        },
+      },
     });
   };
 
@@ -270,7 +268,7 @@ const InvoicesList = () => {
   // Handle bulk actions
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedInvoices(invoices.map(invoice => invoice.Id));
+      setSelectedInvoices(invoices.map((invoice) => invoice.Id));
     } else {
       setSelectedInvoices([]);
     }
@@ -280,41 +278,41 @@ const InvoicesList = () => {
     if (checked) {
       setSelectedInvoices([...selectedInvoices, invoiceId]);
     } else {
-      setSelectedInvoices(selectedInvoices.filter(id => id !== invoiceId));
+      setSelectedInvoices(selectedInvoices.filter((id) => id !== invoiceId));
     }
   };
 
   // Get status color and icon
   const getStatusDisplay = (status) => {
     switch (status?.toLowerCase()) {
-      case 'draft':
+      case "draft":
         return {
-          color: 'bg-gray-100 text-gray-800',
+          color: "bg-gray-100 text-gray-800",
           icon: <FileText className="w-4 h-4" />,
         };
-      case 'sent':
+      case "sent":
         return {
-          color: 'bg-blue-100 text-blue-800',
+          color: "bg-blue-100 text-blue-800",
           icon: <Send className="w-4 h-4" />,
         };
-      case 'paid':
+      case "paid":
         return {
-          color: 'bg-green-100 text-green-800',
+          color: "bg-green-100 text-green-800",
           icon: <CheckCircle className="w-4 h-4" />,
         };
-      case 'overdue':
+      case "overdue":
         return {
-          color: 'bg-red-100 text-red-800',
+          color: "bg-red-100 text-red-800",
           icon: <AlertCircle className="w-4 h-4" />,
         };
-      case 'voided':
+      case "voided":
         return {
-          color: 'bg-gray-100 text-gray-800',
+          color: "bg-gray-100 text-gray-800",
           icon: <XCircle className="w-4 h-4" />,
         };
       default:
         return {
-          color: 'bg-gray-100 text-gray-800',
+          color: "bg-gray-100 text-gray-800",
           icon: <Clock className="w-4 h-4" />,
         };
     }
@@ -322,8 +320,8 @@ const InvoicesList = () => {
 
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency,
     }).format(amount);
   };
@@ -338,13 +336,14 @@ const InvoicesList = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
 
-
-  console.log('invoices================>>>>', invoices)
+  console.log("invoices================>>>>", invoices);
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -356,7 +355,8 @@ const InvoicesList = () => {
               {translations.Invoices}
             </h1>
             <Span className="text-sm text-gray-500">
-              {translations.Showing} {invoices.length} {translations.of} {pagination.totalItems} {translations.results}
+              {translations.Showing} {invoices.length} {translations.of}{" "}
+              {pagination.totalItems} {translations.results}
             </Span>
           </Container>
 
@@ -390,7 +390,9 @@ const InvoicesList = () => {
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => {/* Handle settings */}}
+              onClick={() => {
+                /* Handle settings */
+              }}
             />
 
             <FilledButton
@@ -406,7 +408,7 @@ const InvoicesList = () => {
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => navigate("/admin/invoices/new")}
+              onClick={() => navigate("/admin/new-invoice")}
             />
           </Container>
         </Container>
@@ -527,14 +529,18 @@ const InvoicesList = () => {
                 <input
                   type="date"
                   value={dateRange.from}
-                  onChange={(e) => setDateRangeLocal({ ...dateRange, from: e.target.value })}
+                  onChange={(e) =>
+                    setDateRangeLocal({ ...dateRange, from: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <Span className="text-gray-500">to</Span>
                 <input
                   type="date"
                   value={dateRange.to}
-                  onChange={(e) => setDateRangeLocal({ ...dateRange, to: e.target.value })}
+                  onChange={(e) =>
+                    setDateRangeLocal({ ...dateRange, to: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <FilledButton
@@ -581,12 +587,17 @@ const InvoicesList = () => {
               <Container className="flex items-center gap-4">
                 <input
                   type="checkbox"
-                  checked={selectedInvoices.length === invoices.length && invoices.length > 0}
+                  checked={
+                    selectedInvoices.length === invoices.length &&
+                    invoices.length > 0
+                  }
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <Span className="text-sm font-medium text-gray-700">
-                  {selectedInvoices.length > 0 ? `${selectedInvoices.length} selected` : "Select all"}
+                  {selectedInvoices.length > 0
+                    ? `${selectedInvoices.length} selected`
+                    : "Select all"}
                 </Span>
               </Container>
 
@@ -605,7 +616,9 @@ const InvoicesList = () => {
                     fontWeight="font-medium"
                     fontSize="text-sm"
                     isIconLeft={true}
-                    onClick={() => {/* Handle bulk send */}}
+                    onClick={() => {
+                      /* Handle bulk send */
+                    }}
                   />
                   <FilledButton
                     isIcon={true}
@@ -620,7 +633,9 @@ const InvoicesList = () => {
                     fontWeight="font-medium"
                     fontSize="text-sm"
                     isIconLeft={true}
-                    onClick={() => {/* Handle bulk delete */}}
+                    onClick={() => {
+                      /* Handle bulk delete */
+                    }}
                   />
                 </Container>
               )}
@@ -633,7 +648,10 @@ const InvoicesList = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {translations["Invoice Number"]}
@@ -667,7 +685,9 @@ const InvoicesList = () => {
                         <input
                           type="checkbox"
                           checked={selectedInvoices.includes(invoice.Id)}
-                          onChange={(e) => handleSelectInvoice(invoice.Id, e.target.checked)}
+                          onChange={(e) =>
+                            handleSelectInvoice(invoice.Id, e.target.checked)
+                          }
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                       </td>
@@ -709,7 +729,9 @@ const InvoicesList = () => {
                         </Span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}>
+                        <Span
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}
+                        >
                           {statusDisplay.icon}
                           {invoice.Status}
                         </Span>
@@ -717,11 +739,18 @@ const InvoicesList = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Container>
                           <Span className="text-sm font-medium text-gray-900">
-                            {formatCurrency(invoice.TotalAmount, invoice.Currency)}
+                            {formatCurrency(
+                              invoice.TotalAmount,
+                              invoice.Currency
+                            )}
                           </Span>
                           {invoice.PaidAmount > 0 && (
                             <Span className="text-xs text-green-600 block">
-                              {formatCurrency(invoice.PaidAmount, invoice.Currency)} paid
+                              {formatCurrency(
+                                invoice.PaidAmount,
+                                invoice.Currency
+                              )}{" "}
+                              paid
                             </Span>
                           )}
                         </Container>
@@ -748,7 +777,6 @@ const InvoicesList = () => {
                             textColor="text-blue-700"
                             rounded="rounded-lg"
                             buttonText=""
-
                             height="h-8"
                             width="w-8"
                             onClick={() => handleEdit(invoice)}
@@ -764,21 +792,33 @@ const InvoicesList = () => {
                               buttonText=""
                               height="h-8"
                               width="w-8"
-                              onClick={() => setActionDropdown(actionDropdown === invoice.Id ? null : invoice.Id)}
+                              onClick={() =>
+                                setActionDropdown(
+                                  actionDropdown === invoice.Id
+                                    ? null
+                                    : invoice.Id
+                                )
+                              }
                             />
                             {actionDropdown === invoice.Id && (
                               <Container className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                                 <Container className="py-1">
                                   <button
-                                    onClick={() => { handleClone(invoice); setActionDropdown(null); }}
+                                    onClick={() => {
+                                      handleClone(invoice);
+                                      setActionDropdown(null);
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                   >
                                     <Copy className="w-4 h-4" />
                                     {translations.Clone}
                                   </button>
-                                  {invoice.Status !== 'Sent' && (
+                                  {invoice.Status !== "Sent" && (
                                     <button
-                                      onClick={() => { handleSend(invoice); setActionDropdown(null); }}
+                                      onClick={() => {
+                                        handleSend(invoice);
+                                        setActionDropdown(null);
+                                      }}
                                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                     >
                                       <Send className="w-4 h-4" />
@@ -786,7 +826,11 @@ const InvoicesList = () => {
                                     </button>
                                   )}
                                   <button
-                                    onClick={() => { /* Handle download */ setActionDropdown(null); }}
+                                    onClick={() => {
+                                      /* Handle download */ setActionDropdown(
+                                        null
+                                      );
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                   >
                                     <Download className="w-4 h-4" />
@@ -794,7 +838,10 @@ const InvoicesList = () => {
                                   </button>
                                   <hr className="my-1" />
                                   <button
-                                    onClick={() => { handleDelete(invoice); setActionDropdown(null); }}
+                                    onClick={() => {
+                                      handleDelete(invoice);
+                                      setActionDropdown(null);
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -847,9 +894,13 @@ const InvoicesList = () => {
           <Container className="flex items-center justify-between mt-6">
             <Container className="flex items-center gap-2">
               <Span className="text-sm text-gray-700">
-                {translations.Showing} {((pagination.page - 1) * pagination.pageSize) + 1} to{" "}
-                {Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} {translations.of}{" "}
-                {pagination.totalItems} {translations.results}
+                {translations.Showing}{" "}
+                {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
+                {Math.min(
+                  pagination.page * pagination.pageSize,
+                  pagination.totalItems
+                )}{" "}
+                {translations.of} {pagination.totalItems} {translations.results}
               </Span>
             </Container>
 
@@ -881,8 +932,8 @@ const InvoicesList = () => {
                       onClick={() => goToPage(pageNumber)}
                       className={`px-3 py-2 text-sm rounded-lg ${
                         isCurrentPage
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       {pageNumber}
@@ -936,8 +987,10 @@ const InvoicesList = () => {
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the invoice{" "}
-              <strong>"{invoiceToDelete?.InvoiceNumber}"</strong> and all associated data.
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the invoice{" "}
+              <strong>"{invoiceToDelete?.InvoiceNumber}"</strong> and all
+              associated data.
             </Span>
           </Container>
         }

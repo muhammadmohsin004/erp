@@ -28,9 +28,9 @@ import {
 
 // Context imports
 import { useInvoices } from "../../Contexts/InvoiceContext/InvoiceContext";
-import {useClients} from "../../Contexts/apiClientContext/apiClientContext";
+import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import { useService } from "../../Contexts/ServiceContext/ServiceContext";
-import {useProductsManager} from "../../Contexts/ProductsManagerContext/ProductsManagerContext";
+import { useProductsManager } from "../../Contexts/ProductsManagerContext/ProductsManagerContext";
 
 // Component imports
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -49,12 +49,15 @@ const InvoiceForm = () => {
   const isEditing = !!id;
   const editData = location.state?.editData;
   const cloneData = location.state?.cloneData;
+  console.log("editData---->", editData);
 
   const translations = {
     "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
     "Edit Invoice": language === "ar" ? "تعديل فاتورة" : "Edit Invoice",
-    "Invoice Details": language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
-    "Client Information": language === "ar" ? "معلومات العميل" : "Client Information",
+    "Invoice Details":
+      language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
+    "Client Information":
+      language === "ar" ? "معلومات العميل" : "Client Information",
     "Invoice Items": language === "ar" ? "عناصر الفاتورة" : "Invoice Items",
     "Payment & Terms": language === "ar" ? "الدفع والشروط" : "Payment & Terms",
     "Invoice Summary": language === "ar" ? "ملخص الفاتورة" : "Invoice Summary",
@@ -62,47 +65,50 @@ const InvoiceForm = () => {
     "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
     "Invoice Date": language === "ar" ? "تاريخ الفاتورة" : "Invoice Date",
     "Due Date": language === "ar" ? "تاريخ الاستحقاق" : "Due Date",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Currency": language === "ar" ? "العملة" : "Currency",
+    Status: language === "ar" ? "الحالة" : "Status",
+    Currency: language === "ar" ? "العملة" : "Currency",
     "Add Item": language === "ar" ? "إضافة عنصر" : "Add Item",
     "Product/Service": language === "ar" ? "منتج/خدمة" : "Product/Service",
-    "Description": language === "ar" ? "الوصف" : "Description",
-    "Quantity": language === "ar" ? "الكمية" : "Quantity",
+    Description: language === "ar" ? "الوصف" : "Description",
+    Quantity: language === "ar" ? "الكمية" : "Quantity",
     "Unit Price": language === "ar" ? "سعر الوحدة" : "Unit Price",
-    "Discount": language === "ar" ? "الخصم" : "Discount",
-    "Tax": language === "ar" ? "الضريبة" : "Tax",
-    "Total": language === "ar" ? "المجموع" : "Total",
-    "Subtotal": language === "ar" ? "المجموع الفرعي" : "Subtotal",
+    Discount: language === "ar" ? "الخصم" : "Discount",
+    Tax: language === "ar" ? "الضريبة" : "Tax",
+    Total: language === "ar" ? "المجموع" : "Total",
+    Subtotal: language === "ar" ? "المجموع الفرعي" : "Subtotal",
     "Tax Amount": language === "ar" ? "مبلغ الضريبة" : "Tax Amount",
     "Discount Amount": language === "ar" ? "مبلغ الخصم" : "Discount Amount",
     "Grand Total": language === "ar" ? "المجموع الكلي" : "Grand Total",
     "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
-    "Notes": language === "ar" ? "ملاحظات" : "Notes",
+    Notes: language === "ar" ? "ملاحظات" : "Notes",
     "Internal Notes": language === "ar" ? "ملاحظات داخلية" : "Internal Notes",
     "Save Draft": language === "ar" ? "حفظ المسودة" : "Save Draft",
     "Save & Send": language === "ar" ? "حفظ وإرسال" : "Save & Send",
-    "Preview": language === "ar" ? "معاينة" : "Preview",
-    "Delete": language === "ar" ? "حذف" : "Delete",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "Search clients...": language === "ar" ? "البحث عن العملاء..." : "Search clients...",
-    "Search products...": language === "ar" ? "البحث عن المنتجات..." : "Search products...",
-    "Draft": language === "ar" ? "مسودة" : "Draft",
-    "Sent": language === "ar" ? "مرسل" : "Sent",
-    "Paid": language === "ar" ? "مدفوع" : "Paid",
-    "Overdue": language === "ar" ? "متأخر" : "Overdue",
-    "Back to Invoices": language === "ar" ? "العودة للفواتير" : "Back to Invoices",
-    "Required": language === "ar" ? "مطلوب" : "Required",
-    "Invalid": language === "ar" ? "غير صالح" : "Invalid",
-    "Success": language === "ar" ? "نجح" : "Success",
-    "Error": language === "ar" ? "خطأ" : "Error",
-    "Percentage": language === "ar" ? "نسبة مئوية" : "Percentage",
-    "Fixed": language === "ar" ? "ثابت" : "Fixed",
+    Preview: language === "ar" ? "معاينة" : "Preview",
+    Delete: language === "ar" ? "حذف" : "Delete",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "Search clients...":
+      language === "ar" ? "البحث عن العملاء..." : "Search clients...",
+    "Search products...":
+      language === "ar" ? "البحث عن المنتجات..." : "Search products...",
+    Draft: language === "ar" ? "مسودة" : "Draft",
+    Sent: language === "ar" ? "مرسل" : "Sent",
+    Paid: language === "ar" ? "مدفوع" : "Paid",
+    Overdue: language === "ar" ? "متأخر" : "Overdue",
+    "Back to Invoices":
+      language === "ar" ? "العودة للفواتير" : "Back to Invoices",
+    Required: language === "ar" ? "مطلوب" : "Required",
+    Invalid: language === "ar" ? "غير صالح" : "Invalid",
+    Success: language === "ar" ? "نجح" : "Success",
+    Error: language === "ar" ? "خطأ" : "Error",
+    Percentage: language === "ar" ? "نسبة مئوية" : "Percentage",
+    Fixed: language === "ar" ? "ثابت" : "Fixed",
     "Auto Generate": language === "ar" ? "توليد تلقائي" : "Auto Generate",
     "PO Number": language === "ar" ? "رقم أمر الشراء" : "PO Number",
     "Exchange Rate": language === "ar" ? "سعر الصرف" : "Exchange Rate",
-    "Item": language === "ar" ? "عنصر" : "Item",
-    "Remove": language === "ar" ? "إزالة" : "Remove",
+    Item: language === "ar" ? "عنصر" : "Item",
+    Remove: language === "ar" ? "إزالة" : "Remove",
     "Line Total": language === "ar" ? "إجمالي الخط" : "Line Total",
   };
 
@@ -150,7 +156,7 @@ const InvoiceForm = () => {
   const [formData, setFormData] = useState({
     clientId: "",
     invoiceNumber: "",
-    invoiceDate: new Date().toISOString().split('T')[0],
+    invoiceDate: new Date().toISOString().split("T")[0],
     dueDate: "",
     status: "Draft",
     currency: "USD",
@@ -195,11 +201,11 @@ const InvoiceForm = () => {
       try {
         // Load clients
         await getClients();
-        
+
         // Load services
         await getServices();
-        
-        // Load products 
+
+        // Load products
         await getProducts();
 
         // If editing, load invoice data
@@ -214,7 +220,7 @@ const InvoiceForm = () => {
             id: undefined,
             invoiceNumber: "",
             status: "Draft",
-            invoiceDate: new Date().toISOString().split('T')[0],
+            invoiceDate: new Date().toISOString().split("T")[0],
           });
         }
 
@@ -236,8 +242,12 @@ const InvoiceForm = () => {
       setFormData({
         clientId: currentInvoice.ClientId || "",
         invoiceNumber: currentInvoice.InvoiceNumber || "",
-        invoiceDate: currentInvoice.InvoiceDate ? new Date(currentInvoice.InvoiceDate).toISOString().split('T')[0] : "",
-        dueDate: currentInvoice.DueDate ? new Date(currentInvoice.DueDate).toISOString().split('T')[0] : "",
+        invoiceDate: currentInvoice.InvoiceDate
+          ? new Date(currentInvoice.InvoiceDate).toISOString().split("T")[0]
+          : "",
+        dueDate: currentInvoice.DueDate
+          ? new Date(currentInvoice.DueDate).toISOString().split("T")[0]
+          : "",
         status: currentInvoice.Status || "Draft",
         currency: currentInvoice.Currency || "USD",
         exchangeRate: currentInvoice.ExchangeRate || 1,
@@ -254,22 +264,22 @@ const InvoiceForm = () => {
 
   // Combine products and services into unified items array
   useEffect(() => {
-    const productItems = (products?.Data?.$values || []).map(product => ({
+    const productItems = (products?.Data?.$values || []).map((product) => ({
       id: product.Id,
       name: product.Name,
       price: product.UnitPrice || 0,
-      type: 'product',
+      type: "product",
       taxRate: product.TaxRate || 0,
-      description: product.Description || '',
+      description: product.Description || "",
     }));
 
-    const serviceItems = (services?.Data?.$values || []).map(service => ({
+    const serviceItems = (services?.Data?.$values || []).map((service) => ({
       id: service.Id,
       name: service.Name,
       price: service.UnitPrice || 0,
-      type: 'service',
+      type: "service",
       taxRate: service.TaxRate || 0,
-      description: service.Description || '',
+      description: service.Description || "",
     }));
 
     setAllItems([...productItems, ...serviceItems]);
@@ -283,7 +293,7 @@ const InvoiceForm = () => {
   // Get selected client info
   useEffect(() => {
     if (formData.clientId) {
-      const client = clients.find(c => c.Id === parseInt(formData.clientId));
+      const client = clients.find((c) => c.Id === parseInt(formData.clientId));
       setSelectedClient(client);
       if (client) {
         getClientDetails(client.Id);
@@ -294,14 +304,15 @@ const InvoiceForm = () => {
   // Calculate totals
   const calculateTotals = useCallback(() => {
     const subtotal = formData?.items?.reduce((sum, item) => {
-      return sum + (item.quantity * item.unitPrice);
+      return sum + item.quantity * item.unitPrice;
     }, 0);
 
     const totalDiscount = formData?.items?.reduce((sum, item) => {
       const lineAmount = item.quantity * item.unitPrice;
-      const discountAmount = item.discountType === "percentage" 
-        ? (lineAmount * (item.discount || 0)) / 100
-        : (item.discount || 0);
+      const discountAmount =
+        item.discountType === "percentage"
+          ? (lineAmount * (item.discount || 0)) / 100
+          : item.discount || 0;
       return sum + discountAmount;
     }, 0);
 
@@ -309,14 +320,19 @@ const InvoiceForm = () => {
 
     const totalTax = formData?.items?.reduce((sum, item) => {
       const lineAmount = item.quantity * item.unitPrice;
-      const itemDiscount = item.discountType === "percentage" 
-        ? (lineAmount * (item.discount || 0)) / 100
-        : (item.discount || 0);
+      const itemDiscount =
+        item.discountType === "percentage"
+          ? (lineAmount * (item.discount || 0)) / 100
+          : item.discount || 0;
       const taxableAmount = lineAmount - itemDiscount;
       return sum + (taxableAmount * (item.taxRate || 0)) / 100;
     }, 0);
 
-    const grandTotal = afterDiscount + totalTax + (formData.shippingAmount || 0) - (formData.discountAmount || 0);
+    const grandTotal =
+      afterDiscount +
+      totalTax +
+      (formData.shippingAmount || 0) -
+      (formData.discountAmount || 0);
 
     setTotals({
       subtotal,
@@ -328,14 +344,14 @@ const InvoiceForm = () => {
 
   // Handle form input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-    
+
     // Clear validation error for this field
     if (validationErrors[field]) {
-      setValidationErrors(prev => ({
+      setValidationErrors((prev) => ({
         ...prev,
         [field]: null,
       }));
@@ -344,7 +360,7 @@ const InvoiceForm = () => {
 
   // Handle client selection
   const handleClientSelect = (client) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       clientId: client.Id,
       currency: client.Currency || "USD",
@@ -370,7 +386,7 @@ const InvoiceForm = () => {
       lineTotal: 0,
     };
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       items: [...prev.items, newItem],
     }));
@@ -387,14 +403,15 @@ const InvoiceForm = () => {
     // Calculate line total
     const item = updatedItems[index];
     const lineAmount = item.quantity * item.unitPrice;
-    const discountAmount = item.discountType === "percentage" 
-      ? (lineAmount * (item.discount || 0)) / 100
-      : (item.discount || 0);
+    const discountAmount =
+      item.discountType === "percentage"
+        ? (lineAmount * (item.discount || 0)) / 100
+        : item.discount || 0;
     const taxableAmount = lineAmount - discountAmount;
     const taxAmount = (taxableAmount * (item.taxRate || 0)) / 100;
     item.lineTotal = taxableAmount + taxAmount;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       items: updatedItems,
     }));
@@ -402,7 +419,7 @@ const InvoiceForm = () => {
 
   // Remove item
   const removeItem = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       items: prev.items.filter((_, i) => i !== index),
     }));
@@ -410,7 +427,7 @@ const InvoiceForm = () => {
 
   // Select product/service for item
   const selectItem = (index, item) => {
-    if (item.type === 'product') {
+    if (item.type === "product") {
       updateItem(index, "productId", item.id);
       updateItem(index, "serviceId", null);
     } else {
@@ -468,7 +485,7 @@ const InvoiceForm = () => {
       const submitData = {
         ...formData,
         status: action === "send" ? "Sent" : formData.status,
-        items: formData?.items?.map(item => ({
+        items: formData?.items?.map((item) => ({
           productId: item.productId,
           serviceId: item.serviceId,
           itemName: item.itemName,
@@ -496,9 +513,11 @@ const InvoiceForm = () => {
 
         navigate("/admin/invoices", {
           state: {
-            message: isEditing ? "Invoice updated successfully" : "Invoice created successfully",
-            type: "success"
-          }
+            message: isEditing
+              ? "Invoice updated successfully"
+              : "Invoice created successfully",
+            type: "success",
+          },
         });
       }
     } catch (error) {
@@ -517,8 +536,8 @@ const InvoiceForm = () => {
       navigate("/admin/invoices", {
         state: {
           message: "Invoice deleted successfully",
-          type: "success"
-        }
+          type: "success",
+        },
       });
     } catch (error) {
       console.error("Error deleting invoice:", error);
@@ -526,16 +545,18 @@ const InvoiceForm = () => {
   };
 
   // Filtered clients for search
-  const filteredClients = clients.filter(client =>
-    client.FullName?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-    client.BusinessName?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-    client.Email?.toLowerCase().includes(clientSearch.toLowerCase())
+  const filteredClients = clients.filter(
+    (client) =>
+      client.FullName?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.BusinessName?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+      client.Email?.toLowerCase().includes(clientSearch.toLowerCase())
   );
 
   // Filtered items for search
-  const filteredItems = allItems.filter(item =>
-    item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-    item.description.toLowerCase().includes(itemSearch.toLowerCase())
+  const filteredItems = allItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
+      item.description.toLowerCase().includes(itemSearch.toLowerCase())
   );
 
   // Loading state
@@ -543,12 +564,14 @@ const InvoiceForm = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
 
-  console.log('This is the form data ', formData)
+  console.log("This is the form data ", formData);
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -570,10 +593,14 @@ const InvoiceForm = () => {
             />
             <Container>
               <h1 className="text-2xl font-bold text-gray-900">
-                {isEditing ? translations["Edit Invoice"] : translations["Create Invoice"]}
+                {isEditing
+                  ? translations["Edit Invoice"]
+                  : translations["Create Invoice"]}
               </h1>
               <Span className="text-sm text-gray-500">
-                {isEditing && formData.invoiceNumber ? `#${formData.invoiceNumber}` : translations["Invoice Details"]}
+                {isEditing && formData.invoiceNumber
+                  ? `#${formData.invoiceNumber}`
+                  : translations["Invoice Details"]}
               </Span>
             </Container>
           </Container>
@@ -592,9 +619,11 @@ const InvoiceForm = () => {
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => {/* Handle preview */}}
+              onClick={() => {
+                /* Handle preview */
+              }}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Save}
@@ -653,7 +682,6 @@ const InvoiceForm = () => {
         <Container className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Form */}
           <Container className="lg:col-span-2 space-y-6">
-            
             {/* Client Information */}
             <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
@@ -675,7 +703,9 @@ const InvoiceForm = () => {
                     >
                       {selectedClient ? (
                         <Span className="block truncate">
-                          {selectedClient.FullName || selectedClient.BusinessName} ({selectedClient.Email})
+                          {selectedClient.FullName ||
+                            selectedClient.BusinessName}{" "}
+                          ({selectedClient.Email})
                         </Span>
                       ) : (
                         <Span className="block truncate text-gray-500">
@@ -722,7 +752,9 @@ const InvoiceForm = () => {
                     )}
                   </Container>
                   {validationErrors.clientId && (
-                    <Span className="text-red-500 text-sm mt-1">{validationErrors.clientId}</Span>
+                    <Span className="text-red-500 text-sm mt-1">
+                      {validationErrors.clientId}
+                    </Span>
                   )}
                 </Container>
 
@@ -733,7 +765,8 @@ const InvoiceForm = () => {
                       <Container>
                         <Span className="text-sm text-gray-500">Name</Span>
                         <Span className="block font-medium text-gray-900">
-                          {selectedClient.FullName || selectedClient.BusinessName}
+                          {selectedClient.FullName ||
+                            selectedClient.BusinessName}
                         </Span>
                       </Container>
                       <Container>
@@ -781,7 +814,9 @@ const InvoiceForm = () => {
                     <input
                       type="text"
                       value={formData.invoiceNumber}
-                      onChange={(e) => handleInputChange("invoiceNumber", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("invoiceNumber", e.target.value)
+                      }
                       placeholder={translations["Auto Generate"]}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
@@ -796,7 +831,9 @@ const InvoiceForm = () => {
                   </label>
                   <select
                     value={formData.status}
-                    onChange={(e) => handleInputChange("status", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("status", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="Draft">{translations.Draft}</option>
@@ -814,13 +851,17 @@ const InvoiceForm = () => {
                     <input
                       type="date"
                       value={formData.invoiceDate}
-                      onChange={(e) => handleInputChange("invoiceDate", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("invoiceDate", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <Calendar className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   </Container>
                   {validationErrors.invoiceDate && (
-                    <Span className="text-red-500 text-sm mt-1">{validationErrors.invoiceDate}</Span>
+                    <Span className="text-red-500 text-sm mt-1">
+                      {validationErrors.invoiceDate}
+                    </Span>
                   )}
                 </Container>
 
@@ -833,7 +874,9 @@ const InvoiceForm = () => {
                     <input
                       type="date"
                       value={formData.dueDate}
-                      onChange={(e) => handleInputChange("dueDate", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("dueDate", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <Calendar className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -847,7 +890,9 @@ const InvoiceForm = () => {
                   </label>
                   <select
                     value={formData.currency}
-                    onChange={(e) => handleInputChange("currency", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("currency", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="USD">USD</option>
@@ -865,7 +910,9 @@ const InvoiceForm = () => {
                   <input
                     type="text"
                     value={formData.purchaseOrderNumber}
-                    onChange={(e) => handleInputChange("purchaseOrderNumber", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("purchaseOrderNumber", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </Container>
@@ -897,8 +944,6 @@ const InvoiceForm = () => {
               </Container>
 
               <Container className="space-y-4">
-                
-
                 {formData?.items?.length === 0 && (
                   <Container className="text-center py-8">
                     <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -925,7 +970,9 @@ const InvoiceForm = () => {
                   </label>
                   <textarea
                     value={formData.paymentTerms}
-                    onChange={(e) => handleInputChange("paymentTerms", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("paymentTerms", e.target.value)
+                    }
                     rows="3"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Payment terms and conditions..."
@@ -953,7 +1000,9 @@ const InvoiceForm = () => {
                   </label>
                   <textarea
                     value={formData.internalNotes}
-                    onChange={(e) => handleInputChange("internalNotes", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("internalNotes", e.target.value)
+                    }
                     rows="3"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Internal notes (not visible to client)..."
@@ -974,7 +1023,9 @@ const InvoiceForm = () => {
               <Container className="space-y-4">
                 {/* Subtotal */}
                 <Container className="flex justify-between">
-                  <Span className="text-gray-600">{translations.Subtotal}:</Span>
+                  <Span className="text-gray-600">
+                    {translations.Subtotal}:
+                  </Span>
                   <Span className="font-medium">
                     {formData.currency} {totals.subtotal}
                   </Span>
@@ -982,7 +1033,9 @@ const InvoiceForm = () => {
 
                 {/* Discount */}
                 <Container className="flex justify-between">
-                  <Span className="text-gray-600">{translations.Discount}:</Span>
+                  <Span className="text-gray-600">
+                    {translations.Discount}:
+                  </Span>
                   <Span className="font-medium text-red-600">
                     -{formData.currency} {totals.totalDiscount}
                   </Span>
@@ -990,7 +1043,9 @@ const InvoiceForm = () => {
 
                 {/* Tax */}
                 <Container className="flex justify-between">
-                  <Span className="text-gray-600">{translations["Tax Amount"]}:</Span>
+                  <Span className="text-gray-600">
+                    {translations["Tax Amount"]}:
+                  </Span>
                   <Span className="font-medium">
                     {formData.currency} {totals.totalTax}
                   </Span>
@@ -1005,7 +1060,12 @@ const InvoiceForm = () => {
                     <input
                       type="number"
                       value={formData.discountAmount}
-                      onChange={(e) => handleInputChange("discountAmount", parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "discountAmount",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       min="0"
                       step="0.01"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1023,7 +1083,12 @@ const InvoiceForm = () => {
                     <input
                       type="number"
                       value={formData.shippingAmount}
-                      onChange={(e) => handleInputChange("shippingAmount", parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "shippingAmount",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
                       min="0"
                       step="0.01"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1113,8 +1178,9 @@ const InvoiceForm = () => {
                 Are you sure?
               </h3>
               <Span className="text-gray-500 mb-4 block">
-                This action cannot be undone. This will permanently delete the invoice{" "}
-                <strong>"{formData.invoiceNumber}"</strong> and all associated data.
+                This action cannot be undone. This will permanently delete the
+                invoice <strong>"{formData.invoiceNumber}"</strong> and all
+                associated data.
               </Span>
             </Container>
           }
