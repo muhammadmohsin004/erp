@@ -476,6 +476,7 @@ export const useSidebarData = () => {
             path: getRoleBasedPath("/finance/incomes"),
             icon: TrendingUp,
           },
+
           // {
           //   label: t.incomescatagories,
           //   path: getRoleBasedPath("/finance/incomes/categories"),
@@ -495,6 +496,11 @@ export const useSidebarData = () => {
             label: t.financeSetting,
             path: getRoleBasedPath("/finance/settings"),
             icon: TrendingDown,
+          },
+           {
+            label: t.FinanceReports,
+            path: getRoleBasedPath("/finance/Reports/Manager"),
+            icon: TrendingUp,
           },
           
           {

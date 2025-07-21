@@ -29,6 +29,7 @@ import { ExpenseCategoryProvider } from "./Contexts/ExpenseCategoryContext/Expen
 import { FinanceExpensesProvider } from "./Contexts/FinanceContext/FinanceExpensesContext";
 import { FinanceIncomesProvider } from "./Contexts/FinanceContext/FinanceIncomeContext";
 import { IncomeCategoryProvider } from "./Contexts/IncomeCategoryContext/IncomeCategoryContext";
+import { FinanceReportsProvider } from "./Contexts/FinanceReportsContext";
 function App() {
   return (
     <Router>
@@ -58,7 +59,9 @@ function App() {
                                                     <FinanceExpensesProvider>
                                                       <FinanceIncomesProvider>
                                                         <IncomeCategoryProvider>
+                                                          <FinanceReportsProvider>
                                                           <Routes />
+                                                          </FinanceReportsProvider> 
                                                         </IncomeCategoryProvider>
                                                       </FinanceIncomesProvider>
                                                     </FinanceExpensesProvider>
