@@ -88,6 +88,7 @@ import InvoiceDemoApp from "../pages/Sale/Invoice/InvoiceDetailsPage";
 import ClientsListPage from "../pages/clients/ClientsListPage";
 import ClientDetailPage from "../pages/clients/ClientDetailPage";
 import FinanceSettings from "../pages/FinanceManager/FinanceSettings";
+import IncomeDetailsPage from "../pages/FinanceManager/IncomeDetails/IncomeDetailsPage";
 // import InvoiceApp from "../pages/Sale/InvoiceApp/InvoiceApp";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -717,6 +718,14 @@ const getRouteConfig = () => {
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },
+
+    {
+      path: "/admin/finance/incomes/Income Details /:id",
+      component: IncomeDetailsPage,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+
     // {
     //   path: "/admin/finance/income/new",
     //   component: NewIncome,
