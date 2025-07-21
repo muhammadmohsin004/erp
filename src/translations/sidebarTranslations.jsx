@@ -76,7 +76,7 @@ export const sidebarTranslations = {
     expenses: "Expenses",
     expensescatagories: "Expenses Catagories",
     balanceSheet: "Balance Sheet",
-    financesetting: "Finance Settings",
+    financeSetting: "Finance Settings",
     FinanceReports: "FinanceReports",
 
     //vendor
