@@ -104,9 +104,8 @@ const InputField = ({
     placeholder,
     value: value || "",
     onChange,
-    className: `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-      errors[name] ? "border-red-500" : "border-gray-300"
-    }`,
+    className: `w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors[name] ? "border-red-500" : "border-gray-300"
+      }`,
   };
 
   return (
@@ -147,9 +146,8 @@ const SelectBox = ({
           console.log(`SelectBox ${name} - Selected:`, e.target.value);
           handleChange(e.target.value);
         }}
-        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          errors[name] ? "border-red-500" : "border-gray-300"
-        }`}
+        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors[name] ? "border-red-500" : "border-gray-300"
+          }`}
       >
         <option value="">{placeholder}</option>
         {optionList.map((option) => (
@@ -308,10 +306,10 @@ const BankAccountForm = forwardRef(
     console.log("BankAccountForm - Render with formData:", formData);
 
     return (
-      <Container className="space-y-6 p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+      <Container className="space-y-6 p-6 rounded-lg  max-w-4xl mx-auto">
         {/* Account Information Section */}
         <Container>
-          <Container className="flex items-center gap-2 mb-4"> 
+          <Container className="flex items-center gap-2 mb-4">
             <Building2 className="w-5 h-5 text-blue-600" />
             <h3 className="text-lg font-semibold text-gray-900">
               {translations["Account Information"]}
@@ -435,16 +433,17 @@ const BankAccountForm = forwardRef(
 
         {/* Submit Button for Testing */}
         <Container className="flex justify-end space-x-4">
-          <button
-            type="button"
+          <FilledButton
+            buttonText={isEditing ? "Update Account" : "Create Account"}
+            icon={Plus}
             onClick={() => {
               console.log("Submit button clicked");
               handleFormSubmit();
             }}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+
           >
-            {isEditing ? "Update Account" : "Create Account"}
-          </button>
+
+          </FilledButton>
         </Container>
       </Container>
     );
@@ -496,10 +495,10 @@ const BankAccountManagement = () => {
 
   // Filter and search options
   const accountTypeOptions = [
-    { value: "", label: translations.All },
-    { value: "Savings", label: translations.Savings },
-    { value: "Checking", label: translations.Checking },
-    { value: "Business", label: translations.Business },
+    { value: "", label: "All" },
+    { value: "Savings", label: "Savings" },
+    { value: "Checking", label: "Checking" },
+    { value: "Business", label: "Business" },
   ];
 
   const currencyOptions = [
@@ -660,17 +659,17 @@ const BankAccountManagement = () => {
       {/* Header */}
       <Container className="bg-white border-b border-gray-200">
         <Container className="px-6 py-4">
-          <Container className="flex items-center justify-between">
-            <Container className="flex items-center gap-4">
-              <Container className="flex items-center gap-2">
-                <Building2 className="w-8 h-8 text-blue-600" />
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {translations["Bank Account Management"]}
-                </h1>
-              </Container>
+          <Container className="flex items-center justify-around">
+
+            <Container className="flex items-center gap-2">
+              <Building2 className="w-8 h-8 text-blue-600" />
+              <h1 className="text-2xl font-bold text-gray-900">
+                {"Bank Account Management"}
+              </h1>
             </Container>
 
-            <Container className="flex gap-3">
+
+            <Container className="flex text-end  gap-2">
               <OutlineButton
                 buttonText={translations.Export}
                 icon={Download}
@@ -706,7 +705,7 @@ const BankAccountManagement = () => {
                 onClick={() => console.log("Import")}
               />
               <FilledButton
-                buttonText={translations["Add New Account"]}
+                buttonText={"Add New Account"}
                 icon={Plus}
                 isIcon={true}
                 isIconLeft={true}
@@ -791,31 +790,33 @@ const BankAccountManagement = () => {
 
         {/* Search and Filters */}
         <Card className="p-6 mb-6">
-          <SearchAndFilters
-            searchPlaceholder={translations["Search bank accounts"]}
-            onSearch={handleSearch}
-            searchValue={searchTerm}
-            filters={[
-              {
-                label: translations["Filter by account type"],
-                options: accountTypeOptions,
-                value: selectedFilters.accountType,
-                onChange: (value) => handleFilterChange("accountType", value),
-              },
-              {
-                label: translations["Filter by currency"],
-                options: currencyOptions,
-                value: selectedFilters.currency,
-                onChange: (value) => handleFilterChange("currency", value),
-              },
-              {
-                label: translations["Filter by status"],
-                options: statusOptions,
-                value: selectedFilters.status,
-                onChange: (value) => handleFilterChange("status", value),
-              },
-            ]}
-          />
+         
+            <SearchAndFilters
+              searchPlaceholder="Search bank accounts"
+              onSearch={handleSearch}
+              searchValue={searchTerm}
+              filters={[
+                {
+                  label: "Account type",
+                  options: accountTypeOptions,
+                  value: selectedFilters.accountType,
+                  onChange: (value) => handleFilterChange("accountType", value),
+                },
+                {
+                  label: "Currency",
+                  options: currencyOptions,
+                  value: selectedFilters.currency,
+                  onChange: (value) => handleFilterChange("currency", value),
+                },
+                {
+                  label: "Status",
+                  options: statusOptions,
+                  value: selectedFilters.status,
+                  onChange: (value) => handleFilterChange("status", value),
+                },
+              ]}
+            />
+          
         </Card>
 
         {/* Error Alert */}
@@ -964,42 +965,32 @@ const BankAccountManagement = () => {
                       </TD>
                       <TD className="text-center">
                         <Dropdown
-                          buttonText={translations.Actions}
-                          buttonClassName="text-sm"
+                          buttonText={'Actions'}
+                          buttonClassName="text-sm "
                           items={[
+
                             {
-                              label: translations["View Details"],
-                              icon: Eye,
-                              action: () =>
-                                console.log("View details", account.Id),
-                            },
-                            {
-                              label: translations["Edit"],
+                              label: "Edit",
                               icon: Edit2,
                               action: () => handleEdit(account),
                             },
-                            {
-                              label: translations["View Transactions"],
-                              icon: Activity,
-                              action: () =>
-                                console.log("View transactions", account.Id),
-                            },
+
                             ...(!account.IsDefault
                               ? [
-                                  {
-                                    label: translations["Set as Default"],
-                                    icon: Star,
-                                    action: () => handleSetDefault(account.Id),
-                                  },
-                                ]
+                                {
+                                  label: "Set as Default",
+                                  icon: Star,
+                                  action: () => handleSetDefault(account.Id),
+                                },
+                              ]
                               : []),
                             {
-                              label: translations["Toggle Status"],
+                              label: "Toggle Status",
                               icon: account.IsActive ? XCircle : CheckCircle,
                               action: () => handleToggleStatus(account.Id),
                             },
                             {
-                              label: translations["Delete"],
+                              label: "Delete",
                               icon: Trash2,
                               action: () => handleDelete(account.Id),
                               className: "text-red-600 hover:text-red-700",
@@ -1044,8 +1035,8 @@ const BankAccountManagement = () => {
           isSaving
             ? translations.Loading
             : isEditing
-            ? translations["Update Account"]
-            : translations["Create Account"]
+              ? translations["Update Account"]
+              : translations["Create Account"]
         }
         cancelText={translations.Cancel}
         okAction={handleModalOk}
