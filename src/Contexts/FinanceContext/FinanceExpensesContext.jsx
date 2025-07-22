@@ -266,7 +266,7 @@ export const FinanceExpensesProvider = ({ children }) => {
 
         if (response.Success) {
           // Handle both single object and array responses
-          const expenseData = response?.Data?.$values || [];
+          const expenseData = response?.data?.Data?.$values || [];
 
           console.log("Expense Data:", expenseData);
 

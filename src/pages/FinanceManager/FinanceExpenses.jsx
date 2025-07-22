@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { 
   Plus, Search, Calendar, 
   Eye, Edit, Trash2, MoreVertical, AlertCircle,
@@ -29,18 +29,6 @@ const Toast = ({ message, type, onClose }) => {
   };
 
   const Icon = icons[type];
-
-  useEffect(() => {
-    // Fetch expense details when component mounts
-    if (expenseId) {
-      getExpense(expenseId);
-    }
-
-    // Cleanup function to clear current expense when component unmounts
-    return () => {
-      clearCurrentExpense();
-    };
-  }, [expenseId, getExpense, clearCurrentExpense]);
 
   useEffect(() => {
     const timer = setTimeout(onClose, 5000);
@@ -452,6 +440,18 @@ const ExpenseDetailsPage = ({
   const expense = currentExpense;
 
   useEffect(() => {
+    // Fetch expense details when component mounts
+    if (expenseId) {
+      getExpense(expenseId);
+    }
+
+    // Cleanup function to clear current expense when component unmounts
+    return () => {
+      clearCurrentExpense();
+    };
+  }, [expenseId]); // Fixed: Remove function dependencies
+
+  useEffect(() => {
     // Load company data from localStorage
     try {
       const companyData = localStorage.getItem('company');
@@ -462,20 +462,20 @@ const ExpenseDetailsPage = ({
       console.error('Error loading company data:', error);
       showToast('Error loading company data', 'error');
     }
-  }, [showToast]);
+  }, []); // Fixed: Remove showToast dependency
 
   useEffect(() => {
     if (expense) {
       showToast('Expense details loaded successfully', 'success');
       setIsDraft(expense.Status === 'Draft' || expense.IsDraft);
     }
-  }, [expense, showToast]);
+  }, [expense]); // Fixed: Remove showToast dependency
 
   useEffect(() => {
     if (error) {
       showToast(`Error: ${error}`, 'error');
     }
-  }, [error, showToast]);
+  }, [error]); // Fixed: Remove showToast dependency
 
   // Early return if no expenseId provided
   if (!expenseId) {
@@ -528,72 +528,42 @@ const ExpenseDetailsPage = ({
     printWindow.print();
     printWindow.close();
     
-    notify.info('Printing initiated');
+    showToast('Printing initiated', 'info');
   };
 
   const handleDownloadPDF = async () => {
     try {
-      notify.info('Generating PDF...');
+      showToast('Generating PDF...', 'info');
       
-      // Dynamic import for PDF generation
-      const jsPDF = (await import('jspdf')).jsPDF;
-      const html2canvas = (await import('html2canvas')).default;
-      
-      const element = voucherRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      
-      let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      pdf.save(`Expense_Voucher_${expense?.CodeNumber}.pdf`);
-      notify.success('PDF downloaded successfully');
+      // For this demo, we'll just show a message
+      // In a real app, you'd implement PDF generation
+      showToast('PDF generation feature coming soon', 'warning');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      notify.error('Error generating PDF. Please try again.');
+      showToast('Error generating PDF. Please try again.', 'error');
     }
   };
 
   const handleSendEmail = () => {
-    notify.info('Email feature coming soon');
+    showToast('Email feature coming soon', 'info');
   };
 
   const handleEdit = () => {
     if (onEdit && expense) {
       onEdit(expense);
     } else {
-      notify.warning('Edit functionality not available');
+      showToast('Edit functionality not available', 'warning');
     }
   };
 
   const handleClone = async () => {
     if (!expense) {
-      notify.error('No expense data to clone');
+      showToast('No expense data to clone', 'error');
       return;
     }
 
     try {
-      notify.info('Cloning expense record...');
+      showToast('Cloning expense record...', 'info');
       
       const cloneData = {
         description: `Copy of ${expense.Description}`,
@@ -613,22 +583,22 @@ const ExpenseDetailsPage = ({
         onClone(expense);
       }
       
-      notify.success('Expense record cloned successfully');
+      showToast('Expense record cloned successfully', 'success');
     } catch (error) {
       console.error('Error cloning expense:', error);
-      notify.error('Error cloning expense record');
+      showToast('Error cloning expense record', 'error');
     }
   };
 
   const handleDelete = async () => {
     if (!expense) {
-      notify.error('No expense data to delete');
+      showToast('No expense data to delete', 'error');
       return;
     }
 
     if (window.confirm('Are you sure you want to delete this expense record? This action cannot be undone.')) {
       try {
-        notify.info('Deleting expense record...');
+        showToast('Deleting expense record...', 'info');
         
         await contextDeleteExpense(expense.Id || expense.id);
         
@@ -636,7 +606,7 @@ const ExpenseDetailsPage = ({
           onDelete(expense.Id || expense.id);
         }
         
-        notify.success('Expense record deleted successfully');
+        showToast('Expense record deleted successfully', 'success');
         
         setTimeout(() => {
           if (onBack) onBack();
@@ -644,7 +614,7 @@ const ExpenseDetailsPage = ({
         
       } catch (error) {
         console.error('Error deleting expense:', error);
-        notify.error('Error deleting expense record');
+        showToast('Error deleting expense record', 'error');
       }
     }
   };
@@ -653,7 +623,7 @@ const ExpenseDetailsPage = ({
     if (!expense) return;
 
     try {
-      notify.info('Updating status...');
+      showToast('Updating status...', 'info');
       
       const updateData = {
         ...expense,
@@ -663,10 +633,10 @@ const ExpenseDetailsPage = ({
       await updateExpense(expense.Id || expense.id, updateData);
       setIsDraft(!isDraft);
       
-      notify.success(`Expense marked as ${isDraft ? 'Confirmed' : 'Draft'}`);
+      showToast(`Expense marked as ${isDraft ? 'Confirmed' : 'Draft'}`, 'success');
     } catch (error) {
       console.error('Error updating status:', error);
-      notify.error('Error updating status');
+      showToast('Error updating status', 'error');
     }
   };
 
@@ -684,6 +654,7 @@ const ExpenseDetailsPage = ({
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <ToastContainer />
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading expense details...</p>
@@ -695,6 +666,7 @@ const ExpenseDetailsPage = ({
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <ToastContainer />
         <div className="text-center">
           <div className="text-red-600 mb-4">
             <XCircle className="mx-auto h-12 w-12 mb-2" />
@@ -710,6 +682,7 @@ const ExpenseDetailsPage = ({
   if (!expense) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <ToastContainer />
         <div className="text-center">
           <p className="text-gray-600">Expense not found</p>
           <Button onClick={onBack} className="mt-4">Go Back</Button>
@@ -720,7 +693,7 @@ const ExpenseDetailsPage = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
+      <ToastContainer />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="bg-red-600 text-white px-6 py-4 rounded-t-lg">
@@ -865,6 +838,8 @@ const ExpenseDetailsPage = ({
 
 // Main Component - Expense List & Details Management
 const FinanceExpense = () => {
+  const { showToast, ToastContainer } = useToast();
+  
   // Page state management
   const [currentPage, setCurrentPage] = useState('list'); // 'list' or 'details'
   const [selectedExpenseId, setSelectedExpenseId] = useState(null);
@@ -891,7 +866,10 @@ const FinanceExpense = () => {
   } = useFinanceExpenses();
 
   // Expense Category Context
-  const { getActiveExpenseCategories } = useExpenseCategory();
+  const { getExpenseCategories,expenseCategories } = useExpenseCategory();
+  console.log("sfdjihasidfauiehguieshigufsui",expenseCategories);
+   const activeCategories = expenseCategories?.$values;
+
 
   // State for list page
   const [searchValue, setSearchValue] = useState('');
@@ -921,20 +899,22 @@ const FinanceExpense = () => {
     const loadData = async () => {
       try {
         await getExpenses();
+        await getExpenseCategories();
         await getExpenseStatistics();
-        notify.success('Data loaded successfully');
+        showToast('Data loaded successfully', 'success');
       } catch (error) {
         console.error("Error loading data:", error);
-        notify.error('Error loading data');
+        showToast('Error loading data', 'error');
       }
     };
     
     if (currentPage === 'list') {
       loadData();
     }
-  }, [currentPage]);
+  }, [currentPage]); // Fixed: Remove function dependencies
 
   // Helper function to safely get expenses array
+  console.log("expenses",expenses);
   const getExpensesArray = () => {
     if (Array.isArray(expenses)) {
       return expenses;
@@ -960,8 +940,9 @@ const FinanceExpense = () => {
   };
 
   // Get category name by ID
+    console.log("activeCategories",activeCategories);
   const getCategoryNameById = (categoryId) => {
-    const activeCategories = getActiveExpenseCategories();
+   
     const category = activeCategories.find(cat => cat.Id === categoryId);
     return category ? category.Name : 'Uncategorized';
   };
@@ -997,7 +978,7 @@ const FinanceExpense = () => {
   const handleSearch = () => {
     if (searchValue.trim()) {
       searchExpenses(searchValue);
-      notify.info('Search completed');
+      showToast('Search completed', 'info');
     } else {
       getExpenses();
     }
@@ -1012,7 +993,7 @@ const FinanceExpense = () => {
     setDateRange({ start: '', end: '' });
     resetFilters();
     getExpenses();
-    notify.info('Filters reset');
+    showToast('Filters reset', 'info');
   };
 
   const handleCategoryFilter = (categoryId) => {
@@ -1032,7 +1013,7 @@ const FinanceExpense = () => {
   const handleDateRangeFilter = () => {
     if (dateRange.start && dateRange.end) {
       filterByDateRange(dateRange.start, dateRange.end);
-      notify.info('Date filter applied');
+      showToast('Date filter applied', 'info');
     }
   };
 
@@ -1042,7 +1023,7 @@ const FinanceExpense = () => {
 
   const handleAddExpense = async () => {
     if (!validateForm()) {
-      notify.error('Please fix the form errors');
+      showToast('Please fix the form errors', 'error');
       return;
     }
 
@@ -1052,10 +1033,10 @@ const FinanceExpense = () => {
       setShowAddModal(false);
       resetForm();
       await getExpenses();
-      notify.success('Expense added successfully');
+      showToast('Expense added successfully', 'success');
     } catch (error) {
       console.error('Error adding expense:', error);
-      notify.error('Error adding expense');
+      showToast('Error adding expense', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -1063,7 +1044,7 @@ const FinanceExpense = () => {
 
   const handleEditExpense = async () => {
     if (!validateForm()) {
-      notify.error('Please fix the form errors');
+      showToast('Please fix the form errors', 'error');
       return;
     }
 
@@ -1074,10 +1055,10 @@ const FinanceExpense = () => {
       setEditingExpense(null);
       resetForm();
       await getExpenses();
-      notify.success('Expense updated successfully');
+      showToast('Expense updated successfully', 'success');
     } catch (error) {
       console.error('Error updating expense:', error);
-      notify.error('Error updating expense');
+      showToast('Error updating expense', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -1088,10 +1069,10 @@ const FinanceExpense = () => {
       try {
         await deleteExpense(id);
         await getExpenses();
-        notify.success('Expense deleted successfully');
+        showToast('Expense deleted successfully', 'success');
       } catch (error) {
         console.error('Error deleting expense:', error);
-        notify.error('Error deleting expense');
+        showToast('Error deleting expense', 'error');
       }
     }
   };
@@ -1205,10 +1186,12 @@ const FinanceExpense = () => {
   }
 
   const expensesList = getExpensesArray();
+  console.log('expensesList:', expensesList);
 
   if (loading && expensesList.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <ToastContainer />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -1228,7 +1211,7 @@ const FinanceExpense = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      
+      <ToastContainer />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error Display */}
         {error && (
@@ -1322,7 +1305,7 @@ const FinanceExpense = () => {
                 onChange={(e) => handleCategoryFilter(e.target.value)}
               >
                 <option value="">Any category</option>
-                {getActiveExpenseCategories()?.map(cat => (
+                {expenseCategories?.$values?.map(cat => (
                   <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
                 ))}
               </Select>
@@ -1578,7 +1561,7 @@ const FinanceExpense = () => {
               error={formErrors.categoryId}
             >
               <option value="">Select category</option>
-              {getActiveExpenseCategories()?.map(cat => (
+              {expenseCategories?.$values?.map(cat => (
                 <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
               ))}
             </Select>
@@ -1654,7 +1637,7 @@ const FinanceExpense = () => {
               error={formErrors.categoryId}
             >
               <option value="">Select category</option>
-              {getActiveExpenseCategories()?.map(cat => (
+              {expenseCategories?.$values?.map(cat => (
                 <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
               ))}
             </Select>

@@ -869,7 +869,7 @@ const FinanceIncome = () => {
   } = useFinanceIncomes();
 
   // Income Category Context
-  const { getActiveIncomeCategories } = useIncomeCategory();
+  const { getIncomeCategories,incomeCategories } = useIncomeCategory();
 
   // State for list page
   const [searchValue, setSearchValue] = useState('');
@@ -899,6 +899,7 @@ const FinanceIncome = () => {
     const loadData = async () => {
       try {
         await getIncomes();
+        await getIncomeCategories();
         await getIncomeStatistics();
         showToast('Data loaded successfully', 'success');
       } catch (error) {
@@ -939,7 +940,7 @@ const FinanceIncome = () => {
 
   // Get category name by ID
   const getCategoryNameById = (categoryId) => {
-    const activeCategories = getActiveIncomeCategories();
+    const activeCategories = incomeCategories.Data?.$values;
     const category = activeCategories.find(cat => cat.Id === categoryId);
     return category ? category.Name : 'Uncategorized';
   };
@@ -1302,7 +1303,7 @@ const FinanceIncome = () => {
                 onChange={(e) => handleCategoryFilter(e.target.value)}
               >
                 <option value="">Any category</option>
-                {getActiveIncomeCategories()?.map(cat => (
+                {incomeCategories.Data?.$values?.map(cat => (
                   <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
                 ))}
               </Select>
@@ -1558,7 +1559,7 @@ const FinanceIncome = () => {
               error={formErrors.categoryId}
             >
               <option value="">Select category</option>
-              {getActiveIncomeCategories()?.map(cat => (
+              {incomeCategories.Data?.$values?.map(cat => (
                 <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
               ))}
             </Select>
@@ -1634,7 +1635,7 @@ const FinanceIncome = () => {
               error={formErrors.categoryId}
             >
               <option value="">Select category</option>
-              {getActiveIncomeCategories()?.map(cat => (
+              {incomeCategories?.Data?.$values.map(cat => (
                 <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
               ))}
             </Select>
