@@ -5,30 +5,26 @@ const OutlineButton = ({
   icon: Icon,
   isIconLeft,
   isIconRight,
-  borderColor,
-  borderWidth,
-  rounded,
-  bgColor,
-  textColor,
-  buttonText,
-  height,
-  width,
-  fontWeight,
-  fontSize,
-  type,
+  borderColor = "border-primary-border",
+  borderWidth = "border",
+  rounded = "rounded-md",
+  bgColor = "bg-transparent",
+  textColor = "text-primary-text",
+  buttonText = "",
+  height = "h-10",
+  width = "w-auto",
+  fontWeight = "font-medium",
+  fontSize = "text-sm",
+  type = "button",
   onClick,
-  px,
-  hover,
+  px = "px-4",
+  hover = "hover:bg-primary-hover",
   disabled = false,
 }) => {
   return (
     <button
       disabled={disabled}
-      className={`${bgColor} ${textColor} ${height} ${width} ${fontWeight} ${fontSize} ${borderColor} ${borderWidth}  ${rounded} ${
-        px !== undefined && px
-      } ${
-        hover !== undefined && hover
-      } text-center flex justify-center items-center pointer`}
+      className={`${bgColor} ${textColor} ${height} ${width} ${fontWeight} ${fontSize} ${borderColor} ${borderWidth} ${rounded} ${px} ${hover} text-center flex justify-center items-center pointer`}
       type={type}
       onClick={onClick}
     >
@@ -43,7 +39,6 @@ const OutlineButton = ({
           <Icon className={`${fontSize} ${textColor}`} />
         </Span>
       )}
-      {/* Handle case when only isIcon is true (no left/right specified) */}
       {isIcon && !isIconLeft && !isIconRight && (
         <Span>
           <Icon className={`${fontSize} ${textColor}`} />
