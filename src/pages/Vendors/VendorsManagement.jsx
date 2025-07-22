@@ -10,161 +10,87 @@ import {
   ToggleRight,
   MapPin,
   Phone,
-  Mail,
-  Building,
-  Calendar,
-  User,
-  ArrowLeft,
-  Save,
   Filter,
   Search,
+  ChevronLeft,
+  ChevronRight,
+  Mail,
+  Building,
+  User,
+  RefreshCw,
   X,
 } from "lucide-react";
+import { notification } from "antd";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import OutlineButton from "../../components/elements/elements/buttons/outlineButton/OutlineButton";
 import Table from "../../components/elements/table/Table";
-import { useVendor } from "../../Contexts/VendorContext/VendorContext";
-import Modall from "../../components/elements/modal/Modal";
 import InputField from "../../components/elements/inputField/InputField";
 import SelectBox from "../../components/elements/selectBox/SelectBox";
-import { notification } from "antd";
+import { useVendor } from "../../Contexts/VendorContext/VendorContext";
 
 const VendorManagement = () => {
   const navigate = useNavigate();
   const {
     vendors,
-    currentVendor,
     loading,
     error,
     pagination,
     filters,
     getVendors,
     getVendor,
-    createVendor,
-    updateVendor,
     deleteVendor,
     toggleVendorStatus,
     searchVendors,
     filterVendorsByCurrency,
     filterVendorsByCountry,
     filterVendorsByStatus,
-    filterVendorsByDateRange,
-    sortVendors,
-    changePage,
-    changePageSize,
     setFilters,
     clearError,
-    resetState,
+    changePage,
+    changePageSize,
+    bulkDeleteVendors,
   } = useVendor();
 
-  // State for modals and forms
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedVendor, setSelectedVendor] = useState(null);
+  // Local state
+  const [apiNotification, contextHolder] = notification.useNotification();
   const [selectedVendors, setSelectedVendors] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
   const [isTogglingStatus, setIsTogglingStatus] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
-  const [apiNotification, contextHolder] = notification.useNotification();
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
-  // Form state - Updated to match API expected format
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    country: "",
-    postalCode: "",
-    currency: "USD",
-    paymentTerms: "",
-    contactPerson: "",
-    taxNumber: "",
-    bankDetails: "",
-    isActive: true,
-    description: "",
-  });
-
-  // Translations
-  const translations = {
-    Vendors: "Vendors",
-    "New Vendor": "New Vendor",
-    "Edit Vendor": "Edit Vendor",
-    "View Vendor": "View Vendor",
-    "Vendor Details": "Vendor Details",
-    Name: "Name",
-    Code: "Code",
-    Email: "Email",
-    Phone: "Phone",
-    Address: "Address",
-    City: "City",
-    State: "State",
-    Country: "Country",
-    "Postal Code": "Postal Code",
-    Currency: "Currency",
-    "Payment Terms": "Payment Terms",
-    "Contact Person": "Contact Person",
-    "Tax Number": "Tax Number",
-    "Bank Details": "Bank Details",
-    Status: "Status",
-    Active: "Active",
-    Inactive: "Inactive",
-    Description: "Description",
-    Actions: "Actions",
-    View: "View",
-    Edit: "Edit",
-    Delete: "Delete",
-    Clone: "Clone",
-    Toggle: "Toggle",
-    Save: "Save",
-    Cancel: "Cancel",
-    Close: "Close",
-    Search: "Search",
-    Filters: "Filters",
-    "Clear All": "Clear All",
-    Apply: "Apply",
-    "Select All": "Select All",
-    "Delete Selected": "Delete Selected",
-    Export: "Export",
-    Import: "Import",
-    Created: "Created",
-    Updated: "Updated",
-    Loading: "Loading",
-    "No vendors found": "No vendors found",
-    "Are you sure you want to delete this vendor?":
-      "Are you sure you want to delete this vendor?",
-    "Are you sure you want to delete selected vendors?":
-      "Are you sure you want to delete selected vendors?",
-    Success: "Success",
-    Error: "Error",
-    "Vendor created successfully": "Vendor created successfully",
-    "Vendor updated successfully": "Vendor updated successfully",
-    "Vendor deleted successfully": "Vendor deleted successfully",
-    "Status toggled successfully": "Status toggled successfully",
-    "Required field": "This field is required",
-    "Invalid email": "Please enter a valid email address",
-  };
-
-  // Currency options
+  // Filter options
   const currencyOptions = [
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-    { value: "GBP", label: "GBP" },
-    { value: "PKR", label: "PKR" },
+    { value: "USD", label: "USD - US Dollar" },
+    { value: "EUR", label: "EUR - Euro" },
+    { value: "GBP", label: "GBP - British Pound" },
+    { value: "PKR", label: "PKR - Pakistani Rupee" },
+    { value: "CAD", label: "CAD - Canadian Dollar" },
+    { value: "AUD", label: "AUD - Australian Dollar" },
+    { value: "JPY", label: "JPY - Japanese Yen" },
   ];
 
-  // Status options
   const statusOptions = [
     { value: "", label: "All Status" },
     { value: "true", label: "Active" },
     { value: "false", label: "Inactive" },
+  ];
+
+  const countryOptions = [
+    { value: "", label: "All Countries" },
+    { value: "US", label: "United States" },
+    { value: "GB", label: "United Kingdom" },
+    { value: "CA", label: "Canada" },
+    { value: "PK", label: "Pakistan" },
+    { value: "IN", label: "India" },
+    { value: "AU", label: "Australia" },
+    { value: "DE", label: "Germany" },
+    { value: "FR", label: "France" },
+    { value: "JP", label: "Japan" },
+    { value: "CN", label: "China" },
   ];
 
   // Initialize data
@@ -172,62 +98,34 @@ const VendorManagement = () => {
     getVendors();
   }, []);
 
+  // Handle API errors
+  useEffect(() => {
+    if (error) {
+      showNotification("error", "Error", error);
+      clearError();
+    }
+  }, [error, clearError]);
+
+  // Update selectAll state based on selectedVendors
+  useEffect(() => {
+    if (vendors && vendors.length > 0) {
+      setSelectAll(selectedVendors.length === vendors.length);
+    } else {
+      setSelectAll(false);
+    }
+  }, [selectedVendors, vendors]);
+
   // Show notification
   const showNotification = (type, message, description) => {
     apiNotification[type]({
       message,
       description,
       placement: "bottomRight",
+      duration: type === "error" ? 6 : 4,
     });
   };
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    // Clear error when user types
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  // Handle select box changes
-  const handleSelectChange = (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear error when user selects
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  // Form validation
-  const validateForm = () => {
-    const errors = {};
-    let isValid = true;
-
-    if (!formData.name.trim()) {
-      errors.name = translations["Required field"];
-      isValid = false;
-    }
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = translations["Invalid email"];
-      isValid = false;
-    }
-
-    setFormErrors(errors);
-    return isValid;
-  };
-
-  // In handleVendorSelection and handleSelectAll:
+  // Handle vendor selection
   const handleVendorSelection = (vendorId) => {
     setSelectedVendors((prev) =>
       prev.includes(vendorId)
@@ -240,585 +138,269 @@ const VendorManagement = () => {
     if (selectAll) {
       setSelectedVendors([]);
     } else {
-      setSelectedVendors(vendorsData.map((vendor) => vendor.id) || []);
-    }
-    setSelectAll(!selectAll);
-  };
-
-  // Handle view vendor
-  const handleViewVendor = async (vendorId) => {
-    console.log('Starting to view vendor:', vendorId); // Debug
-    try {
-      setLoading(true);
-      const vendor = await getVendor(vendorId);
-      console.log('Received vendor data:', vendor); // Debug
-
-      if (vendor) {
-        console.log('Setting vendor and opening modal'); // Debug
-        setSelectedVendor(vendor);
-        setShowViewModal(true);
-      } else {
-        console.log('No vendor data received'); // Debug
-      }
-    } catch (err) {
-      console.error('Error viewing vendor:', err); // Debug
-      showNotification("error", translations.Error, err.message);
-    } finally {
-      setLoading(false);
+      setSelectedVendors(vendors?.map((vendor) => vendor.Id) || []);
     }
   };
 
-  const handleOpenCreateModal = () => {
-    resetFormData();
-    setShowCreateModal(true);
-  };
+  // Navigation handlers
 
-  const handleCloseCreateModal = () => {
-    setShowCreateModal(false);
-    resetFormData();
-  };
 
-  // Handle edit vendor
   const handleEditVendor = async (vendorId) => {
     try {
-      const vendor = await getVendor(vendorId);
-      if (vendor) {
-        setSelectedVendor(vendor);
-        setFormData({
-          name: vendor.Name || "",
-          code: vendor.Code || "",
-          email: vendor.Email || "",
-          phone: vendor.Phone || "",
-          address: vendor.Address || "",
-          city: vendor.City || "",
-          state: vendor.State || "",
-          country: vendor.Country || "",
-          postalCode: vendor.PostalCode || "",
-          currency: vendor.Currency || "USD",
-          paymentTerms: vendor.PaymentTerms || "",
-          contactPerson: vendor.ContactPerson || "",
-          taxNumber: vendor.TaxNumber || "",
-          bankDetails: vendor.BankDetails || "",
-          isActive: vendor.IsActive !== undefined ? vendor.IsActive : true,
-          description: vendor.Description || "",
+      const vendorData = await getVendor(vendorId);
+      if (vendorData) {
+        navigate("/admin/add-vendors", {
+          state: {
+            editData: vendorData,
+            isEditing: true,
+          },
         });
-        setShowEditModal(true);
       }
-    } catch (err) {
-      showNotification("error", translations.Error, err.message);
+    } catch (error) {
+      console.error("Error fetching vendor for edit:", error);
+      showNotification("error", "Error", "Failed to fetch vendor details for editing");
     }
   };
 
-  // Handle clone vendor
+  const handleCreateVendor = () => {
+    navigate("/admin/add-vendors");
+  };
+
   const handleCloneVendor = async (vendorId) => {
     try {
-      const vendor = await getVendor(vendorId);
-      if (vendor) {
-        setFormData({
-          name: `${vendor.Name} (Copy)` || "",
-          code: `${vendor.Code}_COPY` || "",
-          email: vendor.Email || "",
-          phone: vendor.Phone || "",
-          address: vendor.Address || "",
-          city: vendor.City || "",
-          state: vendor.State || "",
-          country: vendor.Country || "",
-          postalCode: vendor.PostalCode || "",
-          currency: vendor.Currency || "USD",
-          paymentTerms: vendor.PaymentTerms || "",
-          contactPerson: vendor.ContactPerson || "",
-          taxNumber: vendor.TaxNumber || "",
-          bankDetails: vendor.BankDetails || "",
-          isActive: true,
-          description: vendor.Description || "",
+      const vendorData = await getVendor(vendorId);
+      if (vendorData) {
+        navigate("/admin/add-vendors", {
+          state: {
+            cloneData: {
+              ...vendorData,
+              Name: `${vendorData.Name || "Vendor"} (Copy)`,
+              Id: undefined,
+              IsDefault: false,
+            },
+          },
         });
-        setShowCreateModal(true);
       }
-    } catch (err) {
-      showNotification("error", translations.Error, err.message);
+    } catch (error) {
+      console.error("Error cloning vendor:", error);
+      showNotification("error", "Error", "Failed to clone vendor");
     }
   };
 
-  // Handle delete vendor
+  // Delete handlers
   const handleDeleteVendor = async (vendorId) => {
-    if (
-      window.confirm(
-        translations["Are you sure you want to delete this vendor?"]
-      )
-    ) {
+    if (window.confirm("Are you sure you want to delete this vendor? This action cannot be undone.")) {
       setIsDeleting(vendorId);
       try {
         const success = await deleteVendor(vendorId);
         if (success) {
-          showNotification(
-            "success",
-            translations.Success,
-            translations["Vendor deleted successfully"]
-          );
+          showNotification("success", "Success", "Vendor deleted successfully");
+          setSelectedVendors((prev) => prev.filter((id) => id !== vendorId));
         }
       } catch (err) {
-        showNotification("error", translations.Error, err.message);
+        showNotification("error", "Error", err.message || "Failed to delete vendor");
       } finally {
         setIsDeleting(null);
       }
     }
   };
 
-  // Handle toggle status
+  const handleBulkDelete = async () => {
+    if (selectedVendors.length === 0) return;
+
+    if (window.confirm(`Are you sure you want to delete ${selectedVendors.length} selected vendor(s)? This action cannot be undone.`)) {
+      setIsBulkDeleting(true);
+      try {
+        const success = await bulkDeleteVendors(selectedVendors);
+        if (success) {
+          showNotification("success", "Success", `${selectedVendors.length} vendor(s) deleted successfully`);
+          setSelectedVendors([]);
+        }
+      } catch (err) {
+        showNotification("error", "Error", err.message || "Failed to delete vendors");
+      } finally {
+        setIsBulkDeleting(false);
+      }
+    }
+  };
+
+  // Toggle status handler
   const handleToggleStatus = async (vendorId) => {
     setIsTogglingStatus(vendorId);
     try {
       const success = await toggleVendorStatus(vendorId);
       if (success) {
-        showNotification(
-          "success",
-          translations.Success,
-          translations["Status toggled successfully"]
-        );
+        showNotification("success", "Success", "Vendor status updated successfully");
       }
     } catch (err) {
-      showNotification("error", translations.Error, err.message);
+      showNotification("error", "Error", err.message || "Failed to update vendor status");
     } finally {
       setIsTogglingStatus(null);
     }
   };
 
-  // Handle form submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      if (selectedVendor) {
-        // Update existing vendor
-        const success = await updateVendor(selectedVendor.id, formData);
-        if (success) {
-          setShowEditModal(false);
-          setSelectedVendor(null);
-          resetFormData();
-          showNotification(
-            "success",
-            translations.Success,
-            translations["Vendor updated successfully"]
-          );
-        }
-      } else {
-        // Create new vendor
-        const success = await createVendor(formData);
-        if (success) {
-          setShowCreateModal(false);
-          resetFormData();
-          showNotification(
-            "success",
-            translations.Success,
-            translations["Vendor created successfully"]
-          );
-        }
-      }
-    } catch (err) {
-      showNotification("error", translations.Error, err.message);
-    }
-  };
-
-  // Reset form data
-  const resetFormData = () => {
-    setFormData({
-      name: "",
-      code: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      country: "",
-      postalCode: "",
-      currency: "USD",
-      paymentTerms: "",
-      contactPerson: "",
-      taxNumber: "",
-      bankDetails: "",
-      isActive: true,
-      description: "",
-    });
-    setFormErrors({});
-  };
-
-  // Handle search
-  const handleSearch = (searchTerm) => {
+  // Filter handlers
+  const handleSearch = (e) => {
+    const searchTerm = e.target.value;
     searchVendors(searchTerm);
   };
 
-  // Handle clear filters
+  const handleCurrencyFilter = (value) => {
+    filterVendorsByCurrency(value);
+  };
+
+  const handleCountryFilter = (value) => {
+    filterVendorsByCountry(value);
+  };
+
+  const handleStatusFilter = (value) => {
+    const status = value === "" ? null : value === "true";
+    filterVendorsByStatus(status);
+  };
+
   const handleClearFilters = () => {
     setFilters({
       search: "",
       currency: "",
       country: "",
       isActive: null,
-      startDate: null,
-      endDate: null,
       sortBy: "name",
       sortAscending: true,
     });
     getVendors();
   };
 
-  // Get vendors data - Updated to handle the context structure
-  const vendorsData = Array.isArray(vendors) ? vendors : [];
-
-  // Render vendor form
-  const renderVendorForm = () => (
-    <form onSubmit={handleSubmit} className="space-y-6" id="vendor-form">
-      {contextHolder}
-      <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Container className="space-y-4">
-          <InputField
-            name="name"
-            placeholder="Enter vendor name"
-            type="text"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-            label={`${translations.Name} *`}
-            width="w-full"
-            marginBottom="mb-0"
-            error={formErrors.name}
-          />
-
-          <InputField
-            name="code"
-            placeholder="Enter vendor code"
-            type="text"
-            value={formData.code}
-            onChange={handleInputChange}
-            label={translations.Code}
-            width="w-full"
-            marginBottom="mb-0"
-          />
-
-          <InputField
-            name="email"
-            placeholder="Enter email address"
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            label={translations.Email}
-            width="w-full"
-            marginBottom="mb-0"
-            error={formErrors.email}
-          />
-
-          <InputField
-            name="phone"
-            placeholder="Enter phone number"
-            type="tel"
-            value={formData.phone}
-            onChange={handleInputChange}
-            label={translations.Phone}
-            width="w-full"
-            marginBottom="mb-0"
-          />
-
-          <InputField
-            name="contactPerson"
-            placeholder="Enter contact person name"
-            type="text"
-            value={formData.contactPerson}
-            onChange={handleInputChange}
-            label={translations["Contact Person"]}
-            width="w-full"
-            marginBottom="mb-0"
-          />
-
-          <SelectBox
-            name="currency"
-            placeholder="Select currency"
-            value={formData.currency}
-            handleChange={(value) => handleSelectChange("currency", value)}
-            optionList={currencyOptions}
-            label={translations.Currency}
-            width="w-full"
-            marginBottom="mb-0"
-          />
-        </Container>
-
-        <Container className="space-y-4">
-          <InputField
-            name="address"
-            placeholder="Enter address"
-            type="text"
-            value={formData.address}
-            onChange={handleInputChange}
-            label={translations.Address}
-            width="w-full"
-            marginBottom="mb-0"
-            isTextArea={true}
-            rows={3}
-          />
-
-          <Container className="grid grid-cols-2 gap-4">
-            <InputField
-              name="city"
-              placeholder="Enter city"
-              type="text"
-              value={formData.city}
-              onChange={handleInputChange}
-              label={translations.City}
-              width="w-full"
-              marginBottom="mb-0"
-            />
-
-            <InputField
-              name="state"
-              placeholder="Enter state"
-              type="text"
-              value={formData.state}
-              onChange={handleInputChange}
-              label={translations.State}
-              width="w-full"
-              marginBottom="mb-0"
-            />
-          </Container>
-
-          <Container className="grid grid-cols-2 gap-4">
-            <InputField
-              name="country"
-              placeholder="Enter country"
-              type="text"
-              value={formData.country}
-              onChange={handleInputChange}
-              label={translations.Country}
-              width="w-full"
-              marginBottom="mb-0"
-            />
-
-            <InputField
-              name="postalCode"
-              placeholder="Enter postal code"
-              type="text"
-              value={formData.postalCode}
-              onChange={handleInputChange}
-              label={translations["Postal Code"]}
-              width="w-full"
-              marginBottom="mb-0"
-            />
-          </Container>
-
-          <InputField
-            name="paymentTerms"
-            placeholder="Enter payment terms"
-            type="text"
-            value={formData.paymentTerms}
-            onChange={handleInputChange}
-            label={translations["Payment Terms"]}
-            width="w-full"
-            marginBottom="mb-0"
-          />
-
-          <InputField
-            name="taxNumber"
-            placeholder="Enter tax number"
-            type="text"
-            value={formData.taxNumber}
-            onChange={handleInputChange}
-            label={translations["Tax Number"]}
-            width="w-full"
-            marginBottom="mb-0"
-          />
-
-          <InputField
-            name="bankDetails"
-            placeholder="Enter bank details"
-            type="text"
-            value={formData.bankDetails}
-            onChange={handleInputChange}
-            label={translations["Bank Details"]}
-            width="w-full"
-            marginBottom="mb-0"
-            isTextArea={true}
-            rows={3}
-          />
-        </Container>
-      </Container>
-
-      <InputField
-        name="description"
-        placeholder="Enter description"
-        type="text"
-        value={formData.description}
-        onChange={handleInputChange}
-        label={translations.Description}
-        width="w-full"
-        marginBottom="mb-0"
-        isTextArea={true}
-        rows={3}
-      />
-
-      <Container className="flex items-center">
-        <input
-          type="checkbox"
-          name="isActive"
-          checked={formData.isActive}
-          onChange={handleInputChange}
-          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-        />
-        <label className="ml-2 text-sm text-gray-700">
-          {translations.Active}
-        </label>
-      </Container>
-    </form>
-  );
-
-  const Modall = ({ isOpen, onClose, title, body, okText, okAction }) => {
-    if (!isOpen) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-4 border-b">
-            <h3 className="text-lg font-medium">{title}</h3>
-          </div>
-          <div className="p-4">{body}</div>
-          <div className="p-4 border-t flex justify-end">
-            <button
-              onClick={() => {
-                okAction?.();
-                onClose();
-              }}
-              className="px-4 py-2 bg-blue-600 text-white rounded"
-            >
-              {okText}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (pagination.pageNumber > 1) {
+      changePage(pagination.pageNumber - 1);
+    }
   };
+
+  const handleNextPage = () => {
+    const totalPages = Math.ceil(pagination.totalItems / pagination.pageSize);
+    if (pagination.pageNumber < totalPages) {
+      changePage(pagination.pageNumber + 1);
+    }
+  };
+
+  const handlePageSizeChange = (value) => {
+    changePageSize(Number(value));
+  };
+
+  // Format display data
+  const formatAddress = (vendor) => {
+    const addressParts = [];
+    if (vendor.City) addressParts.push(vendor.City);
+    if (vendor.State) addressParts.push(vendor.State);
+    if (vendor.Country) addressParts.push(vendor.Country);
+    return addressParts.join(", ") || "N/A";
+  };
+
+  const totalPages = Math.ceil(pagination.totalItems / pagination.pageSize);
 
   return (
     <Container className="p-6 bg-gray-50 min-h-screen">
+      {contextHolder}
+
       {/* Header */}
-      <Container className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <Container className="bg-white shadow-sm rounded-lg mb-6">
         <Container className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-  <div className="flex items-center gap-4">
-    <h1 className="text-2xl font-bold text-gray-900">
-      {translations.Vendors}
-    </h1>
-    <span className="text-sm text-gray-500">
-      {pagination.totalItems} total vendors
-    </span>
-  </div>
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Vendor Management</h1>
+                <Span className="text-sm text-gray-500">
+                  {pagination.totalItems || 0} total vendors
+                </Span>
+              </div>
+            </div>
 
-  <div className="flex gap-3">
-    <OutlineButton
-      buttonText={translations.Filters}
-      onClick={() => setShowFilters(!showFilters)}
-      borderColor="border-gray-300"
-      borderWidth="border"
-      rounded="rounded-lg"
-      bgColor="bg-white"
-      textColor="text-gray-700"
-      height="h-10"
-      px="px-4"
-      fontWeight="font-medium"
-      fontSize="text-sm"
-      icon={Filter}
-      iconSize="w-4 h-4"
-      isIconLeft={true}
-    />
-    <FilledButton
-      isIcon={true}
-      icon={Plus}
-      iconSize="w-4 h-4"
-      bgColor="bg-blue-600 hover:bg-blue-700"
-      textColor="text-white"
-      rounded="rounded-lg"
-      buttonText={translations["New Vendor"]}
-      height="h-10"
-      px="px-4"
-      fontWeight="font-medium"
-      fontSize="text-sm"
-      isIconLeft={true}
-      onClick={handleOpenCreateModal}
-    />
-  </div>
-</div>
-
+            <div className="flex gap-3">
+              <OutlineButton
+                buttonText={showFilters ? "Hide Filters" : "Show Filters"}
+                onClick={() => setShowFilters(!showFilters)}
+                borderColor="border-gray-300"
+                borderWidth="border"
+                rounded="rounded-lg"
+                bgColor={showFilters ? "bg-blue-50 hover:bg-blue-100" : "bg-white hover:bg-gray-50"}
+                textColor={showFilters ? "text-blue-700" : "text-gray-700"}
+                height="h-10"
+                px="px-4"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                icon={showFilters ? X : Filter}
+                iconSize="w-4 h-4"
+                isIconLeft={true}
+              />
+              <FilledButton
+                isIcon={true}
+                icon={Plus}
+                iconSize="w-4 h-4"
+                bgColor="bg-blue-600 hover:bg-blue-700"
+                textColor="text-white"
+                rounded="rounded-lg"
+                buttonText="New Vendor"
+                height="h-10"
+                px="px-4"
+                fontWeight="font-medium"
+                fontSize="text-sm"
+                isIconLeft={true}
+                onClick={handleCreateVendor}
+              />
+            </div>
+          </div>
         </Container>
 
         {/* Filters */}
         {showFilters && (
           <Container className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <Container className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Container>
-                <InputField
-                  name="search"
-                  placeholder="Search vendors..."
-                  type="text"
-                  value={filters.search}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  label={translations.Search}
-                  width="w-full"
-                  marginBottom="mb-0"
-                />
-              </Container>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <InputField
+                name="search"
+                placeholder="Search vendors..."
+                type="text"
+                value={filters.search || ""}
+                onChange={handleSearch}
+                label="Search"
+                icon={Search}
+                disabled={loading}
+              />
 
-              <Container>
-                <SelectBox
-                  name="currencyFilter"
-                  placeholder="All Currencies"
-                  value={filters.currency}
-                  handleChange={(value) => filterVendorsByCurrency(value)}
-                  optionList={[
-                    { value: "", label: "All Currencies" },
-                    ...currencyOptions,
-                  ]}
-                  label={translations.Currency}
-                  width="w-full"
-                  marginBottom="mb-0"
-                />
-              </Container>
+              <SelectBox
+                name="currencyFilter"
+                placeholder="All Currencies"
+                value={filters.currency || ""}
+                handleChange={handleCurrencyFilter}
+                optionList={[{ value: "", label: "All Currencies" }, ...currencyOptions]}
+                label="Currency"
+                disabled={loading}
+              />
 
-              <Container>
-                <InputField
-                  name="countryFilter"
-                  placeholder="Filter by country..."
-                  type="text"
-                  value={filters.country}
-                  onChange={(e) => filterVendorsByCountry(e.target.value)}
-                  label={translations.Country}
-                  width="w-full"
-                  marginBottom="mb-0"
-                />
-              </Container>
+              <SelectBox
+                name="countryFilter"
+                placeholder="All Countries"
+                value={filters.country || ""}
+                handleChange={handleCountryFilter}
+                optionList={countryOptions}
+                label="Country"
+                disabled={loading}
+              />
 
-              <Container>
-                <SelectBox
-                  name="statusFilter"
-                  placeholder="All Status"
-                  value={
-                    filters.isActive === null ? "" : String(filters.isActive)
-                  }
-                  handleChange={(value) =>
-                    filterVendorsByStatus(
-                      value === "" ? null : value === "true"
-                    )
-                  }
-                  optionList={statusOptions}
-                  label={translations.Status}
-                  width="w-full"
-                  marginBottom="mb-0"
-                />
-              </Container>
-            </Container>
+              <SelectBox
+                name="statusFilter"
+                placeholder="All Status"
+                value={filters.isActive === null ? "" : String(filters.isActive)}
+                handleChange={handleStatusFilter}
+                optionList={statusOptions}
+                label="Status"
+                disabled={loading}
+              />
+            </div>
 
-            <Container className="flex justify-end mt-4">
+            <div className="flex justify-end mt-4">
               <OutlineButton
-                buttonText={translations["Clear All"]}
+                buttonText="Clear Filters"
                 onClick={handleClearFilters}
                 borderColor="border-blue-600"
                 borderWidth="border"
@@ -829,34 +411,26 @@ const VendorManagement = () => {
                 px="px-4"
                 fontWeight="font-medium"
                 fontSize="text-sm"
+                icon={RefreshCw}
+                iconSize="w-4 h-4"
+                isIconLeft={true}
+                disabled={loading}
               />
-            </Container>
+            </div>
           </Container>
         )}
 
         {/* Bulk Actions */}
         {selectedVendors.length > 0 && (
           <Container className="px-6 py-3 bg-blue-50 border-b border-gray-200">
-            <Container className="flex items-center justify-between">
-              <Span className="text-sm text-blue-800">
-                {selectedVendors.length} vendors selected
+            <div className="flex items-center justify-between">
+              <Span className="text-sm text-blue-800 font-medium">
+                {selectedVendors.length} vendor{selectedVendors.length !== 1 ? 's' : ''} selected
               </Span>
-              <Container className="flex gap-2">
+              <div className="flex gap-2">
                 <OutlineButton
-                  buttonText={translations["Delete Selected"]}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        translations[
-                        "Are you sure you want to delete selected vendors?"
-                        ]
-                      )
-                    ) {
-                      // Handle bulk delete
-                      selectedVendors.forEach((id) => deleteVendor(id));
-                      setSelectedVendors([]);
-                    }
-                  }}
+                  buttonText={isBulkDeleting ? "Deleting..." : "Delete Selected"}
+                  onClick={handleBulkDelete}
                   borderColor="border-red-600"
                   borderWidth="border"
                   rounded="rounded-lg"
@@ -869,15 +443,25 @@ const VendorManagement = () => {
                   icon={Trash2}
                   iconSize="w-4 h-4"
                   isIconLeft={true}
+                  disabled={isBulkDeleting}
                 />
-              </Container>
-            </Container>
+              </div>
+            </div>
           </Container>
         )}
       </Container>
 
       {/* Table */}
-      <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <Container className="bg-white shadow-sm rounded-lg">
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10 rounded-lg">
+            <div className="flex items-center gap-2 text-blue-600">
+              <RefreshCw className="w-5 h-5 animate-spin" />
+              <span>Loading vendors...</span>
+            </div>
+          </div>
+        )}
+
         <Container className="overflow-x-auto">
           <Table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -887,229 +471,195 @@ const VendorManagement = () => {
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAll}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    disabled={!vendors || vendors.length === 0 || loading}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                   />
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {translations.Name}
+                  Vendor Details
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                  {translations.Code}
+                  Contact Info
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                  {translations["Contact Person"]}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                  {translations.Address}
+                  Location
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {translations.Status}
+                  Status
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {translations.Actions}
+                  Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+              {!loading && (!vendors || vendors.length === 0) ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-4 text-center">
-                    <Span className="text-gray-500">
-                      {translations.Loading}...
-                    </Span>
-                  </td>
-                </tr>
-              ) : vendorsData.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="px-6 py-4 text-center">
-                    <Span className="text-gray-500">
-                      {translations["No vendors found"]}
-                    </Span>
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <Building className="w-12 h-12 text-gray-300" />
+                      <div>
+                        <Span className="text-lg font-medium text-gray-500">No vendors found</Span>
+                        <p className="text-sm text-gray-400 mt-1">
+                          {filters.search || filters.currency || filters.country || filters.isActive !== null
+                            ? "Try adjusting your filters or search terms"
+                            : "Get started by creating your first vendor"}
+                        </p>
+                      </div>
+                      {!filters.search && !filters.currency && !filters.country && filters.isActive === null && (
+                        <FilledButton
+                          buttonText="Create First Vendor"
+                          onClick={handleCreateVendor}
+                          bgColor="bg-blue-600 hover:bg-blue-700"
+                          textColor="text-white"
+                          rounded="rounded-lg"
+                          height="h-10"
+                          px="px-4"
+                          fontWeight="font-medium"
+                          fontSize="text-sm"
+                          icon={Plus}
+                          iconSize="w-4 h-4"
+                          isIconLeft={true}
+                        />
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (
-                vendorsData.map((vendor) => (
-                  <tr key={vendor.id} className="hover:bg-gray-50">
+                vendors?.map((vendor) => (
+                  <tr key={vendor.Id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <input
                         type="checkbox"
                         checked={selectedVendors.includes(vendor.Id)}
                         onChange={() => handleVendorSelection(vendor.Id)}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                       />
                     </td>
+
                     <td className="px-6 py-4">
-                      <Container>
-                        <Container className="flex items-center gap-2">
-                          <Span className="text-sm font-medium text-gray-900">
-                            {vendor.Name || "N/A"}
-                          </Span>
-                        </Container>
-                        {vendor.Email && (
-                          <a
-                            href={`mailto:${vendor.Email}`}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {vendor.Email}
-                          </a>
-                        )}
-                      </Container>
-                    </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      <Span className="text-sm text-gray-900">
-                        {vendor.Code || "-"}
-                      </Span>
-                    </td>
-                    <td className="px-6 py-4 hidden lg:table-cell">
-                      <Container>
-                        {vendor.ContactPerson ? (
-                          <Container>
-                            <Span className="text-sm text-gray-900 block">
-                              {vendor.ContactPerson}
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Building className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <Span className="text-sm font-medium text-gray-900 truncate">
+                              {vendor.Name || "Unnamed Vendor"}
                             </Span>
-                            {vendor.Phone && (
-                              <a
-                                href={`tel:${vendor.Phone}`}
-                                className="text-xs text-blue-600 hover:text-blue-800"
-                              >
-                                {vendor.Phone}
-                              </a>
-                            )}
-                          </Container>
-                        ) : (
-                          <Span className="text-sm text-gray-500">-</Span>
-                        )}
-                      </Container>
-                    </td>
-                    <td className="px-6 py-4 hidden xl:table-cell">
-                      {vendor.Address || vendor.City ? (
-                        <Container className="flex items-start">
-                          <MapPin className="w-4 h-4 text-gray-400 mr-1 mt-0.5 flex-shrink-0" />
-                          <Container className="text-sm text-gray-900">
-                            {vendor.Address && (
-                              <>
-                                <Span className="block"></Span>
-                                <Span className="block">{vendor.Address}</Span>
-                              </>
-                            )}
-                            {vendor.City && (
-                              <Span className="block text-gray-600">
-                                {vendor.City}
-                                {vendor.State && `, ${vendor.State}`}
+                          </div>
+                          {vendor.ContactPerson && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <User className="w-3 h-3 text-gray-400" />
+                              <Span className="text-xs text-gray-600">
+                                {vendor.ContactPerson}
                               </Span>
-                            )}
-                          </Container>
-                        </Container>
+                            </div>
+                          )}
+                          {vendor.Currency && (
+                            <Span className="inline-block px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full mt-2">
+                              {vendor.Currency}
+                            </Span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <div className="space-y-1">
+                        {vendor.Email ? (
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <a
+                              href={`mailto:${vendor.Email}`}
+                              className="text-sm text-blue-600 hover:text-blue-800 hover:underline truncate"
+                            >
+                              {vendor.Email}
+                            </a>
+                          </div>
+                        ) : (
+                          <Span className="text-sm text-gray-500">No email</Span>
+                        )}
+                        {vendor.Phone && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <a
+                              href={`tel:${vendor.Phone}`}
+                              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              {vendor.Phone}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-gray-900">
+                          <Span className="block">{formatAddress(vendor)}</Span>
+                          {vendor.PostalCode && (
+                            <Span className="text-xs text-gray-500">{vendor.PostalCode}</Span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      {vendor.IsActive ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <Span className="text-sm text-green-600 font-medium">Active</Span>
+                        </div>
                       ) : (
-                        <Span className="text-sm text-gray-500">-</Span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <Span className="text-sm text-red-600 font-medium">Inactive</Span>
+                        </div>
                       )}
                     </td>
+
                     <td className="px-6 py-4">
-                      <Container className="flex items-center">
-                        {vendor.IsActive ? (
-                          <Container className="flex items-center gap-2">
-                            <Container className="w-2 h-2 bg-green-500 rounded-full"></Container>
-                            <Span className="text-sm text-green-600 font-medium">
-                              {translations.Active}
-                            </Span>
-                          </Container>
-                        ) : (
-                          <Container className="flex items-center gap-2">
-                            <Container className="w-2 h-2 bg-red-500 rounded-full"></Container>
-                            <Span className="text-sm text-red-600 font-medium">
-                              {translations.Inactive}
-                            </Span>
-                          </Container>
-                        )}
-                      </Container>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Container className="flex items-center justify-center gap-2">
-                        <OutlineButton
-                          buttonText="Eye"
+                      <div className="flex items-center justify-center gap-1">
+                        {/* View Button */}
+                        <button
                           onClick={() => handleViewVendor(vendor.Id)}
-                          borderColor="border-blue-200"
-                          borderWidth="border"
-                          rounded="rounded-lg"
-                          bgColor="bg-blue-50 hover:bg-blue-100"
-                          textColor="text-blue-600"
-                          height="h-8"
-                          width="w-8"
-                          icon={Eye}
-                          iconSize="w-4 h-4"
-                          title={translations.View}
-                        />
-                        <OutlineButton
-                          buttonText="Edit"
+                          className="flex items-center justify-center h-8 w-8 border border-blue-200 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900"
+                          title="View Vendor"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+
+                        {/* Edit Button */}
+                        <button
                           onClick={() => handleEditVendor(vendor.Id)}
-                          borderColor="border-green-200"
-                          borderWidth="border"
-                          rounded="rounded-lg"
-                          bgColor="bg-green-50 hover:bg-green-100"
-                          textColor="text-green-600"
-                          height="h-8"
-                          width="w-8"
-                          icon={Edit}
-                          iconSize="w-4 h-4"
-                          title={translations.Edit}
-                        />
-                        <OutlineButton
-                          buttonText="Copy"
+                          className="flex items-center justify-center h-8 w-8 border border-green-200 rounded-lg bg-green-50 hover:bg-green-100 text-green-600"
+                          title="Edit Vendor"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+
+                        {/* Clone Button */}
+                        <button
                           onClick={() => handleCloneVendor(vendor.Id)}
-                          borderColor="border-purple-200"
-                          borderWidth="border"
-                          rounded="rounded-lg"
-                          bgColor="bg-purple-50 hover:bg-purple-100"
-                          textColor="text-purple-600"
-                          height="h-8"
-                          width="w-8"
-                          icon={Copy}
-                          iconSize="w-4 h-4"
-                          title={translations.Clone}
-                        />
-                        <OutlineButton
-                          buttonText=""
-                          onClick={() => handleToggleStatus(vendor.Id)}
-                          borderColor={
-                            vendor.IsActive
-                              ? "border-orange-200"
-                              : "border-gray-200"
-                          }
-                          borderWidth="border"
-                          rounded="rounded-lg"
-                          bgColor={
-                            vendor.IsActive
-                              ? "bg-orange-50 hover:bg-orange-100"
-                              : "bg-gray-50 hover:bg-gray-100"
-                          }
-                          textColor={
-                            vendor.IsActive
-                              ? "text-orange-600"
-                              : "text-gray-600"
-                          }
-                          height="h-8"
-                          width="w-8"
-                          icon={vendor.IsActive ? ToggleRight : ToggleLeft}
-                          iconSize="w-4 h-4"
-                          disabled={isTogglingStatus === vendor.Id}
-                          title={translations.Toggle}
-                        />
-                        <OutlineButton
-                          buttonText="Trash"
+                          className="flex items-center justify-center h-8 w-8 border border-purple-200 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600"
+                          title="Clone Vendor"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
                           onClick={() => handleDeleteVendor(vendor.Id)}
-                          borderColor="border-red-200"
-                          borderWidth="border"
-                          rounded="rounded-lg"
-                          bgColor="bg-red-50 hover:bg-red-100"
-                          textColor="text-red-600"
-                          height="h-8"
-                          width="w-8"
-                          icon={Trash2}
-                          iconSize="w-4 h-4"
+                          className={`flex items-center justify-center h-8 w-8 border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 ${isDeleting === vendor.Id ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                           disabled={isDeleting === vendor.Id}
-                          title={translations.Delete}
-                        />
-                      </Container>
+                          title="Delete Vendor"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -1119,348 +669,77 @@ const VendorManagement = () => {
         </Container>
 
         {/* Pagination */}
-        <Container className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-          <Container className="flex items-center justify-between">
-            <Span className="text-sm text-gray-700">
-              Showing{" "}
-              {pagination.PageNumber * pagination.PageSize -
-                pagination.PageSize +
-                1}{" "}
-              to{" "}
-              {Math.min(
-                pagination.PageNumber * pagination.PageSize,
-                pagination.TotalItems
-              )}{" "}
-              of {pagination.TotalItems} results
-            </Span>
-            <Container className="flex items-center gap-2">
-              <SelectBox
-                name="pageSize"
-                value={pagination.PageSize}
-                handleChange={(value) => changePageSize(Number(value))}
-                optionList={[
-                  { value: 10, label: "10" },
-                  { value: 25, label: "25" },
-                  { value: 50, label: "50" },
-                  { value: 100, label: "100" },
-                ]}
-                width="w-20"
-                marginBottom="mb-0"
-              />
-              <Container className="flex gap-1">
-                <OutlineButton
-                  buttonText="Previous"
-                  onClick={() => changePage(pagination.PageNumber - 1)}
-                  borderColor="border-gray-300"
-                  borderWidth="border"
-                  rounded="rounded-lg"
-                  bgColor="bg-white hover:bg-gray-50"
-                  textColor="text-gray-700"
-                  height="h-8"
-                  px="px-3"
-                  fontWeight="font-medium"
-                  fontSize="text-sm"
-                  disabled={pagination.PageNumber === 1}
+        {vendors && vendors.length > 0 && (
+          <Container className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Span className="text-sm text-gray-700">Show</Span>
+                <SelectBox
+                  name="pageSize"
+                  value={pagination.pageSize}
+                  handleChange={handlePageSizeChange}
+                  optionList={[
+                    { value: 10, label: "10" },
+                    { value: 25, label: "25" },
+                    { value: 50, label: "50" },
+                    { value: 100, label: "100" },
+                  ]}
+                  width="w-20"
+                  marginBottom="mb-0"
+                  disabled={loading}
                 />
-                <OutlineButton
-                  buttonText="Next"
-                  onClick={() => changePage(pagination.PageNumber + 1)}
-                  borderColor="border-gray-300"
-                  borderWidth="border"
-                  rounded="rounded-lg"
-                  bgColor="bg-white hover:bg-gray-50"
-                  textColor="text-gray-700"
-                  height="h-8"
-                  px="px-3"
-                  fontWeight="font-medium"
-                  fontSize="text-sm"
-                  disabled={
-                    pagination.PageNumber >=
-                    Math.ceil(pagination.TotalItems / pagination.PageSize)
-                  }
-                />
-              </Container>
-            </Container>
+                <Span className="text-sm text-gray-700">per page</Span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Span className="text-sm text-gray-700">
+                  Showing {((pagination.pageNumber - 1) * pagination.pageSize) + 1} to{" "}
+                  {Math.min(pagination.pageNumber * pagination.pageSize, pagination.totalItems)} of{" "}
+                  {pagination.totalItems} vendors
+                </Span>
+
+                <div className="flex items-center gap-2">
+                  <OutlineButton
+                    buttonText=""
+                    onClick={handlePreviousPage}
+                    borderColor="border-gray-300"
+                    borderWidth="border"
+                    rounded="rounded-lg"
+                    bgColor="bg-white hover:bg-gray-50"
+                    textColor="text-gray-700"
+                    height="h-9"
+                    width="w-9"
+                    icon={ChevronLeft}
+                    iconSize="w-4 h-4"
+                    disabled={pagination.pageNumber === 1 || loading}
+                    title="Previous Page"
+                  />
+
+                  <Span className="text-sm text-gray-700 px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg">
+                    {pagination.pageNumber} of {totalPages}
+                  </Span>
+
+                  <OutlineButton
+                    buttonText=""
+                    onClick={handleNextPage}
+                    borderColor="border-gray-300"
+                    borderWidth="border"
+                    rounded="rounded-lg"
+                    bgColor="bg-white hover:bg-gray-50"
+                    textColor="text-gray-700"
+                    height="h-9"
+                    width="w-9"
+                    icon={ChevronRight}
+                    iconSize="w-4 h-4"
+                    disabled={pagination.pageNumber >= totalPages || loading}
+                    title="Next Page"
+                  />
+                </div>
+              </div>
+            </div>
           </Container>
-        </Container>
+        )}
       </Container>
-
-      {/* Create Vendor Modal */}
-      <Modall
-        isOpen={showCreateModal}
-        onClose={handleCloseCreateModal}
-        title={translations["New Vendor"]}
-        size="lg"
-        body={renderVendorForm()}
-        okText={translations.Save}
-        cancelText={translations.Cancel}
-        okAction={handleSubmit}
-        cancelAction={handleCloseCreateModal}
-        okButtonDisabled={loading}
-      />
-
-      {/* Edit Vendor Modal */}
-      <Modall
-        isOpen={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setSelectedVendor(null);
-          resetFormData();
-        }}
-        title={translations["Edit Vendor"]}
-        size="lg"
-        body={renderVendorForm()}
-        okText={translations.Save}
-        cancelText={translations.Cancel}
-        okAction={handleSubmit}
-        cancelAction={() => {
-          setShowEditModal(false);
-          setSelectedVendor(null);
-          resetFormData();
-        }}
-        okButtonDisabled={loading}
-      />
-
-      {/* View Vendor Modal */}
-      <Modall
-        isOpen={showViewModal}
-        onClose={() => {
-          setShowViewModal(false);
-          setSelectedVendor(null);
-        }}
-        title={translations["Vendor Details"]}
-        size="lg"
-        okText={translations.Close}
-        cancelText={null}
-        okAction={() => {
-          setShowViewModal(false);
-          setSelectedVendor(null);
-        }}
-        body={
-          selectedVendor && (
-            <Container className="space-y-6">
-              <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Container className="space-y-4">
-                  <Container className="flex items-center gap-3">
-                    <Building className="w-5 h-5 text-gray-400" />
-                    <Container>
-                      <Span className="text-sm font-medium text-gray-900 block">
-                        {selectedVendor.Name || "N/A"}
-                      </Span>
-                      <Span className="text-xs text-gray-500">
-                        {translations.Name}
-                      </Span>
-                    </Container>
-                  </Container>
-
-                  {selectedVendor.Code && (
-                    <Container className="flex items-center gap-3">
-                      <Container className="w-5 h-5 flex items-center justify-center">
-                        <Span className="text-xs font-bold text-gray-400">#</Span>
-                      </Container>
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.Code}
-                        </Span>
-                        <Span className="text-xs text-gray-500">
-                          {translations.Code}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  {selectedVendor.Email && (
-                    <Container className="flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-gray-400" />
-                      <Container>
-                        <a
-                          href={`mailto:${selectedVendor.Email}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-800 block"
-                        >
-                          {selectedVendor.Email}
-                        </a>
-                        <Span className="text-xs text-gray-500">
-                          {translations.Email}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  {selectedVendor.Phone && (
-                    <Container className="flex items-center gap-3">
-                      <Phone className="w-5 h-5 text-gray-400" />
-                      <Container>
-                        <a
-                          href={`tel:${selectedVendor.Phone}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-800 block"
-                        >
-                          {selectedVendor.Phone}
-                        </a>
-                        <Span className="text-xs text-gray-500">
-                          {translations.Phone}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  {selectedVendor.ContactPerson && (
-                    <Container className="flex items-center gap-3">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.ContactPerson}
-                        </Span>
-                        <Span className="text-xs text-gray-500">
-                          {translations["Contact Person"]}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  {selectedVendor.Currency && (
-                    <Container className="flex items-center gap-3">
-                      <Container className="w-5 h-5 flex items-center justify-center">
-                        <Span className="text-xs font-bold text-gray-400">$</Span>
-                      </Container>
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.Currency}
-                        </Span>
-                        <Span className="text-xs text-gray-500">
-                          {translations.Currency}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-                </Container>
-
-                <Container className="space-y-4">
-                  {(selectedVendor.Address || selectedVendor.City) && (
-                    <Container className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
-                      <Container>
-                        <Container className="text-sm font-medium text-gray-900">
-                          {selectedVendor.Address && (
-                            <Span className="block">
-                              {selectedVendor.Address}
-                            </Span>
-                          )}
-                          {selectedVendor.City && (
-                            <Span className="block">
-                              {selectedVendor.City}
-                              {selectedVendor.State &&
-                                `, ${selectedVendor.State}`}
-                              {selectedVendor.PostalCode &&
-                                ` ${selectedVendor.PostalCode}`}
-                            </Span>
-                          )}
-                          {selectedVendor.Country && (
-                            <Span className="block text-gray-600">
-                              {selectedVendor.Country}
-                            </Span>
-                          )}
-                        </Container>
-                        <Span className="text-xs text-gray-500">
-                          {translations.Address}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  {selectedVendor.PaymentTerms && (
-                    <Container className="flex items-center gap-3">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.PaymentTerms}
-                        </Span>
-                        <Span className="text-xs text-gray-500">
-                          {translations["Payment Terms"]}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  {selectedVendor.TaxNumber && (
-                    <Container className="flex items-center gap-3">
-                      <Container className="w-5 h-5 flex items-center justify-center">
-                        <Span className="text-xs font-bold text-gray-400">
-                          TAX
-                        </Span>
-                      </Container>
-                      <Container>
-                        <Span className="text-sm font-medium text-gray-900 block">
-                          {selectedVendor.TaxNumber}
-                        </Span>
-                        <Span className="text-xs text-gray-500">
-                          {translations["Tax Number"]}
-                        </Span>
-                      </Container>
-                    </Container>
-                  )}
-
-                  <Container className="flex items-center gap-3">
-                    <Container className="w-5 h-5 flex items-center justify-center">
-                      <Container
-                        className={`w-2 h-2 rounded-full ${selectedVendor.IsActive
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                          }`}
-                      ></Container>
-                    </Container>
-                    <Container>
-                      <Span
-                        className={`text-sm font-medium block ${selectedVendor.IsActive
-                          ? "text-green-600"
-                          : "text-red-600"
-                          }`}
-                      >
-                        {selectedVendor.IsActive
-                          ? translations.Active
-                          : translations.Inactive}
-                      </Span>
-                      <Span className="text-xs text-gray-500">
-                        {translations.Status}
-                      </Span>
-                    </Container>
-                  </Container>
-                </Container>
-              </Container>
-
-              {selectedVendor.BankDetails && (
-                <Container className="border-t border-gray-200 pt-4">
-                  <Container className="space-y-2">
-                    <Span className="text-sm font-medium text-gray-900">
-                      {translations["Bank Details"]}
-                    </Span>
-                    <Container className="bg-gray-50 p-3 rounded-md">
-                      <Span className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedVendor.BankDetails}
-                      </Span>
-                    </Container>
-                  </Container>
-                </Container>
-              )}
-
-              {selectedVendor.Description && (
-                <Container className="border-t border-gray-200 pt-4">
-                  <Container className="space-y-2">
-                    <Span className="text-sm font-medium text-gray-900">
-                      {translations.Description}
-                    </Span>
-                    <Container className="bg-gray-50 p-3 rounded-md">
-                      <Span className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedVendor.Description}
-                      </Span>
-                    </Container>
-                  </Container>
-                </Container>
-              )}
-            </Container>
-          )
-        }
-      />
-
     </Container>
   );
 };

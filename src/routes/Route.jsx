@@ -90,6 +90,7 @@ import ClientDetailPage from "../pages/clients/ClientDetailPage";
 import FinanceSettings from "../pages/FinanceManager/FinanceSettings";
 import IncomeDetailsPage from "../pages/FinanceManager/IncomeDetails/IncomeDetailsPage";
 import FinanceReports from "../pages/FinanceManager/Reports/FinanceReports";
+import AddVendors from "../pages/Vendors/AddVendors";
 // import InvoiceApp from "../pages/Sale/InvoiceApp/InvoiceApp";
 // Helper function to get role-based dashboard path
 const getDashboardPath = (userRole) => {
@@ -786,6 +787,12 @@ const getRouteConfig = () => {
     {
       path: "/admin/vendors",
       component: VendorsManagement,
+      roles: ["Admin", "Manager", "Employee"],
+      layout: true,
+    },
+    {
+      path: "/admin/add-vendors",
+      component: AddVendors,
       roles: ["Admin", "Manager", "Employee"],
       layout: true,
     },

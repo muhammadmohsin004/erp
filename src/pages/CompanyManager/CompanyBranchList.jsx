@@ -381,7 +381,7 @@ const CompanyBranchList = () => {
               bgColor="bg-gray-100 hover:bg-gray-200"
               textColor="text-gray-700"
               rounded="rounded-lg"
-              borderColor={}
+              borderColor={'dsf'}
               buttonText={translations.Filters}
               height="h-10"
               px="px-4"
@@ -393,7 +393,7 @@ const CompanyBranchList = () => {
             <OutlineButton
               isIcon={true}
               icon={Download}
-              iconSize="w-4 h-4"
+              // iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
               textColor="text-gray-700"
               rounded="rounded-lg"
