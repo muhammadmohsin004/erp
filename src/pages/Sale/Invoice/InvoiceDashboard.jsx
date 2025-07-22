@@ -39,52 +39,60 @@ import Span from "../../../components/elements/span/Span";
 const InvoiceDashboard = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
-    "Invoice Dashboard": language === "ar" ? "لوحة معلومات الفواتير" : "Invoice Dashboard",
+    "Invoice Dashboard":
+      language === "ar" ? "لوحة معلومات الفواتير" : "Invoice Dashboard",
     "Create Invoice": language === "ar" ? "إنشاء فاتورة" : "Create Invoice",
     "View All": language === "ar" ? "عرض الكل" : "View All",
     "Total Revenue": language === "ar" ? "إجمالي الإيرادات" : "Total Revenue",
-    "Outstanding": language === "ar" ? "المستحق" : "Outstanding",
+    Outstanding: language === "ar" ? "المستحق" : "Outstanding",
     "Total Invoices": language === "ar" ? "إجمالي الفواتير" : "Total Invoices",
-    "Paid This Month": language === "ar" ? "مدفوع هذا الشهر" : "Paid This Month",
-    "Recent Invoices": language === "ar" ? "الفواتير الأخيرة" : "Recent Invoices",
+    "Paid This Month":
+      language === "ar" ? "مدفوع هذا الشهر" : "Paid This Month",
+    "Recent Invoices":
+      language === "ar" ? "الفواتير الأخيرة" : "Recent Invoices",
     "Quick Actions": language === "ar" ? "إجراءات سريعة" : "Quick Actions",
-    "Revenue Overview": language === "ar" ? "نظرة عامة على الإيرادات" : "Revenue Overview",
+    "Revenue Overview":
+      language === "ar" ? "نظرة عامة على الإيرادات" : "Revenue Overview",
     "Invoice Status": language === "ar" ? "حالة الفاتورة" : "Invoice Status",
     "Top Clients": language === "ar" ? "أفضل العملاء" : "Top Clients",
-    "Overdue Invoices": language === "ar" ? "الفواتير المتأخرة" : "Overdue Invoices",
-    "Monthly Performance": language === "ar" ? "الأداء الشهري" : "Monthly Performance",
-    "Draft": language === "ar" ? "مسودة" : "Draft",
-    "Sent": language === "ar" ? "مرسل" : "Sent",
-    "Paid": language === "ar" ? "مدفوع" : "Paid",
-    "Overdue": language === "ar" ? "متأخر" : "Overdue",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "Overdue Invoices":
+      language === "ar" ? "الفواتير المتأخرة" : "Overdue Invoices",
+    "Monthly Performance":
+      language === "ar" ? "الأداء الشهري" : "Monthly Performance",
+    Draft: language === "ar" ? "مسودة" : "Draft",
+    Sent: language === "ar" ? "مرسل" : "Sent",
+    Paid: language === "ar" ? "مدفوع" : "Paid",
+    Overdue: language === "ar" ? "متأخر" : "Overdue",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     "vs last month": language === "ar" ? "مقابل الشهر الماضي" : "vs last month",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     "Last Month": language === "ar" ? "الشهر الماضي" : "Last Month",
     "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
-    "Client": language === "ar" ? "العميل" : "Client",
-    "Amount": language === "ar" ? "المبلغ" : "Amount",
+    Client: language === "ar" ? "العميل" : "Client",
+    Amount: language === "ar" ? "المبلغ" : "Amount",
     "Due Date": language === "ar" ? "تاريخ الاستحقاق" : "Due Date",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Send": language === "ar" ? "إرسال" : "Send",
-    "No invoices found": language === "ar" ? "لم يتم العثور على فواتير" : "No invoices found",
-    "No overdue invoices": language === "ar" ? "لا توجد فواتير متأخرة" : "No overdue invoices",
+    Status: language === "ar" ? "الحالة" : "Status",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Send: language === "ar" ? "إرسال" : "Send",
+    "No invoices found":
+      language === "ar" ? "لم يتم العثور على فواتير" : "No invoices found",
+    "No overdue invoices":
+      language === "ar" ? "لا توجد فواتير متأخرة" : "No overdue invoices",
     "Collection Rate": language === "ar" ? "معدل التحصيل" : "Collection Rate",
     "Average Invoice": language === "ar" ? "متوسط الفاتورة" : "Average Invoice",
-    "days": language === "ar" ? "أيام" : "days",
-    "ago": language === "ar" ? "منذ" : "ago",
+    days: language === "ar" ? "أيام" : "days",
+    ago: language === "ar" ? "منذ" : "ago",
     "due in": language === "ar" ? "مستحق في" : "due in",
     "overdue by": language === "ar" ? "متأخر بـ" : "overdue by",
     "Export Report": language === "ar" ? "تصدير التقرير" : "Export Report",
-    "Refresh": language === "ar" ? "تحديث" : "Refresh",
-    "Filter": language === "ar" ? "تصفية" : "Filter",
-    "Settings": language === "ar" ? "الإعدادات" : "Settings",
+    Refresh: language === "ar" ? "تحديث" : "Refresh",
+    Filter: language === "ar" ? "تصفية" : "Filter",
+    Settings: language === "ar" ? "الإعدادات" : "Settings",
   };
 
   // Context hooks
@@ -112,39 +120,39 @@ const InvoiceDashboard = () => {
   // Helper function to extract invoice data from the API response structure
   const extractInvoiceData = (invoiceResponse) => {
     if (!invoiceResponse) return [];
-    
+
     // If it's the full API response with Data.$values
     if (invoiceResponse.Data && invoiceResponse.Data.$values) {
       return invoiceResponse.Data.$values;
     }
-    
+
     // If it's just the Data object with $values
     if (invoiceResponse.$values) {
       return invoiceResponse.$values;
     }
-    
+
     // If it's a direct array
     if (Array.isArray(invoiceResponse)) {
       return invoiceResponse;
     }
-    
+
     return [];
   };
 
   // Helper function to extract statistics data
   const extractStatisticsData = (statisticsResponse) => {
     if (!statisticsResponse) return null;
-    
+
     // If it's the full API response with Data
     if (statisticsResponse.Data) {
       return statisticsResponse.Data;
     }
-    
+
     // If it's direct statistics object
     if (statisticsResponse.TotalInvoices !== undefined) {
       return statisticsResponse;
     }
-    
+
     return null;
   };
 
@@ -187,12 +195,14 @@ const InvoiceDashboard = () => {
     setRecentInvoices(recent);
 
     // Get overdue invoices
-    const overdue = invoiceArray.filter(invoice => invoice.IsOverdue === true);
+    const overdue = invoiceArray.filter(
+      (invoice) => invoice.IsOverdue === true
+    );
     setOverdueInvoices(overdue);
 
     // Calculate top clients
     const clientInvoices = {};
-    invoiceArray.forEach(invoice => {
+    invoiceArray.forEach((invoice) => {
       if (!clientInvoices[invoice.ClientId]) {
         clientInvoices[invoice.ClientId] = {
           clientName: invoice.ClientName,
@@ -201,7 +211,7 @@ const InvoiceDashboard = () => {
           invoiceCount: 0,
         };
       }
-      clientInvoices[invoice.ClientId].totalAmount += (invoice.TotalAmount || 0);
+      clientInvoices[invoice.ClientId].totalAmount += invoice.TotalAmount || 0;
       clientInvoices[invoice.ClientId].invoiceCount++;
     });
 
@@ -218,20 +228,27 @@ const InvoiceDashboard = () => {
   const generateMonthlyData = (invoiceArray) => {
     const months = [];
     const now = new Date();
-    
+
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = date.toLocaleString('default', { month: 'short' });
-      
-      const monthInvoices = invoiceArray.filter(invoice => {
+      const monthName = date.toLocaleString("default", { month: "short" });
+
+      const monthInvoices = invoiceArray.filter((invoice) => {
         const invoiceDate = new Date(invoice.InvoiceDate);
-        return invoiceDate.getMonth() === date.getMonth() && 
-               invoiceDate.getFullYear() === date.getFullYear();
+        return (
+          invoiceDate.getMonth() === date.getMonth() &&
+          invoiceDate.getFullYear() === date.getFullYear()
+        );
       });
 
-      const totalAmount = monthInvoices.reduce((sum, inv) => sum + (inv.TotalAmount || 0), 0);
-      const paidAmount = monthInvoices.filter(inv => inv.Status === 'Paid').reduce((sum, inv) => sum + (inv.PaidAmount || 0), 0);
-      
+      const totalAmount = monthInvoices.reduce(
+        (sum, inv) => sum + (inv.TotalAmount || 0),
+        0
+      );
+      const paidAmount = monthInvoices
+        .filter((inv) => inv.Status === "Paid")
+        .reduce((sum, inv) => sum + (inv.PaidAmount || 0), 0);
+
       months.push({
         month: monthName,
         total: totalAmount,
@@ -239,7 +256,7 @@ const InvoiceDashboard = () => {
         count: monthInvoices.length,
       });
     }
-    
+
     return months;
   };
 
@@ -251,8 +268,8 @@ const InvoiceDashboard = () => {
 
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
@@ -267,16 +284,31 @@ const InvoiceDashboard = () => {
   // Get status color and icon
   const getStatusDisplay = (status) => {
     switch (status?.toLowerCase()) {
-      case 'draft':
-        return { color: 'bg-gray-100 text-gray-800', icon: <FileText className="w-4 h-4" /> };
-      case 'sent':
-        return { color: 'bg-blue-100 text-blue-800', icon: <Send className="w-4 h-4" /> };
-      case 'paid':
-        return { color: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-4 h-4" /> };
-      case 'overdue':
-        return { color: 'bg-red-100 text-red-800', icon: <AlertCircle className="w-4 h-4" /> };
+      case "draft":
+        return {
+          color: "bg-gray-100 text-gray-800",
+          icon: <FileText className="w-4 h-4" />,
+        };
+      case "sent":
+        return {
+          color: "bg-blue-100 text-blue-800",
+          icon: <Send className="w-4 h-4" />,
+        };
+      case "paid":
+        return {
+          color: "bg-green-100 text-green-800",
+          icon: <CheckCircle className="w-4 h-4" />,
+        };
+      case "overdue":
+        return {
+          color: "bg-red-100 text-red-800",
+          icon: <AlertCircle className="w-4 h-4" />,
+        };
       default:
-        return { color: 'bg-gray-100 text-gray-800', icon: <Clock className="w-4 h-4" /> };
+        return {
+          color: "bg-gray-100 text-gray-800",
+          icon: <Clock className="w-4 h-4" />,
+        };
     }
   };
 
@@ -292,7 +324,7 @@ const InvoiceDashboard = () => {
   // Get invoice counts by status
   const getInvoicesByStatus = (status) => {
     const invoiceArray = extractInvoiceData(invoices);
-    return invoiceArray.filter(invoice => invoice.Status === status);
+    return invoiceArray.filter((invoice) => invoice.Status === status);
   };
 
   // Loading state
@@ -300,22 +332,28 @@ const InvoiceDashboard = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
 
   // Get statistics data
   const statsData = extractStatisticsData(statistics);
-  
+
   // Use API statistics if available, otherwise calculate from invoices
-  const draftCount = statsData?.DraftInvoices ?? getInvoicesByStatus('Draft').length;
-  const sentCount = statsData?.SentInvoices ?? getInvoicesByStatus('Sent').length;
-  const paidCount = statsData?.PaidInvoices ?? getInvoicesByStatus('Paid').length;
+  const draftCount =
+    statsData?.DraftInvoices ?? getInvoicesByStatus("Draft").length;
+  const sentCount =
+    statsData?.SentInvoices ?? getInvoicesByStatus("Sent").length;
+  const paidCount =
+    statsData?.PaidInvoices ?? getInvoicesByStatus("Paid").length;
   const overdueCount = statsData?.OverdueInvoices ?? overdueInvoices.length;
   const totalRevenue = statsData?.TotalRevenue ?? 0;
   const outstandingAmount = statsData?.OutstandingAmount ?? 0;
-  const totalInvoices = statsData?.TotalInvoices ?? extractInvoiceData(invoices).length;
+  const totalInvoices =
+    statsData?.TotalInvoices ?? extractInvoiceData(invoices).length;
   const collectionRate = statsData?.CollectionRate ?? 0;
   const averageInvoiceValue = statsData?.AverageInvoiceValue ?? 0;
 
@@ -365,7 +403,9 @@ const InvoiceDashboard = () => {
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => {/* Handle export */}}
+              onClick={() => {
+                /* Handle export */
+              }}
             />
 
             <FilledButton
@@ -508,13 +548,24 @@ const InvoiceDashboard = () => {
               {monthlyData.map((month, index) => (
                 <Container key={index} className="space-y-2">
                   <Container className="flex items-center justify-between">
-                    <Span className="text-sm font-medium text-gray-700">{month.month}</Span>
-                    <Span className="text-sm text-gray-500">{formatCurrency(month.total)}</Span>
+                    <Span className="text-sm font-medium text-gray-700">
+                      {month.month}
+                    </Span>
+                    <Span className="text-sm text-gray-500">
+                      {formatCurrency(month.total)}
+                    </Span>
                   </Container>
                   <Container className="w-full bg-gray-200 rounded-full h-2">
                     <Container
                       className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${Math.min((month.total / Math.max(...monthlyData.map(m => m.total))) * 100, 100)}%` }}
+                      style={{
+                        width: `${Math.min(
+                          (month.total /
+                            Math.max(...monthlyData.map((m) => m.total))) *
+                            100,
+                          100
+                        )}%`,
+                      }}
                     />
                   </Container>
                 </Container>
@@ -527,38 +578,54 @@ const InvoiceDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               {translations["Invoice Status"]}
             </h3>
-            
+
             <Container className="space-y-4">
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center gap-2">
                   <Container className="w-3 h-3 bg-gray-400 rounded-full"></Container>
-                  <Span className="text-sm text-gray-700">{translations.Draft}</Span>
+                  <Span className="text-sm text-gray-700">
+                    {translations.Draft}
+                  </Span>
                 </Container>
-                <Span className="text-sm font-medium text-gray-900">{draftCount}</Span>
+                <Span className="text-sm font-medium text-gray-900">
+                  {draftCount}
+                </Span>
               </Container>
-              
+
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center gap-2">
                   <Container className="w-3 h-3 bg-blue-400 rounded-full"></Container>
-                  <Span className="text-sm text-gray-700">{translations.Sent}</Span>
+                  <Span className="text-sm text-gray-700">
+                    {translations.Sent}
+                  </Span>
                 </Container>
-                <Span className="text-sm font-medium text-gray-900">{sentCount}</Span>
+                <Span className="text-sm font-medium text-gray-900">
+                  {sentCount}
+                </Span>
               </Container>
-              
+
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center gap-2">
                   <Container className="w-3 h-3 bg-green-400 rounded-full"></Container>
-                  <Span className="text-sm text-gray-700">{translations.Paid}</Span>
+                  <Span className="text-sm text-gray-700">
+                    {translations.Paid}
+                  </Span>
                 </Container>
-                <Span className="text-sm font-medium text-gray-900">{paidCount}</Span>
+                <Span className="text-sm font-medium text-gray-900">
+                  {paidCount}
+                </Span>
               </Container>
-              
+
               <Container className="flex items-center justify-between">
                 <Container className="flex items-center gap-2">
                   <Container className="w-3 h-3 bg-red-400 rounded-full"></Container>
-                  <Span className="text-sm text-gray-700">{translations.Overdue}</Span>
+                  <Span className="text-sm text-gray-700">
+                    {translations.Overdue}
+                  </Span>
                 </Container>
-                <Span className="text-sm font-medium text-gray-900">{overdueCount}</Span>
+                <Span className="text-sm font-medium text-gray-900">
+                  {overdueCount}
+                </Span>
               </Container>
             </Container>
           </Container>
@@ -594,7 +661,10 @@ const InvoiceDashboard = () => {
                 recentInvoices.map((invoice) => {
                   const statusDisplay = getStatusDisplay(invoice.Status);
                   return (
-                    <Container key={invoice.Id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                    <Container
+                      key={invoice.Id}
+                      className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                    >
                       <Container className="flex items-center gap-3">
                         <Container className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                           <FileText className="w-5 h-5 text-blue-600" />
@@ -610,9 +680,14 @@ const InvoiceDashboard = () => {
                       </Container>
                       <Container className="text-right">
                         <Span className="text-sm font-medium text-gray-900">
-                          {formatCurrency(invoice.TotalAmount, invoice.Currency)}
+                          {formatCurrency(
+                            invoice.TotalAmount,
+                            invoice.Currency
+                          )}
                         </Span>
-                        <Span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}>
+                        <Span
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}
+                        >
                           {statusDisplay.icon}
                           {invoice.Status}
                         </Span>
@@ -657,7 +732,10 @@ const InvoiceDashboard = () => {
             <Container className="space-y-4">
               {topClients.length > 0 ? (
                 topClients.map((client, index) => (
-                  <Container key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                  <Container
+                    key={index}
+                    className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                  >
                     <Container className="flex items-center gap-3">
                       <Container className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                         <Users className="w-5 h-5 text-green-600" />
@@ -726,9 +804,14 @@ const InvoiceDashboard = () => {
                 </thead>
                 <tbody>
                   {overdueInvoices.map((invoice) => {
-                    const daysOverdue = invoice.DaysOverdue || Math.abs(getDaysDifference(invoice.DueDate));
+                    const daysOverdue =
+                      invoice.DaysOverdue ||
+                      Math.abs(getDaysDifference(invoice.DueDate));
                     return (
-                      <tr key={invoice.Id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr
+                        key={invoice.Id}
+                        className="border-b border-gray-100 hover:bg-gray-50"
+                      >
                         <td className="py-3 px-4">
                           <Span className="text-sm font-medium text-gray-900">
                             {invoice.InvoiceNumber}
@@ -751,7 +834,10 @@ const InvoiceDashboard = () => {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <Span className="text-sm font-medium text-gray-900">
-                            {formatCurrency(invoice.TotalAmount, invoice.Currency)}
+                            {formatCurrency(
+                              invoice.TotalAmount,
+                              invoice.Currency
+                            )}
                           </Span>
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -766,7 +852,9 @@ const InvoiceDashboard = () => {
                               buttonText=""
                               height="h-8"
                               width="w-8"
-                              onClick={() => navigate(`/admin/invoices/${invoice.Id}`)}
+                              onClick={() =>
+                                navigate(`/admin/invoices/${invoice.Id}`)
+                              }
                             />
                             <FilledButton
                               isIcon={true}
@@ -778,7 +866,9 @@ const InvoiceDashboard = () => {
                               buttonText=""
                               height="h-8"
                               width="w-8"
-                              onClick={() => {/* Handle send reminder */}}
+                              onClick={() => {
+                                /* Handle send reminder */
+                              }}
                             />
                           </Container>
                         </td>

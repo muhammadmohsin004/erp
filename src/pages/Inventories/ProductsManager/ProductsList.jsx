@@ -1756,7 +1756,6 @@
 
 // export default ProductsList;
 
-
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -1809,7 +1808,7 @@ import Span from "../../../components/elements/span/Span";
 const ProductsList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   // Get products context
   const {
@@ -1833,8 +1832,11 @@ const ProductsList = () => {
   } = useProductsManager();
 
   // Process products data from API response
-  const productsData = Array.isArray(products?.Data?.$values)  ? products.Data.$values  : Array.isArray(products)  ? products 
- : [];
+  const productsData = Array.isArray(products?.Data?.$values)
+    ? products.Data.$values
+    : Array.isArray(products)
+    ? products
+    : [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
@@ -2030,7 +2032,8 @@ const ProductsList = () => {
       const now = new Date();
       const stats = {
         totalProducts: pagination?.TotalItems || productsData.length,
-        activeProducts: productsData.filter((p) => p.Status === "Active").length,
+        activeProducts: productsData.filter((p) => p.Status === "Active")
+          .length,
         productsThisMonth: productsData.filter((p) => {
           const createdDate = new Date(p.CreatedAt);
           return (
@@ -2475,8 +2478,9 @@ const ProductsList = () => {
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Container className="flex items-center gap-2 mt-1">
             <Span
-              className={`text-2xl font-bold ${isAlert && value > 0 ? "text-red-600" : "text-gray-900"
-                }`}
+              className={`text-2xl font-bold ${
+                isAlert && value > 0 ? "text-red-600" : "text-gray-900"
+              }`}
             >
               {isCurrency ? `$${formatCurrency(value)}` : value || 0}
             </Span>
@@ -2680,8 +2684,9 @@ const ProductsList = () => {
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${translations.Search
-                } ${translations.Products.toLowerCase()}...`}
+              placeholder={`${
+                translations.Search
+              } ${translations.Products.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -2718,17 +2723,17 @@ const ProductsList = () => {
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {searchTerm ||
-                  filterOptions.status ||
-                  filterOptions.categoryId ||
-                  filterOptions.lowStockOnly
+                filterOptions.status ||
+                filterOptions.categoryId ||
+                filterOptions.lowStockOnly
                   ? translations["No results found"]
                   : translations.NoProducts}
               </h3>
               <p className="text-gray-500 mb-6">
                 {searchTerm ||
-                  filterOptions.status ||
-                  filterOptions.categoryId ||
-                  filterOptions.lowStockOnly
+                filterOptions.status ||
+                filterOptions.categoryId ||
+                filterOptions.lowStockOnly
                   ? "Try adjusting your filters or search terms"
                   : "Get started by adding your first product"}
               </p>
@@ -2737,18 +2742,18 @@ const ProductsList = () => {
                   filterOptions.status ||
                   filterOptions.categoryId ||
                   filterOptions.lowStockOnly) && (
-                    <FilledButton
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-lg"
-                      buttonText={`${translations["Clear All"]} ${translations.Filters}`}
-                      height="h-10"
-                      px="px-4"
-                      fontWeight="font-medium"
-                      fontSize="text-sm"
-                      onClick={handleClearFilters}
-                    />
-                  )}
+                  <FilledButton
+                    bgColor="bg-gray-100 hover:bg-gray-200"
+                    textColor="text-gray-700"
+                    rounded="rounded-lg"
+                    buttonText={`${translations["Clear All"]} ${translations.Filters}`}
+                    height="h-10"
+                    px="px-4"
+                    fontWeight="font-medium"
+                    fontSize="text-sm"
+                    onClick={handleClearFilters}
+                  />
+                )}
                 <FilledButton
                   isIcon={true}
                   icon={Plus}

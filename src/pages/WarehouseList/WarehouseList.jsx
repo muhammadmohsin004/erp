@@ -46,7 +46,7 @@ import Span from "../../components/elements/span/Span";
 const WarehouseList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Warehouse": language === "ar" ? "إضافة مستودع" : "Add Warehouse",

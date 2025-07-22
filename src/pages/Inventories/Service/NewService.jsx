@@ -21,7 +21,7 @@ const NewService = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const { createService, updateService, loading } = useService();
 

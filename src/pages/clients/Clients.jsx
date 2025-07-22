@@ -731,7 +731,7 @@ import CustomAlert from "../../components/elements/Alert/CustomAlerts"; // Adjus
 const DynamicClientDashboard = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const {
     clients,

@@ -47,7 +47,7 @@ import Span from "../../../components/elements/span/Span";
 const RequisitionList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Requisition": language === "ar" ? "إضافة طلب" : "Add Requisition",
@@ -534,7 +534,6 @@ const RequisitionList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -560,7 +559,8 @@ const RequisitionList = () => {
               isIconLeft
               onClick={handleExport}
               disabled={
-                (!Array.isArray(requisitionsData) || requisitionsData.length === 0) &&
+                (!Array.isArray(requisitionsData) ||
+                  requisitionsData.length === 0) &&
                 selectedRequisitions.length === 0
               }
             />
@@ -582,7 +582,6 @@ const RequisitionList = () => {
             />
           </div>
         </div>
-
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -1058,7 +1057,7 @@ const RequisitionList = () => {
                   {selectedRequisition.Attachments?.length || 0})
                 </h3>
                 {selectedRequisition.Attachments &&
-                  selectedRequisition.Attachments.length > 0 ? (
+                selectedRequisition.Attachments.length > 0 ? (
                   <Container className="space-y-2">
                     {selectedRequisition.Attachments.map(
                       (attachment, index) => (

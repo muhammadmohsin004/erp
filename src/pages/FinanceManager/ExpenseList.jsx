@@ -41,7 +41,7 @@ import Table from "../../components/elements/table/Table";
 const ExpenseList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   // Translations object
   const translations = {

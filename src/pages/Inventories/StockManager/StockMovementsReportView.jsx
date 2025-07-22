@@ -29,7 +29,7 @@ const StockMovementView = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Stock Movement Details":

@@ -16,12 +16,13 @@ import { useCompanyBranch } from "../../Contexts/CompanyBranchContext/CompanyBra
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
+import CustomAlert from "../../components/elements/Alert/CustomAlerts";
 
 const CompanyBranchForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Branch": language === "ar" ? "إضافة فرع" : "Add Branch",
@@ -40,32 +41,45 @@ const CompanyBranchForm = () => {
     Save: language === "ar" ? "حفظ" : "Save",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Back to List": language === "ar" ? "العودة للقائمة" : "Back to List",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Contact Information": language === "ar" ? "معلومات الاتصال" : "Contact Information",
-    "Settings": language === "ar" ? "الإعدادات" : "Settings",
-    "Enter branch name": language === "ar" ? "أدخل اسم الفرع" : "Enter branch name",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Contact Information":
+      language === "ar" ? "معلومات الاتصال" : "Contact Information",
+    Settings: language === "ar" ? "الإعدادات" : "Settings",
+    "Enter branch name":
+      language === "ar" ? "أدخل اسم الفرع" : "Enter branch name",
     "Enter address": language === "ar" ? "أدخل العنوان" : "Enter address",
     "Enter city": language === "ar" ? "أدخل المدينة" : "Enter city",
     "Enter state": language === "ar" ? "أدخل الولاية" : "Enter state",
     "Enter country": language === "ar" ? "أدخل الدولة" : "Enter country",
-    "Enter zip code": language === "ar" ? "أدخل الرمز البريدي" : "Enter zip code",
-    "Enter phone number": language === "ar" ? "أدخل رقم الهاتف" : "Enter phone number",
-    "This field is required": language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
+    "Enter zip code":
+      language === "ar" ? "أدخل الرمز البريدي" : "Enter zip code",
+    "Enter phone number":
+      language === "ar" ? "أدخل رقم الهاتف" : "Enter phone number",
+    "This field is required":
+      language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
     "Saving...": language === "ar" ? "جارٍ الحفظ..." : "Saving...",
     "Creating...": language === "ar" ? "جارٍ الإنشاء..." : "Creating...",
     "Updating...": language === "ar" ? "جارٍ التحديث..." : "Updating...",
-    "Success": language === "ar" ? "نجح" : "Success",
-    "Error": language === "ar" ? "خطأ" : "Error",
+    Success: language === "ar" ? "نجح" : "Success",
+    Error: language === "ar" ? "خطأ" : "Error",
+    "Branch created successfully":
+      language === "ar"
+        ? "تم إنشاء الفرع بنجاح"
+        : "Branch created successfully",
+    "Branch updated successfully":
+      language === "ar"
+        ? "تم تحديث الفرع بنجاح"
+        : "Branch updated successfully",
+    "Failed to save branch":
+      language === "ar" ? "فشل في حفظ الفرع" : "Failed to save branch",
+    "Please try again":
+      language === "ar" ? "يرجى المحاولة مرة أخرى" : "Please try again",
   };
 
   // Get branch context
-  const {
-    createBranch,
-    updateBranch,
-    loading,
-    error,
-    clearError,
-  } = useCompanyBranch();
+  const { createBranch, updateBranch, loading, error, clearError } =
+    useCompanyBranch();
 
   // Determine mode based on location state
   const { editData, cloneData, isEditing } = location.state || {};
@@ -88,12 +102,40 @@ const CompanyBranchForm = () => {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Alert state
+  const [alert, setAlert] = useState({
+    isVisible: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
 
+  // Alert functions
+  const showAlert = (type, title, message) => {
+    setAlert({
+      isVisible: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlert((prev) => ({
+      ...prev,
+      isVisible: false,
+    }));
+  };
 
   // Initialize form data based on mode
   useEffect(() => {
-    console.log("useEffect triggered - isEditMode:", isEditMode, "isCloning:", isCloning);
-    
+    console.log(
+      "useEffect triggered - isEditMode:",
+      isEditMode,
+      "isCloning:",
+      isCloning
+    );
+
     if (isEditMode && editData) {
       console.log("Setting edit data:", editData);
       setFormData({
@@ -121,7 +163,7 @@ const CompanyBranchForm = () => {
         IsActive: cloneData.IsActive !== undefined ? cloneData.IsActive : true,
       });
     }
-    
+
     // Clear any existing errors when mode changes
     if (clearError) {
       clearError();
@@ -139,19 +181,19 @@ const CompanyBranchForm = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     const fieldValue = type === "checkbox" ? checked : value;
-    
+
     console.log("Input change:", { name, value: fieldValue, type });
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: fieldValue
+      [name]: fieldValue,
     }));
 
     // Clear error for this field
     if (formErrors[name]) {
-      setFormErrors(prev => ({
+      setFormErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
@@ -185,7 +227,7 @@ const CompanyBranchForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     console.log("handleSubmit called");
-    
+
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -201,6 +243,11 @@ const CompanyBranchForm = () => {
 
     if (!validateForm()) {
       console.log("Form validation failed");
+      showAlert(
+        "error",
+        translations.Error,
+        "Please fill in all required fields"
+      );
       return;
     }
 
@@ -209,9 +256,14 @@ const CompanyBranchForm = () => {
 
     try {
       let result;
-      
+
       if (isEditMode) {
-        console.log("Updating branch with ID:", editData.Id, "and data:", formData);
+        console.log(
+          "Updating branch with ID:",
+          editData.Id,
+          "and data:",
+          formData
+        );
         result = await updateBranch(editData.Id, formData);
       } else {
         console.log("Creating new branch with data:", formData);
@@ -221,23 +273,41 @@ const CompanyBranchForm = () => {
       console.log("API result:", result);
 
       if (result) {
-        console.log("Success! Navigating back to list");
-        // Success - navigate back to list
-        navigate("/admin/company-branches", {
-          state: {
-            message: isEditMode 
-              ? "Branch updated successfully" 
-              : "Branch created successfully",
-            type: "success"
-          }
-        });
+        console.log(
+          "Success! Showing success alert and navigating back to list"
+        );
+
+        // Show success alert
+        const successMessage = isEditMode
+          ? translations["Branch updated successfully"]
+          : translations["Branch created successfully"];
+
+        showAlert("success", translations.Success, successMessage);
+
+        // Navigate back to list after a short delay to show the alert
+        setTimeout(() => {
+          navigate("/admin/company-branches", {
+            state: {
+              message: successMessage,
+              type: "success",
+            },
+          });
+        }, 1500);
       } else {
         console.log("No result returned from API");
-        alert("Failed to save branch. Please try again.");
+        showAlert(
+          "error",
+          translations.Error,
+          `${translations["Failed to save branch"]}. ${translations["Please try again"]}`
+        );
       }
     } catch (error) {
       console.error("Error saving branch:", error);
-      alert(`Error: ${error.message || "Failed to save branch"}`);
+      showAlert(
+        "error",
+        translations.Error,
+        error.message || translations["Failed to save branch"]
+      );
     } finally {
       setIsSubmitting(false);
       console.log("Submission completed");
@@ -267,6 +337,16 @@ const CompanyBranchForm = () => {
 
   return (
     <Container className="min-h-screen bg-gray-50">
+      {/* Custom Alert */}
+      <CustomAlert
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        isVisible={alert.isVisible}
+        onClose={hideAlert}
+        autoClose={true}
+      />
+
       <Container className="px-6 py-6">
         {/* Header */}
         <Container className="flex items-center justify-between mb-6">
@@ -292,8 +372,6 @@ const CompanyBranchForm = () => {
               </Span>
             </Container>
           </Container>
-
-         
         </Container>
 
         {/* Error Display */}
@@ -303,7 +381,6 @@ const CompanyBranchForm = () => {
           </Container>
         )}
 
-       
         {/* Form */}
         <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
           <form onSubmit={handleSubmit} className="p-6">
@@ -315,7 +392,7 @@ const CompanyBranchForm = () => {
                     <Building className="w-5 h-5" />
                     {translations["Basic Information"]}
                   </h3>
-                  
+
                   {/* Branch Name */}
                   <Container className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -328,7 +405,9 @@ const CompanyBranchForm = () => {
                       onChange={handleInputChange}
                       placeholder={translations["Enter branch name"]}
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.BranchName ? "border-red-300" : "border-gray-300"
+                        formErrors.BranchName
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       disabled={isSubmitting}
                     />
@@ -351,7 +430,9 @@ const CompanyBranchForm = () => {
                       placeholder={translations["Enter address"]}
                       rows={3}
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.Address ? "border-red-300" : "border-gray-300"
+                        formErrors.Address
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       disabled={isSubmitting}
                     />
@@ -418,7 +499,9 @@ const CompanyBranchForm = () => {
                         onChange={handleInputChange}
                         placeholder={translations["Enter country"]}
                         className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          formErrors.Country ? "border-red-300" : "border-gray-300"
+                          formErrors.Country
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         disabled={isSubmitting}
                       />
@@ -531,7 +614,9 @@ const CompanyBranchForm = () => {
                 {/* Additional Info for Edit Mode */}
                 {isEditMode && editData && (
                   <Container className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Additional Information</h4>
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">
+                      Additional Information
+                    </h4>
                     <Container className="text-xs text-gray-500 space-y-1">
                       <Container>
                         <strong>Created:</strong>{" "}
@@ -571,16 +656,32 @@ const CompanyBranchForm = () => {
                   className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
                 >
                   {isSubmitting && (
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                   )}
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting 
-                    ? (isEditMode ? translations["Updating..."] : translations["Creating..."])
-                    : translations.Save
-                  }
+                  {isSubmitting
+                    ? isEditMode
+                      ? translations["Updating..."]
+                      : translations["Creating..."]
+                    : translations.Save}
                 </button>
               </Container>
             </Container>
