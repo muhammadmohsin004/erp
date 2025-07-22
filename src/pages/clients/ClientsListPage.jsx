@@ -20,7 +20,7 @@ import {
   Check,
   Ban,
   AlertCircle,
-  Download
+  Download,
 } from "lucide-react";
 import { useClients } from "../../Contexts/apiClientContext/apiClientContext";
 import FilledButton from "../../components/elements/elements/buttons/filledButton/FilledButton";
@@ -41,7 +41,7 @@ const ClientsListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const {
     clients: clientsResponse,
@@ -53,7 +53,7 @@ const ClientsListPage = () => {
     setFilters,
     setPagination,
     deleteClient,
-    updateClientStatus
+    updateClientStatus,
   } = useClients();
 
   // Extract clients array from response
@@ -75,46 +75,51 @@ const ClientsListPage = () => {
     return [];
   }, [clientsResponse]);
 
-  const translations = React.useMemo(() => ({
-    "All Clients": language === "ar" ? "جميع العملاء" : "All Clients",
-    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
-    "Search & Filters": language === "ar" ? "البحث والفلاتر" : "Search & Filters",
-    "Search by name": language === "ar" ? "البحث بالاسم" : "Name",
-    "Search": language === "ar" ? "بحث" : "Search",
-    "Advanced": language === "ar" ? "متقدم" : "Advanced",
-    "Hide": language === "ar" ? "إخفاء" : "Hide",
-    "Client Type": language === "ar" ? "نوع العميل" : "Client",
-    "All Types": language === "ar" ? "جميع الأنواع" : "All Types",
-    "Individual": language === "ar" ? "فردي" : "Individual",
-    "Business": language === "ar" ? "تجاري" : "Business",
-    "Category": language === "ar" ? "الفئة" : "Category",
-    "Currency": language === "ar" ? "العملة" : "Currency",
-    "Country": language === "ar" ? "البلد" : "Country",
-    "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
-    "Sort": language === "ar" ? "ترتيب" : "Sort",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No clients found": language === "ar" ? "لم يتم العثور على عملاء" : "No clients found",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Delete": language === "ar" ? "حذف" : "Delete",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Showing": language === "ar" ? "عرض" : "Showing",
-    "of": language === "ar" ? "من" : "of",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "Approve": language === "ar" ? "موافقة" : "Approve",
-    "Reject": language === "ar" ? "رفض" : "Reject",
-    "Active": language === "ar" ? "نشط" : "Active",
-    "Inactive": language === "ar" ? "غير نشط" : "Inactive",
-    "Pending": language === "ar" ? "قيد الانتظار" : "Pending",
-    "Client Name": language === "ar" ? "اسم العميل" : "Client Name",
-    "Email": language === "ar" ? "البريد الإلكتروني" : "Email",
-    "Phone": language === "ar" ? "الهاتف" : "Phone",
-    "Type": language === "ar" ? "النوع" : "Type",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Last Activity": language === "ar" ? "آخر نشاط" : "Last Activity",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions"
-  }), [language]);
+  const translations = React.useMemo(
+    () => ({
+      "All Clients": language === "ar" ? "جميع العملاء" : "All Clients",
+      "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
+      "Search & Filters":
+        language === "ar" ? "البحث والفلاتر" : "Search & Filters",
+      "Search by name": language === "ar" ? "البحث بالاسم" : "Name",
+      Search: language === "ar" ? "بحث" : "Search",
+      Advanced: language === "ar" ? "متقدم" : "Advanced",
+      Hide: language === "ar" ? "إخفاء" : "Hide",
+      "Client Type": language === "ar" ? "نوع العميل" : "Client",
+      "All Types": language === "ar" ? "جميع الأنواع" : "All Types",
+      Individual: language === "ar" ? "فردي" : "Individual",
+      Business: language === "ar" ? "تجاري" : "Business",
+      Category: language === "ar" ? "الفئة" : "Category",
+      Currency: language === "ar" ? "العملة" : "Currency",
+      Country: language === "ar" ? "البلد" : "Country",
+      "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
+      Sort: language === "ar" ? "ترتيب" : "Sort",
+      Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+      "No clients found":
+        language === "ar" ? "لم يتم العثور على عملاء" : "No clients found",
+      View: language === "ar" ? "عرض" : "View",
+      Edit: language === "ar" ? "تعديل" : "Edit",
+      Delete: language === "ar" ? "حذف" : "Delete",
+      Clone: language === "ar" ? "نسخ" : "Clone",
+      Showing: language === "ar" ? "عرض" : "Showing",
+      of: language === "ar" ? "من" : "of",
+      Previous: language === "ar" ? "السابق" : "Previous",
+      Next: language === "ar" ? "التالي" : "Next",
+      Approve: language === "ar" ? "موافقة" : "Approve",
+      Reject: language === "ar" ? "رفض" : "Reject",
+      Active: language === "ar" ? "نشط" : "Active",
+      Inactive: language === "ar" ? "غير نشط" : "Inactive",
+      Pending: language === "ar" ? "قيد الانتظار" : "Pending",
+      "Client Name": language === "ar" ? "اسم العميل" : "Client Name",
+      Email: language === "ar" ? "البريد الإلكتروني" : "Email",
+      Phone: language === "ar" ? "الهاتف" : "Phone",
+      Type: language === "ar" ? "النوع" : "Type",
+      Status: language === "ar" ? "الحالة" : "Status",
+      "Last Activity": language === "ar" ? "آخر نشاط" : "Last Activity",
+      Actions: language === "ar" ? "الإجراءات" : "Actions",
+    }),
+    [language]
+  );
 
   // Local state
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -144,7 +149,7 @@ const ClientsListPage = () => {
       getClients({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        ...filters
+        ...filters,
       });
     }
   }, [pagination.page, pagination.pageSize, filters, token]);
@@ -160,22 +165,31 @@ const ClientsListPage = () => {
   }, [pagination.page, filters, setSearchParams]);
 
   // Handle search
-  const handleSearch = useCallback((searchTerm) => {
-    setFilters({ search: searchTerm });
-    setPagination({ page: 1 });
-  }, [setFilters, setPagination]);
+  const handleSearch = useCallback(
+    (searchTerm) => {
+      setFilters({ search: searchTerm });
+      setPagination({ page: 1 });
+    },
+    [setFilters, setPagination]
+  );
 
   // Handle filter changes
-  const handleFilterChange = useCallback((filterName, value) => {
-    setFilters({ [filterName]: value });
-    setPagination({ page: 1 });
-  }, [setFilters, setPagination]);
+  const handleFilterChange = useCallback(
+    (filterName, value) => {
+      setFilters({ [filterName]: value });
+      setPagination({ page: 1 });
+    },
+    [setFilters, setPagination]
+  );
 
   // Handle pagination
-  const handlePageChange = useCallback((newPage) => {
-    setPagination({ page: newPage });
-    window.scrollTo(0, 0);
-  }, [setPagination]);
+  const handlePageChange = useCallback(
+    (newPage) => {
+      setPagination({ page: newPage });
+      window.scrollTo(0, 0);
+    },
+    [setPagination]
+  );
 
   // Handle delete
   const handleDeleteClick = (client) => {
@@ -193,7 +207,7 @@ const ClientsListPage = () => {
       getClients({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        ...filters
+        ...filters,
       });
     } catch (error) {
       console.error("Delete failed:", error);
@@ -219,7 +233,7 @@ const ClientsListPage = () => {
       getClients({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        ...filters
+        ...filters,
       });
     } catch (error) {
       console.error("Status update failed:", error);
@@ -230,9 +244,9 @@ const ClientsListPage = () => {
   // Toggle action menu
   const toggleActionMenu = (clientId, event) => {
     event.stopPropagation();
-    setOpenActionMenus(prev => ({
+    setOpenActionMenus((prev) => ({
       ...prev,
-      [clientId]: !prev[clientId]
+      [clientId]: !prev[clientId],
     }));
   };
 
@@ -255,26 +269,28 @@ const ClientsListPage = () => {
     const handleClickOutside = () => {
       setOpenActionMenus({});
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   // Select all functionality
-  const isAllSelected = clientsArray.length > 0 && selectedClients.length === clientsArray.length;
-  const isIndeterminate = selectedClients.length > 0 && selectedClients.length < clientsArray.length;
+  const isAllSelected =
+    clientsArray.length > 0 && selectedClients.length === clientsArray.length;
+  const isIndeterminate =
+    selectedClients.length > 0 && selectedClients.length < clientsArray.length;
 
   const handleSelectAll = () => {
     if (isAllSelected) {
       setSelectedClients([]);
     } else {
-      setSelectedClients(clientsArray.map(client => client.Id));
+      setSelectedClients(clientsArray.map((client) => client.Id));
     }
   };
 
   const handleSelectClient = (clientId) => {
-    setSelectedClients(prev =>
+    setSelectedClients((prev) =>
       prev.includes(clientId)
-        ? prev.filter(id => id !== clientId)
+        ? prev.filter((id) => id !== clientId)
         : [...prev, clientId]
     );
   };
@@ -295,7 +311,7 @@ const ClientsListPage = () => {
       getClients({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        ...filters
+        ...filters,
       });
     } catch (error) {
       console.error("Bulk status update failed:", error);
@@ -309,7 +325,11 @@ const ClientsListPage = () => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete ${selectedClients.length} clients? This action cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedClients.length} clients? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -322,7 +342,7 @@ const ClientsListPage = () => {
       getClients({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        ...filters
+        ...filters,
       });
     } catch (error) {
       console.error("Bulk delete failed:", error);
@@ -342,7 +362,7 @@ const ClientsListPage = () => {
                 <input
                   type="checkbox"
                   checked={isAllSelected}
-                  ref={checkbox => {
+                  ref={(checkbox) => {
                     if (checkbox) checkbox.indeterminate = isIndeterminate;
                   }}
                   onChange={handleSelectAll}
@@ -351,8 +371,12 @@ const ClientsListPage = () => {
                 <Span className="text-sm font-medium text-gray-700">
                   {selectedClients.length > 0
                     ? `${selectedClients.length} selected`
-                    : `${((pagination.page - 1) * pagination.pageSize) + 1}-${Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} of ${pagination.totalItems}`
-                  }
+                    : `${
+                        (pagination.page - 1) * pagination.pageSize + 1
+                      }-${Math.min(
+                        pagination.page * pagination.pageSize,
+                        pagination.totalItems
+                      )} of ${pagination.totalItems}`}
                 </Span>
               </Container>
 
@@ -363,9 +387,18 @@ const ClientsListPage = () => {
                     buttonText="Change Status"
                     buttonClassName="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
                     items={[
-                      { label: "Set to Active", action: () => handleBulkStatusChange("Active") },
-                      { label: "Set to Inactive", action: () => handleBulkStatusChange("Inactive") },
-                      { label: "Set to Pending", action: () => handleBulkStatusChange("Pending") }
+                      {
+                        label: "Set to Active",
+                        action: () => handleBulkStatusChange("Active"),
+                      },
+                      {
+                        label: "Set to Inactive",
+                        action: () => handleBulkStatusChange("Inactive"),
+                      },
+                      {
+                        label: "Set to Pending",
+                        action: () => handleBulkStatusChange("Pending"),
+                      },
                     ]}
                     onSelect={(item) => item.action()}
                   />
@@ -404,7 +437,9 @@ const ClientsListPage = () => {
             {/* Right side actions */}
             <Container className="flex items-center gap-3">
               <button
-                onClick={() => getClients({ page: pagination.page, ...filters })}
+                onClick={() =>
+                  getClients({ page: pagination.page, ...filters })
+                }
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <RefreshCw className="w-5 h-5 text-gray-600" />
@@ -444,7 +479,9 @@ const ClientsListPage = () => {
             <Container className="relative">
               <select
                 value={filters.clientType || ""}
-                onChange={(e) => handleFilterChange("clientType", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange("clientType", e.target.value)
+                }
                 className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-32"
               >
                 <option value="">{translations["Client Type"]}</option>
@@ -474,7 +511,9 @@ const ClientsListPage = () => {
                 placeholder="Search by name, email, phone..."
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch(localSearch)}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && handleSearch(localSearch)
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </Container>
@@ -483,13 +522,16 @@ const ClientsListPage = () => {
             <Container className="flex items-center gap-3 ml-auto">
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${showAdvancedFilters
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                  showAdvancedFilters
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 <Filter className="w-4 h-4" />
-                {showAdvancedFilters ? translations.Hide : translations.Advanced}
+                {showAdvancedFilters
+                  ? translations.Hide
+                  : translations.Advanced}
               </button>
 
               <FilledButton
@@ -517,7 +559,9 @@ const ClientsListPage = () => {
                   <input
                     type="text"
                     value={filters.category || ""}
-                    onChange={(e) => handleFilterChange("category", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("category", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </Container>
@@ -528,7 +572,9 @@ const ClientsListPage = () => {
                   </label>
                   <select
                     value={filters.currency || ""}
-                    onChange={(e) => handleFilterChange("currency", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("currency", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   >
                     <option value="">All Currencies</option>
@@ -547,7 +593,9 @@ const ClientsListPage = () => {
                   <input
                     type="text"
                     value={filters.country || ""}
-                    onChange={(e) => handleFilterChange("country", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("country", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </Container>
@@ -578,7 +626,14 @@ const ClientsListPage = () => {
 
                 <button
                   onClick={() => {
-                    setFilters({ search: "", clientType: "", status: "", category: "", currency: "", country: "" });
+                    setFilters({
+                      search: "",
+                      clientType: "",
+                      status: "",
+                      category: "",
+                      currency: "",
+                      country: "",
+                    });
                     setLocalSearch("");
                     setPagination({ page: 1 });
                   }}
@@ -591,8 +646,6 @@ const ClientsListPage = () => {
           )}
         </Container>
       </Container>
-
-      
 
       {/* Clients Table */}
       <Container className="bg-white rounded-lg border border-gray-200 mx-6 my-6 overflow-hidden">
@@ -633,7 +686,9 @@ const ClientsListPage = () => {
                         bgColor="bg-blue-600 hover:bg-blue-700"
                         textColor="text-white"
                         buttonText="Retry"
-                        onClick={() => getClients({ page: pagination.page, ...filters })}
+                        onClick={() =>
+                          getClients({ page: pagination.page, ...filters })
+                        }
                       />
                     </Container>
                   </TD>
@@ -668,17 +723,28 @@ const ClientsListPage = () => {
                   <TR key={client.Id} className="hover:bg-gray-50">
                     <TD className="whitespace-nowrap">
                       <Container className="flex items-center gap-3">
-                        <Container className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${client.ClientType === "Individual" ? "bg-blue-500" : "bg-pink-500"
-                          }`}>
-                          {client.ClientType === "Business" && client.BusinessName
+                        <Container
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
+                            client.ClientType === "Individual"
+                              ? "bg-blue-500"
+                              : "bg-pink-500"
+                          }`}
+                        >
+                          {client.ClientType === "Business" &&
+                          client.BusinessName
                             ? client.BusinessName.charAt(0).toUpperCase()
                             : client.FullName
-                              ? client.FullName.split(' ').map(n => n.charAt(0)).join('').toUpperCase()
-                              : "C"}
+                            ? client.FullName.split(" ")
+                                .map((n) => n.charAt(0))
+                                .join("")
+                                .toUpperCase()
+                            : "C"}
                         </Container>
                         <Container>
                           <Span className="font-medium text-gray-900 block">
-                            {client.ClientType === "Business" ? client.BusinessName : client.FullName}
+                            {client.ClientType === "Business"
+                              ? client.BusinessName
+                              : client.FullName}
                           </Span>
                           <Span className="text-sm text-gray-500">
                             #{client.CodeNumber || client.Id}
@@ -730,7 +796,9 @@ const ClientsListPage = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate(`/admin/ViewClients-Details/${client.Id}`);
+                                  navigate(
+                                    `/admin/ViewClients-Details/${client.Id}`
+                                  );
                                   setOpenActionMenus({});
                                 }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -742,7 +810,10 @@ const ClientsListPage = () => {
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate("/admin/new-clients", {
-                                    state: { editData: client, isEditing: true }
+                                    state: {
+                                      editData: client,
+                                      isEditing: true,
+                                    },
                                   });
                                   setOpenActionMenus({});
                                 }}
@@ -806,7 +877,12 @@ const ClientsListPage = () => {
             <Container className="px-6 py-4 border-t border-gray-200">
               <Container className="flex items-center justify-between">
                 <Span className="text-sm text-gray-500">
-                  Showing {((pagination.page - 1) * pagination.pageSize) + 1} to {Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems} entries
+                  Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
+                  {Math.min(
+                    pagination.page * pagination.pageSize,
+                    pagination.totalItems
+                  )}{" "}
+                  of {pagination.totalItems} entries
                 </Span>
                 <Container className="flex items-center gap-2">
                   <button
@@ -834,7 +910,12 @@ const ClientsListPage = () => {
           <Container className="px-6 py-4 border-t border-gray-200">
             <Container className="flex items-center justify-between">
               <Span className="text-sm text-gray-500">
-                Showing {((pagination.page - 1) * pagination.pageSize) + 1} to {Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems} entries
+                Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
+                {Math.min(
+                  pagination.page * pagination.pageSize,
+                  pagination.totalItems
+                )}{" "}
+                of {pagination.totalItems} entries
               </Span>
               <Container className="flex items-center gap-2">
                 <button
@@ -865,8 +946,9 @@ const ClientsListPage = () => {
               Delete Client
             </h3>
             <Span className="text-gray-600 mb-6 block">
-              Are you sure you want to delete "{clientToDelete?.FullName || clientToDelete?.BusinessName}"?
-              This action cannot be undone.
+              Are you sure you want to delete "
+              {clientToDelete?.FullName || clientToDelete?.BusinessName}"? This
+              action cannot be undone.
             </Span>
             <Container className="flex justify-end gap-3">
               <FilledButton
@@ -900,8 +982,11 @@ const ClientsListPage = () => {
               {newStatus === "Active" ? "Approve Client" : "Deactivate Client"}
             </h3>
             <Span className="text-gray-600 mb-6 block">
-              Are you sure you want to {newStatus === "Active" ? "approve" : "deactivate"} "
-              {clientToUpdateStatus?.FullName || clientToUpdateStatus?.BusinessName}"?
+              Are you sure you want to{" "}
+              {newStatus === "Active" ? "approve" : "deactivate"} "
+              {clientToUpdateStatus?.FullName ||
+                clientToUpdateStatus?.BusinessName}
+              "?
             </Span>
             <Container className="flex justify-end gap-3">
               <FilledButton
@@ -914,7 +999,11 @@ const ClientsListPage = () => {
                 onClick={() => setShowStatusModal(false)}
               />
               <FilledButton
-                bgColor={newStatus === "Active" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+                bgColor={
+                  newStatus === "Active"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-red-600 hover:bg-red-700"
+                }
                 textColor="text-white"
                 rounded="rounded-lg"
                 buttonText={newStatus === "Active" ? "Approve" : "Deactivate"}

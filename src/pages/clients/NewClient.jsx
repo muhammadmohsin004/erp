@@ -25,152 +25,194 @@ import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 
 // InputField component with enhanced styling
-const InputField = React.memo(({ 
-  label, 
-  name, 
-  type = "text", 
-  required = false, 
-  placeholder = "", 
-  value, 
-  onChange, 
-  error,
-  icon: Icon,
-  as = "input",
-  options = [],
-  className = ""
-}) => (
-  <Container className={`space-y-1.5 ${className}`}>
-    <label className="block text-sm font-medium text-gray-700">
-      {label}
-      {required && <Span className="text-red-500 ml-1">*</Span>}
-    </label>
-    <Container className="relative">
-      {Icon && (
-        <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-          <Icon className="h-4 w-4 text-gray-400" />
-        </Container>
-      )}
-      {as === "textarea" ? (
-        <textarea
-          name={name}
-          value={value || ""}
-          onChange={(e) => onChange(name, e.target.value)}
-          placeholder={placeholder}
-          rows={3}
-          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${error ? 'border-red-500' : ''}`}
-        />
-      ) : as === "select" ? (
-        <select
-          name={name}
-          value={value || ""}
-          onChange={(e) => onChange(name, e.target.value)}
-          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-8 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white ${error ? 'border-red-500' : ''}`}
-        >
-          {placeholder && <option value="">{placeholder}</option>}
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={value || ""}
-          onChange={(e) => onChange(name, e.target.value)}
-          placeholder={placeholder}
-          className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${error ? 'border-red-500' : ''}`}
-        />
-      )}
-      {as === "select" && (
-        <Container className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </Container>
-      )}
+const InputField = React.memo(
+  ({
+    label,
+    name,
+    type = "text",
+    required = false,
+    placeholder = "",
+    value,
+    onChange,
+    error,
+    icon: Icon,
+    as = "input",
+    options = [],
+    className = "",
+  }) => (
+    <Container className={`space-y-1.5 ${className}`}>
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+        {required && <Span className="text-red-500 ml-1">*</Span>}
+      </label>
+      <Container className="relative">
+        {Icon && (
+          <Container className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+            <Icon className="h-4 w-4 text-gray-400" />
+          </Container>
+        )}
+        {as === "textarea" ? (
+          <textarea
+            name={name}
+            value={value || ""}
+            onChange={(e) => onChange(name, e.target.value)}
+            placeholder={placeholder}
+            rows={3}
+            className={`block w-full ${
+              Icon ? "pl-10" : "pl-3"
+            } pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              error ? "border-red-500" : ""
+            }`}
+          />
+        ) : as === "select" ? (
+          <select
+            name={name}
+            value={value || ""}
+            onChange={(e) => onChange(name, e.target.value)}
+            className={`block w-full ${
+              Icon ? "pl-10" : "pl-3"
+            } pr-8 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white ${
+              error ? "border-red-500" : ""
+            }`}
+          >
+            {placeholder && <option value="">{placeholder}</option>}
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={value || ""}
+            onChange={(e) => onChange(name, e.target.value)}
+            placeholder={placeholder}
+            className={`block w-full ${
+              Icon ? "pl-10" : "pl-3"
+            } pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              error ? "border-red-500" : ""
+            }`}
+          />
+        )}
+        {as === "select" && (
+          <Container className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </Container>
+        )}
+      </Container>
+      {error && <Span className="text-red-500 text-xs">{error}</Span>}
     </Container>
-    {error && <Span className="text-red-500 text-xs">{error}</Span>}
-  </Container>
-));
+  )
+);
 
 // Radio Button Group Component
-const RadioGroup = React.memo(({ label, name, options, value, onChange, error, required = false }) => (
-  <Container className="space-y-1.5">
-    <label className="block text-sm font-medium text-gray-700">
-      {label}
-      {required && <Span className="text-red-500 ml-1">*</Span>}
-    </label>
-    <Container className="flex gap-6">
-      {options.map((option) => (
-        <label key={option.value} className="flex items-center cursor-pointer">
-          <input
-            type="radio"
-            name={name}
-            value={option.value}
-            checked={value === option.value}
-            onChange={(e) => onChange(name, e.target.value)}
-            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-          />
-          <Container className="ml-2 flex items-center gap-2">
-            {option.icon && <option.icon className="w-4 h-4 text-gray-500" />}
-            <Span className="text-sm text-gray-700">{option.label}</Span>
-          </Container>
-        </label>
-      ))}
+const RadioGroup = React.memo(
+  ({ label, name, options, value, onChange, error, required = false }) => (
+    <Container className="space-y-1.5">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+        {required && <Span className="text-red-500 ml-1">*</Span>}
+      </label>
+      <Container className="flex gap-6">
+        {options.map((option) => (
+          <label
+            key={option.value}
+            className="flex items-center cursor-pointer"
+          >
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={value === option.value}
+              onChange={(e) => onChange(name, e.target.value)}
+              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            />
+            <Container className="ml-2 flex items-center gap-2">
+              {option.icon && <option.icon className="w-4 h-4 text-gray-500" />}
+              <Span className="text-sm text-gray-700">{option.label}</Span>
+            </Container>
+          </label>
+        ))}
+      </Container>
+      {error && <Span className="text-red-500 text-xs">{error}</Span>}
     </Container>
-    {error && <Span className="text-red-500 text-xs">{error}</Span>}
-  </Container>
-));
+  )
+);
 
 const NewClient = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
-  
+  const token = localStorage.getItem("token");
+
   const { createClient, updateClient } = useClients();
 
   // Translations
-  const translations = React.useMemo(() => ({
-    "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
-    "Edit Client": language === "ar" ? "تعديل العميل" : "Edit Client",
-    "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
-    "Account Details": language === "ar" ? "تفاصيل الحساب" : "Account Details",
-    "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
-    "Individual": language === "ar" ? "فردي" : "Individual",
-    "Business": language === "ar" ? "تجاري" : "Business",
-    "Business Name": language === "ar" ? "اسم النشاط التجاري" : "Business Name",
-    "First Name": language === "ar" ? "الاسم الأول" : "First Name",
-    "Last Name": language === "ar" ? "اسم العائلة" : "Last Name",
-    "Telephone": language === "ar" ? "الهاتف الثابت" : "Telephone",
-    "Mobile": language === "ar" ? "الهاتف المحمول" : "Mobile",
-    "Street Address 1": language === "ar" ? "العنوان الأول" : "Street Address 1",
-    "Street Address 2": language === "ar" ? "العنوان الثاني" : "Street Address 2",
-    "City": language === "ar" ? "المدينة" : "City",
-    "State": language === "ar" ? "الولاية/المنطقة" : "State",
-    "Postal Code": language === "ar" ? "الرمز البريدي" : "Postal Code",
-    "Country": language === "ar" ? "البلد" : "Country",
-    "Vat number": language === "ar" ? "الرقم الضريبي" : "Vat number",
-    "Add Secondary Address": language === "ar" ? "إضافة عنوان ثانوي" : "Add Secondary Address",
-    "Contacts List": language === "ar" ? "قائمة جهات الاتصال" : "Contacts List",
-    "Add": language === "ar" ? "إضافة" : "Add",
-    "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
-    "Invoicing Method": language === "ar" ? "طريقة الفوترة" : "Invoicing Method",
-    "Currency": language === "ar" ? "العملة" : "Currency",
-    "Email": language === "ar" ? "البريد الإلكتروني" : "Email",
-    "Category": language === "ar" ? "الفئة" : "Category",
-    "Notes": language === "ar" ? "ملاحظات" : "Notes",
-    "Attachments": language === "ar" ? "المرفقات" : "Attachments",
-    "Display Language": language === "ar" ? "لغة العرض" : "Display Language",
-    "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
-    "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
-    "Save": language === "ar" ? "حفظ" : "Save",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Required": language === "ar" ? "مطلوب" : "Required",
-    "Drop file here or select from your computer": language === "ar" ? "اسحب الملف هنا أو اختر من جهاز الكمبيوتر" : "Drop file here or select from your computer",
-  }), [language]);
+  const translations = React.useMemo(
+    () => ({
+      "Add Client": language === "ar" ? "إضافة عميل" : "Add Client",
+      "Edit Client": language === "ar" ? "تعديل العميل" : "Edit Client",
+      "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
+      "Account Details":
+        language === "ar" ? "تفاصيل الحساب" : "Account Details",
+      "Client Type": language === "ar" ? "نوع العميل" : "Client Type",
+      Individual: language === "ar" ? "فردي" : "Individual",
+      Business: language === "ar" ? "تجاري" : "Business",
+      "Business Name":
+        language === "ar" ? "اسم النشاط التجاري" : "Business Name",
+      "First Name": language === "ar" ? "الاسم الأول" : "First Name",
+      "Last Name": language === "ar" ? "اسم العائلة" : "Last Name",
+      Telephone: language === "ar" ? "الهاتف الثابت" : "Telephone",
+      Mobile: language === "ar" ? "الهاتف المحمول" : "Mobile",
+      "Street Address 1":
+        language === "ar" ? "العنوان الأول" : "Street Address 1",
+      "Street Address 2":
+        language === "ar" ? "العنوان الثاني" : "Street Address 2",
+      City: language === "ar" ? "المدينة" : "City",
+      State: language === "ar" ? "الولاية/المنطقة" : "State",
+      "Postal Code": language === "ar" ? "الرمز البريدي" : "Postal Code",
+      Country: language === "ar" ? "البلد" : "Country",
+      "Vat number": language === "ar" ? "الرقم الضريبي" : "Vat number",
+      "Add Secondary Address":
+        language === "ar" ? "إضافة عنوان ثانوي" : "Add Secondary Address",
+      "Contacts List":
+        language === "ar" ? "قائمة جهات الاتصال" : "Contacts List",
+      Add: language === "ar" ? "إضافة" : "Add",
+      "Code Number": language === "ar" ? "رقم الكود" : "Code Number",
+      "Invoicing Method":
+        language === "ar" ? "طريقة الفوترة" : "Invoicing Method",
+      Currency: language === "ar" ? "العملة" : "Currency",
+      Email: language === "ar" ? "البريد الإلكتروني" : "Email",
+      Category: language === "ar" ? "الفئة" : "Category",
+      Notes: language === "ar" ? "ملاحظات" : "Notes",
+      Attachments: language === "ar" ? "المرفقات" : "Attachments",
+      "Display Language": language === "ar" ? "لغة العرض" : "Display Language",
+      "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
+      "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
+      Save: language === "ar" ? "حفظ" : "Save",
+      Cancel: language === "ar" ? "إلغاء" : "Cancel",
+      Required: language === "ar" ? "مطلوب" : "Required",
+      "Drop file here or select from your computer":
+        language === "ar"
+          ? "اسحب الملف هنا أو اختر من جهاز الكمبيوتر"
+          : "Drop file here or select from your computer",
+    }),
+    [language]
+  );
 
   // Form state - Updated to match controller defaults exactly
   const [formData, setFormData] = useState({
@@ -274,9 +316,9 @@ const NewClient = () => {
         DisplayLanguage: cloneData.DisplayLanguage || "en",
         InvoicingMethod: cloneData.InvoicingMethod || "Email",
       };
-      
+
       setFormData(sanitizedCloneData);
-      
+
       if (cloneData.Contacts && Array.isArray(cloneData.Contacts.$values)) {
         setContacts(cloneData.Contacts.$values);
       } else if (cloneData.Contacts && Array.isArray(cloneData.Contacts)) {
@@ -295,9 +337,9 @@ const NewClient = () => {
         DisplayLanguage: editData.DisplayLanguage || "en",
         InvoicingMethod: editData.InvoicingMethod || "Email",
       };
-      
+
       setFormData(sanitizedEditData);
-      
+
       if (editData.Contacts && Array.isArray(editData.Contacts.$values)) {
         setContacts(editData.Contacts.$values);
       } else if (editData.Contacts && Array.isArray(editData.Contacts)) {
@@ -319,44 +361,50 @@ const NewClient = () => {
   }, [token, navigate]);
 
   // Event handlers
-  const handleInputChange = useCallback((field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value || ""
-    }));
-    
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  }, [errors]);
+  const handleInputChange = useCallback(
+    (field, value) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value || "",
+      }));
+
+      if (errors[field]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
   const handleContactChange = useCallback((index, field, value) => {
-    setContacts(prev => {
+    setContacts((prev) => {
       const newContacts = [...prev];
       newContacts[index] = {
         ...newContacts[index],
-        [field]: value || ""
+        [field]: value || "",
       };
       return newContacts;
     });
   }, []);
 
   const addContact = useCallback(() => {
-    setContacts(prev => [...prev, {
-      FirstName: "",
-      LastName: "",
-      Email: "",
-      Mobile: "",
-      Telephone: ""
-    }]);
+    setContacts((prev) => [
+      ...prev,
+      {
+        FirstName: "",
+        LastName: "",
+        Email: "",
+        Mobile: "",
+        Telephone: "",
+      },
+    ]);
   }, []);
 
   const removeContact = useCallback((index) => {
-    setContacts(prev => prev.filter((_, i) => i !== index));
+    setContacts((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   // File handling
@@ -383,40 +431,48 @@ const NewClient = () => {
   }, []);
 
   const processFiles = useCallback((files) => {
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       const allowedTypes = [
-        'image/jpeg', 'image/jpg', 'image/png', 
-        'application/pdf', 
-        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'text/plain'
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/plain",
       ];
-      
+
       const maxSize = 10 * 1024 * 1024; // 10MB
-      
+
       if (!allowedTypes.includes(file.type)) {
-        alert(`File ${file.name} has invalid type. Allowed types: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, TXT`);
+        alert(
+          `File ${file.name} has invalid type. Allowed types: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, TXT`
+        );
         return false;
       }
-      
+
       if (file.size > maxSize) {
         alert(`File ${file.name} exceeds size limit of 10MB`);
         return false;
       }
-      
+
       return true;
     });
-    
-    setAttachments(prev => [...prev, ...validFiles]);
+
+    setAttachments((prev) => [...prev, ...validFiles]);
   }, []);
 
   const removeAttachment = useCallback((index) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const removeExistingAttachment = useCallback((attachment) => {
-    setExistingAttachments(prev => prev.filter(att => att.Id !== attachment.Id));
-    setAttachmentsToRemove(prev => [...prev, attachment.Id]);
+    setExistingAttachments((prev) =>
+      prev.filter((att) => att.Id !== attachment.Id)
+    );
+    setAttachmentsToRemove((prev) => [...prev, attachment.Id]);
   }, []);
 
   // Validation - Updated to match controller validation exactly
@@ -426,15 +482,19 @@ const NewClient = () => {
     // CRITICAL: Match controller validation logic exactly
     if (formData.ClientType === "Individual") {
       // Controller checks: dto.ClientType == "Individual" && string.IsNullOrWhiteSpace(dto.FullName)
-      const fullName = formData.FullName?.trim() || 
-                      `${formData.FirstName?.trim() || ""} ${formData.LastName?.trim() || ""}`.trim();
+      const fullName =
+        formData.FullName?.trim() ||
+        `${formData.FirstName?.trim() || ""} ${
+          formData.LastName?.trim() || ""
+        }`.trim();
       if (!fullName) {
         newErrors.FirstName = "Full Name is required for Individual clients";
       }
     } else if (formData.ClientType === "Business") {
       // Controller checks: dto.ClientType == "Business" && string.IsNullOrWhiteSpace(dto.BusinessName)
       if (!formData.BusinessName?.trim()) {
-        newErrors.BusinessName = "Business Name is required for Business clients";
+        newErrors.BusinessName =
+          "Business Name is required for Business clients";
       }
     }
 
@@ -458,7 +518,7 @@ const NewClient = () => {
     // CRITICAL: Map DisplayLanguage from form codes to full names
     let displayLanguage = "English"; // Default
     if (formData.DisplayLanguage === "ar") displayLanguage = "Arabic";
-    else if (formData.DisplayLanguage === "fr") displayLanguage = "French"; 
+    else if (formData.DisplayLanguage === "fr") displayLanguage = "French";
     else if (formData.DisplayLanguage === "de") displayLanguage = "German";
     else if (formData.DisplayLanguage === "en") displayLanguage = "English";
 
@@ -468,8 +528,11 @@ const NewClient = () => {
       fullName = formData.BusinessName?.trim() || "";
     } else {
       // For Individual clients, controller validates FullName is required
-      fullName = formData.FullName?.trim() || 
-                `${formData.FirstName?.trim() || ""} ${formData.LastName?.trim() || ""}`.trim();
+      fullName =
+        formData.FullName?.trim() ||
+        `${formData.FirstName?.trim() || ""} ${
+          formData.LastName?.trim() || ""
+        }`.trim();
     }
 
     const sanitized = {
@@ -478,19 +541,19 @@ const NewClient = () => {
       Currency: formData.Currency || "USD", // Controller defaults to USD
       InvoicingMethod: formData.InvoicingMethod || "Email",
       DisplayLanguage: displayLanguage, // FIXED: Send full language name
-      
+
       // CRITICAL: Required NOT NULL fields - must match controller expectations
       Mobile: formData.Mobile?.trim() || "",
       Telephone: formData.Telephone?.trim() || "",
       TaxNumber: formData.TaxNumber?.trim() || "", // Empty string as controller expects
       PaymentTerms: formData.PaymentTerms?.trim() || "", // Empty string as controller expects
-      
+
       // CRITICAL: Name fields - exact mapping to controller
       FullName: fullName,
       BusinessName: formData.BusinessName?.trim() || "",
       FirstName: formData.FirstName?.trim() || "",
       LastName: formData.LastName?.trim() || "",
-      
+
       // Contact and Address fields
       Email: formData.Email?.trim() || "",
       StreetAddress1: formData.StreetAddress1?.trim() || "",
@@ -499,16 +562,16 @@ const NewClient = () => {
       State: formData.State?.trim() || "",
       PostalCode: formData.PostalCode?.trim() || "",
       Country: formData.Country?.trim() || "",
-      
+
       // Optional fields
       VatNumber: formData.VatNumber?.trim() || "",
       CodeNumber: formData.CodeNumber?.trim() || "",
       Category: formData.Category?.trim() || "",
       Notes: formData.Notes?.trim() || "",
-      
+
       // Boolean field
       HasSecondaryAddress: Boolean(formData.HasSecondaryAddress),
-      
+
       // CRITICAL: Backend duplicate fields - exact names expected
       MobileNumber: formData.Mobile?.trim() || "",
       Phone: formData.Telephone?.trim() || "",
@@ -519,52 +582,74 @@ const NewClient = () => {
   }, [formData]);
 
   // Handle form submission
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-    setIsSaving(true);
-    try {
-      const sanitizedData = sanitizeFormData();
-      
-      const validContacts = contacts.filter(contact => 
-        contact.FirstName?.trim() || contact.LastName?.trim() || contact.Email?.trim() || contact.Mobile?.trim() || contact.Telephone?.trim()
-      ).map(contact => ({
-        FirstName: contact.FirstName?.trim() || "",
-        LastName: contact.LastName?.trim() || "",
-        Email: contact.Email?.trim() || "",
-        Mobile: contact.Mobile?.trim() || "",
-        Telephone: contact.Telephone?.trim() || "",
-      }));
-
-      const submitData = {
-        ...sanitizedData,
-        contacts: validContacts,
-        ...(isEditing && { attachmentsToRemove: attachmentsToRemove })
-      };
-
-      let response;
-      if (isEditing && editData?.Id) {
-        response = await updateClient(editData.Id, submitData, attachments);
-      } else {
-        response = await createClient(submitData, attachments);
+      if (!validateForm()) {
+        return;
       }
 
-      if (response && response.Success !== false) {
-        navigate("/admin/clients");
-      } else {
-        throw new Error(response?.Message || "Failed to save client");
+      setIsSaving(true);
+      try {
+        const sanitizedData = sanitizeFormData();
+
+        const validContacts = contacts
+          .filter(
+            (contact) =>
+              contact.FirstName?.trim() ||
+              contact.LastName?.trim() ||
+              contact.Email?.trim() ||
+              contact.Mobile?.trim() ||
+              contact.Telephone?.trim()
+          )
+          .map((contact) => ({
+            FirstName: contact.FirstName?.trim() || "",
+            LastName: contact.LastName?.trim() || "",
+            Email: contact.Email?.trim() || "",
+            Mobile: contact.Mobile?.trim() || "",
+            Telephone: contact.Telephone?.trim() || "",
+          }));
+
+        const submitData = {
+          ...sanitizedData,
+          contacts: validContacts,
+          ...(isEditing && { attachmentsToRemove: attachmentsToRemove }),
+        };
+
+        let response;
+        if (isEditing && editData?.Id) {
+          response = await updateClient(editData.Id, submitData, attachments);
+        } else {
+          response = await createClient(submitData, attachments);
+        }
+
+        if (response && response.Success !== false) {
+          navigate("/admin/clients");
+        } else {
+          throw new Error(response?.Message || "Failed to save client");
+        }
+      } catch (error) {
+        console.error("Error saving client:", error);
+        alert(error.message || "Failed to save client. Please try again.");
+      } finally {
+        setIsSaving(false);
       }
-    } catch (error) {
-      console.error("Error saving client:", error);
-      alert(error.message || "Failed to save client. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  }, [formData, contacts, attachments, attachmentsToRemove, isEditing, editData, validateForm, sanitizeFormData, updateClient, createClient, navigate]);
+    },
+    [
+      formData,
+      contacts,
+      attachments,
+      attachmentsToRemove,
+      isEditing,
+      editData,
+      validateForm,
+      sanitizeFormData,
+      updateClient,
+      createClient,
+      navigate,
+    ]
+  );
 
   return (
     <Container className="min-h-screen bg-gray-50">
@@ -589,7 +674,9 @@ const NewClient = () => {
                 <Span className="opacity-80">Clients</Span>
                 <Span className="opacity-60">›</Span>
                 <Span className="font-medium">
-                  {isEditing ? translations["Edit Client"] : translations["Add Client"]}
+                  {isEditing
+                    ? translations["Edit Client"]
+                    : translations["Add Client"]}
                 </Span>
               </nav>
             </Container>
@@ -638,7 +725,7 @@ const NewClient = () => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-100">
                   {translations["Client Details"]}
                 </h2>
-                
+
                 <Container className="space-y-5">
                   {/* Client Type */}
                   <RadioGroup
@@ -775,10 +862,18 @@ const NewClient = () => {
                       type="checkbox"
                       id="HasSecondaryAddress"
                       checked={formData.HasSecondaryAddress || false}
-                      onChange={(e) => handleInputChange("HasSecondaryAddress", e.target.checked)}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "HasSecondaryAddress",
+                          e.target.checked
+                        )
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
-                    <label htmlFor="HasSecondaryAddress" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor="HasSecondaryAddress"
+                      className="ml-2 text-sm text-gray-700 cursor-pointer"
+                    >
                       {translations["Add Secondary Address"]}
                     </label>
                   </Container>
@@ -865,7 +960,7 @@ const NewClient = () => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-100">
                   {translations["Account Details"]}
                 </h2>
-                
+
                 <Container className="space-y-5">
                   <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InputField
@@ -949,21 +1044,27 @@ const NewClient = () => {
                     <label className="block text-sm font-medium text-gray-700">
                       {translations["Attachments"]}
                     </label>
-                    
+
                     <Container
                       className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
-                        dragOver 
-                          ? 'border-blue-400 bg-blue-50' 
-                          : 'border-gray-300 hover:border-gray-400'
+                        dragOver
+                          ? "border-blue-400 bg-blue-50"
+                          : "border-gray-300 hover:border-gray-400"
                       }`}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      onClick={() => document.getElementById('file-upload').click()}
+                      onClick={() =>
+                        document.getElementById("file-upload").click()
+                      }
                     >
                       <UploadIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                       <Span className="text-sm text-gray-600">
-                        {translations["Drop file here or select from your computer"]}
+                        {
+                          translations[
+                            "Drop file here or select from your computer"
+                          ]
+                        }
                       </Span>
                     </Container>
 
@@ -979,9 +1080,14 @@ const NewClient = () => {
                     {/* File Lists */}
                     {existingAttachments.length > 0 && (
                       <Container className="space-y-2">
-                        <h4 className="text-xs font-medium text-gray-600">Existing Files</h4>
+                        <h4 className="text-xs font-medium text-gray-600">
+                          Existing Files
+                        </h4>
                         {existingAttachments.map((attachment) => (
-                          <Container key={attachment.Id} className="flex items-center justify-between bg-blue-50 p-2 rounded border border-blue-200">
+                          <Container
+                            key={attachment.Id}
+                            className="flex items-center justify-between bg-blue-50 p-2 rounded border border-blue-200"
+                          >
                             <Container className="flex items-center gap-2">
                               <FileIcon className="w-4 h-4 text-blue-400" />
                               <Span className="text-xs text-gray-900 truncate">
@@ -998,7 +1104,9 @@ const NewClient = () => {
                               buttonText=""
                               height="h-6"
                               width="w-6"
-                              onClick={() => removeExistingAttachment(attachment)}
+                              onClick={() =>
+                                removeExistingAttachment(attachment)
+                              }
                             />
                           </Container>
                         ))}
@@ -1007,12 +1115,19 @@ const NewClient = () => {
 
                     {attachments.length > 0 && (
                       <Container className="space-y-2">
-                        <h4 className="text-xs font-medium text-gray-600">New Files</h4>
+                        <h4 className="text-xs font-medium text-gray-600">
+                          New Files
+                        </h4>
                         {attachments.map((file, index) => (
-                          <Container key={index} className="flex items-center justify-between bg-green-50 p-2 rounded border border-green-200">
+                          <Container
+                            key={index}
+                            className="flex items-center justify-between bg-green-50 p-2 rounded border border-green-200"
+                          >
                             <Container className="flex items-center gap-2">
                               <FileIcon className="w-4 h-4 text-green-400" />
-                              <Span className="text-xs text-gray-900 truncate">{file.name}</Span>
+                              <Span className="text-xs text-gray-900 truncate">
+                                {file.name}
+                              </Span>
                               <Span className="text-xs text-gray-500">
                                 ({(file.size / 1024 / 1024).toFixed(1)} MB)
                               </Span>

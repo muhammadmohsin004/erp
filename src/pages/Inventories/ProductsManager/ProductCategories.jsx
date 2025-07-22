@@ -47,45 +47,51 @@ import Span from "../../../components/elements/span/Span";
 const ProductCategories = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
-    "Product Categories": language === "ar" ? "فئات المنتجات" : "Product Categories",
-    "Back to Products": language === "ar" ? "العودة للمنتجات" : "Back to Products",
+    "Product Categories":
+      language === "ar" ? "فئات المنتجات" : "Product Categories",
+    "Back to Products":
+      language === "ar" ? "العودة للمنتجات" : "Back to Products",
     "Add Category": language === "ar" ? "إضافة فئة" : "Add Category",
-    "Categories": language === "ar" ? "الفئات" : "Categories",
+    Categories: language === "ar" ? "الفئات" : "Categories",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
-    "Search": language === "ar" ? "بحث" : "Search",
-    "Filters": language === "ar" ? "الفلاتر" : "Filters",
-    "Export": language === "ar" ? "تصدير" : "Export",
-    "Selected": language === "ar" ? "محدد" : "Selected",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    Search: language === "ar" ? "بحث" : "Search",
+    Filters: language === "ar" ? "الفلاتر" : "Filters",
+    Export: language === "ar" ? "تصدير" : "Export",
+    Selected: language === "ar" ? "محدد" : "Selected",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
     "No Categories": language === "ar" ? "لا يوجد فئات" : "No categories found",
-    "Name": language === "ar" ? "الاسم" : "Name",
-    "Description": language === "ar" ? "الوصف" : "Description",
+    Name: language === "ar" ? "الاسم" : "Name",
+    Description: language === "ar" ? "الوصف" : "Description",
     "Parent Category": language === "ar" ? "الفئة الأب" : "Parent Category",
     "Product Count": language === "ar" ? "عدد المنتجات" : "Product Count",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "Showing": language === "ar" ? "عرض" : "Showing",
-    "Of": language === "ar" ? "من" : "of",
-    "Items": language === "ar" ? "عناصر" : "Items",
-    "Active": language === "ar" ? "نشط" : "Active",
-    "Inactive": language === "ar" ? "غير نشط" : "Inactive",
-    "Total": language === "ar" ? "المجموع" : "Total",
+    Status: language === "ar" ? "الحالة" : "Status",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    Showing: language === "ar" ? "عرض" : "Showing",
+    Of: language === "ar" ? "من" : "of",
+    Items: language === "ar" ? "عناصر" : "Items",
+    Active: language === "ar" ? "نشط" : "Active",
+    Inactive: language === "ar" ? "غير نشط" : "Inactive",
+    Total: language === "ar" ? "المجموع" : "Total",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Delete": language === "ar" ? "حذف" : "Delete",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Clone: language === "ar" ? "نسخ" : "Clone",
+    Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Category": language === "ar" ? "حذف الفئة" : "Delete Category",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Category Details": language === "ar" ? "تفاصيل الفئة" : "Category Details",
-    "Close": language === "ar" ? "إغلاق" : "Close",
+    Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
     "Root Category": language === "ar" ? "فئة جذر" : "Root Category",
     "Sub Category": language === "ar" ? "فئة فرعية" : "Sub Category",
@@ -97,41 +103,52 @@ const ProductCategories = () => {
     "Tree View": language === "ar" ? "عرض شجري" : "Tree View",
     "List View": language === "ar" ? "عرض قائمة" : "List View",
     "Category Tree": language === "ar" ? "شجرة الفئات" : "Category Tree",
-    "Category Management": language === "ar" ? "إدارة الفئات" : "Category Management",
-    "Hierarchy": language === "ar" ? "التسلسل الهرمي" : "Hierarchy",
+    "Category Management":
+      language === "ar" ? "إدارة الفئات" : "Category Management",
+    Hierarchy: language === "ar" ? "التسلسل الهرمي" : "Hierarchy",
     "Top Level": language === "ar" ? "المستوى الأعلى" : "Top Level",
     "Sub Categories": language === "ar" ? "الفئات الفرعية" : "Sub Categories",
     "No Description": language === "ar" ? "بدون وصف" : "No Description",
     "No Parent": language === "ar" ? "بدون فئة أب" : "No Parent",
-    "Main Categories": language === "ar" ? "الفئات الرئيسية" : "Main Categories",
+    "Main Categories":
+      language === "ar" ? "الفئات الرئيسية" : "Main Categories",
     "Sub-Categories": language === "ar" ? "الفئات الفرعية" : "Sub-Categories",
     "Empty Categories": language === "ar" ? "فئات فارغة" : "Empty Categories",
-    "Categories with Products": language === "ar" ? "فئات تحتوي على منتجات" : "Categories with Products",
+    "Categories with Products":
+      language === "ar" ? "فئات تحتوي على منتجات" : "Categories with Products",
     "Recently Added": language === "ar" ? "مضاف حديثاً" : "Recently Added",
-    "Retry": language === "ar" ? "إعادة المحاولة" : "Retry",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Category Structure": language === "ar" ? "هيكل الفئة" : "Category Structure",
-    "Statistics": language === "ar" ? "الإحصائيات" : "Statistics",
-    "Cannot delete category with products": language === "ar" ? "لا يمكن حذف فئة تحتوي على منتجات" : "Cannot delete category with products",
-    "Cannot delete category with sub-categories": language === "ar" ? "لا يمكن حذف فئة تحتوي على فئات فرعية" : "Cannot delete category with sub-categories",
-    "Level": language === "ar" ? "المستوى" : "Level",
-    "Expand": language === "ar" ? "توسيع" : "Expand",
-    "Collapse": language === "ar" ? "طي" : "Collapse",
+    Retry: language === "ar" ? "إعادة المحاولة" : "Retry",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Category Structure":
+      language === "ar" ? "هيكل الفئة" : "Category Structure",
+    Statistics: language === "ar" ? "الإحصائيات" : "Statistics",
+    "Cannot delete category with products":
+      language === "ar"
+        ? "لا يمكن حذف فئة تحتوي على منتجات"
+        : "Cannot delete category with products",
+    "Cannot delete category with sub-categories":
+      language === "ar"
+        ? "لا يمكن حذف فئة تحتوي على فئات فرعية"
+        : "Cannot delete category with sub-categories",
+    Level: language === "ar" ? "المستوى" : "Level",
+    Expand: language === "ar" ? "توسيع" : "Expand",
+    Collapse: language === "ar" ? "طي" : "Collapse",
     "Expand All": language === "ar" ? "توسيع الكل" : "Expand All",
     "Collapse All": language === "ar" ? "طي الكل" : "Collapse All",
     "Show Empty": language === "ar" ? "عرض الفارغة" : "Show Empty",
     "Hide Empty": language === "ar" ? "إخفاء الفارغة" : "Hide Empty",
-    "products": language === "ar" ? "منتجات" : "products",
-    "subcategories": language === "ar" ? "فئات فرعية" : "subcategories",
-    "items": language === "ar" ? "عناصر" : "items",
-    "pages": language === "ar" ? "صفحات" : "pages",
+    products: language === "ar" ? "منتجات" : "products",
+    subcategories: language === "ar" ? "فئات فرعية" : "subcategories",
+    items: language === "ar" ? "عناصر" : "items",
+    pages: language === "ar" ? "صفحات" : "pages",
     "Go to page": language === "ar" ? "انتقل إلى الصفحة" : "Go to page",
     "items per page": language === "ar" ? "عنصر في الصفحة" : "items per page",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "First": language === "ar" ? "الأول" : "First",
-    "Last": language === "ar" ? "الأخير" : "Last",
-    "Page": language === "ar" ? "صفحة" : "Page"
+    Previous: language === "ar" ? "السابق" : "Previous",
+    Next: language === "ar" ? "التالي" : "Next",
+    First: language === "ar" ? "الأول" : "First",
+    Last: language === "ar" ? "الأخير" : "Last",
+    Page: language === "ar" ? "صفحة" : "Page",
   };
 
   // Get products context
@@ -154,7 +171,9 @@ const ProductCategories = () => {
   } = useProductsManager();
 
   // Process categories data from API response
-const categoriesData = Array.isArray(productCategories?.Data?.$values) ? productCategories.Data.$values : [];
+  const categoriesData = Array.isArray(productCategories?.Data?.$values)
+    ? productCategories.Data.$values
+    : [];
   const treeData = categoriesTree || [];
 
   // Local state management
@@ -216,34 +235,41 @@ const categoriesData = Array.isArray(productCategories?.Data?.$values) ? product
 
   // Update statistics when categories change
   // Replace the entire useEffect block with:
-useEffect(() => {
-  if (Array.isArray(categoriesData) && categoriesData.length > 0) {
-    const now = new Date();
-    const stats = {
-      totalCategories: categoriesData.length,
-      mainCategories: categoriesData.filter(c => !c.ParentCategoryId).length,
-      subCategories: categoriesData.filter(c => c.ParentCategoryId).length,
-      emptyCategories: categoriesData.filter(c => (c.ProductCount || 0) === 0).length,
-      categoriesWithProducts: categoriesData.filter(c => (c.ProductCount || 0) > 0).length,
-      recentlyAdded: categoriesData.filter(c => {
-        const createdDate = new Date(c.CreatedAt);
-        return createdDate.getMonth() === now.getMonth() && 
-               createdDate.getFullYear() === now.getFullYear();
-      }).length,
-    };
-    setStatistics(stats);
-  } else {
-    // Reset statistics if no valid data
-    setStatistics({
-      totalCategories: 0,
-      mainCategories: 0,
-      subCategories: 0,
-      emptyCategories: 0,
-      categoriesWithProducts: 0,
-      recentlyAdded: 0,
-    });
-  }
-}, [categoriesData]);
+  useEffect(() => {
+    if (Array.isArray(categoriesData) && categoriesData.length > 0) {
+      const now = new Date();
+      const stats = {
+        totalCategories: categoriesData.length,
+        mainCategories: categoriesData.filter((c) => !c.ParentCategoryId)
+          .length,
+        subCategories: categoriesData.filter((c) => c.ParentCategoryId).length,
+        emptyCategories: categoriesData.filter(
+          (c) => (c.ProductCount || 0) === 0
+        ).length,
+        categoriesWithProducts: categoriesData.filter(
+          (c) => (c.ProductCount || 0) > 0
+        ).length,
+        recentlyAdded: categoriesData.filter((c) => {
+          const createdDate = new Date(c.CreatedAt);
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
+        }).length,
+      };
+      setStatistics(stats);
+    } else {
+      // Reset statistics if no valid data
+      setStatistics({
+        totalCategories: 0,
+        mainCategories: 0,
+        subCategories: 0,
+        emptyCategories: 0,
+        categoriesWithProducts: 0,
+        recentlyAdded: 0,
+      });
+    }
+  }, [categoriesData]);
 
   // Handle search with debounce
   useEffect(() => {
@@ -431,7 +457,7 @@ useEffect(() => {
 
   // Tree view functions
   const toggleNode = (nodeId) => {
-    setExpandedNodes(prev => {
+    setExpandedNodes((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(nodeId)) {
         newSet.delete(nodeId);
@@ -445,7 +471,7 @@ useEffect(() => {
   const expandAll = () => {
     const getAllIds = (nodes) => {
       const ids = [];
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         ids.push(node.Id);
         if (node.Children && node.Children.length > 0) {
           ids.push(...getAllIds(node.Children));
@@ -463,12 +489,14 @@ useEffect(() => {
   // Utility functions
   const getParentCategoryName = (parentId) => {
     if (!parentId) return translations["No Parent"];
-    const parent = categoriesData.find(c => c.Id === parentId);
+    const parent = categoriesData.find((c) => c.Id === parentId);
     return parent?.Name || translations["No Parent"];
   };
 
   const getStatusColor = (status) => {
-    return status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+    return status === "Active"
+      ? "bg-green-100 text-green-800"
+      : "bg-red-100 text-red-800";
   };
 
   // Statistics Card Component
@@ -495,9 +523,9 @@ useEffect(() => {
 
     return (
       <Container className="select-none">
-        <Container 
+        <Container
           className={`flex items-center gap-2 p-3 hover:bg-gray-50 border-b border-gray-100 ${
-            level > 0 ? 'border-l-2 border-blue-200' : ''
+            level > 0 ? "border-l-2 border-blue-200" : ""
           }`}
           style={{ paddingLeft: `${level * 24 + 12}px` }}
         >
@@ -522,7 +550,9 @@ useEffect(() => {
             ) : (
               <Folder className="w-4 h-4 text-gray-500" />
             )}
-            <Span className="text-sm font-medium text-gray-900">{node.Name}</Span>
+            <Span className="text-sm font-medium text-gray-900">
+              {node.Name}
+            </Span>
           </Container>
 
           <Container className="flex items-center gap-2 ml-auto">
@@ -534,7 +564,7 @@ useEffect(() => {
                 {node.Children.length} {translations.subcategories}
               </Span>
             )}
-            
+
             <Container className="flex gap-1">
               <button
                 onClick={() => handleViewCategory(node.Id)}
@@ -615,15 +645,15 @@ useEffect(() => {
               </Span>
             )}
           </Container>
-          
+
           <Container className="flex gap-3 flex-wrap">
             {/* View Mode Toggle */}
             <Container className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode("list")}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === "list" 
-                    ? "bg-white text-gray-900 shadow-sm" 
+                  viewMode === "list"
+                    ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -633,8 +663,8 @@ useEffect(() => {
               <button
                 onClick={() => setViewMode("tree")}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === "tree" 
-                    ? "bg-white text-gray-900 shadow-sm" 
+                  viewMode === "tree"
+                    ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -678,7 +708,7 @@ useEffect(() => {
                 />
               </>
             )}
-            
+
             {/* Action Buttons */}
             <FilledButton
               isIcon={true}
@@ -695,7 +725,7 @@ useEffect(() => {
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Download}
@@ -711,7 +741,7 @@ useEffect(() => {
               isIconLeft={true}
               onClick={() => console.log("Export categories")}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -784,7 +814,9 @@ useEffect(() => {
                 isFocused={isFocused}
                 searchValue={searchTerm}
                 setSearchValue={setSearchTerm}
-                placeholder={`${translations.Search} ${translations.Categories.toLowerCase()}...`}
+                placeholder={`${
+                  translations.Search
+                } ${translations.Categories.toLowerCase()}...`}
               />
             </Container>
           </Container>
@@ -948,12 +980,19 @@ useEffect(() => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {categoriesData.map((category) => (
-                          <tr key={category.Id} className="hover:bg-gray-50 transition-colors duration-150">
+                          <tr
+                            key={category.Id}
+                            className="hover:bg-gray-50 transition-colors duration-150"
+                          >
                             <td className="px-6 py-4">
                               <input
                                 type="checkbox"
-                                checked={selectedCategories.includes(category.Id)}
-                                onChange={() => handleCategorySelection(category.Id)}
+                                checked={selectedCategories.includes(
+                                  category.Id
+                                )}
+                                onChange={() =>
+                                  handleCategorySelection(category.Id)
+                                }
                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                               />
                             </td>
@@ -980,7 +1019,9 @@ useEffect(() => {
                             </td>
                             <td className="px-6 py-4 hidden md:table-cell">
                               <Span className="text-sm text-gray-900">
-                                {getParentCategoryName(category.ParentCategoryId)}
+                                {getParentCategoryName(
+                                  category.ParentCategoryId
+                                )}
                               </Span>
                             </td>
                             <td className="px-6 py-4 hidden lg:table-cell">
@@ -992,14 +1033,21 @@ useEffect(() => {
                               </Container>
                             </td>
                             <td className="px-6 py-4">
-                              <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(category.Status)}`}>
-                                {translations[category.Status] || category.Status}
+                              <Span
+                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                                  category.Status
+                                )}`}
+                              >
+                                {translations[category.Status] ||
+                                  category.Status}
                               </Span>
                             </td>
                             <td className="px-6 py-4">
                               <Container className="flex justify-center gap-1">
                                 <button
-                                  onClick={() => handleViewCategory(category.Id)}
+                                  onClick={() =>
+                                    handleViewCategory(category.Id)
+                                  }
                                   className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                   title={translations.View}
                                 >
@@ -1007,7 +1055,9 @@ useEffect(() => {
                                 </button>
 
                                 <button
-                                  onClick={() => handleEditCategory(category.Id)}
+                                  onClick={() =>
+                                    handleEditCategory(category.Id)
+                                  }
                                   className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
                                   title={translations.Edit}
                                 >
@@ -1015,7 +1065,9 @@ useEffect(() => {
                                 </button>
 
                                 <button
-                                  onClick={() => handleCloneCategory(category.Id)}
+                                  onClick={() =>
+                                    handleCloneCategory(category.Id)
+                                  }
                                   className="inline-flex items-center justify-center w-7 h-7 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1"
                                   title={translations.Clone}
                                 >
@@ -1023,7 +1075,9 @@ useEffect(() => {
                                 </button>
 
                                 <button
-                                  onClick={() => handleDeleteCategory(category.Id)}
+                                  onClick={() =>
+                                    handleDeleteCategory(category.Id)
+                                  }
                                   className="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                                   title={translations.Delete}
                                 >
@@ -1038,94 +1092,111 @@ useEffect(() => {
                   </Container>
 
                   {/* Pagination */}
-                  {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                    <Container className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
-                      <Container className="flex items-center gap-4">
-                        <Span className="text-sm text-gray-500">
-                          {translations.Showing}{" "}
-                          {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                          {Math.min(pagination.PageNumber * pagination.PageSize, pagination.TotalItems)}{" "}
-                          {translations.Of} {pagination.TotalItems} {translations.Items}
-                        </Span>
-                        
-                        <Container className="flex items-center gap-2">
-                          <Span className="text-sm text-gray-500">{translations["items per page"]}:</Span>
-                          <select
-                            value={pagination.PageSize}
-                            onChange={(e) => changePageSize(parseInt(e.target.value))}
-                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                            <option value={100}>100</option>
-                          </select>
+                  {pagination &&
+                    pagination.TotalPages &&
+                    pagination.TotalPages > 1 && (
+                      <Container className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
+                        <Container className="flex items-center gap-4">
+                          <Span className="text-sm text-gray-500">
+                            {translations.Showing}{" "}
+                            {(pagination.PageNumber - 1) * pagination.PageSize +
+                              1}{" "}
+                            -{" "}
+                            {Math.min(
+                              pagination.PageNumber * pagination.PageSize,
+                              pagination.TotalItems
+                            )}{" "}
+                            {translations.Of} {pagination.TotalItems}{" "}
+                            {translations.Items}
+                          </Span>
+
+                          <Container className="flex items-center gap-2">
+                            <Span className="text-sm text-gray-500">
+                              {translations["items per page"]}:
+                            </Span>
+                            <select
+                              value={pagination.PageSize}
+                              onChange={(e) =>
+                                changePageSize(parseInt(e.target.value))
+                              }
+                              className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value={10}>10</option>
+                              <option value={25}>25</option>
+                              <option value={50}>50</option>
+                              <option value={100}>100</option>
+                            </select>
+                          </Container>
+                        </Container>
+
+                        <Container className="flex gap-2">
+                          <FilledButton
+                            isIcon={true}
+                            icon={ChevronsLeft}
+                            iconSize="w-4 h-4"
+                            bgColor="bg-gray-100 hover:bg-gray-200"
+                            textColor="text-gray-700"
+                            rounded="rounded-md"
+                            buttonText=""
+                            height="h-8"
+                            width="w-8"
+                            disabled={!pagination.HasPreviousPage}
+                            onClick={() => changePage(1)}
+                            title={translations.First}
+                          />
+                          <FilledButton
+                            isIcon={true}
+                            icon={ChevronLeft}
+                            iconSize="w-4 h-4"
+                            bgColor="bg-gray-100 hover:bg-gray-200"
+                            textColor="text-gray-700"
+                            rounded="rounded-md"
+                            buttonText=""
+                            height="h-8"
+                            width="w-8"
+                            disabled={!pagination.HasPreviousPage}
+                            onClick={() =>
+                              changePage(pagination.PageNumber - 1)
+                            }
+                            title={translations.Previous}
+                          />
+                          <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                            {translations.Page} {pagination.PageNumber}{" "}
+                            {translations.Of} {pagination.TotalPages}
+                          </Span>
+                          <FilledButton
+                            isIcon={true}
+                            icon={ChevronRight}
+                            iconSize="w-4 h-4"
+                            bgColor="bg-gray-100 hover:bg-gray-200"
+                            textColor="text-gray-700"
+                            rounded="rounded-md"
+                            buttonText=""
+                            height="h-8"
+                            width="w-8"
+                            disabled={!pagination.HasNextPage}
+                            onClick={() =>
+                              changePage(pagination.PageNumber + 1)
+                            }
+                            title={translations.Next}
+                          />
+                          <FilledButton
+                            isIcon={true}
+                            icon={ChevronsRight}
+                            iconSize="w-4 h-4"
+                            bgColor="bg-gray-100 hover:bg-gray-200"
+                            textColor="text-gray-700"
+                            rounded="rounded-md"
+                            buttonText=""
+                            height="h-8"
+                            width="w-8"
+                            disabled={!pagination.HasNextPage}
+                            onClick={() => changePage(pagination.TotalPages)}
+                            title={translations.Last}
+                          />
                         </Container>
                       </Container>
-                      
-                      <Container className="flex gap-2">
-                        <FilledButton
-                          isIcon={true}
-                          icon={ChevronsLeft}
-                          iconSize="w-4 h-4"
-                          bgColor="bg-gray-100 hover:bg-gray-200"
-                          textColor="text-gray-700"
-                          rounded="rounded-md"
-                          buttonText=""
-                          height="h-8"
-                          width="w-8"
-                          disabled={!pagination.HasPreviousPage}
-                          onClick={() => changePage(1)}
-                          title={translations.First}
-                        />
-                        <FilledButton
-                          isIcon={true}
-                          icon={ChevronLeft}
-                          iconSize="w-4 h-4"
-                          bgColor="bg-gray-100 hover:bg-gray-200"
-                          textColor="text-gray-700"
-                          rounded="rounded-md"
-                          buttonText=""
-                          height="h-8"
-                          width="w-8"
-                          disabled={!pagination.HasPreviousPage}
-                          onClick={() => changePage(pagination.PageNumber - 1)}
-                          title={translations.Previous}
-                        />
-                        <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                          {translations.Page} {pagination.PageNumber} {translations.Of} {pagination.TotalPages}
-                        </Span>
-                        <FilledButton
-                          isIcon={true}
-                          icon={ChevronRight}
-                          iconSize="w-4 h-4"
-                          bgColor="bg-gray-100 hover:bg-gray-200"
-                          textColor="text-gray-700"
-                          rounded="rounded-md"
-                          buttonText=""
-                          height="h-8"
-                          width="w-8"
-                          disabled={!pagination.HasNextPage}
-                          onClick={() => changePage(pagination.PageNumber + 1)}
-                          title={translations.Next}
-                        />
-                        <FilledButton
-                          isIcon={true}
-                          icon={ChevronsRight}
-                          iconSize="w-4 h-4"
-                          bgColor="bg-gray-100 hover:bg-gray-200"
-                          textColor="text-gray-700"
-                          rounded="rounded-md"
-                          buttonText=""
-                          height="h-8"
-                          width="w-8"
-                          disabled={!pagination.HasNextPage}
-                          onClick={() => changePage(pagination.TotalPages)}
-                          title={translations.Last}
-                        />
-                      </Container>
-                    </Container>
-                  )}
+                    )}
                 </>
               )}
             </>
@@ -1140,7 +1211,9 @@ useEffect(() => {
         title={
           <Container className="flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            <Span>{isEditing ? translations.Edit : translations["Add Category"]}</Span>
+            <Span>
+              {isEditing ? translations.Edit : translations["Add Category"]}
+            </Span>
           </Container>
         }
         width={600}
@@ -1158,7 +1231,9 @@ useEffect(() => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations.Name}...`}
                 required
@@ -1171,7 +1246,9 @@ useEffect(() => {
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations.Description}...`}
@@ -1184,15 +1261,28 @@ useEffect(() => {
               </label>
               <select
                 value={formData.parentCategoryId || ""}
-                onChange={(e) => setFormData({...formData, parentCategoryId: e.target.value ? parseInt(e.target.value) : null})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    parentCategoryId: e.target.value
+                      ? parseInt(e.target.value)
+                      : null,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">{translations["No Parent"]}</option>
-                {Array.isArray(categoriesData) ? categoriesData.filter(c => isEditing ? c.Id !== selectedCategory?.Id : true).map(category => (
-                  <option key={category.Id} value={category.Id}>
-                    {category.Name}
-                  </option>
-                )) : null}
+                {Array.isArray(categoriesData)
+                  ? categoriesData
+                      .filter((c) =>
+                        isEditing ? c.Id !== selectedCategory?.Id : true
+                      )
+                      .map((category) => (
+                        <option key={category.Id} value={category.Id}>
+                          {category.Name}
+                        </option>
+                      ))
+                  : null}
               </select>
             </Container>
 
@@ -1202,7 +1292,9 @@ useEffect(() => {
               </label>
               <select
                 value={formData.status}
-                onChange={(e) => setFormData({...formData, status: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="Active">{translations.Active}</option>
@@ -1253,7 +1345,8 @@ useEffect(() => {
                         {translations.Description}
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
-                        {selectedCategory.Description || translations["No Description"]}
+                        {selectedCategory.Description ||
+                          translations["No Description"]}
                       </Span>
                     </Container>
                     <Container>
@@ -1261,15 +1354,22 @@ useEffect(() => {
                         {translations["Parent Category"]}
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
-                        {getParentCategoryName(selectedCategory.ParentCategoryId)}
+                        {getParentCategoryName(
+                          selectedCategory.ParentCategoryId
+                        )}
                       </Span>
                     </Container>
                     <Container>
                       <Span className="text-sm font-medium text-gray-500">
                         {translations.Status}
                       </Span>
-                      <Span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${getStatusColor(selectedCategory.Status)}`}>
-                        {translations[selectedCategory.Status] || selectedCategory.Status}
+                      <Span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${getStatusColor(
+                          selectedCategory.Status
+                        )}`}
+                      >
+                        {translations[selectedCategory.Status] ||
+                          selectedCategory.Status}
                       </Span>
                     </Container>
                   </Container>
@@ -1285,7 +1385,8 @@ useEffect(() => {
                         {translations["Product Count"]}
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
-                        {selectedCategory.ProductCount || 0} {translations.products}
+                        {selectedCategory.ProductCount || 0}{" "}
+                        {translations.products}
                       </Span>
                     </Container>
                     <Container>
@@ -1294,7 +1395,9 @@ useEffect(() => {
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
                         {selectedCategory.CreatedAt
-                          ? new Date(selectedCategory.CreatedAt).toLocaleDateString()
+                          ? new Date(
+                              selectedCategory.CreatedAt
+                            ).toLocaleDateString()
                           : "N/A"}
                       </Span>
                     </Container>
@@ -1331,8 +1434,10 @@ useEffect(() => {
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the category{" "}
-              <strong>"{categoryToDelete?.Name}"</strong> and all associated data.
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the category{" "}
+              <strong>"{categoryToDelete?.Name}"</strong> and all associated
+              data.
             </Span>
             {categoryToDelete?.ProductCount > 0 && (
               <Container className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
@@ -1382,7 +1487,12 @@ useEffect(() => {
                   </label>
                   <select
                     value={filterOptions.status}
-                    onChange={(e) => setFilterOptions({...filterOptions, status: e.target.value})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        status: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">{translations["All Status"]}</option>
@@ -1397,12 +1507,19 @@ useEffect(() => {
                   </label>
                   <select
                     value={filterOptions.sortBy}
-                    onChange={(e) => setFilterOptions({...filterOptions, sortBy: e.target.value})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        sortBy: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="name">{translations.Name}</option>
                     <option value="status">{translations.Status}</option>
-                    <option value="createdat">{translations["Date Created"]}</option>
+                    <option value="createdat">
+                      {translations["Date Created"]}
+                    </option>
                   </select>
                 </Container>
 
@@ -1411,7 +1528,12 @@ useEffect(() => {
                     <input
                       type="checkbox"
                       checked={filterOptions.sortAscending}
-                      onChange={(e) => setFilterOptions({...filterOptions, sortAscending: e.target.checked})}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          sortAscending: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <Span className="ml-2 text-sm text-gray-700">
@@ -1425,7 +1547,12 @@ useEffect(() => {
                     <input
                       type="checkbox"
                       checked={filterOptions.showEmpty}
-                      onChange={(e) => setFilterOptions({...filterOptions, showEmpty: e.target.checked})}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          showEmpty: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <Span className="ml-2 text-sm text-gray-700">

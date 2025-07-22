@@ -26,15 +26,18 @@ const StockMovementForm = () => {
   const { id } = useParams();
   const location = useLocation();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const isEdit = Boolean(id);
   const formType = location.state?.formType || "transaction"; // transaction, adjust, transfer
 
   const translations = {
-    "Add Stock Movement": language === "ar" ? "إضافة حركة مخزون" : "Add Stock Movement",
-    "Edit Stock Movement": language === "ar" ? "تعديل حركة مخزون" : "Edit Stock Movement",
-    "Stock Management": language === "ar" ? "إدارة المخزون" : "Stock Management",
+    "Add Stock Movement":
+      language === "ar" ? "إضافة حركة مخزون" : "Add Stock Movement",
+    "Edit Stock Movement":
+      language === "ar" ? "تعديل حركة مخزون" : "Edit Stock Movement",
+    "Stock Management":
+      language === "ar" ? "إدارة المخزون" : "Stock Management",
     Product: language === "ar" ? "المنتج" : "Product",
     "Transaction Type": language === "ar" ? "نوع المعاملة" : "Transaction Type",
     Quantity: language === "ar" ? "الكمية" : "Quantity",
@@ -50,25 +53,38 @@ const StockMovementForm = () => {
     Save: language === "ar" ? "حفظ" : "Save",
     Cancel: language === "ar" ? "إلغاء" : "Cancel",
     "Back to List": language === "ar" ? "العودة للقائمة" : "Back to List",
-    "Movement Information": language === "ar" ? "معلومات الحركة" : "Movement Information",
-    "Product Information": language === "ar" ? "معلومات المنتج" : "Product Information",
+    "Movement Information":
+      language === "ar" ? "معلومات الحركة" : "Movement Information",
+    "Product Information":
+      language === "ar" ? "معلومات المنتج" : "Product Information",
     "Select product": language === "ar" ? "اختر المنتج" : "Select product",
-    "Select transaction type": language === "ar" ? "اختر نوع المعاملة" : "Select transaction type",
-    "Select warehouse": language === "ar" ? "اختر المستودع" : "Select warehouse",
+    "Select transaction type":
+      language === "ar" ? "اختر نوع المعاملة" : "Select transaction type",
+    "Select warehouse":
+      language === "ar" ? "اختر المستودع" : "Select warehouse",
     "Enter quantity": language === "ar" ? "أدخل الكمية" : "Enter quantity",
     "Enter price": language === "ar" ? "أدخل السعر" : "Enter price",
     "Enter notes": language === "ar" ? "أدخل الملاحظات" : "Enter notes",
     "Enter reference": language === "ar" ? "أدخل المرجع" : "Enter reference",
     "Enter reason": language === "ar" ? "أدخل السبب" : "Enter reason",
-    "This field is required": language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
-    "Quantity must be greater than 0": language === "ar" ? "يجب أن تكون الكمية أكبر من 0" : "Quantity must be greater than 0",
-    "Price must be greater than 0": language === "ar" ? "يجب أن يكون السعر أكبر من 0" : "Price must be greater than 0",
+    "This field is required":
+      language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
+    "Quantity must be greater than 0":
+      language === "ar"
+        ? "يجب أن تكون الكمية أكبر من 0"
+        : "Quantity must be greater than 0",
+    "Price must be greater than 0":
+      language === "ar"
+        ? "يجب أن يكون السعر أكبر من 0"
+        : "Price must be greater than 0",
     "Processing...": language === "ar" ? "جارٍ المعالجة..." : "Processing...",
     "Loading...": language === "ar" ? "جارٍ التحميل..." : "Loading...",
     Purchase: language === "ar" ? "شراء" : "Purchase",
     Sale: language === "ar" ? "بيع" : "Sale",
-    "Stock Adjustment +": language === "ar" ? "تعديل مخزون +" : "Stock Adjustment +",
-    "Stock Adjustment -": language === "ar" ? "تعديل مخزون -" : "Stock Adjustment -",
+    "Stock Adjustment +":
+      language === "ar" ? "تعديل مخزون +" : "Stock Adjustment +",
+    "Stock Adjustment -":
+      language === "ar" ? "تعديل مخزون -" : "Stock Adjustment -",
     "Transfer In": language === "ar" ? "نقل داخل" : "Transfer In",
     "Transfer Out": language === "ar" ? "نقل خارج" : "Transfer Out",
   };
@@ -115,7 +131,7 @@ const StockMovementForm = () => {
     const fetchDropdownData = async () => {
       try {
         setDropdownsLoading(true);
-        
+
         // Fetch products dropdown
         const productsData = await getProductsDropdown();
         let productsArray = [];
@@ -128,7 +144,7 @@ const StockMovementForm = () => {
         }
         setProductsDropdown(productsArray);
 
-        // Fetch warehouses dropdown  
+        // Fetch warehouses dropdown
         const warehousesData = await getWarehousesDropdown();
         let warehousesArray = [];
         if (warehousesData?.$values) {
@@ -139,7 +155,6 @@ const StockMovementForm = () => {
           warehousesArray = warehousesData;
         }
         setWarehousesDropdown(warehousesArray);
-        
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
         setProductsDropdown([]);
@@ -155,7 +170,9 @@ const StockMovementForm = () => {
   // Find movement for editing
   useEffect(() => {
     if (isEdit && stockMovements?.Data?.$values && id) {
-      const movement = stockMovements.Data.$values.find(m => m.Id === parseInt(id));
+      const movement = stockMovements.Data.$values.find(
+        (m) => m.Id === parseInt(id)
+      );
       if (movement) {
         setCurrentMovement(movement);
         setFormData({
@@ -166,7 +183,9 @@ const StockMovementForm = () => {
           warehouseId: movement.WarehouseId || "",
           fromWarehouseId: "",
           toWarehouseId: "",
-          date: movement.CreatedAt ? new Date(movement.CreatedAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+          date: movement.CreatedAt
+            ? new Date(movement.CreatedAt).toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0],
           notes: movement.Notes || "",
           referenceNumber: movement.Reference || "",
         });
@@ -195,8 +214,14 @@ const StockMovementForm = () => {
     return [
       { value: "Purchase", label: translations.Purchase },
       { value: "Sale", label: translations.Sale },
-      { value: "Stock Adjustment +", label: translations["Stock Adjustment +"] },
-      { value: "Stock Adjustment -", label: translations["Stock Adjustment -"] },
+      {
+        value: "Stock Adjustment +",
+        label: translations["Stock Adjustment +"],
+      },
+      {
+        value: "Stock Adjustment -",
+        label: translations["Stock Adjustment -"],
+      },
       { value: "Transfer In", label: translations["Transfer In"] },
       { value: "Transfer Out", label: translations["Transfer Out"] },
     ];
@@ -242,8 +267,11 @@ const StockMovementForm = () => {
     }
 
     // Price validation for Purchase and Sale
-    if ((formData.movementType === "Purchase" || formData.movementType === "Sale") && 
-        (!formData.unitPrice || parseFloat(formData.unitPrice) <= 0)) {
+    if (
+      (formData.movementType === "Purchase" ||
+        formData.movementType === "Sale") &&
+      (!formData.unitPrice || parseFloat(formData.unitPrice) <= 0)
+    ) {
       errors.unitPrice = translations["Price must be greater than 0"];
     }
 
@@ -271,7 +299,11 @@ const StockMovementForm = () => {
     try {
       // Determine quantity change based on movement type
       let quantityChange = parseInt(formData.quantity);
-      if (formData.movementType === "Sale" || formData.movementType === "Stock Adjustment -" || formData.movementType === "Transfer Out") {
+      if (
+        formData.movementType === "Sale" ||
+        formData.movementType === "Stock Adjustment -" ||
+        formData.movementType === "Transfer Out"
+      ) {
         quantityChange = -quantityChange;
       }
 
@@ -279,7 +311,9 @@ const StockMovementForm = () => {
         ProductId: parseInt(formData.productId),
         MovementType: formData.movementType,
         QuantityChange: quantityChange,
-        ...(formData.unitPrice && { UnitPrice: parseFloat(formData.unitPrice) }),
+        ...(formData.unitPrice && {
+          UnitPrice: parseFloat(formData.unitPrice),
+        }),
         WarehouseId: parseInt(formData.warehouseId),
         Date: formData.date,
         Notes: formData.notes,
@@ -290,22 +324,38 @@ const StockMovementForm = () => {
       if (isEdit) {
         result = await updateStockMovement(parseInt(id), transactionData);
       } else {
-        result = await addStockTransaction(parseInt(formData.productId), transactionData);
+        result = await addStockTransaction(
+          parseInt(formData.productId),
+          transactionData
+        );
       }
 
       if (result) {
         navigate("/admin/stock/movements", {
           state: {
-            message: isEdit ? "Stock movement updated successfully" : "Stock movement created successfully",
+            message: isEdit
+              ? "Stock movement updated successfully"
+              : "Stock movement created successfully",
             type: "success",
           },
         });
       } else {
-        alert(`Failed to ${isEdit ? 'update' : 'create'} movement. Please try again.`);
+        alert(
+          `Failed to ${
+            isEdit ? "update" : "create"
+          } movement. Please try again.`
+        );
       }
     } catch (error) {
-      console.error(`Error ${isEdit ? 'updating' : 'creating'} movement:`, error);
-      alert(`Error: ${error.message || `Failed to ${isEdit ? 'update' : 'create'} movement`}`);
+      console.error(
+        `Error ${isEdit ? "updating" : "creating"} movement:`,
+        error
+      );
+      alert(
+        `Error: ${
+          error.message || `Failed to ${isEdit ? "update" : "create"} movement`
+        }`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -322,14 +372,18 @@ const StockMovementForm = () => {
 
   // Get page title
   const getPageTitle = () => {
-    return isEdit ? translations["Edit Stock Movement"] : translations["Add Stock Movement"];
+    return isEdit
+      ? translations["Edit Stock Movement"]
+      : translations["Add Stock Movement"];
   };
 
   // Loading state
   if (!token) {
     return (
       <Container className="flex justify-center items-center min-h-screen">
-        <Span className="text-blue-500 text-lg">{translations["Loading..."]}</Span>
+        <Span className="text-blue-500 text-lg">
+          {translations["Loading..."]}
+        </Span>
       </Container>
     );
   }
@@ -338,7 +392,9 @@ const StockMovementForm = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations["Loading..."]}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations["Loading..."]}
+        </Span>
       </Container>
     );
   }
@@ -448,7 +504,9 @@ const StockMovementForm = () => {
                       value={formData.productId}
                       onChange={handleInputChange}
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.productId ? "border-red-300" : "border-gray-300"
+                        formErrors.productId
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       disabled={isSubmitting}
                     >
@@ -476,11 +534,15 @@ const StockMovementForm = () => {
                       value={formData.movementType}
                       onChange={handleInputChange}
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.movementType ? "border-red-300" : "border-gray-300"
+                        formErrors.movementType
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       disabled={isSubmitting}
                     >
-                      <option value="">{translations["Select transaction type"]}</option>
+                      <option value="">
+                        {translations["Select transaction type"]}
+                      </option>
                       {getTransactionTypes().map((type) => (
                         <option key={type.value} value={type.value}>
                           {type.label}
@@ -506,11 +568,15 @@ const StockMovementForm = () => {
                         value={formData.warehouseId}
                         onChange={handleInputChange}
                         className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                          formErrors.warehouseId ? "border-red-300" : "border-gray-300"
+                          formErrors.warehouseId
+                            ? "border-red-300"
+                            : "border-gray-300"
                         }`}
                         disabled={isSubmitting}
                       >
-                        <option value="">{translations["Select warehouse"]}</option>
+                        <option value="">
+                          {translations["Select warehouse"]}
+                        </option>
                         {warehousesDropdown.map((warehouse) => (
                           <option key={warehouse.Id} value={warehouse.Id}>
                             {warehouse.Name}
@@ -548,7 +614,9 @@ const StockMovementForm = () => {
                       placeholder={translations["Enter quantity"]}
                       min="1"
                       className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.quantity ? "border-red-300" : "border-gray-300"
+                        formErrors.quantity
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       disabled={isSubmitting}
                     />
@@ -560,7 +628,8 @@ const StockMovementForm = () => {
                   </Container>
 
                   {/* Unit Price (for Purchase and Sale only) */}
-                  {(formData.movementType === "Purchase" || formData.movementType === "Sale") && (
+                  {(formData.movementType === "Purchase" ||
+                    formData.movementType === "Sale") && (
                     <Container className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {translations["Unit Price"]} *
@@ -576,7 +645,9 @@ const StockMovementForm = () => {
                           step="0.01"
                           min="0.01"
                           className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                            formErrors.unitPrice ? "border-red-300" : "border-gray-300"
+                            formErrors.unitPrice
+                              ? "border-red-300"
+                              : "border-gray-300"
                           }`}
                           disabled={isSubmitting}
                         />
@@ -683,7 +754,9 @@ const StockMovementForm = () => {
                     </svg>
                   )}
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? translations["Processing..."] : translations.Save}
+                  {isSubmitting
+                    ? translations["Processing..."]
+                    : translations.Save}
                 </button>
               </Container>
             </Container>

@@ -47,21 +47,25 @@ const InvoiceDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
-    "Invoice Details": language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
-    "Back to Invoices": language === "ar" ? "العودة للفواتير" : "Back to Invoices",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Delete": language === "ar" ? "حذف" : "Delete",
-    "Send": language === "ar" ? "إرسال" : "Send",
-    "Download": language === "ar" ? "تحميل" : "Download",
-    "Print": language === "ar" ? "طباعة" : "Print",
-    "Share": language === "ar" ? "مشاركة" : "Share",
+    "Invoice Details":
+      language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
+    "Back to Invoices":
+      language === "ar" ? "العودة للفواتير" : "Back to Invoices",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Clone: language === "ar" ? "نسخ" : "Clone",
+    Delete: language === "ar" ? "حذف" : "Delete",
+    Send: language === "ar" ? "إرسال" : "Send",
+    Download: language === "ar" ? "تحميل" : "Download",
+    Print: language === "ar" ? "طباعة" : "Print",
+    Share: language === "ar" ? "مشاركة" : "Share",
     "Mark as Paid": language === "ar" ? "تعيين كمدفوع" : "Mark as Paid",
-    "Invoice Information": language === "ar" ? "معلومات الفاتورة" : "Invoice Information",
-    "Client Information": language === "ar" ? "معلومات العميل" : "Client Information",
+    "Invoice Information":
+      language === "ar" ? "معلومات الفاتورة" : "Invoice Information",
+    "Client Information":
+      language === "ar" ? "معلومات العميل" : "Client Information",
     "Invoice Items": language === "ar" ? "عناصر الفاتورة" : "Invoice Items",
     "Payment Summary": language === "ar" ? "ملخص الدفع" : "Payment Summary",
     "Payment History": language === "ar" ? "سجل الدفع" : "Payment History",
@@ -69,53 +73,61 @@ const InvoiceDetails = () => {
     "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
     "Invoice Date": language === "ar" ? "تاريخ الفاتورة" : "Invoice Date",
     "Due Date": language === "ar" ? "تاريخ الاستحقاق" : "Due Date",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Currency": language === "ar" ? "العملة" : "Currency",
+    Status: language === "ar" ? "الحالة" : "Status",
+    Currency: language === "ar" ? "العملة" : "Currency",
     "Exchange Rate": language === "ar" ? "سعر الصرف" : "Exchange Rate",
     "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
-    "Notes": language === "ar" ? "ملاحظات" : "Notes",
+    Notes: language === "ar" ? "ملاحظات" : "Notes",
     "Internal Notes": language === "ar" ? "ملاحظات داخلية" : "Internal Notes",
     "PO Number": language === "ar" ? "رقم أمر الشراء" : "PO Number",
     "Client Name": language === "ar" ? "اسم العميل" : "Client Name",
-    "Email": language === "ar" ? "البريد الإلكتروني" : "Email",
-    "Phone": language === "ar" ? "الهاتف" : "Phone",
-    "Address": language === "ar" ? "العنوان" : "Address",
-    "Item": language === "ar" ? "العنصر" : "Item",
-    "Description": language === "ar" ? "الوصف" : "Description",
-    "Quantity": language === "ar" ? "الكمية" : "Quantity",
+    Email: language === "ar" ? "البريد الإلكتروني" : "Email",
+    Phone: language === "ar" ? "الهاتف" : "Phone",
+    Address: language === "ar" ? "العنوان" : "Address",
+    Item: language === "ar" ? "العنصر" : "Item",
+    Description: language === "ar" ? "الوصف" : "Description",
+    Quantity: language === "ar" ? "الكمية" : "Quantity",
     "Unit Price": language === "ar" ? "سعر الوحدة" : "Unit Price",
-    "Discount": language === "ar" ? "الخصم" : "Discount",
-    "Tax": language === "ar" ? "الضريبة" : "Tax",
-    "Total": language === "ar" ? "المجموع" : "Total",
-    "Subtotal": language === "ar" ? "المجموع الفرعي" : "Subtotal",
+    Discount: language === "ar" ? "الخصم" : "Discount",
+    Tax: language === "ar" ? "الضريبة" : "Tax",
+    Total: language === "ar" ? "المجموع" : "Total",
+    Subtotal: language === "ar" ? "المجموع الفرعي" : "Subtotal",
     "Tax Amount": language === "ar" ? "مبلغ الضريبة" : "Tax Amount",
     "Discount Amount": language === "ar" ? "مبلغ الخصم" : "Discount Amount",
-    "Shipping": language === "ar" ? "الشحن" : "Shipping",
+    Shipping: language === "ar" ? "الشحن" : "Shipping",
     "Grand Total": language === "ar" ? "المجموع الكلي" : "Grand Total",
     "Paid Amount": language === "ar" ? "المبلغ المدفوع" : "Paid Amount",
     "Balance Due": language === "ar" ? "الرصيد المستحق" : "Balance Due",
-    "Draft": language === "ar" ? "مسودة" : "Draft",
-    "Sent": language === "ar" ? "مرسل" : "Sent",
-    "Paid": language === "ar" ? "مدفوع" : "Paid",
-    "Overdue": language === "ar" ? "متأخر" : "Overdue",
-    "Voided": language === "ar" ? "ملغي" : "Voided",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "Invoice not found": language === "ar" ? "لم يتم العثور على الفاتورة" : "Invoice not found",
+    Draft: language === "ar" ? "مسودة" : "Draft",
+    Sent: language === "ar" ? "مرسل" : "Sent",
+    Paid: language === "ar" ? "مدفوع" : "Paid",
+    Overdue: language === "ar" ? "متأخر" : "Overdue",
+    Voided: language === "ar" ? "ملغي" : "Voided",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "Invoice not found":
+      language === "ar" ? "لم يتم العثور على الفاتورة" : "Invoice not found",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Confirm": language === "ar" ? "تأكيد" : "Confirm",
-    "Created": language === "ar" ? "تم الإنشاء" : "Created",
-    "Updated": language === "ar" ? "تم التحديث" : "Updated",
-    "Show Internal Notes": language === "ar" ? "إظهار الملاحظات الداخلية" : "Show Internal Notes",
-    "Hide Internal Notes": language === "ar" ? "إخفاء الملاحظات الداخلية" : "Hide Internal Notes",
-    "No items found": language === "ar" ? "لم يتم العثور على عناصر" : "No items found",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    Confirm: language === "ar" ? "تأكيد" : "Confirm",
+    Created: language === "ar" ? "تم الإنشاء" : "Created",
+    Updated: language === "ar" ? "تم التحديث" : "Updated",
+    "Show Internal Notes":
+      language === "ar" ? "إظهار الملاحظات الداخلية" : "Show Internal Notes",
+    "Hide Internal Notes":
+      language === "ar" ? "إخفاء الملاحظات الداخلية" : "Hide Internal Notes",
+    "No items found":
+      language === "ar" ? "لم يتم العثور على عناصر" : "No items found",
     "No notes": language === "ar" ? "لا توجد ملاحظات" : "No notes",
     "Payment Method": language === "ar" ? "طريقة الدفع" : "Payment Method",
     "Payment Date": language === "ar" ? "تاريخ الدفع" : "Payment Date",
-    "Reference": language === "ar" ? "المرجع" : "Reference",
-    "Amount": language === "ar" ? "المبلغ" : "Amount",
-    "No payments recorded": language === "ar" ? "لم يتم تسجيل مدفوعات" : "No payments recorded",
+    Reference: language === "ar" ? "المرجع" : "Reference",
+    Amount: language === "ar" ? "المبلغ" : "Amount",
+    "No payments recorded":
+      language === "ar" ? "لم يتم تسجيل مدفوعات" : "No payments recorded",
     "View Client": language === "ar" ? "عرض العميل" : "View Client",
     "Contact Client": language === "ar" ? "اتصل بالعميل" : "Contact Client",
   };
@@ -144,7 +156,7 @@ const InvoiceDetails = () => {
   const [paymentData, setPaymentData] = useState({
     amount: 0,
     paymentMethod: "Cash",
-    paymentDate: new Date().toISOString().split('T')[0],
+    paymentDate: new Date().toISOString().split("T")[0],
     reference: "",
     notes: "",
   });
@@ -177,7 +189,7 @@ const InvoiceDetails = () => {
   // Update payment amount when invoice changes
   useEffect(() => {
     if (currentInvoice) {
-      setPaymentData(prev => ({
+      setPaymentData((prev) => ({
         ...prev,
         amount: currentInvoice.BalanceAmount || currentInvoice.TotalAmount || 0,
       }));
@@ -187,7 +199,7 @@ const InvoiceDetails = () => {
   // Handle actions
   const handleEdit = () => {
     navigate(`/admin/invoices/edit/${id}`, {
-      state: { editData: currentInvoice, isEditing: true }
+      state: { editData: currentInvoice, isEditing: true },
     });
   };
 
@@ -199,9 +211,9 @@ const InvoiceDetails = () => {
           InvoiceNumber: `${currentInvoice.InvoiceNumber}-Copy`,
           Id: undefined,
           Status: "Draft",
-          InvoiceDate: new Date().toISOString().split('T')[0],
-        }
-      }
+          InvoiceDate: new Date().toISOString().split("T")[0],
+        },
+      },
     });
   };
 
@@ -211,8 +223,8 @@ const InvoiceDetails = () => {
       navigate("/admin/invoices", {
         state: {
           message: "Invoice deleted successfully",
-          type: "success"
-        }
+          type: "success",
+        },
       });
     } catch (error) {
       console.error("Error deleting invoice:", error);
@@ -268,55 +280,55 @@ const InvoiceDetails = () => {
   // Get status color and icon
   const getStatusDisplay = (status) => {
     switch (status?.toLowerCase()) {
-      case 'draft':
+      case "draft":
         return {
-          color: 'bg-gray-100 text-gray-800',
+          color: "bg-gray-100 text-gray-800",
           icon: <FileText className="w-5 h-5" />,
-          bgColor: 'bg-gray-50',
-          textColor: 'text-gray-600',
+          bgColor: "bg-gray-50",
+          textColor: "text-gray-600",
         };
-      case 'sent':
+      case "sent":
         return {
-          color: 'bg-blue-100 text-blue-800',
+          color: "bg-blue-100 text-blue-800",
           icon: <Send className="w-5 h-5" />,
-          bgColor: 'bg-blue-50',
-          textColor: 'text-blue-600',
+          bgColor: "bg-blue-50",
+          textColor: "text-blue-600",
         };
-      case 'paid':
+      case "paid":
         return {
-          color: 'bg-green-100 text-green-800',
+          color: "bg-green-100 text-green-800",
           icon: <CheckCircle className="w-5 h-5" />,
-          bgColor: 'bg-green-50',
-          textColor: 'text-green-600',
+          bgColor: "bg-green-50",
+          textColor: "text-green-600",
         };
-      case 'overdue':
+      case "overdue":
         return {
-          color: 'bg-red-100 text-red-800',
+          color: "bg-red-100 text-red-800",
           icon: <AlertCircle className="w-5 h-5" />,
-          bgColor: 'bg-red-50',
-          textColor: 'text-red-600',
+          bgColor: "bg-red-50",
+          textColor: "text-red-600",
         };
-      case 'voided':
+      case "voided":
         return {
-          color: 'bg-gray-100 text-gray-800',
+          color: "bg-gray-100 text-gray-800",
           icon: <XCircle className="w-5 h-5" />,
-          bgColor: 'bg-gray-50',
-          textColor: 'text-gray-600',
+          bgColor: "bg-gray-50",
+          textColor: "text-gray-600",
         };
       default:
         return {
-          color: 'bg-gray-100 text-gray-800',
+          color: "bg-gray-100 text-gray-800",
           icon: <Clock className="w-5 h-5" />,
-          bgColor: 'bg-gray-50',
-          textColor: 'text-gray-600',
+          bgColor: "bg-gray-50",
+          textColor: "text-gray-600",
         };
     }
   };
 
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency,
     }).format(amount);
   };
@@ -328,7 +340,7 @@ const InvoiceDetails = () => {
 
   // Check if invoice is overdue
   const isOverdue = (dueDate, status) => {
-    if (!dueDate || status === 'Paid') return false;
+    if (!dueDate || status === "Paid") return false;
     return new Date(dueDate) < new Date();
   };
 
@@ -337,7 +349,9 @@ const InvoiceDetails = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
@@ -483,18 +497,24 @@ const InvoiceDetails = () => {
               {actionDropdown && (
                 <Container className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                   <Container className="py-1">
-                    {currentInvoice.Status !== 'Sent' && (
+                    {currentInvoice.Status !== "Sent" && (
                       <button
-                        onClick={() => { setShowSendModal(true); setActionDropdown(false); }}
+                        onClick={() => {
+                          setShowSendModal(true);
+                          setActionDropdown(false);
+                        }}
                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                       >
                         <Send className="w-4 h-4" />
                         {translations.Send}
                       </button>
                     )}
-                    {currentInvoice.Status !== 'Paid' && (
+                    {currentInvoice.Status !== "Paid" && (
                       <button
-                        onClick={() => { setShowPaymentModal(true); setActionDropdown(false); }}
+                        onClick={() => {
+                          setShowPaymentModal(true);
+                          setActionDropdown(false);
+                        }}
                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                       >
                         <CreditCard className="w-4 h-4" />
@@ -502,7 +522,10 @@ const InvoiceDetails = () => {
                       </button>
                     )}
                     <button
-                      onClick={() => { handleShare(); setActionDropdown(false); }}
+                      onClick={() => {
+                        handleShare();
+                        setActionDropdown(false);
+                      }}
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                     >
                       <Share2 className="w-4 h-4" />
@@ -510,7 +533,10 @@ const InvoiceDetails = () => {
                     </button>
                     <hr className="my-1" />
                     <button
-                      onClick={() => { setShowDeleteModal(true); setActionDropdown(false); }}
+                      onClick={() => {
+                        setShowDeleteModal(true);
+                        setActionDropdown(false);
+                      }}
                       className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -535,20 +561,30 @@ const InvoiceDetails = () => {
                   Invoice {currentInvoice.Status}
                 </h3>
                 <Span className={`text-sm ${statusDisplay.textColor}`}>
-                  {currentInvoice.Status === 'Draft' && "This invoice is still in draft mode"}
-                  {currentInvoice.Status === 'Sent' && "This invoice has been sent to the client"}
-                  {currentInvoice.Status === 'Paid' && "This invoice has been paid in full"}
-                  {currentInvoice.Status === 'Overdue' && "This invoice is overdue"}
-                  {currentInvoice.Status === 'Voided' && "This invoice has been voided"}
+                  {currentInvoice.Status === "Draft" &&
+                    "This invoice is still in draft mode"}
+                  {currentInvoice.Status === "Sent" &&
+                    "This invoice has been sent to the client"}
+                  {currentInvoice.Status === "Paid" &&
+                    "This invoice has been paid in full"}
+                  {currentInvoice.Status === "Overdue" &&
+                    "This invoice is overdue"}
+                  {currentInvoice.Status === "Voided" &&
+                    "This invoice has been voided"}
                 </Span>
               </Container>
             </Container>
-            
+
             {isOverdue(currentInvoice.DueDate, currentInvoice.Status) && (
               <Container className="flex items-center gap-2 text-red-600">
                 <AlertCircle className="w-5 h-5" />
                 <Span className="text-sm font-medium">
-                  Overdue by {Math.ceil((new Date() - new Date(currentInvoice.DueDate)) / (1000 * 60 * 60 * 24))} days
+                  Overdue by{" "}
+                  {Math.ceil(
+                    (new Date() - new Date(currentInvoice.DueDate)) /
+                      (1000 * 60 * 60 * 24)
+                  )}{" "}
+                  days
                 </Span>
               </Container>
             )}
@@ -559,7 +595,6 @@ const InvoiceDetails = () => {
         <Container className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Invoice Details */}
           <Container className="lg:col-span-2 space-y-6">
-            
             {/* Invoice Information */}
             <Container className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
@@ -581,7 +616,9 @@ const InvoiceDetails = () => {
                   <Span className="text-sm font-medium text-gray-500 block mb-1">
                     {translations.Status}
                   </Span>
-                  <Span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${statusDisplay.color}`}>
+                  <Span
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${statusDisplay.color}`}
+                  >
                     {statusDisplay.icon}
                     {currentInvoice.Status}
                   </Span>
@@ -606,7 +643,9 @@ const InvoiceDetails = () => {
                   <Container className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-400" />
                     <Span className="text-gray-900">
-                      {currentInvoice.DueDate ? formatDate(currentInvoice.DueDate) : "Not set"}
+                      {currentInvoice.DueDate
+                        ? formatDate(currentInvoice.DueDate)
+                        : "Not set"}
                     </Span>
                   </Container>
                 </Container>
@@ -763,7 +802,9 @@ const InvoiceDetails = () => {
                   fontWeight="font-medium"
                   fontSize="text-sm"
                   isIconLeft={true}
-                  onClick={() => {/* Navigate to client details */}}
+                  onClick={() => {
+                    /* Navigate to client details */
+                  }}
                 />
                 <FilledButton
                   isIcon={true}
@@ -778,7 +819,9 @@ const InvoiceDetails = () => {
                   fontWeight="font-medium"
                   fontSize="text-sm"
                   isIconLeft={true}
-                  onClick={() => window.open(`mailto:${currentInvoice.ClientEmail}`)}
+                  onClick={() =>
+                    window.open(`mailto:${currentInvoice.ClientEmail}`)
+                  }
                 />
               </Container>
             </Container>
@@ -845,33 +888,45 @@ const InvoiceDetails = () => {
                           </td>
                           <td className="py-4 px-4 text-right">
                             <Span className="text-gray-900">
-                              {formatCurrency(item.UnitPrice, currentInvoice.Currency)}
+                              {formatCurrency(
+                                item.UnitPrice,
+                                currentInvoice.Currency
+                              )}
                             </Span>
                           </td>
                           <td className="py-4 px-4 text-right">
                             <Span className="text-gray-900">
-                              {item.Discount > 0 ? (
-                                item.DiscountType === 'percentage' ? 
-                                  `${item.Discount}%` : 
-                                  formatCurrency(item.Discount, currentInvoice.Currency)
-                              ) : '-'}
+                              {item.Discount > 0
+                                ? item.DiscountType === "percentage"
+                                  ? `${item.Discount}%`
+                                  : formatCurrency(
+                                      item.Discount,
+                                      currentInvoice.Currency
+                                    )
+                                : "-"}
                             </Span>
                           </td>
                           <td className="py-4 px-4 text-right">
                             <Span className="text-gray-900">
-                              {item.TaxRate > 0 ? `${item.TaxRate}%` : '-'}
+                              {item.TaxRate > 0 ? `${item.TaxRate}%` : "-"}
                             </Span>
                           </td>
                           <td className="py-4 px-4 text-right">
                             <Span className="font-medium text-gray-900">
-                              {formatCurrency(item.TotalAmount, currentInvoice.Currency)}
+                              {formatCurrency(
+                                item.TotalAmount,
+                                currentInvoice.Currency
+                              )}
                             </Span>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="7" className="py-8 text-center text-gray-500">
+                        <td
+                          colSpan="7"
+                          className="py-8 text-center text-gray-500"
+                        >
                           {translations["No items found"]}
                         </td>
                       </tr>
@@ -893,18 +948,29 @@ const InvoiceDetails = () => {
               <Container className="space-y-4">
                 {/* Subtotal */}
                 <Container className="flex justify-between">
-                  <Span className="text-gray-600">{translations.Subtotal}:</Span>
+                  <Span className="text-gray-600">
+                    {translations.Subtotal}:
+                  </Span>
                   <Span className="font-medium">
-                    {formatCurrency(currentInvoice.SubTotal, currentInvoice.Currency)}
+                    {formatCurrency(
+                      currentInvoice.SubTotal,
+                      currentInvoice.Currency
+                    )}
                   </Span>
                 </Container>
 
                 {/* Discount */}
                 {currentInvoice.DiscountAmount > 0 && (
                   <Container className="flex justify-between">
-                    <Span className="text-gray-600">{translations["Discount Amount"]}:</Span>
+                    <Span className="text-gray-600">
+                      {translations["Discount Amount"]}:
+                    </Span>
                     <Span className="font-medium text-red-600">
-                      -{formatCurrency(currentInvoice.DiscountAmount, currentInvoice.Currency)}
+                      -
+                      {formatCurrency(
+                        currentInvoice.DiscountAmount,
+                        currentInvoice.Currency
+                      )}
                     </Span>
                   </Container>
                 )}
@@ -912,9 +978,14 @@ const InvoiceDetails = () => {
                 {/* Tax */}
                 {currentInvoice.TaxAmount > 0 && (
                   <Container className="flex justify-between">
-                    <Span className="text-gray-600">{translations["Tax Amount"]}:</Span>
+                    <Span className="text-gray-600">
+                      {translations["Tax Amount"]}:
+                    </Span>
                     <Span className="font-medium">
-                      {formatCurrency(currentInvoice.TaxAmount, currentInvoice.Currency)}
+                      {formatCurrency(
+                        currentInvoice.TaxAmount,
+                        currentInvoice.Currency
+                      )}
                     </Span>
                   </Container>
                 )}
@@ -922,9 +993,14 @@ const InvoiceDetails = () => {
                 {/* Shipping */}
                 {currentInvoice.ShippingAmount > 0 && (
                   <Container className="flex justify-between">
-                    <Span className="text-gray-600">{translations.Shipping}:</Span>
+                    <Span className="text-gray-600">
+                      {translations.Shipping}:
+                    </Span>
                     <Span className="font-medium">
-                      {formatCurrency(currentInvoice.ShippingAmount, currentInvoice.Currency)}
+                      {formatCurrency(
+                        currentInvoice.ShippingAmount,
+                        currentInvoice.Currency
+                      )}
                     </Span>
                   </Container>
                 )}
@@ -937,16 +1013,24 @@ const InvoiceDetails = () => {
                     {translations["Grand Total"]}:
                   </Span>
                   <Span className="text-xl font-bold text-gray-900">
-                    {formatCurrency(currentInvoice.TotalAmount, currentInvoice.Currency)}
+                    {formatCurrency(
+                      currentInvoice.TotalAmount,
+                      currentInvoice.Currency
+                    )}
                   </Span>
                 </Container>
 
                 {/* Paid Amount */}
                 {currentInvoice.PaidAmount > 0 && (
                   <Container className="flex justify-between">
-                    <Span className="text-green-600">{translations["Paid Amount"]}:</Span>
+                    <Span className="text-green-600">
+                      {translations["Paid Amount"]}:
+                    </Span>
                     <Span className="font-medium text-green-600">
-                      {formatCurrency(currentInvoice.PaidAmount, currentInvoice.Currency)}
+                      {formatCurrency(
+                        currentInvoice.PaidAmount,
+                        currentInvoice.Currency
+                      )}
                     </Span>
                   </Container>
                 )}
@@ -954,9 +1038,14 @@ const InvoiceDetails = () => {
                 {/* Balance Due */}
                 {currentInvoice.BalanceAmount > 0 && (
                   <Container className="flex justify-between">
-                    <Span className="text-red-600">{translations["Balance Due"]}:</Span>
+                    <Span className="text-red-600">
+                      {translations["Balance Due"]}:
+                    </Span>
                     <Span className="font-medium text-red-600">
-                      {formatCurrency(currentInvoice.BalanceAmount, currentInvoice.Currency)}
+                      {formatCurrency(
+                        currentInvoice.BalanceAmount,
+                        currentInvoice.Currency
+                      )}
                     </Span>
                   </Container>
                 )}
@@ -965,7 +1054,7 @@ const InvoiceDetails = () => {
 
                 {/* Actions */}
                 <Container className="space-y-3">
-                  {currentInvoice.Status !== 'Paid' && (
+                  {currentInvoice.Status !== "Paid" && (
                     <FilledButton
                       isIcon={true}
                       icon={CreditCard}
@@ -983,7 +1072,7 @@ const InvoiceDetails = () => {
                     />
                   )}
 
-                  {currentInvoice.Status === 'Draft' && (
+                  {currentInvoice.Status === "Draft" && (
                     <FilledButton
                       isIcon={true}
                       icon={Send}
@@ -1005,14 +1094,18 @@ const InvoiceDetails = () => {
                 {/* Meta Information */}
                 <Container className="pt-4 border-t border-gray-200 space-y-2">
                   <Container className="flex justify-between text-sm">
-                    <Span className="text-gray-500">{translations.Created}:</Span>
+                    <Span className="text-gray-500">
+                      {translations.Created}:
+                    </Span>
                     <Span className="text-gray-900">
                       {formatDate(currentInvoice.CreatedAt)}
                     </Span>
                   </Container>
                   {currentInvoice.UpdatedAt && (
                     <Container className="flex justify-between text-sm">
-                      <Span className="text-gray-500">{translations.Updated}:</Span>
+                      <Span className="text-gray-500">
+                        {translations.Updated}:
+                      </Span>
                       <Span className="text-gray-900">
                         {formatDate(currentInvoice.UpdatedAt)}
                       </Span>
@@ -1049,8 +1142,10 @@ const InvoiceDetails = () => {
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the invoice{" "}
-              <strong>"{currentInvoice.InvoiceNumber}"</strong> and all associated data.
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the invoice{" "}
+              <strong>"{currentInvoice.InvoiceNumber}"</strong> and all
+              associated data.
             </Span>
           </Container>
         }
@@ -1081,7 +1176,9 @@ const InvoiceDetails = () => {
                 Send Invoice to Client
               </h3>
               <Span className="text-gray-500">
-                This will send the invoice to <strong>{currentInvoice.ClientEmail}</strong> and mark it as sent.
+                This will send the invoice to{" "}
+                <strong>{currentInvoice.ClientEmail}</strong> and mark it as
+                sent.
               </Span>
             </Container>
           </Container>
@@ -1113,18 +1210,28 @@ const InvoiceDetails = () => {
                 <input
                   type="number"
                   value={paymentData.amount}
-                  onChange={(e) => setPaymentData({...paymentData, amount: parseFloat(e.target.value) || 0})}
+                  onChange={(e) =>
+                    setPaymentData({
+                      ...paymentData,
+                      amount: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </Container>
-              
+
               <Container>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {translations["Payment Method"]}
                 </label>
                 <select
                   value={paymentData.paymentMethod}
-                  onChange={(e) => setPaymentData({...paymentData, paymentMethod: e.target.value})}
+                  onChange={(e) =>
+                    setPaymentData({
+                      ...paymentData,
+                      paymentMethod: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="Cash">Cash</option>
@@ -1142,7 +1249,12 @@ const InvoiceDetails = () => {
               <input
                 type="date"
                 value={paymentData.paymentDate}
-                onChange={(e) => setPaymentData({...paymentData, paymentDate: e.target.value})}
+                onChange={(e) =>
+                  setPaymentData({
+                    ...paymentData,
+                    paymentDate: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </Container>
@@ -1154,7 +1266,9 @@ const InvoiceDetails = () => {
               <input
                 type="text"
                 value={paymentData.reference}
-                onChange={(e) => setPaymentData({...paymentData, reference: e.target.value})}
+                onChange={(e) =>
+                  setPaymentData({ ...paymentData, reference: e.target.value })
+                }
                 placeholder="Transaction ID, Check number, etc."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
@@ -1166,7 +1280,9 @@ const InvoiceDetails = () => {
               </label>
               <textarea
                 value={paymentData.notes}
-                onChange={(e) => setPaymentData({...paymentData, notes: e.target.value})}
+                onChange={(e) =>
+                  setPaymentData({ ...paymentData, notes: e.target.value })
+                }
                 rows="3"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Additional notes about the payment..."

@@ -45,108 +45,153 @@ import Span from "../../../components/elements/span/Span";
 const ProductBrands = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
-    "Product Brands": language === "ar" ? "علامات المنتجات التجارية" : "Product Brands",
-    "Back to Products": language === "ar" ? "العودة للمنتجات" : "Back to Products",
+    "Product Brands":
+      language === "ar" ? "علامات المنتجات التجارية" : "Product Brands",
+    "Back to Products":
+      language === "ar" ? "العودة للمنتجات" : "Back to Products",
     "Add Brand": language === "ar" ? "إضافة علامة تجارية" : "Add Brand",
-    "Brands": language === "ar" ? "العلامات التجارية" : "Brands",
+    Brands: language === "ar" ? "العلامات التجارية" : "Brands",
     "Clear All": language === "ar" ? "مسح الكل" : "Clear All",
-    "Search": language === "ar" ? "بحث" : "Search",
-    "Filters": language === "ar" ? "الفلاتر" : "Filters",
-    "Export": language === "ar" ? "تصدير" : "Export",
-    "Selected": language === "ar" ? "محدد" : "Selected",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No Brands": language === "ar" ? "لا يوجد علامات تجارية" : "No brands found",
-    "Name": language === "ar" ? "الاسم" : "Name",
-    "Description": language === "ar" ? "الوصف" : "Description",
-    "Product": language === "ar" ? "المنتج" : "Product",
+    Search: language === "ar" ? "بحث" : "Search",
+    Filters: language === "ar" ? "الفلاتر" : "Filters",
+    Export: language === "ar" ? "تصدير" : "Export",
+    Selected: language === "ar" ? "محدد" : "Selected",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "No Brands":
+      language === "ar" ? "لا يوجد علامات تجارية" : "No brands found",
+    Name: language === "ar" ? "الاسم" : "Name",
+    Description: language === "ar" ? "الوصف" : "Description",
+    Product: language === "ar" ? "المنتج" : "Product",
     "Created At": language === "ar" ? "تاريخ الإنشاء" : "Created At",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "Showing": language === "ar" ? "عرض" : "Showing",
-    "Of": language === "ar" ? "من" : "of",
-    "Items": language === "ar" ? "عناصر" : "Items",
-    "Active": language === "ar" ? "نشط" : "Active",
-    "Inactive": language === "ar" ? "غير نشط" : "Inactive",
-    "Total": language === "ar" ? "المجموع" : "Total",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    Showing: language === "ar" ? "عرض" : "Showing",
+    Of: language === "ar" ? "من" : "of",
+    Items: language === "ar" ? "عناصر" : "Items",
+    Active: language === "ar" ? "نشط" : "Active",
+    Inactive: language === "ar" ? "غير نشط" : "Inactive",
+    Total: language === "ar" ? "المجموع" : "Total",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Clone": language === "ar" ? "نسخ" : "Clone",
-    "Delete": language === "ar" ? "حذف" : "Delete",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Clone: language === "ar" ? "نسخ" : "Clone",
+    Delete: language === "ar" ? "حذف" : "Delete",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
     "Delete Brand": language === "ar" ? "حذف العلامة التجارية" : "Delete Brand",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Brand Details": language === "ar" ? "تفاصيل العلامة التجارية" : "Brand Details",
-    "Close": language === "ar" ? "إغلاق" : "Close",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    "Brand Details":
+      language === "ar" ? "تفاصيل العلامة التجارية" : "Brand Details",
+    Close: language === "ar" ? "إغلاق" : "Close",
     "Apply Filters": language === "ar" ? "تطبيق الفلاتر" : "Apply Filters",
-    "No results found": language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
+    "No results found":
+      language === "ar" ? "لم يتم العثور على نتائج" : "No results found",
     "All Status": language === "ar" ? "جميع الحالات" : "All Status",
     "Sort by": language === "ar" ? "ترتيب حسب" : "Sort by",
     "Sort Ascending": language === "ar" ? "ترتيب تصاعدي" : "Sort Ascending",
     "Date Created": language === "ar" ? "تاريخ الإنشاء" : "Date Created",
-    "Brand Management": language === "ar" ? "إدارة العلامات التجارية" : "Brand Management",
+    "Brand Management":
+      language === "ar" ? "إدارة العلامات التجارية" : "Brand Management",
     "No Description": language === "ar" ? "بدون وصف" : "No Description",
     "No Product": language === "ar" ? "بدون منتج" : "No Product",
     "Recently Added": language === "ar" ? "مضاف حديثاً" : "Recently Added",
-    "Popular Brands": language === "ar" ? "العلامات التجارية الشائعة" : "Popular Brands",
+    "Popular Brands":
+      language === "ar" ? "العلامات التجارية الشائعة" : "Popular Brands",
     "New Brands": language === "ar" ? "علامات تجارية جديدة" : "New Brands",
-    "Retry": language === "ar" ? "إعادة المحاولة" : "Retry",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Brand Statistics": language === "ar" ? "إحصائيات العلامة التجارية" : "Brand Statistics",
-    "Associated Products": language === "ar" ? "المنتجات المرتبطة" : "Associated Products",
-    "Brand Performance": language === "ar" ? "أداء العلامة التجارية" : "Brand Performance",
+    Retry: language === "ar" ? "إعادة المحاولة" : "Retry",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Brand Statistics":
+      language === "ar" ? "إحصائيات العلامة التجارية" : "Brand Statistics",
+    "Associated Products":
+      language === "ar" ? "المنتجات المرتبطة" : "Associated Products",
+    "Brand Performance":
+      language === "ar" ? "أداء العلامة التجارية" : "Brand Performance",
     "Market Share": language === "ar" ? "حصة السوق" : "Market Share",
     "Growth Rate": language === "ar" ? "معدل النمو" : "Growth Rate",
-    "Revenue": language === "ar" ? "الإيرادات" : "Revenue",
+    Revenue: language === "ar" ? "الإيرادات" : "Revenue",
     "Products Count": language === "ar" ? "عدد المنتجات" : "Products Count",
     "Average Price": language === "ar" ? "متوسط السعر" : "Average Price",
     "Top Performing": language === "ar" ? "الأفضل أداءً" : "Top Performing",
-    "Trending": language === "ar" ? "الأكثر رواجاً" : "Trending",
-    "Premium": language === "ar" ? "مميزة" : "Premium",
-    "Budget": language === "ar" ? "اقتصادية" : "Budget",
-    "Luxury": language === "ar" ? "فاخرة" : "Luxury",
-    "Popular": language === "ar" ? "شائعة" : "Popular",
-    "Status": language === "ar" ? "الحالة" : "Status",
+    Trending: language === "ar" ? "الأكثر رواجاً" : "Trending",
+    Premium: language === "ar" ? "مميزة" : "Premium",
+    Budget: language === "ar" ? "اقتصادية" : "Budget",
+    Luxury: language === "ar" ? "فاخرة" : "Luxury",
+    Popular: language === "ar" ? "شائعة" : "Popular",
+    Status: language === "ar" ? "الحالة" : "Status",
     "Product ID": language === "ar" ? "معرف المنتج" : "Product ID",
     "Created By": language === "ar" ? "أنشأ بواسطة" : "Created By",
     "Updated At": language === "ar" ? "تاريخ التحديث" : "Updated At",
     "Brand Value": language === "ar" ? "قيمة العلامة التجارية" : "Brand Value",
     "Total Value": language === "ar" ? "القيمة الإجمالية" : "Total Value",
     "Average Rating": language === "ar" ? "متوسط التقييم" : "Average Rating",
-    "Customer Satisfaction": language === "ar" ? "رضا العملاء" : "Customer Satisfaction",
+    "Customer Satisfaction":
+      language === "ar" ? "رضا العملاء" : "Customer Satisfaction",
     "Market Position": language === "ar" ? "موقع السوق" : "Market Position",
-    "Competitive Analysis": language === "ar" ? "تحليل المنافسة" : "Competitive Analysis",
-    "Brand Loyalty": language === "ar" ? "ولاء العلامة التجارية" : "Brand Loyalty",
-    "Brand Recognition": language === "ar" ? "تميز العلامة التجارية" : "Brand Recognition",
-    "Save": language === "ar" ? "حفظ" : "Save",
-    "Saving": language === "ar" ? "جارٍ الحفظ" : "Saving",
-    "Required": language === "ar" ? "مطلوب" : "Required",
-    "Optional": language === "ar" ? "اختياري" : "Optional",
+    "Competitive Analysis":
+      language === "ar" ? "تحليل المنافسة" : "Competitive Analysis",
+    "Brand Loyalty":
+      language === "ar" ? "ولاء العلامة التجارية" : "Brand Loyalty",
+    "Brand Recognition":
+      language === "ar" ? "تميز العلامة التجارية" : "Brand Recognition",
+    Save: language === "ar" ? "حفظ" : "Save",
+    Saving: language === "ar" ? "جارٍ الحفظ" : "Saving",
+    Required: language === "ar" ? "مطلوب" : "Required",
+    Optional: language === "ar" ? "اختياري" : "Optional",
     "Select Product": language === "ar" ? "اختر منتج" : "Select Product",
-    "Brand name is required": language === "ar" ? "اسم العلامة التجارية مطلوب" : "Brand name is required",
-    "Brand name already exists": language === "ar" ? "اسم العلامة التجارية موجود بالفعل" : "Brand name already exists",
-    "Failed to save brand": language === "ar" ? "فشل في حفظ العلامة التجارية" : "Failed to save brand",
-    "Brand saved successfully": language === "ar" ? "تم حفظ العلامة التجارية بنجاح" : "Brand saved successfully",
-    "Failed to delete brand": language === "ar" ? "فشل في حذف العلامة التجارية" : "Failed to delete brand",
-    "Brand deleted successfully": language === "ar" ? "تم حذف العلامة التجارية بنجاح" : "Brand deleted successfully",
-    "Failed to fetch brand details": language === "ar" ? "فشل في جلب تفاصيل العلامة التجارية" : "Failed to fetch brand details",
-    "Brand Management Dashboard": language === "ar" ? "لوحة تحكم إدارة العلامات التجارية" : "Brand Management Dashboard",
-    "Brand Overview": language === "ar" ? "نظرة عامة على العلامة التجارية" : "Brand Overview",
-    "Performance Metrics": language === "ar" ? "مقاييس الأداء" : "Performance Metrics",
+    "Brand name is required":
+      language === "ar"
+        ? "اسم العلامة التجارية مطلوب"
+        : "Brand name is required",
+    "Brand name already exists":
+      language === "ar"
+        ? "اسم العلامة التجارية موجود بالفعل"
+        : "Brand name already exists",
+    "Failed to save brand":
+      language === "ar"
+        ? "فشل في حفظ العلامة التجارية"
+        : "Failed to save brand",
+    "Brand saved successfully":
+      language === "ar"
+        ? "تم حفظ العلامة التجارية بنجاح"
+        : "Brand saved successfully",
+    "Failed to delete brand":
+      language === "ar"
+        ? "فشل في حذف العلامة التجارية"
+        : "Failed to delete brand",
+    "Brand deleted successfully":
+      language === "ar"
+        ? "تم حذف العلامة التجارية بنجاح"
+        : "Brand deleted successfully",
+    "Failed to fetch brand details":
+      language === "ar"
+        ? "فشل في جلب تفاصيل العلامة التجارية"
+        : "Failed to fetch brand details",
+    "Brand Management Dashboard":
+      language === "ar"
+        ? "لوحة تحكم إدارة العلامات التجارية"
+        : "Brand Management Dashboard",
+    "Brand Overview":
+      language === "ar" ? "نظرة عامة على العلامة التجارية" : "Brand Overview",
+    "Performance Metrics":
+      language === "ar" ? "مقاييس الأداء" : "Performance Metrics",
     "Quick Stats": language === "ar" ? "إحصائيات سريعة" : "Quick Stats",
-    "Brand Analytics": language === "ar" ? "تحليلات العلامة التجارية" : "Brand Analytics",
-    "items": language === "ar" ? "عناصر" : "items",
-    "pages": language === "ar" ? "صفحات" : "pages",
+    "Brand Analytics":
+      language === "ar" ? "تحليلات العلامة التجارية" : "Brand Analytics",
+    items: language === "ar" ? "عناصر" : "items",
+    pages: language === "ar" ? "صفحات" : "pages",
     "Go to page": language === "ar" ? "انتقل إلى الصفحة" : "Go to page",
     "items per page": language === "ar" ? "عنصر في الصفحة" : "items per page",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "First": language === "ar" ? "الأول" : "First",
-    "Last": language === "ar" ? "الأخير" : "Last",
-    "Page": language === "ar" ? "صفحة" : "Page"
+    Previous: language === "ar" ? "السابق" : "Previous",
+    Next: language === "ar" ? "التالي" : "Next",
+    First: language === "ar" ? "الأول" : "First",
+    Last: language === "ar" ? "الأخير" : "Last",
+    Page: language === "ar" ? "صفحة" : "Page",
   };
 
   // Get products context
@@ -170,8 +215,12 @@ const ProductBrands = () => {
   } = useProductsManager();
 
   // Process brands data from API response
-const brandsData = Array.isArray(productBrands?.Data?.$values) ? productBrands.Data.$values : [];
-const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products : [];
+  const brandsData = Array.isArray(productBrands?.Data?.$values)
+    ? productBrands.Data.$values
+    : [];
+  const productsDropdown = Array.isArray(dropdowns?.products)
+    ? dropdowns.products
+    : [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
@@ -232,19 +281,24 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
       const now = new Date();
       const stats = {
         totalBrands: brandsData.length,
-        popularBrands: brandsData.filter(b => b.ProductId).length,
-        newBrands: brandsData.filter(b => {
+        popularBrands: brandsData.filter((b) => b.ProductId).length,
+        newBrands: brandsData.filter((b) => {
           const createdDate = new Date(b.CreatedAt);
-          return createdDate.getMonth() === now.getMonth() && 
-                 createdDate.getFullYear() === now.getFullYear();
+          return (
+            createdDate.getMonth() === now.getMonth() &&
+            createdDate.getFullYear() === now.getFullYear()
+          );
         }).length,
         topPerforming: Math.floor(brandsData.length * 0.2), // Top 20%
-        recentlyAdded: brandsData.filter(b => {
+        recentlyAdded: brandsData.filter((b) => {
           const createdDate = new Date(b.CreatedAt);
           const daysDiff = (now - createdDate) / (1000 * 3600 * 24);
           return daysDiff <= 7; // Last 7 days
         }).length,
-        averageProducts: brandsData.length > 0 ? brandsData.filter(b => b.ProductId).length / brandsData.length : 0,
+        averageProducts:
+          brandsData.length > 0
+            ? brandsData.filter((b) => b.ProductId).length / brandsData.length
+            : 0,
       };
       setStatistics(stats);
     }
@@ -431,7 +485,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   // Utility functions
   const getProductName = (productId) => {
     if (!productId) return translations["No Product"];
-    const product = productsDropdown.find(p => p.Id === productId);
+    const product = productsDropdown.find((p) => p.Id === productId);
     return product?.Name || translations["No Product"];
   };
 
@@ -441,13 +495,20 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, isPercentage = false }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    isPercentage = false,
+  }) => (
     <Container className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
       <Container className="flex items-center justify-between">
         <Container>
           <Span className="text-gray-500 text-sm font-medium">{title}</Span>
           <Span className="text-2xl font-bold text-gray-900 mt-1 block">
-            {isPercentage ? `${(value * 100).toFixed(1)}%` : (value || 0)}
+            {isPercentage ? `${(value * 100).toFixed(1)}%` : value || 0}
           </Span>
         </Container>
         <Container className={`${bgColor} p-3 rounded-lg`}>
@@ -500,7 +561,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               </Span>
             )}
           </Container>
-          
+
           <Container className="flex gap-3 flex-wrap">
             <FilledButton
               isIcon={true}
@@ -517,7 +578,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               isIconLeft={true}
               onClick={() => setShowFilters(true)}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Download}
@@ -533,7 +594,7 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               isIconLeft={true}
               onClick={() => console.log("Export brands")}
             />
-            
+
             <FilledButton
               isIcon={true}
               icon={Plus}
@@ -606,7 +667,9 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               isFocused={isFocused}
               searchValue={searchTerm}
               setSearchValue={setSearchTerm}
-              placeholder={`${translations.Search} ${translations.Brands.toLowerCase()}...`}
+              placeholder={`${
+                translations.Search
+              } ${translations.Brands.toLowerCase()}...`}
             />
           </Container>
         </Container>
@@ -723,7 +786,10 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {brandsData.map((brand) => (
-                      <tr key={brand.Id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <tr
+                        key={brand.Id}
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
@@ -754,7 +820,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
                           <Span className="text-sm text-gray-900 max-w-xs truncate">
-                            {brand.Description || translations["No Description"]}
+                            {brand.Description ||
+                              translations["No Description"]}
                           </Span>
                         </td>
                         <td className="px-6 py-4 hidden lg:table-cell">
@@ -815,94 +882,106 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               </Container>
 
               {/* Pagination */}
-              {pagination && pagination.TotalPages && pagination.TotalPages > 1 && (
-                <Container className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
-                  <Container className="flex items-center gap-4">
-                    <Span className="text-sm text-gray-500">
-                      {translations.Showing}{" "}
-                      {(pagination.PageNumber - 1) * pagination.PageSize + 1} -{" "}
-                      {Math.min(pagination.PageNumber * pagination.PageSize, pagination.TotalItems)}{" "}
-                      {translations.Of} {pagination.TotalItems} {translations.Items}
-                    </Span>
-                    
-                    <Container className="flex items-center gap-2">
-                      <Span className="text-sm text-gray-500">{translations["items per page"]}:</Span>
-                      <select
-                        value={pagination.PageSize}
-                        onChange={(e) => changePageSize(parseInt(e.target.value))}
-                        className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                      </select>
+              {pagination &&
+                pagination.TotalPages &&
+                pagination.TotalPages > 1 && (
+                  <Container className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
+                    <Container className="flex items-center gap-4">
+                      <Span className="text-sm text-gray-500">
+                        {translations.Showing}{" "}
+                        {(pagination.PageNumber - 1) * pagination.PageSize + 1}{" "}
+                        -{" "}
+                        {Math.min(
+                          pagination.PageNumber * pagination.PageSize,
+                          pagination.TotalItems
+                        )}{" "}
+                        {translations.Of} {pagination.TotalItems}{" "}
+                        {translations.Items}
+                      </Span>
+
+                      <Container className="flex items-center gap-2">
+                        <Span className="text-sm text-gray-500">
+                          {translations["items per page"]}:
+                        </Span>
+                        <select
+                          value={pagination.PageSize}
+                          onChange={(e) =>
+                            changePageSize(parseInt(e.target.value))
+                          }
+                          className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value={10}>10</option>
+                          <option value={25}>25</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
+                        </select>
+                      </Container>
+                    </Container>
+
+                    <Container className="flex gap-2">
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => changePage(1)}
+                        title={translations.First}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronLeft}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasPreviousPage}
+                        onClick={() => changePage(pagination.PageNumber - 1)}
+                        title={translations.Previous}
+                      />
+                      <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
+                        {translations.Page} {pagination.PageNumber}{" "}
+                        {translations.Of} {pagination.TotalPages}
+                      </Span>
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => changePage(pagination.PageNumber + 1)}
+                        title={translations.Next}
+                      />
+                      <FilledButton
+                        isIcon={true}
+                        icon={ChevronsRight}
+                        iconSize="w-4 h-4"
+                        bgColor="bg-gray-100 hover:bg-gray-200"
+                        textColor="text-gray-700"
+                        rounded="rounded-md"
+                        buttonText=""
+                        height="h-8"
+                        width="w-8"
+                        disabled={!pagination.HasNextPage}
+                        onClick={() => changePage(pagination.TotalPages)}
+                        title={translations.Last}
+                      />
                     </Container>
                   </Container>
-                  
-                  <Container className="flex gap-2">
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => changePage(1)}
-                      title={translations.First}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronLeft}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasPreviousPage}
-                      onClick={() => changePage(pagination.PageNumber - 1)}
-                      title={translations.Previous}
-                    />
-                    <Span className="px-3 py-1 bg-gray-100 rounded-md text-sm flex items-center">
-                      {translations.Page} {pagination.PageNumber} {translations.Of} {pagination.TotalPages}
-                    </Span>
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => changePage(pagination.PageNumber + 1)}
-                      title={translations.Next}
-                    />
-                    <FilledButton
-                      isIcon={true}
-                      icon={ChevronsRight}
-                      iconSize="w-4 h-4"
-                      bgColor="bg-gray-100 hover:bg-gray-200"
-                      textColor="text-gray-700"
-                      rounded="rounded-md"
-                      buttonText=""
-                      height="h-8"
-                      width="w-8"
-                      disabled={!pagination.HasNextPage}
-                      onClick={() => changePage(pagination.TotalPages)}
-                      title={translations.Last}
-                    />
-                  </Container>
-                </Container>
-              )}
+                )}
             </>
           )}
         </Container>
@@ -915,11 +994,19 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
         title={
           <Container className="flex items-center gap-2">
             <Star className="w-5 h-5" />
-            <Span>{isEditing ? translations.Edit : translations["Add Brand"]}</Span>
+            <Span>
+              {isEditing ? translations.Edit : translations["Add Brand"]}
+            </Span>
           </Container>
         }
         width={600}
-        okText={isSubmitting ? translations.Saving : (isEditing ? translations.Edit : translations["Add Brand"])}
+        okText={
+          isSubmitting
+            ? translations.Saving
+            : isEditing
+            ? translations.Edit
+            : translations["Add Brand"]
+        }
         cancelText={translations.Cancel}
         okAction={handleSubmitBrand}
         cancelAction={() => setShowAddModal(false)}
@@ -933,7 +1020,9 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations.Name}...`}
                 required
@@ -942,11 +1031,14 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
 
             <Container>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {translations.Description} <span className="text-gray-400">({translations.Optional})</span>
+                {translations.Description}{" "}
+                <span className="text-gray-400">({translations.Optional})</span>
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${translations.Description}...`}
@@ -955,15 +1047,21 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
 
             <Container>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {translations.Product} <span className="text-gray-400">({translations.Optional})</span>
+                {translations.Product}{" "}
+                <span className="text-gray-400">({translations.Optional})</span>
               </label>
               <select
                 value={formData.productId || ""}
-                onChange={(e) => setFormData({...formData, productId: e.target.value ? parseInt(e.target.value) : null})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    productId: e.target.value ? parseInt(e.target.value) : null,
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">{translations["Select Product"]}</option>
-                {productsDropdown.map(product => (
+                {productsDropdown.map((product) => (
                   <option key={product.Id} value={product.Id}>
                     {product.Name}
                   </option>
@@ -1014,7 +1112,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                         {translations.Description}
                       </Span>
                       <Span className="text-sm text-gray-900 block mt-1">
-                        {selectedBrand.Description || translations["No Description"]}
+                        {selectedBrand.Description ||
+                          translations["No Description"]}
                       </Span>
                     </Container>
                     <Container>
@@ -1082,7 +1181,8 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the brand{" "}
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the brand{" "}
               <strong>"{brandToDelete?.Name}"</strong> and all associated data.
             </Span>
           </Container>
@@ -1123,11 +1223,18 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                   </label>
                   <select
                     value={filterOptions.sortBy}
-                    onChange={(e) => setFilterOptions({...filterOptions, sortBy: e.target.value})}
+                    onChange={(e) =>
+                      setFilterOptions({
+                        ...filterOptions,
+                        sortBy: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="name">{translations.Name}</option>
-                    <option value="createdat">{translations["Date Created"]}</option>
+                    <option value="createdat">
+                      {translations["Date Created"]}
+                    </option>
                   </select>
                 </Container>
 
@@ -1136,7 +1243,12 @@ const productsDropdown = Array.isArray(dropdowns?.products) ? dropdowns.products
                     <input
                       type="checkbox"
                       checked={filterOptions.sortAscending}
-                      onChange={(e) => setFilterOptions({...filterOptions, sortAscending: e.target.checked})}
+                      onChange={(e) =>
+                        setFilterOptions({
+                          ...filterOptions,
+                          sortAscending: e.target.checked,
+                        })
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <Span className="ml-2 text-sm text-gray-700">

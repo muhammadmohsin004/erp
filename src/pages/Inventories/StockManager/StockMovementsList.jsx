@@ -33,7 +33,7 @@ import Span from "../../../components/elements/span/Span";
 const StockMovementsList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Stock Movements": language === "ar" ? "حركات المخزون" : "Stock Movements",
@@ -298,8 +298,9 @@ const StockMovementsList = () => {
       );
 
       const csvContent = convertToCSV(selectedData);
-      const filename = `stock_movements_selected_${new Date().toISOString().split("T")[0]
-        }.csv`;
+      const filename = `stock_movements_selected_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
 
       downloadCSV(csvContent, filename);
       setShowExportModal(false);
@@ -327,8 +328,9 @@ const StockMovementsList = () => {
       }
 
       const csvContent = convertToCSV(dataToExport);
-      const filename = `stock_movements_all_${new Date().toISOString().split("T")[0]
-        }.csv`;
+      const filename = `stock_movements_all_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
 
       downloadCSV(csvContent, filename);
       setShowExportModal(false);
@@ -458,7 +460,6 @@ const StockMovementsList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -474,9 +475,12 @@ const StockMovementsList = () => {
               icon={Download}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
-              buttonText={`${translations.Export}${selectedMovements.length > 0 ? ` (${selectedMovements.length})` : ""}`}
+              buttonText={`${translations.Export}${
+                selectedMovements.length > 0
+                  ? ` (${selectedMovements.length})`
+                  : ""
+              }`}
               height="h-10"
               px="px-4"
               fontWeight="font-medium"
@@ -522,7 +526,6 @@ const StockMovementsList = () => {
     */}
           </div>
         </div>
-
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -717,10 +720,11 @@ const StockMovementsList = () => {
                           </td>
                           <td className="px-6 py-4 hidden lg:table-cell">
                             <Span
-                              className={`text-sm font-medium ${movement.QuantityChange > 0
-                                ? "text-green-600"
-                                : "text-red-600"
-                                }`}
+                              className={`text-sm font-medium ${
+                                movement.QuantityChange > 0
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                              }`}
                             >
                               {movement.QuantityChange > 0 ? "+" : ""}
                               {movement.QuantityChange}
@@ -902,10 +906,11 @@ const StockMovementsList = () => {
                       {translations.Quantity}
                     </Span>
                     <Span
-                      className={`text-sm font-medium block mt-1 ${selectedMovement.QuantityChange > 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                        }`}
+                      className={`text-sm font-medium block mt-1 ${
+                        selectedMovement.QuantityChange > 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
                     >
                       {selectedMovement.QuantityChange > 0 ? "+" : ""}
                       {selectedMovement.QuantityChange}

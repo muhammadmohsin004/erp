@@ -26,7 +26,7 @@ const StockTransactionForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Stock Transaction":
@@ -113,57 +113,55 @@ const StockTransactionForm = () => {
   const [dropdownsLoading, setDropdownsLoading] = useState(true);
 
   useEffect(() => {
-  const fetchDropdownData = async () => {
-    try {
-      setDropdownsLoading(true);
-      
-      // Fetch products dropdown
-      const productsData = await getProductsDropdown();
-      console.log('Products raw response:', productsData);
-      
-      // Extract products array regardless of response structure
-      let productsArray = [];
-      if (productsData?.$values) {
-        productsArray = productsData.$values;
-      } else if (productsData?.Data?.$values) {
-        productsArray = productsData.Data.$values;
-      } else if (Array.isArray(productsData)) {
-        productsArray = productsData;
+    const fetchDropdownData = async () => {
+      try {
+        setDropdownsLoading(true);
+
+        // Fetch products dropdown
+        const productsData = await getProductsDropdown();
+        console.log("Products raw response:", productsData);
+
+        // Extract products array regardless of response structure
+        let productsArray = [];
+        if (productsData?.$values) {
+          productsArray = productsData.$values;
+        } else if (productsData?.Data?.$values) {
+          productsArray = productsData.Data.$values;
+        } else if (Array.isArray(productsData)) {
+          productsArray = productsData;
+        }
+
+        setProductsDropdown(productsArray);
+        console.log("Products dropdown set to:", productsArray);
+
+        // Fetch warehouses dropdown
+        const warehousesData = await getWarehousesDropdown();
+        console.log("Warehouses raw response:", warehousesData);
+
+        // Extract warehouses array regardless of response structure
+        let warehousesArray = [];
+        if (warehousesData?.$values) {
+          warehousesArray = warehousesData.$values;
+        } else if (warehousesData?.Data?.$values) {
+          warehousesArray = warehousesData.Data.$values;
+        } else if (Array.isArray(warehousesData)) {
+          warehousesArray = warehousesData;
+        }
+
+        setWarehousesDropdown(warehousesArray);
+        console.log("Warehouses dropdown set to:", warehousesArray);
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+        setProductsDropdown([]);
+        setWarehousesDropdown([]);
+      } finally {
+        setDropdownsLoading(false);
       }
-      
-      setProductsDropdown(productsArray);
-      console.log('Products dropdown set to:', productsArray);
+    };
 
-      // Fetch warehouses dropdown  
-      const warehousesData = await getWarehousesDropdown();
-      console.log('Warehouses raw response:', warehousesData);
-      
-      // Extract warehouses array regardless of response structure
-      let warehousesArray = [];
-      if (warehousesData?.$values) {
-        warehousesArray = warehousesData.$values;
-      } else if (warehousesData?.Data?.$values) {
-        warehousesArray = warehousesData.Data.$values;
-      } else if (Array.isArray(warehousesData)) {
-        warehousesArray = warehousesData;
-      }
-      
-      setWarehousesDropdown(warehousesArray);
-      console.log('Warehouses dropdown set to:', warehousesArray);
-      
-    } catch (error) {
-      console.error("Error fetching dropdown data:", error);
-      setProductsDropdown([]);
-      setWarehousesDropdown([]);
-    } finally {
-      setDropdownsLoading(false);
-    }
-  };
+    fetchDropdownData();
+  }, [getProductsDropdown, getWarehousesDropdown]);
 
-  fetchDropdownData();
-}, [getProductsDropdown, getWarehousesDropdown]);
-
-  
   // Form state
   const [formData, setFormData] = useState({
     productId: productId || "",

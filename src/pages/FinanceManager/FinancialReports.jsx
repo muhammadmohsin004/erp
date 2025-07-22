@@ -30,7 +30,7 @@ import Span from "../../components/elements/span/Span";
 const FinancialReports = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const {
     incomes,
@@ -42,11 +42,14 @@ const FinancialReports = () => {
   } = useFinance();
 
   const translations = {
-    "Financial Reports": language === "ar" ? "التقارير المالية" : "Financial Reports",
-    "Generate Reports": language === "ar" ? "إنشاء التقارير" : "Generate Reports",
+    "Financial Reports":
+      language === "ar" ? "التقارير المالية" : "Financial Reports",
+    "Generate Reports":
+      language === "ar" ? "إنشاء التقارير" : "Generate Reports",
     "Income Statement": language === "ar" ? "بيان الدخل" : "Income Statement",
     "Balance Sheet": language === "ar" ? "الميزانية العمومية" : "Balance Sheet",
-    "Cash Flow Statement": language === "ar" ? "بيان التدفق النقدي" : "Cash Flow Statement",
+    "Cash Flow Statement":
+      language === "ar" ? "بيان التدفق النقدي" : "Cash Flow Statement",
     "Expense Report": language === "ar" ? "تقرير المصروفات" : "Expense Report",
     "Profit & Loss": language === "ar" ? "الأرباح والخسائر" : "Profit & Loss",
     "Monthly Summary": language === "ar" ? "الملخص الشهري" : "Monthly Summary",
@@ -56,22 +59,24 @@ const FinancialReports = () => {
     "From Date": language === "ar" ? "من تاريخ" : "From Date",
     "To Date": language === "ar" ? "إلى تاريخ" : "To Date",
     "Report Type": language === "ar" ? "نوع التقرير" : "Report Type",
-    "Generate": language === "ar" ? "إنشاء" : "Generate",
-    "Back": language === "ar" ? "رجوع" : "Back",
+    Generate: language === "ar" ? "إنشاء" : "Generate",
+    Back: language === "ar" ? "رجوع" : "Back",
     "Total Income": language === "ar" ? "إجمالي الدخل" : "Total Income",
     "Total Expenses": language === "ar" ? "إجمالي المصروفات" : "Total Expenses",
     "Net Profit": language === "ar" ? "صافي الربح" : "Net Profit",
     "Current Balance": language === "ar" ? "الرصيد الحالي" : "Current Balance",
-    "Company Information": language === "ar" ? "معلومات الشركة" : "Company Information",
+    "Company Information":
+      language === "ar" ? "معلومات الشركة" : "Company Information",
     "Report Preview": language === "ar" ? "معاينة التقرير" : "Report Preview",
-    "Select Report Type": language === "ar" ? "اختر نوع التقرير" : "Select Report Type",
+    "Select Report Type":
+      language === "ar" ? "اختر نوع التقرير" : "Select Report Type",
     "All Reports": language === "ar" ? "جميع التقارير" : "All Reports",
     "Custom Range": language === "ar" ? "نطاق مخصص" : "Custom Range",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     "Last Month": language === "ar" ? "الشهر الماضي" : "Last Month",
     "This Quarter": language === "ar" ? "هذا الربع" : "This Quarter",
     "This Year": language === "ar" ? "هذه السنة" : "This Year",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
   };
 
   // Local state
@@ -85,7 +90,8 @@ const FinancialReports = () => {
   // Get company info from localStorage
   const getCompanyInfo = () => {
     try {
-      const companyData = localStorage.getItem('company') || localStorage.getItem('companyData');
+      const companyData =
+        localStorage.getItem("company") || localStorage.getItem("companyData");
       if (companyData) {
         return JSON.parse(companyData);
       }
@@ -96,7 +102,7 @@ const FinancialReports = () => {
         phone: "+1-234-567-8900",
         address: "123 Business Street, City, Country",
         website: "www.company.com",
-        logo: null
+        logo: null,
       };
     } catch (error) {
       console.error("Error parsing company data:", error);
@@ -106,7 +112,7 @@ const FinancialReports = () => {
         phone: "+1-234-567-8900",
         address: "123 Business Street, City, Country",
         website: "www.company.com",
-        logo: null
+        logo: null,
       };
     }
   };
@@ -147,8 +153,14 @@ const FinancialReports = () => {
 
   // Calculate statistics when data changes
   useEffect(() => {
-    const totalIncome = incomesData.reduce((sum, income) => sum + (parseFloat(income.Amount) || 0), 0);
-    const totalExpenses = expensesData.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0);
+    const totalIncome = incomesData.reduce(
+      (sum, income) => sum + (parseFloat(income.Amount) || 0),
+      0
+    );
+    const totalExpenses = expensesData.reduce(
+      (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+      0
+    );
     const netProfit = totalIncome - totalExpenses;
     const currentBalance = companyBalance?.NewBalance || 0;
     const totalTransactions = incomesData.length + expensesData.length;
@@ -165,9 +177,9 @@ const FinancialReports = () => {
   // Format currency
   const formatCurrency = (amount, currency = "PKR") => {
     const numAmount = parseFloat(amount) || 0;
-    return `${currency} ${numAmount.toLocaleString('en-US', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
+    return `${currency} ${numAmount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })}`;
   };
 
@@ -201,7 +213,9 @@ const FinancialReports = () => {
         endDate = new Date(now.getFullYear(), 11, 31);
         break;
       case "custom":
-        startDate = fromDate ? new Date(fromDate) : new Date(now.getFullYear(), 0, 1);
+        startDate = fromDate
+          ? new Date(fromDate)
+          : new Date(now.getFullYear(), 0, 1);
         endDate = toDate ? new Date(toDate) : now;
         break;
       default:
@@ -214,7 +228,7 @@ const FinancialReports = () => {
 
   // Filter data by date range
   const filterDataByRange = (data, startDate, endDate) => {
-    return data.filter(item => {
+    return data.filter((item) => {
       const itemDate = new Date(item.Date || item.CreatedAt);
       return itemDate >= startDate && itemDate <= endDate;
     });
@@ -224,10 +238,20 @@ const FinancialReports = () => {
   const generateComprehensiveReport = () => {
     const { startDate, endDate } = getDateRangeData();
     const filteredIncomes = filterDataByRange(incomesData, startDate, endDate);
-    const filteredExpenses = filterDataByRange(expensesData, startDate, endDate);
-    
-    const totalIncome = filteredIncomes.reduce((sum, income) => sum + (parseFloat(income.Amount) || 0), 0);
-    const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + (parseFloat(expense.Amount) || 0), 0);
+    const filteredExpenses = filterDataByRange(
+      expensesData,
+      startDate,
+      endDate
+    );
+
+    const totalIncome = filteredIncomes.reduce(
+      (sum, income) => sum + (parseFloat(income.Amount) || 0),
+      0
+    );
+    const totalExpenses = filteredExpenses.reduce(
+      (sum, expense) => sum + (parseFloat(expense.Amount) || 0),
+      0
+    );
     const netProfit = totalIncome - totalExpenses;
 
     let reportContent = `
@@ -303,7 +327,9 @@ const FinancialReports = () => {
             }
             .income-card .card-value { color: #059669; }
             .expense-card .card-value { color: #dc2626; }
-            .profit-card .card-value { color: ${netProfit >= 0 ? '#059669' : '#dc2626'}; }
+            .profit-card .card-value { color: ${
+              netProfit >= 0 ? "#059669" : "#dc2626"
+            }; }
             .balance-card .card-value { color: #2563eb; }
             table { 
               width: 100%; 
@@ -396,12 +422,18 @@ const FinancialReports = () => {
                 <div class="card-value">${formatCurrency(totalExpenses)}</div>
               </div>
               <div class="summary-card profit-card">
-                <div class="card-title">Net ${netProfit >= 0 ? 'Profit' : 'Loss'}</div>
-                <div class="card-value">${formatCurrency(Math.abs(netProfit))}</div>
+                <div class="card-title">Net ${
+                  netProfit >= 0 ? "Profit" : "Loss"
+                }</div>
+                <div class="card-value">${formatCurrency(
+                  Math.abs(netProfit)
+                )}</div>
               </div>
               <div class="summary-card balance-card">
                 <div class="card-title">Current Balance</div>
-                <div class="card-value">${formatCurrency(statistics.currentBalance)}</div>
+                <div class="card-value">${formatCurrency(
+                  statistics.currentBalance
+                )}</div>
               </div>
             </div>
 
@@ -422,22 +454,27 @@ const FinancialReports = () => {
     `;
 
     if (filteredIncomes.length > 0) {
-      filteredIncomes.forEach(income => {
+      filteredIncomes.forEach((income) => {
         reportContent += `
           <tr>
             <td>${formatDate(income.Date)}</td>
-            <td>${income.Description || 'N/A'}</td>
-            <td>${income.CodeNumber || '-'}</td>
-            <td class="income-amount">${formatCurrency(income.Amount, income.Currency)}</td>
+            <td>${income.Description || "N/A"}</td>
+            <td>${income.CodeNumber || "-"}</td>
+            <td class="income-amount">${formatCurrency(
+              income.Amount,
+              income.Currency
+            )}</td>
             <td>${income.Currency}</td>
-            <td>${income.IsRecurring ? 'Recurring' : 'One-time'}</td>
+            <td>${income.IsRecurring ? "Recurring" : "One-time"}</td>
           </tr>
         `;
       });
       reportContent += `
         <tr class="total-row">
           <td colspan="3"><strong>Total Income</strong></td>
-          <td class="income-amount"><strong>${formatCurrency(totalIncome)}</strong></td>
+          <td class="income-amount"><strong>${formatCurrency(
+            totalIncome
+          )}</strong></td>
           <td colspan="2"></td>
         </tr>
       `;
@@ -470,22 +507,27 @@ const FinancialReports = () => {
     `;
 
     if (filteredExpenses.length > 0) {
-      filteredExpenses.forEach(expense => {
+      filteredExpenses.forEach((expense) => {
         reportContent += `
           <tr>
             <td>${formatDate(expense.Date)}</td>
-            <td>${expense.Description || 'N/A'}</td>
-            <td>${expense.CodeNumber || '-'}</td>
-            <td class="expense-amount">${formatCurrency(expense.Amount, expense.Currency)}</td>
+            <td>${expense.Description || "N/A"}</td>
+            <td>${expense.CodeNumber || "-"}</td>
+            <td class="expense-amount">${formatCurrency(
+              expense.Amount,
+              expense.Currency
+            )}</td>
             <td>${expense.Currency}</td>
-            <td>${expense.IsRecurring ? 'Recurring' : 'One-time'}</td>
+            <td>${expense.IsRecurring ? "Recurring" : "One-time"}</td>
           </tr>
         `;
       });
       reportContent += `
         <tr class="total-row">
           <td colspan="3"><strong>Total Expenses</strong></td>
-          <td class="expense-amount"><strong>${formatCurrency(totalExpenses)}</strong></td>
+          <td class="expense-amount"><strong>${formatCurrency(
+            totalExpenses
+          )}</strong></td>
           <td colspan="2"></td>
         </tr>
       `;
@@ -506,31 +548,45 @@ const FinancialReports = () => {
             <table>
               <tr>
                 <td><strong>Total Revenue</strong></td>
-                <td class="income-amount"><strong>${formatCurrency(totalIncome)}</strong></td>
+                <td class="income-amount"><strong>${formatCurrency(
+                  totalIncome
+                )}</strong></td>
               </tr>
               <tr>
                 <td><strong>Total Expenses</strong></td>
-                <td class="expense-amount"><strong>${formatCurrency(totalExpenses)}</strong></td>
+                <td class="expense-amount"><strong>${formatCurrency(
+                  totalExpenses
+                )}</strong></td>
               </tr>
               <tr class="total-row">
-                <td><strong>Net ${netProfit >= 0 ? 'Profit' : 'Loss'}</strong></td>
-                <td style="color: ${netProfit >= 0 ? '#059669' : '#dc2626'}">
+                <td><strong>Net ${
+                  netProfit >= 0 ? "Profit" : "Loss"
+                }</strong></td>
+                <td style="color: ${netProfit >= 0 ? "#059669" : "#dc2626"}">
                   <strong>${formatCurrency(Math.abs(netProfit))}</strong>
                 </td>
               </tr>
               <tr>
                 <td><strong>Current Balance</strong></td>
-                <td style="color: #2563eb"><strong>${formatCurrency(statistics.currentBalance)}</strong></td>
+                <td style="color: #2563eb"><strong>${formatCurrency(
+                  statistics.currentBalance
+                )}</strong></td>
               </tr>
               <tr>
                 <td><strong>Total Transactions</strong></td>
-                <td><strong>${filteredIncomes.length + filteredExpenses.length}</strong></td>
+                <td><strong>${
+                  filteredIncomes.length + filteredExpenses.length
+                }</strong></td>
               </tr>
             </table>
 
             <div class="footer">
-              <p><strong>This report was generated automatically by ${companyInfo.name} Finance Management System</strong></p>
-              <p>© ${new Date().getFullYear()} ${companyInfo.name}. All rights reserved.</p>
+              <p><strong>This report was generated automatically by ${
+                companyInfo.name
+              } Finance Management System</strong></p>
+              <p>© ${new Date().getFullYear()} ${
+      companyInfo.name
+    }. All rights reserved.</p>
               <p>Report generated on ${new Date().toLocaleString()}</p>
             </div>
           </div>
@@ -544,10 +600,10 @@ const FinancialReports = () => {
   // Download PDF report
   const handleDownloadPDF = () => {
     setIsGenerating(true);
-    
+
     try {
       let reportContent = "";
-      
+
       switch (reportType) {
         case "comprehensive":
           reportContent = generateComprehensiveReport();
@@ -566,16 +622,17 @@ const FinancialReports = () => {
       }
 
       // Create and download file
-      const blob = new Blob([reportContent], { type: 'text/html' });
+      const blob = new Blob([reportContent], { type: "text/html" });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `${reportType}-report-${new Date().toISOString().split('T')[0]}.html`;
+      link.download = `${reportType}-report-${
+        new Date().toISOString().split("T")[0]
+      }.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
     } catch (error) {
       console.error("Error generating report:", error);
       alert("Failed to generate report. Please try again.");
@@ -587,7 +644,7 @@ const FinancialReports = () => {
   // Print report
   const handlePrintReport = () => {
     const reportContent = generateComprehensiveReport();
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(reportContent);
     printWindow.document.close();
     printWindow.focus();
@@ -597,21 +654,37 @@ const FinancialReports = () => {
   // Generate specific reports
   const generateIncomeReport = () => {
     // Similar structure but only income data
-    return generateComprehensiveReport().replace("COMPREHENSIVE FINANCIAL REPORT", "INCOME STATEMENT");
+    return generateComprehensiveReport().replace(
+      "COMPREHENSIVE FINANCIAL REPORT",
+      "INCOME STATEMENT"
+    );
   };
 
   const generateExpenseReport = () => {
     // Similar structure but only expense data
-    return generateComprehensiveReport().replace("COMPREHENSIVE FINANCIAL REPORT", "EXPENSE REPORT");
+    return generateComprehensiveReport().replace(
+      "COMPREHENSIVE FINANCIAL REPORT",
+      "EXPENSE REPORT"
+    );
   };
 
   const generateBalanceReport = () => {
     // Balance sheet format
-    return generateComprehensiveReport().replace("COMPREHENSIVE FINANCIAL REPORT", "BALANCE SHEET");
+    return generateComprehensiveReport().replace(
+      "COMPREHENSIVE FINANCIAL REPORT",
+      "BALANCE SHEET"
+    );
   };
 
   // Statistics Card Component
-  const StatCard = ({ title, value, icon: Icon, bgColor, iconColor, textColor }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
+    iconColor,
+    textColor,
+  }) => (
     <Container className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
       <Container className="flex items-center justify-between">
         <Container>
@@ -665,7 +738,9 @@ const FinancialReports = () => {
             <Building className="w-8 h-8" />
             <Container>
               <h2 className="text-xl font-bold">{companyInfo.name}</h2>
-              <Span className="text-blue-100">{companyInfo.email} | {companyInfo.phone}</Span>
+              <Span className="text-blue-100">
+                {companyInfo.email} | {companyInfo.phone}
+              </Span>
             </Container>
           </Container>
         </Container>
@@ -692,9 +767,15 @@ const FinancialReports = () => {
             title={translations["Net Profit"]}
             value={formatCurrency(Math.abs(statistics.netProfit))}
             icon={TrendingUp}
-            bgColor={statistics.netProfit >= 0 ? "bg-emerald-50" : "bg-orange-50"}
-            iconColor={statistics.netProfit >= 0 ? "text-emerald-600" : "text-orange-600"}
-            textColor={statistics.netProfit >= 0 ? "text-emerald-600" : "text-orange-600"}
+            bgColor={
+              statistics.netProfit >= 0 ? "bg-emerald-50" : "bg-orange-50"
+            }
+            iconColor={
+              statistics.netProfit >= 0 ? "text-emerald-600" : "text-orange-600"
+            }
+            textColor={
+              statistics.netProfit >= 0 ? "text-emerald-600" : "text-orange-600"
+            }
           />
           <StatCard
             title={translations["Current Balance"]}
@@ -724,9 +805,15 @@ const FinancialReports = () => {
                 onChange={(e) => setReportType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="comprehensive">{translations["All Reports"]}</option>
-                <option value="income">{translations["Income Statement"]}</option>
-                <option value="expense">{translations["Expense Report"]}</option>
+                <option value="comprehensive">
+                  {translations["All Reports"]}
+                </option>
+                <option value="income">
+                  {translations["Income Statement"]}
+                </option>
+                <option value="expense">
+                  {translations["Expense Report"]}
+                </option>
                 <option value="balance">{translations["Balance Sheet"]}</option>
                 <option value="profit">{translations["Profit & Loss"]}</option>
               </select>
@@ -744,7 +831,9 @@ const FinancialReports = () => {
               >
                 <option value="thisMonth">{translations["This Month"]}</option>
                 <option value="lastMonth">{translations["Last Month"]}</option>
-                <option value="thisQuarter">{translations["This Quarter"]}</option>
+                <option value="thisQuarter">
+                  {translations["This Quarter"]}
+                </option>
                 <option value="thisYear">{translations["This Year"]}</option>
                 <option value="custom">{translations["Custom Range"]}</option>
               </select>
@@ -842,7 +931,9 @@ const FinancialReports = () => {
               <Container className="bg-green-50 p-3 rounded-lg">
                 <ArrowUpCircle className="w-6 h-6 text-green-600" />
               </Container>
-              <h4 className="text-lg font-semibold text-gray-900">{translations["Income Statement"]}</h4>
+              <h4 className="text-lg font-semibold text-gray-900">
+                {translations["Income Statement"]}
+              </h4>
             </Container>
             <p className="text-gray-600 text-sm mb-4">
               Detailed breakdown of all income sources and revenue streams.
@@ -869,7 +960,9 @@ const FinancialReports = () => {
               <Container className="bg-red-50 p-3 rounded-lg">
                 <ArrowDownCircle className="w-6 h-6 text-red-600" />
               </Container>
-              <h4 className="text-lg font-semibold text-gray-900">{translations["Expense Report"]}</h4>
+              <h4 className="text-lg font-semibold text-gray-900">
+                {translations["Expense Report"]}
+              </h4>
             </Container>
             <p className="text-gray-600 text-sm mb-4">
               Complete analysis of all expenses and cost breakdowns.
@@ -896,10 +989,13 @@ const FinancialReports = () => {
               <Container className="bg-blue-50 p-3 rounded-lg">
                 <PieChart className="w-6 h-6 text-blue-600" />
               </Container>
-              <h4 className="text-lg font-semibold text-gray-900">{translations["Balance Sheet"]}</h4>
+              <h4 className="text-lg font-semibold text-gray-900">
+                {translations["Balance Sheet"]}
+              </h4>
             </Container>
             <p className="text-gray-600 text-sm mb-4">
-              Financial position and balance overview with assets and liabilities.
+              Financial position and balance overview with assets and
+              liabilities.
             </p>
             <FilledButton
               bgColor="bg-blue-600 hover:bg-blue-700"

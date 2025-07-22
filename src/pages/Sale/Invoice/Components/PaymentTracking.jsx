@@ -49,89 +49,98 @@ import Modall from "../../../../components/elements/modal/Modal";
 const PaymentTracking = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
-    "Payment Tracking": language === "ar" ? "تتبع المدفوعات" : "Payment Tracking",
+    "Payment Tracking":
+      language === "ar" ? "تتبع المدفوعات" : "Payment Tracking",
     "Record Payment": language === "ar" ? "تسجيل دفعة" : "Record Payment",
     "Payment History": language === "ar" ? "سجل المدفوعات" : "Payment History",
-    "Payment Overview": language === "ar" ? "نظرة عامة على المدفوعات" : "Payment Overview",
+    "Payment Overview":
+      language === "ar" ? "نظرة عامة على المدفوعات" : "Payment Overview",
     "Total Received": language === "ar" ? "إجمالي المستلم" : "Total Received",
-    "Outstanding": language === "ar" ? "المستحق" : "Outstanding",
+    Outstanding: language === "ar" ? "المستحق" : "Outstanding",
     "This Month": language === "ar" ? "هذا الشهر" : "This Month",
     "Average Payment": language === "ar" ? "متوسط الدفع" : "Average Payment",
     "Payment Methods": language === "ar" ? "طرق الدفع" : "Payment Methods",
-    "Recent Payments": language === "ar" ? "المدفوعات الأخيرة" : "Recent Payments",
-    "Overdue Payments": language === "ar" ? "المدفوعات المتأخرة" : "Overdue Payments",
+    "Recent Payments":
+      language === "ar" ? "المدفوعات الأخيرة" : "Recent Payments",
+    "Overdue Payments":
+      language === "ar" ? "المدفوعات المتأخرة" : "Overdue Payments",
     "Payment Trends": language === "ar" ? "اتجاهات الدفع" : "Payment Trends",
     "Payment Number": language === "ar" ? "رقم الدفع" : "Payment Number",
     "Invoice Number": language === "ar" ? "رقم الفاتورة" : "Invoice Number",
-    "Client": language === "ar" ? "العميل" : "Client",
-    "Amount": language === "ar" ? "المبلغ" : "Amount",
+    Client: language === "ar" ? "العميل" : "Client",
+    Amount: language === "ar" ? "المبلغ" : "Amount",
     "Payment Date": language === "ar" ? "تاريخ الدفع" : "Payment Date",
     "Payment Method": language === "ar" ? "طريقة الدفع" : "Payment Method",
-    "Reference": language === "ar" ? "المرجع" : "Reference",
-    "Status": language === "ar" ? "الحالة" : "Status",
-    "Actions": language === "ar" ? "الإجراءات" : "Actions",
-    "View": language === "ar" ? "عرض" : "View",
-    "Edit": language === "ar" ? "تعديل" : "Edit",
-    "Delete": language === "ar" ? "حذف" : "Delete",
-    "Download Receipt": language === "ar" ? "تحميل الإيصال" : "Download Receipt",
+    Reference: language === "ar" ? "المرجع" : "Reference",
+    Status: language === "ar" ? "الحالة" : "Status",
+    Actions: language === "ar" ? "الإجراءات" : "Actions",
+    View: language === "ar" ? "عرض" : "View",
+    Edit: language === "ar" ? "تعديل" : "Edit",
+    Delete: language === "ar" ? "حذف" : "Delete",
+    "Download Receipt":
+      language === "ar" ? "تحميل الإيصال" : "Download Receipt",
     "Send Receipt": language === "ar" ? "إرسال الإيصال" : "Send Receipt",
-    "Cash": language === "ar" ? "نقدي" : "Cash",
+    Cash: language === "ar" ? "نقدي" : "Cash",
     "Credit Card": language === "ar" ? "بطاقة ائتمان" : "Credit Card",
     "Bank Transfer": language === "ar" ? "حوالة بنكية" : "Bank Transfer",
-    "Check": language === "ar" ? "شيك" : "Check",
-    "PayPal": language === "ar" ? "باي بال" : "PayPal",
-    "Other": language === "ar" ? "أخرى" : "Other",
-    "Completed": language === "ar" ? "مكتمل" : "Completed",
-    "Pending": language === "ar" ? "قيد الانتظار" : "Pending",
-    "Failed": language === "ar" ? "فشل" : "Failed",
-    "Refunded": language === "ar" ? "مستردة" : "Refunded",
-    "Search payments...": language === "ar" ? "البحث في المدفوعات..." : "Search payments...",
-    "Filter by method": language === "ar" ? "تصفية حسب الطريقة" : "Filter by method",
-    "Filter by status": language === "ar" ? "تصفية حسب الحالة" : "Filter by status",
+    Check: language === "ar" ? "شيك" : "Check",
+    PayPal: language === "ar" ? "باي بال" : "PayPal",
+    Other: language === "ar" ? "أخرى" : "Other",
+    Completed: language === "ar" ? "مكتمل" : "Completed",
+    Pending: language === "ar" ? "قيد الانتظار" : "Pending",
+    Failed: language === "ar" ? "فشل" : "Failed",
+    Refunded: language === "ar" ? "مستردة" : "Refunded",
+    "Search payments...":
+      language === "ar" ? "البحث في المدفوعات..." : "Search payments...",
+    "Filter by method":
+      language === "ar" ? "تصفية حسب الطريقة" : "Filter by method",
+    "Filter by status":
+      language === "ar" ? "تصفية حسب الحالة" : "Filter by status",
     "Date Range": language === "ar" ? "نطاق التاريخ" : "Date Range",
-    "From": language === "ar" ? "من" : "From",
-    "To": language === "ar" ? "إلى" : "To",
+    From: language === "ar" ? "من" : "From",
+    To: language === "ar" ? "إلى" : "To",
     "Apply Filters": language === "ar" ? "تطبيق المرشحات" : "Apply Filters",
     "Clear Filters": language === "ar" ? "مسح المرشحات" : "Clear Filters",
-    "Export": language === "ar" ? "تصدير" : "Export",
-    "Refresh": language === "ar" ? "تحديث" : "Refresh",
-    "Loading": language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "No payments found": language === "ar" ? "لم يتم العثور على مدفوعات" : "No payments found",
+    Export: language === "ar" ? "تصدير" : "Export",
+    Refresh: language === "ar" ? "تحديث" : "Refresh",
+    Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
+    "No payments found":
+      language === "ar" ? "لم يتم العثور على مدفوعات" : "No payments found",
     "Payment Details": language === "ar" ? "تفاصيل الدفع" : "Payment Details",
-    "Invoice Details": language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
+    "Invoice Details":
+      language === "ar" ? "تفاصيل الفاتورة" : "Invoice Details",
     "Client Details": language === "ar" ? "تفاصيل العميل" : "Client Details",
     "Payment Notes": language === "ar" ? "ملاحظات الدفع" : "Payment Notes",
-    "Created": language === "ar" ? "تم الإنشاء" : "Created",
-    "Updated": language === "ar" ? "تم التحديث" : "Updated",
+    Created: language === "ar" ? "تم الإنشاء" : "Created",
+    Updated: language === "ar" ? "تم التحديث" : "Updated",
     "Are you sure?": language === "ar" ? "هل أنت متأكد؟" : "Are you sure?",
-    "This action cannot be undone": language === "ar" ? "لا يمكن التراجع عن هذا الإجراء" : "This action cannot be undone",
-    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
-    "Confirm": language === "ar" ? "تأكيد" : "Confirm",
-    "Previous": language === "ar" ? "السابق" : "Previous",
-    "Next": language === "ar" ? "التالي" : "Next",
-    "Showing": language === "ar" ? "عرض" : "Showing",
-    "of": language === "ar" ? "من" : "of",
-    "results": language === "ar" ? "نتائج" : "results",
+    "This action cannot be undone":
+      language === "ar"
+        ? "لا يمكن التراجع عن هذا الإجراء"
+        : "This action cannot be undone",
+    Cancel: language === "ar" ? "إلغاء" : "Cancel",
+    Confirm: language === "ar" ? "تأكيد" : "Confirm",
+    Previous: language === "ar" ? "السابق" : "Previous",
+    Next: language === "ar" ? "التالي" : "Next",
+    Showing: language === "ar" ? "عرض" : "Showing",
+    of: language === "ar" ? "من" : "of",
+    results: language === "ar" ? "نتائج" : "results",
     "vs last month": language === "ar" ? "مقابل الشهر الماضي" : "vs last month",
-    "Payment Success Rate": language === "ar" ? "معدل نجاح الدفع" : "Payment Success Rate",
+    "Payment Success Rate":
+      language === "ar" ? "معدل نجاح الدفع" : "Payment Success Rate",
     "All Methods": language === "ar" ? "جميع الطرق" : "All Methods",
     "All Statuses": language === "ar" ? "جميع الحالات" : "All Statuses",
     "View All": language === "ar" ? "عرض الكل" : "View All",
     "days ago": language === "ar" ? "أيام مضت" : "days ago",
-    "today": language === "ar" ? "اليوم" : "today",
-    "yesterday": language === "ar" ? "أمس" : "yesterday",
+    today: language === "ar" ? "اليوم" : "today",
+    yesterday: language === "ar" ? "أمس" : "yesterday",
   };
 
   // Context hooks
-  const {
-    invoices,
-    loading,
-    getInvoices,
-    markInvoiceAsPaid,
-  } = useInvoices();
+  const { invoices, loading, getInvoices, markInvoiceAsPaid } = useInvoices();
 
   const { clients, getClients } = useClients();
 
@@ -180,10 +189,7 @@ const PaymentTracking = () => {
   const loadPaymentData = async () => {
     try {
       setLoading2(true);
-      await Promise.all([
-        getInvoices(),
-        getClients(),
-      ]);
+      await Promise.all([getInvoices(), getClients()]);
       generateMockPaymentData();
     } catch (error) {
       console.error("Error loading payment data:", error);
@@ -197,27 +203,41 @@ const PaymentTracking = () => {
     const mockPayments = [];
     let paymentId = 1;
 
-    invoices.forEach(invoice => {
-      if (invoice.Status === 'Paid' || invoice.PaidAmount > 0) {
+    invoices.forEach((invoice) => {
+      if (invoice.Status === "Paid" || invoice.PaidAmount > 0) {
         // Generate payment records for paid invoices
-        const paymentMethods = ['Cash', 'Credit Card', 'Bank Transfer', 'Check', 'PayPal'];
-        const statuses = ['Completed', 'Pending', 'Failed'];
-        
+        const paymentMethods = [
+          "Cash",
+          "Credit Card",
+          "Bank Transfer",
+          "Check",
+          "PayPal",
+        ];
+        const statuses = ["Completed", "Pending", "Failed"];
+
         mockPayments.push({
           id: paymentId++,
-          paymentNumber: `PAY-${new Date().getFullYear()}-${paymentId.toString().padStart(4, '0')}`,
+          paymentNumber: `PAY-${new Date().getFullYear()}-${paymentId
+            .toString()
+            .padStart(4, "0")}`,
           invoiceId: invoice.Id,
           invoiceNumber: invoice.InvoiceNumber,
           clientId: invoice.ClientId,
           clientName: invoice.ClientName,
           clientEmail: invoice.ClientEmail,
           amount: invoice.PaidAmount || invoice.TotalAmount,
-          paymentDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-          paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+          paymentDate: new Date(
+            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+          paymentMethod:
+            paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
           status: statuses[Math.floor(Math.random() * statuses.length)],
-          reference: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          reference: `TXN-${Math.random()
+            .toString(36)
+            .substr(2, 9)
+            .toUpperCase()}`,
           notes: Math.random() > 0.5 ? "Payment received successfully" : "",
-          currency: invoice.Currency || 'USD',
+          currency: invoice.Currency || "USD",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -227,9 +247,9 @@ const PaymentTracking = () => {
     setPayments(mockPayments);
     setFilteredPayments(mockPayments);
     calculatePaymentStats(mockPayments);
-    
+
     // Update pagination
-    setPagination(prev => ({
+    setPagination((prev) => ({
       ...prev,
       totalItems: mockPayments.length,
       totalPages: Math.ceil(mockPayments.length / prev.pageSize),
@@ -240,43 +260,63 @@ const PaymentTracking = () => {
   const calculatePaymentStats = (paymentData) => {
     const now = new Date();
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const completedPayments = paymentData.filter(p => p.status === 'Completed');
-    const totalReceived = completedPayments.reduce((sum, p) => sum + p.amount, 0);
-    const thisMonthPayments = completedPayments.filter(p => new Date(p.paymentDate) >= thisMonth);
-    const thisMonthTotal = thisMonthPayments.reduce((sum, p) => sum + p.amount, 0);
-    
-    const averagePayment = completedPayments.length > 0 ? totalReceived / completedPayments.length : 0;
-    const successRate = paymentData.length > 0 ? (completedPayments.length / paymentData.length) * 100 : 0;
-    
+
+    const completedPayments = paymentData.filter(
+      (p) => p.status === "Completed"
+    );
+    const totalReceived = completedPayments.reduce(
+      (sum, p) => sum + p.amount,
+      0
+    );
+    const thisMonthPayments = completedPayments.filter(
+      (p) => new Date(p.paymentDate) >= thisMonth
+    );
+    const thisMonthTotal = thisMonthPayments.reduce(
+      (sum, p) => sum + p.amount,
+      0
+    );
+
+    const averagePayment =
+      completedPayments.length > 0
+        ? totalReceived / completedPayments.length
+        : 0;
+    const successRate =
+      paymentData.length > 0
+        ? (completedPayments.length / paymentData.length) * 100
+        : 0;
+
     // Method distribution
     const methodDistribution = {};
-    paymentData.forEach(payment => {
-      methodDistribution[payment.paymentMethod] = (methodDistribution[payment.paymentMethod] || 0) + 1;
+    paymentData.forEach((payment) => {
+      methodDistribution[payment.paymentMethod] =
+        (methodDistribution[payment.paymentMethod] || 0) + 1;
     });
-    
+
     // Monthly trends (last 6 months)
     const monthlyTrends = [];
     for (let i = 5; i >= 0; i--) {
       const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
-      
-      const monthPayments = completedPayments.filter(p => {
+
+      const monthPayments = completedPayments.filter((p) => {
         const paymentDate = new Date(p.paymentDate);
         return paymentDate >= monthStart && paymentDate <= monthEnd;
       });
-      
+
       monthlyTrends.push({
-        month: monthStart.toLocaleString('default', { month: 'short' }),
+        month: monthStart.toLocaleString("default", { month: "short" }),
         amount: monthPayments.reduce((sum, p) => sum + p.amount, 0),
         count: monthPayments.length,
       });
     }
-    
+
     setPaymentStats({
       totalReceived,
       thisMonth: thisMonthTotal,
-      outstanding: invoices.reduce((sum, inv) => sum + (inv.BalanceAmount || 0), 0),
+      outstanding: invoices.reduce(
+        (sum, inv) => sum + (inv.BalanceAmount || 0),
+        0
+      ),
       averagePayment,
       successRate,
       methodDistribution,
@@ -289,31 +329,43 @@ const PaymentTracking = () => {
     let filtered = payments;
 
     if (searchTerm) {
-      filtered = filtered.filter(payment =>
-        payment.paymentNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.reference.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (payment) =>
+          payment.paymentNumber
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          payment.invoiceNumber
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          payment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          payment.reference.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedMethod) {
-      filtered = filtered.filter(payment => payment.paymentMethod === selectedMethod);
+      filtered = filtered.filter(
+        (payment) => payment.paymentMethod === selectedMethod
+      );
     }
 
     if (selectedStatus) {
-      filtered = filtered.filter(payment => payment.status === selectedStatus);
+      filtered = filtered.filter(
+        (payment) => payment.status === selectedStatus
+      );
     }
 
     if (dateRange.from && dateRange.to) {
-      filtered = filtered.filter(payment => {
+      filtered = filtered.filter((payment) => {
         const paymentDate = new Date(payment.paymentDate);
-        return paymentDate >= new Date(dateRange.from) && paymentDate <= new Date(dateRange.to);
+        return (
+          paymentDate >= new Date(dateRange.from) &&
+          paymentDate <= new Date(dateRange.to)
+        );
       });
     }
 
     setFilteredPayments(filtered);
-    setPagination(prev => ({
+    setPagination((prev) => ({
       ...prev,
       totalItems: filtered.length,
       totalPages: Math.ceil(filtered.length / prev.pageSize),
@@ -346,7 +398,7 @@ const PaymentTracking = () => {
 
   const confirmDelete = () => {
     if (paymentToDelete) {
-      setPayments(payments.filter(p => p.id !== paymentToDelete.id));
+      setPayments(payments.filter((p) => p.id !== paymentToDelete.id));
       setShowDeleteModal(false);
       setPaymentToDelete(null);
     }
@@ -372,31 +424,46 @@ const PaymentTracking = () => {
   // Get status color and icon
   const getStatusDisplay = (status) => {
     switch (status?.toLowerCase()) {
-      case 'completed':
-        return { color: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-4 h-4" /> };
-      case 'pending':
-        return { color: 'bg-yellow-100 text-yellow-800', icon: <Clock className="w-4 h-4" /> };
-      case 'failed':
-        return { color: 'bg-red-100 text-red-800', icon: <XCircle className="w-4 h-4" /> };
-      case 'refunded':
-        return { color: 'bg-gray-100 text-gray-800', icon: <ArrowDownRight className="w-4 h-4" /> };
+      case "completed":
+        return {
+          color: "bg-green-100 text-green-800",
+          icon: <CheckCircle className="w-4 h-4" />,
+        };
+      case "pending":
+        return {
+          color: "bg-yellow-100 text-yellow-800",
+          icon: <Clock className="w-4 h-4" />,
+        };
+      case "failed":
+        return {
+          color: "bg-red-100 text-red-800",
+          icon: <XCircle className="w-4 h-4" />,
+        };
+      case "refunded":
+        return {
+          color: "bg-gray-100 text-gray-800",
+          icon: <ArrowDownRight className="w-4 h-4" />,
+        };
       default:
-        return { color: 'bg-gray-100 text-gray-800', icon: <Clock className="w-4 h-4" /> };
+        return {
+          color: "bg-gray-100 text-gray-800",
+          icon: <Clock className="w-4 h-4" />,
+        };
     }
   };
 
   // Get payment method icon
   const getPaymentMethodIcon = (method) => {
     switch (method?.toLowerCase()) {
-      case 'cash':
+      case "cash":
         return <Banknote className="w-4 h-4" />;
-      case 'credit card':
+      case "credit card":
         return <CreditCard className="w-4 h-4" />;
-      case 'bank transfer':
+      case "bank transfer":
         return <Building className="w-4 h-4" />;
-      case 'check':
+      case "check":
         return <Receipt className="w-4 h-4" />;
-      case 'paypal':
+      case "paypal":
         return <Wallet className="w-4 h-4" />;
       default:
         return <DollarSign className="w-4 h-4" />;
@@ -405,8 +472,8 @@ const PaymentTracking = () => {
 
   // Format currency
   const formatCurrency = (amount, currency = "USD") => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency,
     }).format(amount);
   };
@@ -421,7 +488,7 @@ const PaymentTracking = () => {
     const now = new Date();
     const paymentDate = new Date(date);
     const diffInDays = Math.floor((now - paymentDate) / (1000 * 60 * 60 * 24));
-    
+
     if (diffInDays === 0) return translations.today;
     if (diffInDays === 1) return translations.yesterday;
     return `${diffInDays} ${translations["days ago"]}`;
@@ -432,7 +499,9 @@ const PaymentTracking = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
@@ -481,7 +550,9 @@ const PaymentTracking = () => {
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => {/* Handle export */}}
+              onClick={() => {
+                /* Handle export */
+              }}
             />
 
             <FilledButton
@@ -604,13 +675,26 @@ const PaymentTracking = () => {
               {paymentStats.monthlyTrends.map((month, index) => (
                 <Container key={index} className="space-y-2">
                   <Container className="flex items-center justify-between">
-                    <Span className="text-sm font-medium text-gray-700">{month.month}</Span>
-                    <Span className="text-sm text-gray-500">{formatCurrency(month.amount)}</Span>
+                    <Span className="text-sm font-medium text-gray-700">
+                      {month.month}
+                    </Span>
+                    <Span className="text-sm text-gray-500">
+                      {formatCurrency(month.amount)}
+                    </Span>
                   </Container>
                   <Container className="w-full bg-gray-200 rounded-full h-2">
                     <Container
                       className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${Math.min((month.amount / Math.max(...paymentStats.monthlyTrends.map(m => m.amount))) * 100, 100)}%` }}
+                      style={{
+                        width: `${Math.min(
+                          (month.amount /
+                            Math.max(
+                              ...paymentStats.monthlyTrends.map((m) => m.amount)
+                            )) *
+                            100,
+                          100
+                        )}%`,
+                      }}
                     />
                   </Container>
                 </Container>
@@ -624,17 +708,26 @@ const PaymentTracking = () => {
               {translations["Payment Methods"]}
             </h3>
             <Container className="space-y-4">
-              {Object.entries(paymentStats.methodDistribution).map(([method, count]) => (
-                <Container key={method} className="flex items-center justify-between">
-                  <Container className="flex items-center gap-3">
-                    <Container className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      {getPaymentMethodIcon(method)}
+              {Object.entries(paymentStats.methodDistribution).map(
+                ([method, count]) => (
+                  <Container
+                    key={method}
+                    className="flex items-center justify-between"
+                  >
+                    <Container className="flex items-center gap-3">
+                      <Container className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        {getPaymentMethodIcon(method)}
+                      </Container>
+                      <Span className="text-sm font-medium text-gray-700">
+                        {method}
+                      </Span>
                     </Container>
-                    <Span className="text-sm font-medium text-gray-700">{method}</Span>
+                    <Span className="text-sm text-gray-500">
+                      {count} payments
+                    </Span>
                   </Container>
-                  <Span className="text-sm text-gray-500">{count} payments</Span>
-                </Container>
-              ))}
+                )
+              )}
             </Container>
           </Container>
         </Container>
@@ -663,8 +756,12 @@ const PaymentTracking = () => {
               >
                 <option value="">{translations["All Methods"]}</option>
                 <option value="Cash">{translations.Cash}</option>
-                <option value="Credit Card">{translations["Credit Card"]}</option>
-                <option value="Bank Transfer">{translations["Bank Transfer"]}</option>
+                <option value="Credit Card">
+                  {translations["Credit Card"]}
+                </option>
+                <option value="Bank Transfer">
+                  {translations["Bank Transfer"]}
+                </option>
                 <option value="Check">{translations.Check}</option>
                 <option value="PayPal">{translations.PayPal}</option>
               </select>
@@ -687,21 +784,29 @@ const PaymentTracking = () => {
                 <input
                   type="date"
                   value={dateRange.from}
-                  onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, from: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <Span className="text-gray-500">to</Span>
                 <input
                   type="date"
                   value={dateRange.to}
-                  onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, to: e.target.value })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </Container>
             </Container>
 
             {/* Clear Filters */}
-            {(searchTerm || selectedMethod || selectedStatus || dateRange.from || dateRange.to) && (
+            {(searchTerm ||
+              selectedMethod ||
+              selectedStatus ||
+              dateRange.from ||
+              dateRange.to) && (
               <FilledButton
                 isIcon={true}
                 icon={XCircle}
@@ -818,7 +923,9 @@ const PaymentTracking = () => {
                         </Container>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}>
+                        <Span
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusDisplay.color}`}
+                        >
                           {statusDisplay.icon}
                           {payment.status}
                         </Span>
@@ -848,27 +955,42 @@ const PaymentTracking = () => {
                               buttonText=""
                               height="h-8"
                               width="w-8"
-                              onClick={() => setActionDropdown(actionDropdown === payment.id ? null : payment.id)}
+                              onClick={() =>
+                                setActionDropdown(
+                                  actionDropdown === payment.id
+                                    ? null
+                                    : payment.id
+                                )
+                              }
                             />
                             {actionDropdown === payment.id && (
                               <Container className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                                 <Container className="py-1">
                                   <button
-                                    onClick={() => { handleEditPayment(payment); setActionDropdown(null); }}
+                                    onClick={() => {
+                                      handleEditPayment(payment);
+                                      setActionDropdown(null);
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                   >
                                     <Edit className="w-4 h-4" />
                                     {translations.Edit}
                                   </button>
                                   <button
-                                    onClick={() => { handleDownloadReceipt(payment); setActionDropdown(null); }}
+                                    onClick={() => {
+                                      handleDownloadReceipt(payment);
+                                      setActionDropdown(null);
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                   >
                                     <Download className="w-4 h-4" />
                                     {translations["Download Receipt"]}
                                   </button>
                                   <button
-                                    onClick={() => { handleSendReceipt(payment); setActionDropdown(null); }}
+                                    onClick={() => {
+                                      handleSendReceipt(payment);
+                                      setActionDropdown(null);
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                   >
                                     <Send className="w-4 h-4" />
@@ -876,7 +998,10 @@ const PaymentTracking = () => {
                                   </button>
                                   <hr className="my-1" />
                                   <button
-                                    onClick={() => { handleDeletePayment(payment); setActionDropdown(null); }}
+                                    onClick={() => {
+                                      handleDeletePayment(payment);
+                                      setActionDropdown(null);
+                                    }}
                                     className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -914,9 +1039,13 @@ const PaymentTracking = () => {
           <Container className="flex items-center justify-between mt-6">
             <Container className="flex items-center gap-2">
               <Span className="text-sm text-gray-700">
-                {translations.Showing} {((pagination.page - 1) * pagination.pageSize) + 1} to{" "}
-                {Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} {translations.of}{" "}
-                {pagination.totalItems} {translations.results}
+                {translations.Showing}{" "}
+                {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
+                {Math.min(
+                  pagination.page * pagination.pageSize,
+                  pagination.totalItems
+                )}{" "}
+                {translations.of} {pagination.totalItems} {translations.results}
               </Span>
             </Container>
 
@@ -934,7 +1063,9 @@ const PaymentTracking = () => {
                 fontWeight="font-medium"
                 fontSize="text-sm"
                 isIconLeft={true}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                onClick={() =>
+                  setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+                }
                 disabled={pagination.page === 1}
               />
 
@@ -945,11 +1076,13 @@ const PaymentTracking = () => {
                   return (
                     <button
                       key={pageNumber}
-                      onClick={() => setPagination(prev => ({ ...prev, page: pageNumber }))}
+                      onClick={() =>
+                        setPagination((prev) => ({ ...prev, page: pageNumber }))
+                      }
                       className={`px-3 py-2 text-sm rounded-lg ${
                         isCurrentPage
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
                       {pageNumber}
@@ -971,7 +1104,9 @@ const PaymentTracking = () => {
                 fontWeight="font-medium"
                 fontSize="text-sm"
                 isIconLeft={true}
-                onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                onClick={() =>
+                  setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
+                }
                 disabled={pagination.page === pagination.totalPages}
               />
             </Container>
@@ -1010,7 +1145,10 @@ const PaymentTracking = () => {
                     {translations.Amount}
                   </Span>
                   <Span className="text-lg font-semibold text-gray-900">
-                    {formatCurrency(selectedPayment.amount, selectedPayment.currency)}
+                    {formatCurrency(
+                      selectedPayment.amount,
+                      selectedPayment.currency
+                    )}
                   </Span>
                 </Container>
                 <Container>
@@ -1019,7 +1157,9 @@ const PaymentTracking = () => {
                   </Span>
                   <Container className="flex items-center gap-2">
                     {getPaymentMethodIcon(selectedPayment.paymentMethod)}
-                    <Span className="text-gray-900">{selectedPayment.paymentMethod}</Span>
+                    <Span className="text-gray-900">
+                      {selectedPayment.paymentMethod}
+                    </Span>
                   </Container>
                 </Container>
                 <Container>
@@ -1028,7 +1168,9 @@ const PaymentTracking = () => {
                   </Span>
                   <Container className="flex items-center gap-2">
                     {getStatusDisplay(selectedPayment.status).icon}
-                    <Span className="text-gray-900">{selectedPayment.status}</Span>
+                    <Span className="text-gray-900">
+                      {selectedPayment.status}
+                    </Span>
                   </Container>
                 </Container>
                 <Container>
@@ -1043,7 +1185,9 @@ const PaymentTracking = () => {
                   <Span className="text-sm font-medium text-gray-500 block mb-1">
                     {translations.Reference}
                   </Span>
-                  <Span className="text-gray-900">{selectedPayment.reference}</Span>
+                  <Span className="text-gray-900">
+                    {selectedPayment.reference}
+                  </Span>
                 </Container>
               </Container>
 
@@ -1058,13 +1202,17 @@ const PaymentTracking = () => {
                     <Span className="text-sm font-medium text-gray-500 block mb-1">
                       {translations["Invoice Number"]}
                     </Span>
-                    <Span className="text-gray-900">{selectedPayment.invoiceNumber}</Span>
+                    <Span className="text-gray-900">
+                      {selectedPayment.invoiceNumber}
+                    </Span>
                   </Container>
                   <Container>
                     <Span className="text-sm font-medium text-gray-500 block mb-1">
                       {translations["Client Name"]}
                     </Span>
-                    <Span className="text-gray-900">{selectedPayment.clientName}</Span>
+                    <Span className="text-gray-900">
+                      {selectedPayment.clientName}
+                    </Span>
                   </Container>
                 </Container>
               </Container>
@@ -1106,7 +1254,8 @@ const PaymentTracking = () => {
               {translations["Are you sure?"]}
             </h3>
             <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will permanently delete the payment record{" "}
+              {translations["This action cannot be undone"]}. This will
+              permanently delete the payment record{" "}
               <strong>"{paymentToDelete?.paymentNumber}"</strong>.
             </Span>
           </Container>
