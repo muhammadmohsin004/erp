@@ -802,31 +802,7 @@ const ClientsListPage = () => {
             </Tbody>
           </Table>
 
-          {pagination.totalPages > 1 && (
-            <Container className="px-6 py-4 border-t border-gray-200">
-              <Container className="flex items-center justify-between">
-                <Span className="text-sm text-gray-500">
-                  Showing {((pagination.page - 1) * pagination.pageSize) + 1} to {Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems} entries
-                </Span>
-                <Container className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {translations.Previous}
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page === pagination.totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {translations.Next}
-                  </button>
-                </Container>
-              </Container>
-            </Container>
-          )}
+          
         </Container>
 
         {/* Pagination */}
