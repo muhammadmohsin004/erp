@@ -66,13 +66,13 @@ import {
   Tablet,
 } from "lucide-react";
 import { AiOutlineEye, AiOutlineDelete } from "react-icons/ai";
-import { useProductsManager } from "../../../Contexts/ProductsManagerContext/ProductsManagerContext";
 import FilledButton from "../../../components/elements/elements/buttons/filledButton/FilledButton";
 import Modall from "../../../components/elements/modal/Modal";
 import SearchAndFilters from "../../../components/elements/searchAndFilters/SearchAndFilters";
 import Table from "../../../components/elements/table/Table";
 import Container from "../../../components/elements/container/Container";
 import Span from "../../../components/elements/span/Span";
+import { useProductsManager } from "../../../Contexts/ProductsManagerContext/ProductsManagerContext";
 
 const ProductImages = () => {
   const navigate = useNavigate();
@@ -153,21 +153,20 @@ const ProductImages = () => {
   // Get products context
   const {
     productImages,
-    dropdowns,
+    products,
     loading: imagesLoading,
     error,
     getProductImages,
+    getProducts,
     createProductImage,
     createMultipleProductImages,
     deleteProductImage,
-    getProductsDropdown,
   } = useProductsManager();
 
   // Process images data from API response
   const imagesData = productImages?.Data?.$values || [];
-  const productsDropdown = Array.isArray(dropdowns?.products)
-    ? dropdowns.products
-    : [];
+
+  const productsDropdown = products?.Data?.$values || [];
 
   // Local state management
   const [searchTerm, setSearchTerm] = useState("");
@@ -225,7 +224,7 @@ const ProductImages = () => {
     const fetchInitialData = async () => {
       try {
         await getProductImages();
-        await getProductsDropdown();
+        await getProducts();
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -234,7 +233,7 @@ const ProductImages = () => {
     if (token) {
       fetchInitialData();
     }
-  }, [token, getProductImages, getProductsDropdown]);
+  }, [token, getProductImages, getProducts]);
 
   // Update statistics when images change
   useEffect(() => {

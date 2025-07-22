@@ -112,12 +112,10 @@ const NewRequisition = () => {
     ? useSupplier()
     : { getSuppliers: null, suppliers: null };
 
-  const { dropdowns, getProductsDropdown } = useProductsManager();
+  const { products, getProducts } = useProductsManager();
 
   // Process data from contexts
-  const productsDropdown = Array.isArray(dropdowns?.products)
-    ? dropdowns.products
-    : [];
+  const productsDropdown = products?.Data?.$values || [];
   const suppliersData = Array.isArray(suppliers?.Data?.$values)
     ? suppliers.Data.$values
     : [];
@@ -173,8 +171,8 @@ const NewRequisition = () => {
         if (getSuppliers) {
           await getSuppliers();
         }
-        if (getProductsDropdown) {
-          await getProductsDropdown();
+        if (getProducts) {
+          await getProducts();
         }
       } catch (error) {
         console.error("Error loading initial data:", error);
@@ -184,7 +182,7 @@ const NewRequisition = () => {
     if (token) {
       loadData();
     }
-  }, [token, getSuppliers, getProductsDropdown]);
+  }, [token, getSuppliers, getProducts]);
 
   // Load edit/clone data
   useEffect(() => {

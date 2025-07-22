@@ -663,7 +663,7 @@ const NewInvoice = () => {
               buttonText=""
               height="h-10"
               width="w-10"
-              onClick={() => navigate("/admin/invoices")}
+              onClick={() => navigate("/admin/invoice-dashboard")}
             />
             <h1 className="text-2xl font-bold text-gray-900">
               {getPageTitle()}

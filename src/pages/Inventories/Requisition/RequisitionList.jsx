@@ -387,15 +387,6 @@ const RequisitionList = () => {
     }
   };
 
-  // Export functionality
-  // const handleExport = () => {
-  //   console.log(
-  //     "Export requisitions:",
-  //     selectedRequisitions.length > 0 ? selectedRequisitions : "all"
-  //   );
-  //   alert("Export functionality to be implemented");
-  // };
-
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
