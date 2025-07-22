@@ -191,22 +191,21 @@ const getAuthToken = () => {
   return localStorage.getItem("token") || sessionStorage.getItem("token");
 };
 
-// Utility function for API calls
+// Utility function for API calls with FormData support
 const apiCall = async (url, options = {}) => {
   const token = getAuthToken();
 
   const defaultOptions = {
     headers: {
-      "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
   };
 
-  // Handle FormData for file uploads
-  if (options.body instanceof FormData) {
-    delete defaultOptions.headers["Content-Type"];
+  // Don't set Content-Type for FormData - let the browser set it
+  if (!(options.body instanceof FormData)) {
+    defaultOptions.headers["Content-Type"] = "application/json";
   }
 
   const response = await fetch(url, { ...defaultOptions });
@@ -265,9 +264,7 @@ export const FinanceExpensesProvider = ({ children }) => {
         const response = await apiCall(url);
 
         if (response.Success) {
-          // Handle both single object and array responses
           const expenseData = response?.data?.Data?.$values || [];
-
           console.log("Expense Data:", expenseData);
 
           dispatch({
@@ -295,7 +292,7 @@ export const FinanceExpensesProvider = ({ children }) => {
 
       const response = await apiCall(`${API_BASE_URL}/${id}`);
 
-      console.log("This is hte new data ", response);
+      console.log("This is the new data ", response);
 
       if (response.Success) {
         dispatch({
@@ -315,38 +312,55 @@ export const FinanceExpensesProvider = ({ children }) => {
       setLoading(true);
       clearError();
 
-      // Prepare the data according to API structure
-      const payload = {
-        CompanyId: expenseData.companyId || 0,
-        CodeNumber: expenseData.codeNumber || "",
-        ExpenseDate: expenseData.expenseDate,
-        CategoryId: parseInt(expenseData.categoryId) || 0,
-        VendorId: parseInt(expenseData.vendorId) || 0,
-        Description: expenseData.description,
-        Amount: parseFloat(expenseData.amount) || 0,
-        Currency: expenseData.currency || "USD",
-        ExchangeRate: parseFloat(expenseData.exchangeRate) || 1,
-        PaymentMethod: expenseData.paymentMethod,
-        BankAccountId: parseInt(expenseData.bankAccountId) || 0,
-        Status: expenseData.status || "Pending",
-        TaxAmount: parseFloat(expenseData.taxAmount) || 0,
-        TaxRate: parseFloat(expenseData.taxRate) || 0,
-        TotalAmount:
-          parseFloat(expenseData.totalAmount) ||
-          parseFloat(expenseData.amount) ||
-          0,
-        Notes: expenseData.notes || "",
-        ReferenceNumber: expenseData.referenceNumber || "",
-        IsRecurring: expenseData.isRecurring || false,
-        RecurringPattern: expenseData.recurringPattern || "",
-        RecurringInterval: parseInt(expenseData.recurringInterval) || 0,
-        NextRecurringDate: expenseData.nextRecurringDate || null,
-        Items: expenseData.items || [],
-      };
+      // Create FormData to match the API's multipart/form-data requirement
+      const formData = new FormData();
+
+      // Map the form data to match the API requirements exactly as shown in curl
+      formData.append('Description', expenseData.description || '');
+      formData.append('Amount', expenseData.amount ? expenseData.amount.toString() : '0');
+      formData.append('Currency', expenseData.currency || 'USD');
+      formData.append('ExpenseDate', expenseData.expenseDate || new Date().toISOString());
+      formData.append('CategoryId', expenseData.categoryId ? expenseData.categoryId.toString() : '0');
+      formData.append('VendorId', expenseData.vendorId ? expenseData.vendorId.toString() : '1');
+      formData.append('PaymentMethod', expenseData.paymentMethod || '');
+      formData.append('Status', expenseData.status || 'Pending');
+      formData.append('CodeNumber', expenseData.codeNumber || `EXP-${Date.now()}`);
+      
+      // Optional fields
+      if (expenseData.notes) formData.append('Notes', expenseData.notes);
+      if (expenseData.referenceNumber) formData.append('ReferenceNumber', expenseData.referenceNumber);
+      if (expenseData.taxAmount) formData.append('TaxAmount', expenseData.taxAmount.toString());
+      if (expenseData.taxRate) formData.append('TaxRate', expenseData.taxRate.toString());
+      if (expenseData.exchangeRate) formData.append('ExchangeRate', expenseData.exchangeRate.toString());
+      
+      // Recurring fields
+      formData.append('IsRecurring', expenseData.isRecurring ? 'true' : 'false');
+      if (expenseData.recurringPattern) formData.append('RecurringPattern', expenseData.recurringPattern);
+      if (expenseData.recurringInterval) formData.append('RecurringInterval', expenseData.recurringInterval.toString());
+      if (expenseData.nextRecurringDate) formData.append('NextRecurringDate', expenseData.nextRecurringDate);
+      if (expenseData.recurringFrequency) formData.append('RecurringFrequency', expenseData.recurringFrequency);
+      
+      // Items array - convert to JSON string as shown in curl
+      if (expenseData.items && expenseData.items.length > 0) {
+        formData.append('Items', JSON.stringify(expenseData.items[0]));
+      } else {
+        // Default item structure based on curl example
+        formData.append('Items', JSON.stringify({
+          Description: expenseData.description || "string",
+          Quantity: 1,
+          UnitPrice: parseFloat(expenseData.amount) || 0,
+          TaxRate: parseFloat(expenseData.taxRate) || 0
+        }));
+      }
+      
+      // Attachments
+      if (expenseData.attachments) {
+        formData.append('Attachments', expenseData.attachments);
+      }
 
       const response = await apiCall(API_BASE_URL, {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: formData, // Send FormData instead of JSON
       });
 
       if (response.Success) {
@@ -366,39 +380,49 @@ export const FinanceExpensesProvider = ({ children }) => {
       setLoading(true);
       clearError();
 
-      // Prepare the data according to API structure
-      const payload = {
-        Id: id,
-        CompanyId: expenseData.companyId || 0,
-        CodeNumber: expenseData.codeNumber || "",
-        ExpenseDate: expenseData.expenseDate,
-        CategoryId: parseInt(expenseData.categoryId) || 0,
-        VendorId: parseInt(expenseData.vendorId) || 0,
-        Description: expenseData.description,
-        Amount: parseFloat(expenseData.amount) || 0,
-        Currency: expenseData.currency || "USD",
-        ExchangeRate: parseFloat(expenseData.exchangeRate) || 1,
-        PaymentMethod: expenseData.paymentMethod,
-        BankAccountId: parseInt(expenseData.bankAccountId) || 0,
-        Status: expenseData.status || "Pending",
-        TaxAmount: parseFloat(expenseData.taxAmount) || 0,
-        TaxRate: parseFloat(expenseData.taxRate) || 0,
-        TotalAmount:
-          parseFloat(expenseData.totalAmount) ||
-          parseFloat(expenseData.amount) ||
-          0,
-        Notes: expenseData.notes || "",
-        ReferenceNumber: expenseData.referenceNumber || "",
-        IsRecurring: expenseData.isRecurring || false,
-        RecurringPattern: expenseData.recurringPattern || "",
-        RecurringInterval: parseInt(expenseData.recurringInterval) || 0,
-        NextRecurringDate: expenseData.nextRecurringDate || null,
-        Items: expenseData.items || [],
-      };
+      // Create FormData for update as well
+      const formData = new FormData();
+
+      // Map the form data to match the API requirements
+      formData.append('Description', expenseData.description || '');
+      formData.append('Amount', expenseData.amount ? expenseData.amount.toString() : '0');
+      formData.append('Currency', expenseData.currency || 'USD');
+      formData.append('ExpenseDate', expenseData.expenseDate || new Date().toISOString());
+      formData.append('CategoryId', expenseData.categoryId ? expenseData.categoryId.toString() : '0');
+      formData.append('VendorId', expenseData.vendorId ? expenseData.vendorId.toString() : '1');
+      formData.append('PaymentMethod', expenseData.paymentMethod || '');
+      formData.append('Status', expenseData.status || 'Pending');
+      formData.append('CodeNumber', expenseData.codeNumber || '');
+      
+      // Optional fields
+      if (expenseData.notes) formData.append('Notes', expenseData.notes);
+      if (expenseData.referenceNumber) formData.append('ReferenceNumber', expenseData.referenceNumber);
+      if (expenseData.taxAmount) formData.append('TaxAmount', expenseData.taxAmount.toString());
+      if (expenseData.taxRate) formData.append('TaxRate', expenseData.taxRate.toString());
+      if (expenseData.exchangeRate) formData.append('ExchangeRate', expenseData.exchangeRate.toString());
+      
+      // Recurring fields
+      formData.append('IsRecurring', expenseData.isRecurring ? 'true' : 'false');
+      if (expenseData.recurringPattern) formData.append('RecurringPattern', expenseData.recurringPattern);
+      if (expenseData.recurringInterval) formData.append('RecurringInterval', expenseData.recurringInterval.toString());
+      if (expenseData.nextRecurringDate) formData.append('NextRecurringDate', expenseData.nextRecurringDate);
+      if (expenseData.recurringFrequency) formData.append('RecurringFrequency', expenseData.recurringFrequency);
+      
+      // Items array
+      if (expenseData.items && expenseData.items.length > 0) {
+        formData.append('Items', JSON.stringify(expenseData.items[0]));
+      } else {
+        formData.append('Items', JSON.stringify({
+          Description: expenseData.description || "string",
+          Quantity: 1,
+          UnitPrice: parseFloat(expenseData.amount) || 0,
+          TaxRate: parseFloat(expenseData.taxRate) || 0
+        }));
+      }
 
       const response = await apiCall(`${API_BASE_URL}/${id}`, {
         method: "PUT",
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (response.Success) {
