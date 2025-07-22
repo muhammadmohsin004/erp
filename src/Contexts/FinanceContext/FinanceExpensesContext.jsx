@@ -264,7 +264,7 @@ export const FinanceExpensesProvider = ({ children }) => {
         const response = await apiCall(url);
 
         if (response.Success) {
-          const expenseData = response?.data?.Data?.$values || [];
+          const expenseData = response?.Data?.$values || [];
           console.log("Expense Data:", expenseData);
 
           dispatch({
@@ -316,46 +316,78 @@ export const FinanceExpensesProvider = ({ children }) => {
       const formData = new FormData();
 
       // Map the form data to match the API requirements exactly as shown in curl
-      formData.append('Description', expenseData.description || '');
-      formData.append('Amount', expenseData.amount ? expenseData.amount.toString() : '0');
-      formData.append('Currency', expenseData.currency || 'USD');
-      formData.append('ExpenseDate', expenseData.expenseDate || new Date().toISOString());
-      formData.append('CategoryId', expenseData.categoryId ? expenseData.categoryId.toString() : '0');
-      formData.append('VendorId', expenseData.vendorId ? expenseData.vendorId.toString() : '1');
-      formData.append('PaymentMethod', expenseData.paymentMethod || '');
-      formData.append('Status', expenseData.status || 'Pending');
-      formData.append('CodeNumber', expenseData.codeNumber || `EXP-${Date.now()}`);
-      
+      formData.append("Description", expenseData.description || "");
+      formData.append(
+        "Amount",
+        expenseData.amount ? expenseData.amount.toString() : "0"
+      );
+      formData.append("Currency", expenseData.currency || "USD");
+      formData.append(
+        "ExpenseDate",
+        expenseData.expenseDate || new Date().toISOString()
+      );
+      formData.append(
+        "CategoryId",
+        expenseData.categoryId ? expenseData.categoryId.toString() : "0"
+      );
+      formData.append(
+        "VendorId",
+        expenseData.vendorId ? expenseData.vendorId.toString() : "1"
+      );
+      formData.append("PaymentMethod", expenseData.paymentMethod || "");
+      formData.append("Status", expenseData.status || "Pending");
+      formData.append(
+        "CodeNumber",
+        expenseData.codeNumber || `EXP-${Date.now()}`
+      );
+
       // Optional fields
-      if (expenseData.notes) formData.append('Notes', expenseData.notes);
-      if (expenseData.referenceNumber) formData.append('ReferenceNumber', expenseData.referenceNumber);
-      if (expenseData.taxAmount) formData.append('TaxAmount', expenseData.taxAmount.toString());
-      if (expenseData.taxRate) formData.append('TaxRate', expenseData.taxRate.toString());
-      if (expenseData.exchangeRate) formData.append('ExchangeRate', expenseData.exchangeRate.toString());
-      
+      if (expenseData.notes) formData.append("Notes", expenseData.notes);
+      if (expenseData.referenceNumber)
+        formData.append("ReferenceNumber", expenseData.referenceNumber);
+      if (expenseData.taxAmount)
+        formData.append("TaxAmount", expenseData.taxAmount.toString());
+      if (expenseData.taxRate)
+        formData.append("TaxRate", expenseData.taxRate.toString());
+      if (expenseData.exchangeRate)
+        formData.append("ExchangeRate", expenseData.exchangeRate.toString());
+
       // Recurring fields
-      formData.append('IsRecurring', expenseData.isRecurring ? 'true' : 'false');
-      if (expenseData.recurringPattern) formData.append('RecurringPattern', expenseData.recurringPattern);
-      if (expenseData.recurringInterval) formData.append('RecurringInterval', expenseData.recurringInterval.toString());
-      if (expenseData.nextRecurringDate) formData.append('NextRecurringDate', expenseData.nextRecurringDate);
-      if (expenseData.recurringFrequency) formData.append('RecurringFrequency', expenseData.recurringFrequency);
-      
+      formData.append(
+        "IsRecurring",
+        expenseData.isRecurring ? "true" : "false"
+      );
+      if (expenseData.recurringPattern)
+        formData.append("RecurringPattern", expenseData.recurringPattern);
+      if (expenseData.recurringInterval)
+        formData.append(
+          "RecurringInterval",
+          expenseData.recurringInterval.toString()
+        );
+      if (expenseData.nextRecurringDate)
+        formData.append("NextRecurringDate", expenseData.nextRecurringDate);
+      if (expenseData.recurringFrequency)
+        formData.append("RecurringFrequency", expenseData.recurringFrequency);
+
       // Items array - convert to JSON string as shown in curl
       if (expenseData.items && expenseData.items.length > 0) {
-        formData.append('Items', JSON.stringify(expenseData.items[0]));
+        formData.append("Items", JSON.stringify(expenseData.items[0]));
       } else {
         // Default item structure based on curl example
-        formData.append('Items', JSON.stringify({
-          Description: expenseData.description || "string",
-          Quantity: 1,
-          UnitPrice: parseFloat(expenseData.amount) || 0,
-          TaxRate: parseFloat(expenseData.taxRate) || 0
-        }));
+        formData.append(
+          "Items",
+          JSON.stringify({
+            Description: expenseData.description || "string",
+            Quantity: 1,
+            UnitPrice: parseFloat(expenseData.amount) || 0,
+            TaxRate: parseFloat(expenseData.taxRate) || 0,
+          })
+        );
       }
-      
+
       // Attachments
       if (expenseData.attachments) {
-        formData.append('Attachments', expenseData.attachments);
+        formData.append("Attachments", expenseData.attachments);
       }
 
       const response = await apiCall(API_BASE_URL, {
@@ -384,40 +416,69 @@ export const FinanceExpensesProvider = ({ children }) => {
       const formData = new FormData();
 
       // Map the form data to match the API requirements
-      formData.append('Description', expenseData.description || '');
-      formData.append('Amount', expenseData.amount ? expenseData.amount.toString() : '0');
-      formData.append('Currency', expenseData.currency || 'USD');
-      formData.append('ExpenseDate', expenseData.expenseDate || new Date().toISOString());
-      formData.append('CategoryId', expenseData.categoryId ? expenseData.categoryId.toString() : '0');
-      formData.append('VendorId', expenseData.vendorId ? expenseData.vendorId.toString() : '1');
-      formData.append('PaymentMethod', expenseData.paymentMethod || '');
-      formData.append('Status', expenseData.status || 'Pending');
-      formData.append('CodeNumber', expenseData.codeNumber || '');
-      
+      formData.append("Description", expenseData.description || "");
+      formData.append(
+        "Amount",
+        expenseData.amount ? expenseData.amount.toString() : "0"
+      );
+      formData.append("Currency", expenseData.currency || "USD");
+      formData.append(
+        "ExpenseDate",
+        expenseData.expenseDate || new Date().toISOString()
+      );
+      formData.append(
+        "CategoryId",
+        expenseData.categoryId ? expenseData.categoryId.toString() : "0"
+      );
+      formData.append(
+        "VendorId",
+        expenseData.vendorId ? expenseData.vendorId.toString() : "1"
+      );
+      formData.append("PaymentMethod", expenseData.paymentMethod || "");
+      formData.append("Status", expenseData.status || "Pending");
+      formData.append("CodeNumber", expenseData.codeNumber || "");
+
       // Optional fields
-      if (expenseData.notes) formData.append('Notes', expenseData.notes);
-      if (expenseData.referenceNumber) formData.append('ReferenceNumber', expenseData.referenceNumber);
-      if (expenseData.taxAmount) formData.append('TaxAmount', expenseData.taxAmount.toString());
-      if (expenseData.taxRate) formData.append('TaxRate', expenseData.taxRate.toString());
-      if (expenseData.exchangeRate) formData.append('ExchangeRate', expenseData.exchangeRate.toString());
-      
+      if (expenseData.notes) formData.append("Notes", expenseData.notes);
+      if (expenseData.referenceNumber)
+        formData.append("ReferenceNumber", expenseData.referenceNumber);
+      if (expenseData.taxAmount)
+        formData.append("TaxAmount", expenseData.taxAmount.toString());
+      if (expenseData.taxRate)
+        formData.append("TaxRate", expenseData.taxRate.toString());
+      if (expenseData.exchangeRate)
+        formData.append("ExchangeRate", expenseData.exchangeRate.toString());
+
       // Recurring fields
-      formData.append('IsRecurring', expenseData.isRecurring ? 'true' : 'false');
-      if (expenseData.recurringPattern) formData.append('RecurringPattern', expenseData.recurringPattern);
-      if (expenseData.recurringInterval) formData.append('RecurringInterval', expenseData.recurringInterval.toString());
-      if (expenseData.nextRecurringDate) formData.append('NextRecurringDate', expenseData.nextRecurringDate);
-      if (expenseData.recurringFrequency) formData.append('RecurringFrequency', expenseData.recurringFrequency);
-      
+      formData.append(
+        "IsRecurring",
+        expenseData.isRecurring ? "true" : "false"
+      );
+      if (expenseData.recurringPattern)
+        formData.append("RecurringPattern", expenseData.recurringPattern);
+      if (expenseData.recurringInterval)
+        formData.append(
+          "RecurringInterval",
+          expenseData.recurringInterval.toString()
+        );
+      if (expenseData.nextRecurringDate)
+        formData.append("NextRecurringDate", expenseData.nextRecurringDate);
+      if (expenseData.recurringFrequency)
+        formData.append("RecurringFrequency", expenseData.recurringFrequency);
+
       // Items array
       if (expenseData.items && expenseData.items.length > 0) {
-        formData.append('Items', JSON.stringify(expenseData.items[0]));
+        formData.append("Items", JSON.stringify(expenseData.items[0]));
       } else {
-        formData.append('Items', JSON.stringify({
-          Description: expenseData.description || "string",
-          Quantity: 1,
-          UnitPrice: parseFloat(expenseData.amount) || 0,
-          TaxRate: parseFloat(expenseData.taxRate) || 0
-        }));
+        formData.append(
+          "Items",
+          JSON.stringify({
+            Description: expenseData.description || "string",
+            Quantity: 1,
+            UnitPrice: parseFloat(expenseData.amount) || 0,
+            TaxRate: parseFloat(expenseData.taxRate) || 0,
+          })
+        );
       }
 
       const response = await apiCall(`${API_BASE_URL}/${id}`, {

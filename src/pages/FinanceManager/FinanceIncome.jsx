@@ -1,16 +1,38 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { 
-  Plus, Search, Calendar, 
-  Eye, Edit, Trash2, MoreVertical, AlertCircle,
-  CreditCard, Banknote, Smartphone, 
-  RefreshCw, FileText, X, Filter, CheckCircle,
-  XCircle, Info, AlertTriangle, Download, Printer,
-  ArrowLeft, Copy, ChevronDown, Mail
-} from 'lucide-react';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Plus,
+  Search,
+  Calendar,
+  Eye,
+  Edit,
+  Trash2,
+  MoreVertical,
+  AlertCircle,
+  CreditCard,
+  Banknote,
+  Smartphone,
+  RefreshCw,
+  FileText,
+  X,
+  Filter,
+  CheckCircle,
+  XCircle,
+  Info,
+  AlertTriangle,
+  Download,
+  Printer,
+  ArrowLeft,
+  Copy,
+  ChevronDown,
+  Mail,
+} from "lucide-react";
 
 // Import your real contexts
-import { useFinanceIncomes, useIncomeDetails } from '../../Contexts/FinanceContext/FinanceIncomeContext';
-import { useIncomeCategory } from '../../Contexts/IncomeCategoryContext/IncomeCategoryContext';
+import {
+  useFinanceIncomes,
+  useIncomeDetails,
+} from "../../Contexts/FinanceContext/FinanceIncomeContext";
+import { useIncomeCategory } from "../../Contexts/IncomeCategoryContext/IncomeCategoryContext";
 
 // Toast Notification Component
 const Toast = ({ message, type, onClose }) => {
@@ -18,14 +40,14 @@ const Toast = ({ message, type, onClose }) => {
     success: CheckCircle,
     error: XCircle,
     warning: AlertTriangle,
-    info: Info
+    info: Info,
   };
-  
+
   const colors = {
-    success: 'bg-green-50 border-green-200 text-green-800',
-    error: 'bg-red-50 border-red-200 text-red-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800'
+    success: "bg-green-50 border-green-200 text-green-800",
+    error: "bg-red-50 border-red-200 text-red-800",
+    warning: "bg-yellow-50 border-yellow-200 text-yellow-800",
+    info: "bg-blue-50 border-blue-200 text-blue-800",
   };
 
   const Icon = icons[type];
@@ -36,7 +58,9 @@ const Toast = ({ message, type, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className={`fixed top-4 right-4 z-50 max-w-sm w-full shadow-lg rounded-lg border ${colors[type]} p-4 transform transition-all duration-300 ease-in-out`}>
+    <div
+      className={`fixed top-4 right-4 z-50 max-w-sm w-full shadow-lg rounded-lg border ${colors[type]} p-4 transform transition-all duration-300 ease-in-out`}
+    >
       <div className="flex items-start">
         <Icon className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
         <div className="flex-1">
@@ -57,18 +81,18 @@ const Toast = ({ message, type, onClose }) => {
 const useToast = () => {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = (message, type = 'info') => {
+  const showToast = (message, type = "info") => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type }]);
   };
 
   const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
   const ToastContainer = () => (
     <>
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <Toast
           key={toast.id}
           message={toast.message}
@@ -84,24 +108,42 @@ const useToast = () => {
 
 // Enhanced UI Components
 const Card = ({ children, className = "", ...props }) => (
-  <div className={`bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 ${className}`} {...props}>
+  <div
+    className={`bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 ${className}`}
+    {...props}
+  >
     {children}
   </div>
 );
 
-const Button = ({ children, variant = "primary", size = "md", icon: Icon, disabled, className = "", loading, ...props }) => {
-  const baseClasses = "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+const Button = ({
+  children,
+  variant = "primary",
+  size = "md",
+  icon: Icon,
+  disabled,
+  className = "",
+  loading,
+  ...props
+}) => {
+  const baseClasses =
+    "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
   const variants = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 shadow-sm",
-    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500",
-    success: "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500 shadow-sm",
-    danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-sm",
-    outline: "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500"
+    primary:
+      "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500 shadow-sm",
+    secondary:
+      "bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500",
+    success:
+      "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500 shadow-sm",
+    danger:
+      "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-sm",
+    outline:
+      "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500",
   };
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-4 py-2 text-sm",
-    lg: "px-6 py-3 text-base"
+    lg: "px-6 py-3 text-base",
   };
 
   return (
@@ -122,25 +164,43 @@ const Button = ({ children, variant = "primary", size = "md", icon: Icon, disabl
 
 const Input = ({ label, error, className = "", ...props }) => (
   <div className="space-y-1">
-    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    {label && (
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+    )}
     <input
-      className={`block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''} ${className}`}
+      className={`block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
+        error ? "border-red-300 focus:ring-red-500 focus:border-red-500" : ""
+      } ${className}`}
       {...props}
     />
-    {error && <p className="text-sm text-red-600 flex items-center mt-1"><AlertCircle className="w-4 h-4 mr-1" />{error}</p>}
+    {error && (
+      <p className="text-sm text-red-600 flex items-center mt-1">
+        <AlertCircle className="w-4 h-4 mr-1" />
+        {error}
+      </p>
+    )}
   </div>
 );
 
 const Select = ({ label, error, children, className = "", ...props }) => (
   <div className="space-y-1">
-    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    {label && (
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+    )}
     <select
-      className={`block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${error ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''} ${className}`}
+      className={`block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
+        error ? "border-red-300 focus:ring-red-500 focus:border-red-500" : ""
+      } ${className}`}
       {...props}
     >
       {children}
     </select>
-    {error && <p className="text-sm text-red-600 flex items-center mt-1"><AlertCircle className="w-4 h-4 mr-1" />{error}</p>}
+    {error && (
+      <p className="text-sm text-red-600 flex items-center mt-1">
+        <AlertCircle className="w-4 h-4 mr-1" />
+        {error}
+      </p>
+    )}
   </div>
 );
 
@@ -150,11 +210,13 @@ const Badge = ({ children, variant = "default", className = "" }) => {
     success: "bg-green-100 text-green-800 border border-green-200",
     warning: "bg-yellow-100 text-yellow-800 border border-yellow-200",
     danger: "bg-red-100 text-red-800 border border-red-200",
-    info: "bg-blue-100 text-blue-800 border border-blue-200"
+    info: "bg-blue-100 text-blue-800 border border-blue-200",
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}
+    >
       {children}
     </span>
   );
@@ -163,10 +225,10 @@ const Badge = ({ children, variant = "default", className = "" }) => {
 const Modal = ({ isOpen, onClose, title, children, footer, size = "lg" }) => {
   const sizes = {
     sm: "max-w-md",
-    md: "max-w-lg", 
+    md: "max-w-lg",
     lg: "max-w-2xl",
     xl: "max-w-4xl",
-    full: "max-w-7xl"
+    full: "max-w-7xl",
   };
 
   if (!isOpen) return null;
@@ -174,19 +236,28 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = "lg" }) => {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
-        <div className={`relative bg-white rounded-xl shadow-xl w-full ${sizes[size]} transform transition-all duration-200 max-h-[90vh] flex flex-col`}>
+        <div
+          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          onClick={onClose}
+        ></div>
+        <div
+          className={`relative bg-white rounded-xl shadow-xl w-full ${sizes[size]} transform transition-all duration-200 max-h-[90vh] flex flex-col`}
+        >
           <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 rounded-lg hover:bg-gray-100"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
           <div className="p-6 overflow-y-auto flex-1">{children}</div>
-          {footer && <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex-shrink-0">{footer}</div>}
+          {footer && (
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex-shrink-0">
+              {footer}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -204,17 +275,22 @@ const Dropdown = ({ trigger, children, className = "" }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className="cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+      >
         {trigger}
       </div>
       {isOpen && (
-        <div className={`absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 py-1 ${className}`}>
+        <div
+          className={`absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 py-1 ${className}`}
+        >
           {children}
         </div>
       )}
@@ -225,54 +301,87 @@ const Dropdown = ({ trigger, children, className = "" }) => {
 // Income Receipt Component
 const IncomeReceipt = ({ income, company }) => {
   const formatCurrency = (amount) => {
-    return `SAR. ${amount?.toLocaleString() || '0'}`;
+    return `SAR. ${amount?.toLocaleString() || "0"}`;
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return new Date().toLocaleDateString('en-GB');
-    return new Date(dateString).toLocaleDateString('en-GB');
+    if (!dateString) return new Date().toLocaleDateString("en-GB");
+    return new Date(dateString).toLocaleDateString("en-GB");
   };
 
   const convertNumberToWords = (amount) => {
-    if (!amount) return 'zero Pakistani Rupees';
-    
-    const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-    const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-    
+    if (!amount) return "zero Pakistani Rupees";
+
+    const ones = [
+      "",
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+    ];
+    const tens = [
+      "",
+      "",
+      "twenty",
+      "thirty",
+      "forty",
+      "fifty",
+      "sixty",
+      "seventy",
+      "eighty",
+      "ninety",
+    ];
+    const teens = [
+      "ten",
+      "eleven",
+      "twelve",
+      "thirteen",
+      "fourteen",
+      "fifteen",
+      "sixteen",
+      "seventeen",
+      "eighteen",
+      "nineteen",
+    ];
+
     const convertHundreds = (num) => {
-      let result = '';
+      let result = "";
       if (num >= 100) {
-        result += ones[Math.floor(num / 100)] + ' hundred ';
+        result += ones[Math.floor(num / 100)] + " hundred ";
         num %= 100;
       }
       if (num >= 20) {
-        result += tens[Math.floor(num / 10)] + ' ';
+        result += tens[Math.floor(num / 10)] + " ";
         num %= 10;
       } else if (num >= 10) {
-        result += teens[num - 10] + ' ';
+        result += teens[num - 10] + " ";
         return result;
       }
       if (num > 0) {
-        result += ones[num] + ' ';
+        result += ones[num] + " ";
       }
       return result;
     };
 
-    if (amount === 0) return 'zero Pakistani Rupees';
-    
-    let result = '';
+    if (amount === 0) return "zero Pakistani Rupees";
+
+    let result = "";
     const crores = Math.floor(amount / 10000000);
     const lakhs = Math.floor((amount % 10000000) / 100000);
     const thousands = Math.floor((amount % 100000) / 1000);
     const hundreds = amount % 1000;
 
-    if (crores > 0) result += convertHundreds(crores) + 'crore ';
-    if (lakhs > 0) result += convertHundreds(lakhs) + 'lakh ';
-    if (thousands > 0) result += convertHundreds(thousands) + 'thousand ';
+    if (crores > 0) result += convertHundreds(crores) + "crore ";
+    if (lakhs > 0) result += convertHundreds(lakhs) + "lakh ";
+    if (thousands > 0) result += convertHundreds(thousands) + "thousand ";
     if (hundreds > 0) result += convertHundreds(hundreds);
 
-    return result.trim() + ' Pakistani Rupees';
+    return result.trim() + " Pakistani Rupees";
   };
 
   return (
@@ -280,36 +389,46 @@ const IncomeReceipt = ({ income, company }) => {
       {/* Header */}
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-xl font-bold text-black">{company?.Name || 'Company Name'}</h1>
-          {company?.Address && <p className="text-sm mt-1">{company.Address}</p>}
+          <h1 className="text-xl font-bold text-black">
+            {company?.Name || "Company Name"}
+          </h1>
+          {company?.Address && (
+            <p className="text-sm mt-1">{company.Address}</p>
+          )}
           {company?.City && <p className="text-sm">{company.City}</p>}
           {company?.Phone && <p className="text-sm">Phone: {company.Phone}</p>}
           {company?.Email && <p className="text-sm">Email: {company.Email}</p>}
         </div>
         <div className="text-center border border-black px-4 py-2">
           <h2 className="text-lg font-bold text-black">Income Receipt</h2>
-          <p className="text-sm mt-1"><strong>NO:</strong> {income?.CodeNumber || '000001'}</p>
+          <p className="text-sm mt-1">
+            <strong>NO:</strong> {income?.CodeNumber || "000001"}
+          </p>
         </div>
       </div>
 
       {/* Receipt Details */}
       <div className="space-y-3 mb-8">
         <div>
-          <strong>Received From:</strong> {income?.CustomerName || income?.Customer?.Name || '...........................'}
+          <strong>Received From:</strong>{" "}
+          {income?.CustomerName ||
+            income?.Customer?.Name ||
+            "..........................."}
         </div>
         <div className="flex justify-between">
           <div>
             <strong>Amount:</strong> {formatCurrency(income?.Amount)}
           </div>
           <div>
-            <strong>Spelled:</strong> {convertNumberToWords(Math.floor(income?.Amount || 0))}
+            <strong>Spelled:</strong>{" "}
+            {convertNumberToWords(Math.floor(income?.Amount || 0))}
           </div>
         </div>
         <div>
           <strong>Date:</strong> {formatDate(income?.IncomeDate)}
         </div>
         <div>
-          <strong>For:</strong> {income?.Description || 'Service provided'}
+          <strong>For:</strong> {income?.Description || "Service provided"}
         </div>
         {income?.PaymentMethod && (
           <div>
@@ -333,18 +452,25 @@ const IncomeReceipt = ({ income, company }) => {
         <div className="text-center">
           <div className="border-b border-black mb-2 pb-8"></div>
           <p className="text-sm font-medium">Received Sig.</p>
-          <p className="text-xs text-gray-500 mt-2">...........................</p>
+          <p className="text-xs text-gray-500 mt-2">
+            ...........................
+          </p>
         </div>
         <div className="text-center">
           <div className="border-b border-black mb-2 pb-8"></div>
           <p className="text-sm font-medium">Cashier Sig</p>
-          <p className="text-xs text-gray-500 mt-2">...........................</p>
+          <p className="text-xs text-gray-500 mt-2">
+            ...........................
+          </p>
         </div>
       </div>
 
       {/* Footer */}
       <div className="mt-8 pt-4 border-t border-gray-200 text-center text-xs text-gray-500">
-        <p>Generated on {new Date().toLocaleDateString()} | {company?.Name || 'Company'}</p>
+        <p>
+          Generated on {new Date().toLocaleDateString()} |{" "}
+          {company?.Name || "Company"}
+        </p>
       </div>
     </div>
   );
@@ -353,15 +479,15 @@ const IncomeReceipt = ({ income, company }) => {
 // Activity Log Component
 const ActivityLog = ({ income }) => {
   const activities = [];
-  
+
   // Add creation activity
   if (income?.CreatedAt || income?.CreatedDate) {
     activities.push({
       id: 1,
-      action: 'Created',
-      user: 'System User',
+      action: "Created",
+      user: "System User",
       timestamp: income.CreatedAt || income.CreatedDate,
-      details: 'Income record created'
+      details: "Income record created",
     });
   }
 
@@ -369,10 +495,10 @@ const ActivityLog = ({ income }) => {
   if (income?.UpdatedAt && income.UpdatedAt !== income.CreatedAt) {
     activities.push({
       id: 2,
-      action: 'Updated',
-      user: 'System User',
+      action: "Updated",
+      user: "System User",
       timestamp: income.UpdatedAt,
-      details: 'Income record updated'
+      details: "Income record updated",
     });
   }
 
@@ -380,29 +506,35 @@ const ActivityLog = ({ income }) => {
   if (income?.Status) {
     activities.push({
       id: 3,
-      action: 'Status Updated',
-      user: 'System User',
-      timestamp: income.UpdatedAt || income.CreatedAt || new Date().toISOString(),
-      details: `Status set to ${income.Status}`
+      action: "Status Updated",
+      user: "System User",
+      timestamp:
+        income.UpdatedAt || income.CreatedAt || new Date().toISOString(),
+      details: `Status set to ${income.Status}`,
     });
   }
 
   return (
     <div className="space-y-4">
-      {activities.length > 0 ? activities.map((activity) => (
-        <div key={activity.id} className="border-l-4 border-blue-500 pl-4 py-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-medium text-gray-900">{activity.action}</h4>
-              <p className="text-sm text-gray-600">{activity.details}</p>
-              <p className="text-xs text-gray-500">by {activity.user}</p>
+      {activities.length > 0 ? (
+        activities.map((activity) => (
+          <div
+            key={activity.id}
+            className="border-l-4 border-blue-500 pl-4 py-2"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium text-gray-900">{activity.action}</h4>
+                <p className="text-sm text-gray-600">{activity.details}</p>
+                <p className="text-xs text-gray-500">by {activity.user}</p>
+              </div>
+              <span className="text-xs text-gray-500">
+                {new Date(activity.timestamp).toLocaleString()}
+              </span>
             </div>
-            <span className="text-xs text-gray-500">
-              {new Date(activity.timestamp).toLocaleString()}
-            </span>
           </div>
-        </div>
-      )) : (
+        ))
+      ) : (
         <div className="text-center py-8 text-gray-500">
           <p>No activity logs available</p>
         </div>
@@ -412,25 +544,19 @@ const ActivityLog = ({ income }) => {
 };
 
 // Income Details Page Component
-const IncomeDetailsPage = ({ 
-  incomeId, 
-  onBack, 
-  onEdit, 
-  onDelete, 
-  onClone 
-}) => {
+const IncomeDetailsPage = ({ incomeId, onBack, onEdit, onDelete, onClone }) => {
   const { showToast, ToastContainer } = useToast();
-  const [activeTab, setActiveTab] = useState('voucher');
+  const [activeTab, setActiveTab] = useState("voucher");
   const [company, setCompany] = useState(null);
   const [isDraft, setIsDraft] = useState(false);
   const receiptRef = useRef();
 
   // Use the actual API context
-  const { 
-    updateIncome, 
+  const {
+    updateIncome,
     deleteIncome: contextDeleteIncome,
     createIncome,
-    getIncomes 
+    getIncomes,
   } = useFinanceIncomes();
 
   // Use the income details hook
@@ -439,33 +565,33 @@ const IncomeDetailsPage = ({
   useEffect(() => {
     // Load company data from localStorage
     try {
-      const companyData = localStorage.getItem('company');
+      const companyData = localStorage.getItem("company");
       if (companyData) {
         setCompany(JSON.parse(companyData));
       }
     } catch (error) {
-      console.error('Error loading company data:', error);
-      showToast('Error loading company data', 'error');
+      console.error("Error loading company data:", error);
+      showToast("Error loading company data", "error");
     }
   }, []);
 
   useEffect(() => {
     if (income) {
-      showToast('Income details loaded successfully', 'success');
-      setIsDraft(income.Status === 'Draft' || income.IsDraft);
+      showToast("Income details loaded successfully", "success");
+      setIsDraft(income.Status === "Draft" || income.IsDraft);
     }
   }, [income]);
 
   useEffect(() => {
     if (error) {
-      showToast(`Error: ${error}`, 'error');
+      showToast(`Error: ${error}`, "error");
     }
   }, [error]);
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     const receiptHTML = receiptRef.current.outerHTML;
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -494,129 +620,134 @@ const IncomeDetailsPage = ({
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
     printWindow.close();
-    
-    showToast('Printing initiated', 'info');
+
+    showToast("Printing initiated", "info");
   };
 
   const handleDownloadPDF = async () => {
     try {
-      showToast('Generating PDF...', 'info');
-      
+      showToast("Generating PDF...", "info");
+
       // Dynamic import for PDF generation
-      const jsPDF = (await import('jspdf')).jsPDF;
-      const html2canvas = (await import('html2canvas')).default;
-      
+      const jsPDF = (await import("jspdf")).jsPDF;
+      const html2canvas = (await import("html2canvas")).default;
+
       const element = receiptRef.current;
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: "#ffffff",
       });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 210;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      
+
       let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-      
+
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
-      
+
       pdf.save(`Income_Receipt_${income?.CodeNumber}.pdf`);
-      showToast('PDF downloaded successfully', 'success');
+      showToast("PDF downloaded successfully", "success");
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      showToast('Error generating PDF. Please try again.', 'error');
+      console.error("Error generating PDF:", error);
+      showToast("Error generating PDF. Please try again.", "error");
     }
   };
 
   const handleSendEmail = () => {
-    showToast('Email feature coming soon', 'info');
+    showToast("Email feature coming soon", "info");
   };
 
   const handleEdit = () => {
     if (onEdit && income) {
       onEdit(income);
     } else {
-      showToast('Edit functionality not available', 'warning');
+      showToast("Edit functionality not available", "warning");
     }
   };
 
   const handleClone = async () => {
     if (!income) {
-      showToast('No income data to clone', 'error');
+      showToast("No income data to clone", "error");
       return;
     }
 
     try {
-      showToast('Cloning income record...', 'info');
-      
+      showToast("Cloning income record...", "info");
+
       const cloneData = {
         description: `Copy of ${income.Description}`,
         amount: income.Amount,
-        incomeDate: new Date().toISOString().split('T')[0],
+        incomeDate: new Date().toISOString().split("T")[0],
         categoryId: income.CategoryId,
         customerId: income.CustomerId,
         paymentMethod: income.PaymentMethod,
         isRecurring: income.IsRecurring,
-        notes: income.Notes ? `${income.Notes} (Cloned)` : 'Cloned from original record'
+        notes: income.Notes
+          ? `${income.Notes} (Cloned)`
+          : "Cloned from original record",
       };
 
       await createIncome(cloneData);
       await getIncomes();
-      
+
       if (onClone) {
         onClone(income);
       }
-      
-      showToast('Income record cloned successfully', 'success');
+
+      showToast("Income record cloned successfully", "success");
     } catch (error) {
-      console.error('Error cloning income:', error);
-      showToast('Error cloning income record', 'error');
+      console.error("Error cloning income:", error);
+      showToast("Error cloning income record", "error");
     }
   };
 
   const handleDelete = async () => {
     if (!income) {
-      showToast('No income data to delete', 'error');
+      showToast("No income data to delete", "error");
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this income record? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this income record? This action cannot be undone."
+      )
+    ) {
       try {
-        showToast('Deleting income record...', 'info');
-        
+        showToast("Deleting income record...", "info");
+
         await contextDeleteIncome(income.Id || income.id);
-        
+
         if (onDelete) {
           onDelete(income.Id || income.id);
         }
-        
-        showToast('Income record deleted successfully', 'success');
-        
+
+        showToast("Income record deleted successfully", "success");
+
         setTimeout(() => {
           if (onBack) onBack();
         }, 1500);
-        
       } catch (error) {
-        console.error('Error deleting income:', error);
-        showToast('Error deleting income record', 'error');
+        console.error("Error deleting income:", error);
+        showToast("Error deleting income record", "error");
       }
     }
   };
@@ -625,32 +756,35 @@ const IncomeDetailsPage = ({
     if (!income) return;
 
     try {
-      showToast('Updating status...', 'info');
-      
+      showToast("Updating status...", "info");
+
       const updateData = {
         ...income,
-        status: isDraft ? 'Confirmed' : 'Draft'
+        status: isDraft ? "Confirmed" : "Draft",
       };
 
       await updateIncome(income.Id || income.id, updateData);
       setIsDraft(!isDraft);
-      
-      showToast(`Income marked as ${isDraft ? 'Confirmed' : 'Draft'}`, 'success');
+
+      showToast(
+        `Income marked as ${isDraft ? "Confirmed" : "Draft"}`,
+        "success"
+      );
     } catch (error) {
-      console.error('Error updating status:', error);
-      showToast('Error updating status', 'error');
+      console.error("Error updating status:", error);
+      showToast("Error updating status", "error");
     }
   };
 
   const getStatusBadge = (status) => {
     const variants = {
-      'Received': 'success',
-      'Confirmed': 'success',
-      'Pending': 'warning',
-      'Cancelled': 'danger',
-      'Draft': 'secondary'
+      Received: "success",
+      Confirmed: "success",
+      Pending: "warning",
+      Cancelled: "danger",
+      Draft: "secondary",
     };
-    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
+    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
   };
 
   if (loading) {
@@ -675,7 +809,9 @@ const IncomeDetailsPage = ({
             <p className="text-lg font-medium">Error loading income details</p>
             <p className="text-sm">{error}</p>
           </div>
-          <Button onClick={onBack} className="mt-4">Go Back</Button>
+          <Button onClick={onBack} className="mt-4">
+            Go Back
+          </Button>
         </div>
       </div>
     );
@@ -687,7 +823,9 @@ const IncomeDetailsPage = ({
         <ToastContainer />
         <div className="text-center">
           <p className="text-gray-600">Income not found</p>
-          <Button onClick={onBack} className="mt-4">Go Back</Button>
+          <Button onClick={onBack} className="mt-4">
+            Go Back
+          </Button>
         </div>
       </div>
     );
@@ -696,15 +834,15 @@ const IncomeDetailsPage = ({
   return (
     <div className="min-h-screen bg-gray-50">
       <ToastContainer />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="bg-purple-600 text-black px-6 py-4 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
-                icon={ArrowLeft} 
+              <Button
+                variant="outline"
+                icon={ArrowLeft}
                 onClick={onBack}
                 className="bg-white text-blue-600 hover:bg-gray-50"
               >
@@ -722,16 +860,18 @@ const IncomeDetailsPage = ({
               </div>
               {getStatusBadge(income.Status)}
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <input 
-                type="checkbox" 
-                id="markAsDraft" 
-                className="rounded" 
+              <input
+                type="checkbox"
+                id="markAsDraft"
+                className="rounded"
                 checked={isDraft}
                 onChange={handleMarkAsDraft}
               />
-              <label htmlFor="markAsDraft" className="text-sm">Mark as Draft</label>
+              <label htmlFor="markAsDraft" className="text-sm">
+                Mark as Draft
+              </label>
             </div>
           </div>
         </div>
@@ -756,14 +896,14 @@ const IncomeDetailsPage = ({
                   </Button>
                 }
               >
-                <button 
+                <button
                   className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setActiveTab('voucher')}
+                  onClick={() => setActiveTab("voucher")}
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   View Receipt
                 </button>
-                <button 
+                <button
                   className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={handleDownloadPDF}
                 >
@@ -780,21 +920,21 @@ const IncomeDetailsPage = ({
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6">
               <button
-                onClick={() => setActiveTab('voucher')}
+                onClick={() => setActiveTab("voucher")}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'voucher'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "voucher"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Voucher
               </button>
               <button
-                onClick={() => setActiveTab('activity')}
+                onClick={() => setActiveTab("activity")}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'activity'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "activity"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Activity Log
@@ -805,14 +945,18 @@ const IncomeDetailsPage = ({
 
         {/* Content Area */}
         <div className="bg-white border border-gray-200 rounded-b-lg">
-          {activeTab === 'voucher' && (
+          {activeTab === "voucher" && (
             <div className="p-6">
               {/* Action Buttons for Receipt */}
               <div className="flex justify-end space-x-2 mb-6">
                 <Button variant="outline" icon={Printer} onClick={handlePrint}>
                   Print
                 </Button>
-                <Button variant="outline" icon={FileText} onClick={handleDownloadPDF}>
+                <Button
+                  variant="outline"
+                  icon={FileText}
+                  onClick={handleDownloadPDF}
+                >
                   PDF
                 </Button>
                 <Button variant="outline" icon={Mail} onClick={handleSendEmail}>
@@ -827,9 +971,11 @@ const IncomeDetailsPage = ({
             </div>
           )}
 
-          {activeTab === 'activity' && (
+          {activeTab === "activity" && (
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Activity Log</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Activity Log
+              </h3>
               <ActivityLog income={income} />
             </div>
           )}
@@ -842,11 +988,11 @@ const IncomeDetailsPage = ({
 // Main Component - Income List & Details Management
 const FinanceIncome = () => {
   const { showToast, ToastContainer } = useToast();
-  
+
   // Page state management
-  const [currentPage, setCurrentPage] = useState('list'); // 'list' or 'details'
+  const [currentPage, setCurrentPage] = useState("list"); // 'list' or 'details'
   const [selectedIncomeId, setSelectedIncomeId] = useState(null);
-  
+
   // Finance Income Context
   const {
     incomes,
@@ -865,34 +1011,34 @@ const FinanceIncome = () => {
     filterByCategory,
     filterByDateRange,
     changePage,
-    resetFilters
+    resetFilters,
   } = useFinanceIncomes();
 
   // Income Category Context
-  const { getIncomeCategories,incomeCategories } = useIncomeCategory();
+  const { getIncomeCategories, incomeCategories } = useIncomeCategory();
 
   // State for list page
-  const [searchValue, setSearchValue] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedDateRange, setSelectedDateRange] = useState('Custom');
-  const [selectedSortBy, setSelectedSortBy] = useState('Date (Newest First)');
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedDateRange, setSelectedDateRange] = useState("Custom");
+  const [selectedSortBy, setSelectedSortBy] = useState("Date (Newest First)");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingIncome, setEditingIncome] = useState(null);
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   const [incomeForm, setIncomeForm] = useState({
-    description: '',
-    amount: '',
-    incomeDate: '',
-    categoryId: '',
-    customerId: '',
-    paymentMethod: '',
+    description: "",
+    amount: "",
+    incomeDate: "",
+    categoryId: "",
+    customerId: "",
+    paymentMethod: "",
     isRecurring: false,
-    notes: ''
+    notes: "",
   });
 
   useEffect(() => {
@@ -901,14 +1047,14 @@ const FinanceIncome = () => {
         await getIncomes();
         await getIncomeCategories();
         await getIncomeStatistics();
-        showToast('Data loaded successfully', 'success');
+        showToast("Data loaded successfully", "success");
       } catch (error) {
         console.error("Error loading data:", error);
-        showToast('Error loading data', 'error');
+        showToast("Error loading data", "error");
       }
     };
-    
-    if (currentPage === 'list') {
+
+    if (currentPage === "list") {
       loadData();
     }
   }, [currentPage]);
@@ -930,45 +1076,45 @@ const FinanceIncome = () => {
   // Navigation functions
   const handleViewDetails = (income) => {
     setSelectedIncomeId(income.Id || income.id);
-    setCurrentPage('details');
+    setCurrentPage("details");
   };
 
   const handleBackToList = () => {
-    setCurrentPage('list');
+    setCurrentPage("list");
     setSelectedIncomeId(null);
   };
 
   // Get category name by ID
   const getCategoryNameById = (categoryId) => {
     const activeCategories = incomeCategories.Data?.$values;
-    const category = activeCategories.find(cat => cat.Id === categoryId);
-    return category ? category.Name : 'Uncategorized';
+    const category = activeCategories.find((cat) => cat.Id === categoryId);
+    return category ? category.Name : "Uncategorized";
   };
 
   // Form validation
   const validateForm = () => {
     const errors = {};
-    
+
     if (!incomeForm.description.trim()) {
-      errors.description = 'Description is required';
+      errors.description = "Description is required";
     }
-    
+
     if (!incomeForm.amount || parseFloat(incomeForm.amount) <= 0) {
-      errors.amount = 'Amount must be greater than 0';
+      errors.amount = "Amount must be greater than 0";
     }
-    
+
     if (!incomeForm.incomeDate) {
-      errors.incomeDate = 'Date is required';
+      errors.incomeDate = "Date is required";
     }
-    
+
     if (!incomeForm.categoryId) {
-      errors.categoryId = 'Category is required';
+      errors.categoryId = "Category is required";
     }
-    
+
     if (!incomeForm.paymentMethod) {
-      errors.paymentMethod = 'Payment method is required';
+      errors.paymentMethod = "Payment method is required";
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -976,22 +1122,22 @@ const FinanceIncome = () => {
   const handleSearch = () => {
     if (searchValue.trim()) {
       searchIncomes(searchValue);
-      showToast('Search completed', 'info');
+      showToast("Search completed", "info");
     } else {
       getIncomes();
     }
   };
 
   const handleReset = () => {
-    setSearchValue('');
-    setSelectedCategory('');
-    setSelectedStatus('');
-    setSelectedDateRange('Custom');
-    setSelectedSortBy('Date (Newest First)');
-    setDateRange({ start: '', end: '' });
+    setSearchValue("");
+    setSelectedCategory("");
+    setSelectedStatus("");
+    setSelectedDateRange("Custom");
+    setSelectedSortBy("Date (Newest First)");
+    setDateRange({ start: "", end: "" });
     resetFilters();
     getIncomes();
-    showToast('Filters reset', 'info');
+    showToast("Filters reset", "info");
   };
 
   const handleCategoryFilter = (categoryId) => {
@@ -1011,7 +1157,7 @@ const FinanceIncome = () => {
   const handleDateRangeFilter = () => {
     if (dateRange.start && dateRange.end) {
       filterByDateRange(dateRange.start, dateRange.end);
-      showToast('Date filter applied', 'info');
+      showToast("Date filter applied", "info");
     }
   };
 
@@ -1021,7 +1167,7 @@ const FinanceIncome = () => {
 
   const handleAddIncome = async () => {
     if (!validateForm()) {
-      showToast('Please fix the form errors', 'error');
+      showToast("Please fix the form errors", "error");
       return;
     }
 
@@ -1031,10 +1177,10 @@ const FinanceIncome = () => {
       setShowAddModal(false);
       resetForm();
       await getIncomes();
-      showToast('Income added successfully', 'success');
+      showToast("Income added successfully", "success");
     } catch (error) {
-      console.error('Error adding income:', error);
-      showToast('Error adding income', 'error');
+      console.error("Error adding income:", error);
+      showToast("Error adding income", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -1042,7 +1188,7 @@ const FinanceIncome = () => {
 
   const handleEditIncome = async () => {
     if (!validateForm()) {
-      showToast('Please fix the form errors', 'error');
+      showToast("Please fix the form errors", "error");
       return;
     }
 
@@ -1053,24 +1199,24 @@ const FinanceIncome = () => {
       setEditingIncome(null);
       resetForm();
       await getIncomes();
-      showToast('Income updated successfully', 'success');
+      showToast("Income updated successfully", "success");
     } catch (error) {
-      console.error('Error updating income:', error);
-      showToast('Error updating income', 'error');
+      console.error("Error updating income:", error);
+      showToast("Error updating income", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteIncome = async (id) => {
-    if (window.confirm('Are you sure you want to delete this income record?')) {
+    if (window.confirm("Are you sure you want to delete this income record?")) {
       try {
         await deleteIncome(id);
         await getIncomes();
-        showToast('Income deleted successfully', 'success');
+        showToast("Income deleted successfully", "success");
       } catch (error) {
-        console.error('Error deleting income:', error);
-        showToast('Error deleting income', 'error');
+        console.error("Error deleting income:", error);
+        showToast("Error deleting income", "error");
       }
     }
   };
@@ -1078,14 +1224,14 @@ const FinanceIncome = () => {
   const openEditModal = (income) => {
     setEditingIncome(income);
     setIncomeForm({
-      description: income.Description || '',
-      amount: income.Amount || '',
-      incomeDate: income.IncomeDate ? income.IncomeDate.split('T')[0] : '',
-      categoryId: income.CategoryId || '',
-      customerId: income.CustomerId || '',
-      paymentMethod: income.PaymentMethod || '',
+      description: income.Description || "",
+      amount: income.Amount || "",
+      incomeDate: income.IncomeDate ? income.IncomeDate.split("T")[0] : "",
+      categoryId: income.CategoryId || "",
+      customerId: income.CustomerId || "",
+      paymentMethod: income.PaymentMethod || "",
       isRecurring: income.IsRecurring || false,
-      notes: income.Notes || ''
+      notes: income.Notes || "",
     });
     setFormErrors({});
     setShowEditModal(true);
@@ -1098,77 +1244,79 @@ const FinanceIncome = () => {
 
   const resetForm = () => {
     setIncomeForm({
-      description: '',
-      amount: '',
-      incomeDate: '',
-      categoryId: '',
-      customerId: '',
-      paymentMethod: '',
+      description: "",
+      amount: "",
+      incomeDate: "",
+      categoryId: "",
+      customerId: "",
+      paymentMethod: "",
       isRecurring: false,
-      notes: ''
+      notes: "",
     });
     setFormErrors({});
   };
 
+  console.log("statistics", statistics);
+
   const getStatusBadge = (status) => {
     const variants = {
-      'Received': 'success',
-      'Pending': 'warning',
-      'Cancelled': 'danger',
-      'Confirmed': 'success'
+      Received: "success",
+      Pending: "warning",
+      Cancelled: "danger",
+      Confirmed: "success",
     };
-    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
+    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
   };
 
   const getPaymentMethodIcon = (method) => {
     const icons = {
-      'Cash': Banknote,
-      'Bank Transfer': CreditCard,
-      'Credit Card': CreditCard,
-      'Digital Wallet': Smartphone,
-      'Check': FileText
+      Cash: Banknote,
+      "Bank Transfer": CreditCard,
+      "Credit Card": CreditCard,
+      "Digital Wallet": Smartphone,
+      Check: FileText,
     };
     const Icon = icons[method] || CreditCard;
     return <Icon className="w-4 h-4" />;
   };
 
   const statusOptions = [
-    { value: '', label: 'All' },
-    { value: 'Received', label: 'Received' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Cancelled', label: 'Cancelled' }
+    { value: "", label: "All" },
+    { value: "Received", label: "Received" },
+    { value: "Pending", label: "Pending" },
+    { value: "Cancelled", label: "Cancelled" },
   ];
 
   const paymentMethodOptions = [
-    { value: 'Cash', label: 'Cash' },
-    { value: 'Bank Transfer', label: 'Bank Transfer' },
-    { value: 'Credit Card', label: 'Credit Card' },
-    { value: 'Check', label: 'Check' },
-    { value: 'Digital Wallet', label: 'Digital Wallet' }
+    { value: "Cash", label: "Cash" },
+    { value: "Bank Transfer", label: "Bank Transfer" },
+    { value: "Credit Card", label: "Credit Card" },
+    { value: "Check", label: "Check" },
+    { value: "Digital Wallet", label: "Digital Wallet" },
   ];
 
   const dateRangeOptions = [
-    { value: 'Custom', label: 'Custom' },
-    { value: 'Today', label: 'Today' },
-    { value: 'Week', label: 'This Week' },
-    { value: 'Month', label: 'This Month' }
+    { value: "Custom", label: "Custom" },
+    { value: "Today", label: "Today" },
+    { value: "Week", label: "This Week" },
+    { value: "Month", label: "This Month" },
   ];
 
   const sortOptions = [
-    'Date (Newest First)',
-    'Date (Oldest First)',
-    'Amount (High to Low)',
-    'Amount (Low to High)'
+    "Date (Newest First)",
+    "Date (Oldest First)",
+    "Amount (High to Low)",
+    "Amount (Low to High)",
   ];
 
   // Show details page if viewing income details
-  if (currentPage === 'details' && selectedIncomeId) {
+  if (currentPage === "details" && selectedIncomeId) {
     return (
-      <IncomeDetailsPage 
+      <IncomeDetailsPage
         incomeId={selectedIncomeId}
         onBack={handleBackToList}
         onEdit={(income) => {
-          setCurrentPage('list');
+          setCurrentPage("list");
           openEditModal(income);
         }}
         onDelete={(id) => {
@@ -1176,8 +1324,8 @@ const FinanceIncome = () => {
           handleBackToList();
         }}
         onClone={(income) => {
-          setCurrentPage('list');
-          showToast('Navigate to list to see cloned record', 'info');
+          setCurrentPage("list");
+          showToast("Navigate to list to see cloned record", "info");
         }}
       />
     );
@@ -1209,7 +1357,7 @@ const FinanceIncome = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <ToastContainer />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Error Display */}
         {error && (
@@ -1224,29 +1372,29 @@ const FinanceIncome = () => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-blue-600 text-balack">
+          <Card className="bg-blue-600 text-black">
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 7 Days</h3>
               <p className="text-2xl font-bold mt-2">
-                SAR. {statistics?.last7Days?.toLocaleString() || '0'}
+                $ {statistics?.TotalAmount?.toLocaleString() || "0"}
               </p>
             </div>
           </Card>
-          
+
           <Card className="bg-blue-600 text-black">
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 30 Days</h3>
               <p className="text-2xl font-bold mt-2">
-                SAR. {statistics?.last30Days?.toLocaleString() || '0'}
+                $ {statistics?.TotalAmount?.toLocaleString() || "0"}
               </p>
             </div>
           </Card>
-          
+
           <Card className="bg-blue-600 text-black">
             <div className="p-6">
               <h3 className="text-sm font-medium opacity-90">Last 365 Days</h3>
               <p className="text-2xl font-bold mt-2">
-                SAR. {statistics?.last365Days?.toLocaleString() || '0'}
+                $ {statistics?.TotalAmount?.toLocaleString() || "0"}
               </p>
             </div>
           </Card>
@@ -1255,10 +1403,12 @@ const FinanceIncome = () => {
         {/* Search Section */}
         <Card className="p-6 mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Search</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Code
+              </label>
               <Input
                 type="text"
                 placeholder="Search by code..."
@@ -1266,77 +1416,92 @@ const FinanceIncome = () => {
                 onChange={(e) => setSearchValue(e.target.value)}
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date
+              </label>
               <div className="flex space-x-2">
-                <Select 
-                  value={selectedDateRange} 
+                <Select
+                  value={selectedDateRange}
                   onChange={(e) => setSelectedDateRange(e.target.value)}
                   className="text-sm"
                 >
-                  {dateRangeOptions.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
+                  {dateRangeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
                   ))}
                 </Select>
                 <Input
                   type="date"
                   placeholder="From"
                   value={dateRange.start}
-                  onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, start: e.target.value })
+                  }
                   className="text-sm"
                 />
                 <Input
                   type="date"
                   placeholder="To"
                   value={dateRange.end}
-                  onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                  onChange={(e) =>
+                    setDateRange({ ...dateRange, end: e.target.value })
+                  }
                   className="text-sm"
                 />
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category
+              </label>
               <Select
                 value={selectedCategory}
                 onChange={(e) => handleCategoryFilter(e.target.value)}
               >
                 <option value="">Any category</option>
-                {incomeCategories.Data?.$values?.map(cat => (
-                  <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
+                {incomeCategories.Data?.$values?.map((cat) => (
+                  <option key={cat.Id} value={cat.Id}>
+                    {cat.Name}
+                  </option>
                 ))}
               </Select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
               <Select
                 value={selectedStatus}
                 onChange={(e) => handleStatusFilter(e.target.value)}
               >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
               </Select>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <Button icon={Filter} onClick={() => {
-              handleSearch();
-              handleDateRangeFilter();
-            }}>
+            <Button
+              icon={Filter}
+              onClick={() => {
+                handleSearch();
+                handleDateRangeFilter();
+              }}
+            >
               Advanced Search
             </Button>
             <Button variant="outline" onClick={handleReset}>
               Reset
             </Button>
-            <Button 
-              variant="success" 
-              icon={Search}
-              onClick={handleSearch}
-            >
+            <Button variant="success" icon={Search} onClick={handleSearch}>
               Search
             </Button>
           </div>
@@ -1349,14 +1514,16 @@ const FinanceIncome = () => {
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Results</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  Sort By: 
-                  <select 
+                  Sort By:
+                  <select
                     className="ml-2 text-sm border-gray-300 rounded"
                     value={selectedSortBy}
                     onChange={(e) => handleSortChange(e.target.value)}
                   >
-                    {sortOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
+                    {sortOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
                     ))}
                   </select>
                 </p>
@@ -1371,33 +1538,53 @@ const FinanceIncome = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code & Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Code & Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {incomesList.map((income) => (
-                  <tr 
-                    key={income.Id || income.id} 
+                  <tr
+                    key={income.Id || income.id}
                     className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => handleViewDetails(income)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {income.CodeNumber} - {new Date(income.IncomeDate).toLocaleDateString()}
+                        {income.CodeNumber} -{" "}
+                        {new Date(income.IncomeDate).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{income.Description}</div>
-                      {income.Notes && <div className="text-xs text-gray-500">{income.Notes}</div>}
+                      <div className="text-sm text-gray-900">
+                        {income.Description}
+                      </div>
+                      {income.Notes && (
+                        <div className="text-xs text-gray-500">
+                          {income.Notes}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant="info">
-                        {income.CategoryName || getCategoryNameById(income.CategoryId)}
+                        {income.CategoryName ||
+                          getCategoryNameById(income.CategoryId)}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -1410,9 +1597,11 @@ const FinanceIncome = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Dropdown
-                        trigger={<MoreVertical className="w-4 h-4 text-gray-400" />}
+                        trigger={
+                          <MoreVertical className="w-4 h-4 text-gray-400" />
+                        }
                       >
-                        <button 
+                        <button
                           className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1423,7 +1612,7 @@ const FinanceIncome = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </button>
-                        <button 
+                        <button
                           className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1434,7 +1623,7 @@ const FinanceIncome = () => {
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
                         </button>
-                        <button 
+                        <button
                           className="flex items-center w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1457,8 +1646,12 @@ const FinanceIncome = () => {
             <div className="text-center py-12">
               <div className="text-gray-500">
                 <Search className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-sm font-medium text-gray-900 mb-1">No income records found</h3>
-                <p className="text-sm text-gray-500">Try adjusting your search criteria or add a new income record.</p>
+                <h3 className="text-sm font-medium text-gray-900 mb-1">
+                  No income records found
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Try adjusting your search criteria or add a new income record.
+                </p>
                 <Button className="mt-4" onClick={openAddModal}>
                   Add Income
                 </Button>
@@ -1470,9 +1663,13 @@ const FinanceIncome = () => {
           {incomesList.length > 0 && (
             <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
               <div className="flex items-center text-sm text-gray-700">
-                Showing {((pagination?.CurrentPage - 1) * pagination?.PageSize) + 1} to{' '}
-                {Math.min(pagination?.CurrentPage * pagination?.PageSize, pagination?.TotalItems)} of{' '}
-                {pagination?.TotalItems} results
+                Showing{" "}
+                {(pagination?.CurrentPage - 1) * pagination?.PageSize + 1} to{" "}
+                {Math.min(
+                  pagination?.CurrentPage * pagination?.PageSize,
+                  pagination?.TotalItems
+                )}{" "}
+                of {pagination?.TotalItems} results
               </div>
               <div className="flex items-center space-x-2">
                 <Button
@@ -1483,19 +1680,25 @@ const FinanceIncome = () => {
                 >
                   Previous
                 </Button>
-                {[...Array(Math.min(5, pagination?.TotalPages || 1))].map((_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Button
-                      key={page}
-                      variant={pagination?.CurrentPage === page ? "primary" : "outline"}
-                      size="sm"
-                      onClick={() => changePage(page)}
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
+                {[...Array(Math.min(5, pagination?.TotalPages || 1))].map(
+                  (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <Button
+                        key={page}
+                        variant={
+                          pagination?.CurrentPage === page
+                            ? "primary"
+                            : "outline"
+                        }
+                        size="sm"
+                        onClick={() => changePage(page)}
+                      >
+                        {page}
+                      </Button>
+                    );
+                  }
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -1530,7 +1733,9 @@ const FinanceIncome = () => {
               label="Description *"
               placeholder="Enter income description"
               value={incomeForm.description}
-              onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, description: e.target.value })
+              }
               error={formErrors.description}
             />
 
@@ -1540,7 +1745,9 @@ const FinanceIncome = () => {
               step="0.01"
               placeholder="Enter amount"
               value={incomeForm.amount}
-              onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, amount: e.target.value })
+              }
               error={formErrors.amount}
             />
 
@@ -1548,31 +1755,41 @@ const FinanceIncome = () => {
               label="Date *"
               type="date"
               value={incomeForm.incomeDate}
-              onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, incomeDate: e.target.value })
+              }
               error={formErrors.incomeDate}
             />
 
             <Select
               label="Category *"
               value={incomeForm.categoryId}
-              onChange={(e) => setIncomeForm({...incomeForm, categoryId: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, categoryId: e.target.value })
+              }
               error={formErrors.categoryId}
             >
               <option value="">Select category</option>
-              {incomeCategories.Data?.$values?.map(cat => (
-                <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
+              {incomeCategories.Data?.$values?.map((cat) => (
+                <option key={cat.Id} value={cat.Id}>
+                  {cat.Name}
+                </option>
               ))}
             </Select>
 
             <Select
               label="Payment Method *"
               value={incomeForm.paymentMethod}
-              onChange={(e) => setIncomeForm({...incomeForm, paymentMethod: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, paymentMethod: e.target.value })
+              }
               error={formErrors.paymentMethod}
             >
               <option value="">Select payment method</option>
-              {paymentMethodOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+              {paymentMethodOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
             </Select>
 
@@ -1580,7 +1797,9 @@ const FinanceIncome = () => {
               label="Notes"
               placeholder="Additional notes (optional)"
               value={incomeForm.notes}
-              onChange={(e) => setIncomeForm({...incomeForm, notes: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, notes: e.target.value })
+              }
             />
           </div>
         </Modal>
@@ -1606,7 +1825,9 @@ const FinanceIncome = () => {
               label="Description *"
               placeholder="Enter income description"
               value={incomeForm.description}
-              onChange={(e) => setIncomeForm({...incomeForm, description: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, description: e.target.value })
+              }
               error={formErrors.description}
             />
 
@@ -1616,7 +1837,9 @@ const FinanceIncome = () => {
               step="0.01"
               placeholder="Enter amount"
               value={incomeForm.amount}
-              onChange={(e) => setIncomeForm({...incomeForm, amount: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, amount: e.target.value })
+              }
               error={formErrors.amount}
             />
 
@@ -1624,31 +1847,41 @@ const FinanceIncome = () => {
               label="Date *"
               type="date"
               value={incomeForm.incomeDate}
-              onChange={(e) => setIncomeForm({...incomeForm, incomeDate: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, incomeDate: e.target.value })
+              }
               error={formErrors.incomeDate}
             />
 
             <Select
               label="Category *"
               value={incomeForm.categoryId}
-              onChange={(e) => setIncomeForm({...incomeForm, categoryId: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, categoryId: e.target.value })
+              }
               error={formErrors.categoryId}
             >
               <option value="">Select category</option>
-              {incomeCategories?.Data?.$values.map(cat => (
-                <option key={cat.Id} value={cat.Id}>{cat.Name}</option>
+              {incomeCategories?.Data?.$values.map((cat) => (
+                <option key={cat.Id} value={cat.Id}>
+                  {cat.Name}
+                </option>
               ))}
             </Select>
 
             <Select
               label="Payment Method *"
               value={incomeForm.paymentMethod}
-              onChange={(e) => setIncomeForm({...incomeForm, paymentMethod: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, paymentMethod: e.target.value })
+              }
               error={formErrors.paymentMethod}
             >
               <option value="">Select payment method</option>
-              {paymentMethodOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+              {paymentMethodOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
             </Select>
 
@@ -1656,7 +1889,9 @@ const FinanceIncome = () => {
               label="Notes"
               placeholder="Additional notes (optional)"
               value={incomeForm.notes}
-              onChange={(e) => setIncomeForm({...incomeForm, notes: e.target.value})}
+              onChange={(e) =>
+                setIncomeForm({ ...incomeForm, notes: e.target.value })
+              }
             />
           </div>
         </Modal>

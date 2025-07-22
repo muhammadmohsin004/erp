@@ -208,45 +208,50 @@ const NewInvoice = () => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-  console.log(`=== INPUT CHANGE: ${field} ===`);
-  console.log("New value:", value);
-  console.log("Value type:", typeof value);
-  console.log("Current formData before update:", formData);
+    console.log(`=== INPUT CHANGE: ${field} ===`);
+    console.log("New value:", value);
+    console.log("Value type:", typeof value);
+    console.log("Current formData before update:", formData);
 
-  setFormData((prev) => {
-    const updated = {
-      ...prev,
-      [field]: value,
-    };
-    console.log("Updated formData:", updated);
-    return updated;
-  });
-
-  // Clear error when user starts typing
-  if (errors[field]) {
-    setErrors((prev) => ({
-      ...prev,
-      [field]: "",
-    }));
-  }
-
-  // If client is selected, log additional info and validate
-  if (field === "ClientId" && value) {
-    console.log("Client selection changed to:", value);
-    const selectedClient = clientsData.find(client => client.Id === parseInt(value));
-    console.log("Selected client details:", selectedClient);
-    
-    if (!selectedClient) {
-      console.warn("Selected client not found in clientsData!");
-      setErrors(prev => ({
+    setFormData((prev) => {
+      const updated = {
         ...prev,
-        ClientId: "Selected client is invalid"
+        [field]: value,
+      };
+      console.log("Updated formData:", updated);
+      return updated;
+    });
+
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: "",
       }));
-    } else {
-      console.log("Valid client selected:", selectedClient.FullName || selectedClient.BusinessName);
     }
-  }
-};
+
+    // If client is selected, log additional info and validate
+    if (field === "ClientId" && value) {
+      console.log("Client selection changed to:", value);
+      const selectedClient = clientsData.find(
+        (client) => client.Id === parseInt(value)
+      );
+      console.log("Selected client details:", selectedClient);
+
+      if (!selectedClient) {
+        console.warn("Selected client not found in clientsData!");
+        setErrors((prev) => ({
+          ...prev,
+          ClientId: "Selected client is invalid",
+        }));
+      } else {
+        console.log(
+          "Valid client selected:",
+          selectedClient.FullName || selectedClient.BusinessName
+        );
+      }
+    }
+  };
 
   // Handle item changes
   const handleItemChange = async (index, field, value) => {
@@ -333,211 +338,230 @@ const NewInvoice = () => {
     }
   };
 
-const validateForm = () => {
-  const newErrors = {};
+  const validateForm = () => {
+    const newErrors = {};
 
-  // FIXED: More robust client validation with detailed logging
-  console.log("=== FORM VALIDATION DEBUG ===");
-  console.log("FormData ClientId:", formData.ClientId);
-  console.log("FormData ClientId type:", typeof formData.ClientId);
-  console.log("Available clients:", clientsData.map(c => ({id: c.Id, name: c.FullName || c.BusinessName})));
+    // FIXED: More robust client validation with detailed logging
+    console.log("=== FORM VALIDATION DEBUG ===");
+    console.log("FormData ClientId:", formData.ClientId);
+    console.log("FormData ClientId type:", typeof formData.ClientId);
+    console.log(
+      "Available clients:",
+      clientsData.map((c) => ({ id: c.Id, name: c.FullName || c.BusinessName }))
+    );
 
-  if (!formData.ClientId || formData.ClientId === "" || formData.ClientId === "0") {
-    newErrors.ClientId = "Client is required";
-    console.log("Client validation failed: No client selected");
-  } else {
-    // Check if client exists in the list
-    const clientExists = clientsData.find(client => client.Id === parseInt(formData.ClientId));
-    console.log("Selected client exists:", clientExists);
-    if (!clientExists) {
-      newErrors.ClientId = "Selected client is invalid";
-      console.log("Client validation failed: Selected client not found in list");
-    }
-  }
-
-  // FIXED: More detailed invoice date validation
-  if (!formData.InvoiceDate) {
-    newErrors.InvoiceDate = "Invoice date is required";
-  }
-
-  // FIXED: Better items validation with detailed logging
-  const validItems = invoiceItems.filter(item => {
-    const hasType = item.ItemType;
-    const hasProduct = item.ItemType === "Product" && item.ProductId;
-    const hasService = item.ItemType === "Service" && item.ServiceId;
-    const hasQuantity = parseFloat(item.Quantity) > 0;
-    const hasPrice = parseFloat(item.UnitPrice) >= 0;
-    
-    const isValid = hasType && (hasProduct || hasService) && hasQuantity && hasPrice;
-    
-    console.log(`Item validation - Type: ${hasType}, Product: ${hasProduct}, Service: ${hasService}, Qty: ${hasQuantity}, Price: ${hasPrice}, Valid: ${isValid}`);
-    
-    return isValid;
-  });
-
-  console.log("Valid items count:", validItems.length);
-  console.log("Total items count:", invoiceItems.length);
-
-  if (validItems.length === 0) {
-    newErrors.items = "At least one complete item is required";
-  }
-
-  // Validate individual items
-  invoiceItems.forEach((item, index) => {
-    if (item.ItemType) {
-      if (!item.ItemType) {
-        newErrors[`item_${index}_type`] = "Item type is required";
-      }
-
-      if (item.ItemType === "Product" && !item.ProductId) {
-        newErrors[`item_${index}_product`] = "Product is required";
-      }
-
-      if (item.ItemType === "Service" && !item.ServiceId) {
-        newErrors[`item_${index}_service`] = "Service is required";
-      }
-
-      const quantity = parseFloat(item.Quantity);
-      const unitPrice = parseFloat(item.UnitPrice);
-      const taxRate = parseFloat(item.TaxRate);
-
-      if (isNaN(quantity) || quantity <= 0) {
-        newErrors[`item_${index}_quantity`] = "Quantity must be greater than 0";
-      }
-
-      if (isNaN(unitPrice) || unitPrice < 0) {
-        newErrors[`item_${index}_price`] = "Unit price must be 0 or greater";
-      }
-
-      if (isNaN(taxRate) || taxRate < 0 || taxRate > 100) {
-        newErrors[`item_${index}_tax`] = "Tax rate must be between 0 and 100";
+    if (
+      !formData.ClientId ||
+      formData.ClientId === "" ||
+      formData.ClientId === "0"
+    ) {
+      newErrors.ClientId = "Client is required";
+      console.log("Client validation failed: No client selected");
+    } else {
+      // Check if client exists in the list
+      const clientExists = clientsData.find(
+        (client) => client.Id === parseInt(formData.ClientId)
+      );
+      console.log("Selected client exists:", clientExists);
+      if (!clientExists) {
+        newErrors.ClientId = "Selected client is invalid";
+        console.log(
+          "Client validation failed: Selected client not found in list"
+        );
       }
     }
-  });
 
-  console.log("=== FORM VALIDATION RESULTS ===");
-  console.log("Form data:", formData);
-  console.log("Selected ClientId:", formData.ClientId);
-  console.log("Validation errors:", newErrors);
+    // FIXED: More detailed invoice date validation
+    if (!formData.InvoiceDate) {
+      newErrors.InvoiceDate = "Invoice date is required";
+    }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    // FIXED: Better items validation with detailed logging
+    const validItems = invoiceItems.filter((item) => {
+      const hasType = item.ItemType;
+      const hasProduct = item.ItemType === "Product" && item.ProductId;
+      const hasService = item.ItemType === "Service" && item.ServiceId;
+      const hasQuantity = parseFloat(item.Quantity) > 0;
+      const hasPrice = parseFloat(item.UnitPrice) >= 0;
+
+      const isValid =
+        hasType && (hasProduct || hasService) && hasQuantity && hasPrice;
+
+      console.log(
+        `Item validation - Type: ${hasType}, Product: ${hasProduct}, Service: ${hasService}, Qty: ${hasQuantity}, Price: ${hasPrice}, Valid: ${isValid}`
+      );
+
+      return isValid;
+    });
+
+    console.log("Valid items count:", validItems.length);
+    console.log("Total items count:", invoiceItems.length);
+
+    if (validItems.length === 0) {
+      newErrors.items = "At least one complete item is required";
+    }
+
+    // Validate individual items
+    invoiceItems.forEach((item, index) => {
+      if (item.ItemType) {
+        if (!item.ItemType) {
+          newErrors[`item_${index}_type`] = "Item type is required";
+        }
+
+        if (item.ItemType === "Product" && !item.ProductId) {
+          newErrors[`item_${index}_product`] = "Product is required";
+        }
+
+        if (item.ItemType === "Service" && !item.ServiceId) {
+          newErrors[`item_${index}_service`] = "Service is required";
+        }
+
+        const quantity = parseFloat(item.Quantity);
+        const unitPrice = parseFloat(item.UnitPrice);
+        const taxRate = parseFloat(item.TaxRate);
+
+        if (isNaN(quantity) || quantity <= 0) {
+          newErrors[`item_${index}_quantity`] =
+            "Quantity must be greater than 0";
+        }
+
+        if (isNaN(unitPrice) || unitPrice < 0) {
+          newErrors[`item_${index}_price`] = "Unit price must be 0 or greater";
+        }
+
+        if (isNaN(taxRate) || taxRate < 0 || taxRate > 100) {
+          newErrors[`item_${index}_tax`] = "Tax rate must be between 0 and 100";
+        }
+      }
+    });
+
+    console.log("=== FORM VALIDATION RESULTS ===");
+    console.log("Form data:", formData);
+    console.log("Selected ClientId:", formData.ClientId);
+    console.log("Validation errors:", newErrors);
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Handle form submission
-// Fixed handleSubmit method in your NewInvoice component
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  // Fixed handleSubmit method in your NewInvoice component
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!validateForm()) {
-    return;
-  }
-
-  setIsSubmitting(true);
-
-  try {
-    // FIXED: Prepare invoice data with correct field names matching backend DTO
-    const invoiceData = {
-      // Basic invoice information - Use exact field names from backend DTO
-      ClientId: parseInt(formData.ClientId), // FIXED: Ensure it's an integer
-      InvoiceNumber: formData.InvoiceNumber || null, // API might auto-generate if null
-      InvoiceDate: formData.InvoiceDate, // FIXED: Use InvoiceDate (capital I)
-      DueDate: formData.DueDate || null, // FIXED: Use DueDate (capital D)
-      Status: formData.Status || "Draft",
-      Description: formData.Description || null,
-      Notes: formData.Notes || null,
-      
-      // Financial fields
-      Currency: "SAR", // Default currency
-      ExchangeRate: 1,
-      DiscountAmount: parseFloat(formData.discountAmount) || 0,
-      ShippingAmount: parseFloat(formData.shippingAmount) || 0,
-      
-      // Additional fields that might be expected
-      PaymentTerms: formData.paymentTerms || null,
-      InternalNotes: formData.internalNotes || null,
-      PurchaseOrderNumber: formData.purchaseOrderNumber || null,
-      IsRecurring: false,
-      
-      // FIXED: Invoice items with correct structure - ensure field name matches context expectation
-      InvoiceItems: invoiceItems
-        .filter((item) => item.ItemType && (item.ProductId || item.ServiceId))
-        .map((item) => ({
-          ItemType: item.ItemType,
-          ProductId: item.ItemType === "Product" ? parseInt(item.ProductId) : null,
-          ServiceId: item.ItemType === "Service" ? parseInt(item.ServiceId) : null,
-          Quantity: parseFloat(item.Quantity) || 1,
-          UnitPrice: parseFloat(item.UnitPrice) || 0,
-          TaxRate: parseFloat(item.TaxRate) || 0,
-          LineTotal: parseFloat(item.LineTotal) || 0,
-          Description: item.Description || item.ItemName || "",
-          Discount: parseFloat(item.Discount) || 0,
-          DiscountType: item.DiscountType || "percentage",
-        })),
-      
-      // Calculated totals
-      SubTotal: parseFloat(formData.SubTotal) || 0,
-      TaxAmount: parseFloat(formData.TaxAmount) || 0,
-      TotalAmount: parseFloat(formData.TotalAmount) || 0,
-    };
-
-    console.log("=== SUBMITTING INVOICE DATA ===");
-    console.log("Prepared invoice data:", invoiceData);
-    console.log("Client ID:", invoiceData.ClientId);
-    console.log("Invoice Items:", invoiceData.InvoiceItems);
-    console.log("Items count:", invoiceData.InvoiceItems.length);
-
-    // FIXED: Additional validation before submission
-    if (!invoiceData.ClientId || invoiceData.ClientId <= 0) {
-      alert("Please select a valid client before submitting the invoice.");
+    if (!validateForm()) {
       return;
     }
 
-    if (!invoiceData.InvoiceItems || invoiceData.InvoiceItems.length === 0) {
-      alert("Please add at least one invoice item before submitting.");
-      return;
-    }
+    setIsSubmitting(true);
 
-    let result;
+    try {
+      // FIXED: Prepare invoice data with correct field names matching backend DTO
+      const invoiceData = {
+        // Basic invoice information - Use exact field names from backend DTO
+        ClientId: parseInt(formData.ClientId), // FIXED: Ensure it's an integer
+        InvoiceNumber: formData.InvoiceNumber || null, // API might auto-generate if null
+        InvoiceDate: formData.InvoiceDate, // FIXED: Use InvoiceDate (capital I)
+        DueDate: formData.DueDate || null, // FIXED: Use DueDate (capital D)
+        Status: formData.Status || "Draft",
+        Description: formData.Description || null,
+        Notes: formData.Notes || null,
 
-    if (isEditing && editData) {
-      // Update existing invoice
-      console.log("Updating invoice with ID:", editData.Id);
-      result = await updateInvoice(editData.Id, invoiceData);
-      if (result) {
-        alert("Invoice updated successfully");
-        navigate("/admin/invoices/list");
-      } else {
-        alert("Failed to update invoice");
+        // Financial fields
+        Currency: "SAR", // Default currency
+        ExchangeRate: 1,
+        DiscountAmount: parseFloat(formData.discountAmount) || 0,
+        ShippingAmount: parseFloat(formData.shippingAmount) || 0,
+
+        // Additional fields that might be expected
+        PaymentTerms: formData.paymentTerms || null,
+        InternalNotes: formData.internalNotes || null,
+        PurchaseOrderNumber: formData.purchaseOrderNumber || null,
+        IsRecurring: false,
+
+        // FIXED: Invoice items with correct structure - ensure field name matches context expectation
+        InvoiceItems: invoiceItems
+          .filter((item) => item.ItemType && (item.ProductId || item.ServiceId))
+          .map((item) => ({
+            ItemType: item.ItemType,
+            ProductId:
+              item.ItemType === "Product" ? parseInt(item.ProductId) : null,
+            ServiceId:
+              item.ItemType === "Service" ? parseInt(item.ServiceId) : null,
+            Quantity: parseFloat(item.Quantity) || 1,
+            UnitPrice: parseFloat(item.UnitPrice) || 0,
+            TaxRate: parseFloat(item.TaxRate) || 0,
+            LineTotal: parseFloat(item.LineTotal) || 0,
+            Description: item.Description || item.ItemName || "",
+            Discount: parseFloat(item.Discount) || 0,
+            DiscountType: item.DiscountType || "percentage",
+          })),
+
+        // Calculated totals
+        SubTotal: parseFloat(formData.SubTotal) || 0,
+        TaxAmount: parseFloat(formData.TaxAmount) || 0,
+        TotalAmount: parseFloat(formData.TotalAmount) || 0,
+      };
+
+      console.log("=== SUBMITTING INVOICE DATA ===");
+      console.log("Prepared invoice data:", invoiceData);
+      console.log("Client ID:", invoiceData.ClientId);
+      console.log("Invoice Items:", invoiceData.InvoiceItems);
+      console.log("Items count:", invoiceData.InvoiceItems.length);
+
+      // FIXED: Additional validation before submission
+      if (!invoiceData.ClientId || invoiceData.ClientId <= 0) {
+        alert("Please select a valid client before submitting the invoice.");
+        return;
       }
-    } else {
-      // Create new invoice
-      console.log("Creating new invoice...");
-      result = await createInvoice(invoiceData);
-      if (result) {
-        alert("Invoice created successfully");
-        navigate("/admin/invoices/list");
+
+      // if (!invoiceData.InvoiceItems || invoiceData.InvoiceItems.length === 0) {
+      //   alert("Please add at least one invoice item before submitting.");
+      //   return;
+      // }
+
+      let result;
+
+      if (isEditing && editData) {
+        // Update existing invoice
+        console.log("Updating invoice with ID:", editData.Id);
+        result = await updateInvoice(editData.Id, invoiceData);
+        if (result) {
+          alert("Invoice updated successfully");
+          navigate("/admin/invoice-dashboard");
+        } else {
+          alert("Failed to update invoice");
+        }
       } else {
-        alert("Failed to create invoice");
+        // Create new invoice
+        console.log("Creating new invoice...");
+        result = await createInvoice(invoiceData);
+        if (result) {
+          alert("Invoice created successfully");
+          navigate("/admin/invoice-dashboard");
+        } else {
+          alert("Failed to create invoice");
+        }
       }
+    } catch (error) {
+      console.error("Error submitting invoice:", error);
+
+      // More detailed error handling
+      if (error.message.includes("Invalid client ID")) {
+        alert("Please select a valid client before submitting the invoice.");
+      } else if (error.message.includes("validation")) {
+        alert("Please check all required fields and try again.");
+      } else {
+        alert(
+          `${isEditing ? "Failed to update" : "Failed to create"} invoice: ${
+            error.message
+          }`
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error("Error submitting invoice:", error);
-    
-    // More detailed error handling
-    if (error.message.includes("Invalid client ID")) {
-      alert("Please select a valid client before submitting the invoice.");
-    } else if (error.message.includes("validation")) {
-      alert("Please check all required fields and try again.");
-    } else {
-      alert(
-        `${isEditing ? "Failed to update" : "Failed to create"} invoice: ${error.message}`
-      );
-    }
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   // Loading state
   if (!token || !initialLoadComplete) {
@@ -565,7 +589,9 @@ const handleSubmit = async (e) => {
   };
 
   const getSelectedClient = () => {
-    return clientsData.find((client) => client.Id === parseInt(formData.ClientId));
+    return clientsData.find(
+      (client) => client.Id === parseInt(formData.ClientId)
+    );
   };
 
   return (
@@ -573,39 +599,52 @@ const handleSubmit = async (e) => {
       <Container className="px-6 py-6">
         {/* Debug Info Panel - Remove this in production */}
         <Container className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <h4 className="font-semibold text-yellow-800 mb-2">Debug Info (Remove in production):</h4>
+          <h4 className="font-semibold text-yellow-800 mb-2">
+            Debug Info (Remove in production):
+          </h4>
           <div className="text-sm text-yellow-700 grid grid-cols-3 gap-4">
             <div>
-              <p><strong>Products:</strong></p>
-              <p>Loading: {productsLoading ? 'Yes' : 'No'}</p>
+              <p>
+                <strong>Products:</strong>
+              </p>
+              <p>Loading: {productsLoading ? "Yes" : "No"}</p>
               <p>Count: {productsData.length}</p>
-              <p>Available: {productsData.length > 0 ? 'Yes' : 'No'}</p>
+              <p>Available: {productsData.length > 0 ? "Yes" : "No"}</p>
               {productsData.length > 0 && (
                 <>
-                  <p>First product: {productsData[0]?.Name || 'No name'}</p>
-                  <p>Price: ${productsData[0]?.UnitPrice || 'No price'}</p>
+                  <p>First product: {productsData[0]?.Name || "No name"}</p>
+                  <p>Price: ${productsData[0]?.UnitPrice || "No price"}</p>
                 </>
               )}
             </div>
             <div>
-              <p><strong>Services:</strong></p>
-              <p>Loading: {servicesLoading ? 'Yes' : 'No'}</p>
+              <p>
+                <strong>Services:</strong>
+              </p>
+              <p>Loading: {servicesLoading ? "Yes" : "No"}</p>
               <p>Count: {servicesData.length}</p>
-              <p>Available: {servicesData.length > 0 ? 'Yes' : 'No'}</p>
+              <p>Available: {servicesData.length > 0 ? "Yes" : "No"}</p>
               {servicesData.length > 0 && (
                 <>
-                  <p>First service: {servicesData[0]?.Name || 'No name'}</p>
-                  <p>Price: ${servicesData[0]?.UnitPrice || 'No price'}</p>
+                  <p>First service: {servicesData[0]?.Name || "No name"}</p>
+                  <p>Price: ${servicesData[0]?.UnitPrice || "No price"}</p>
                 </>
               )}
             </div>
             <div>
-              <p><strong>Clients:</strong></p>
-              <p>Loading: {clientsLoading ? 'Yes' : 'No'}</p>
+              <p>
+                <strong>Clients:</strong>
+              </p>
+              <p>Loading: {clientsLoading ? "Yes" : "No"}</p>
               <p>Count: {clientsData.length}</p>
-              <p>Available: {clientsData.length > 0 ? 'Yes' : 'No'}</p>
+              <p>Available: {clientsData.length > 0 ? "Yes" : "No"}</p>
               {clientsData.length > 0 && (
-                <p>First client: {clientsData[0]?.FullName || clientsData[0]?.BusinessName || 'No name'}</p>
+                <p>
+                  First client:{" "}
+                  {clientsData[0]?.FullName ||
+                    clientsData[0]?.BusinessName ||
+                    "No name"}
+                </p>
               )}
             </div>
           </div>
@@ -779,7 +818,9 @@ const handleSubmit = async (e) => {
                     </option>
                   ))}
                   {!clientsLoading && clientsData.length === 0 && (
-                    <option value="" disabled>No clients available</option>
+                    <option value="" disabled>
+                      No clients available
+                    </option>
                   )}
                 </select>
                 {errors.ClientId && (
@@ -807,16 +848,19 @@ const handleSubmit = async (e) => {
                         return (
                           <Container className="space-y-1">
                             <Span className="text-sm font-medium text-gray-900">
-                              {selectedClient.FullName || selectedClient.BusinessName}
+                              {selectedClient.FullName ||
+                                selectedClient.BusinessName}
                             </Span>
                             {selectedClient.Email && (
                               <Span className="text-sm text-gray-600 block">
                                 {selectedClient.Email}
                               </Span>
                             )}
-                            {(selectedClient.Mobile || selectedClient.Telephone) && (
+                            {(selectedClient.Mobile ||
+                              selectedClient.Telephone) && (
                               <Span className="text-sm text-gray-600 block">
-                                {selectedClient.Mobile || selectedClient.Telephone}
+                                {selectedClient.Mobile ||
+                                  selectedClient.Telephone}
                               </Span>
                             )}
                             {selectedClient.Currency && (
@@ -923,15 +967,20 @@ const handleSubmit = async (e) => {
                           disabled={!item.ItemType || productsLoading}
                         >
                           <option value="">
-                            {productsLoading ? "Loading products..." : "Select Product"}
+                            {productsLoading
+                              ? "Loading products..."
+                              : "Select Product"}
                           </option>
                           {productsData.map((product) => (
                             <option key={product.Id} value={product.Id}>
-                              {product.Name} - ${parseFloat(product.UnitPrice || 0).toFixed(2)}
+                              {product.Name} - $
+                              {parseFloat(product.UnitPrice || 0).toFixed(2)}
                             </option>
                           ))}
                           {!productsLoading && productsData.length === 0 && (
-                            <option value="" disabled>No products available</option>
+                            <option value="" disabled>
+                              No products available
+                            </option>
                           )}
                         </select>
                       ) : item.ItemType === "Service" ? (
@@ -948,15 +997,20 @@ const handleSubmit = async (e) => {
                           disabled={!item.ItemType || servicesLoading}
                         >
                           <option value="">
-                            {servicesLoading ? "Loading services..." : "Select Service"}
+                            {servicesLoading
+                              ? "Loading services..."
+                              : "Select Service"}
                           </option>
                           {servicesData.map((service) => (
                             <option key={service.Id} value={service.Id}>
-                              {service.Name} - ${parseFloat(service.UnitPrice || 0).toFixed(2)}
+                              {service.Name} - $
+                              {parseFloat(service.UnitPrice || 0).toFixed(2)}
                             </option>
                           ))}
                           {!servicesLoading && servicesData.length === 0 && (
-                            <option value="" disabled>No services available</option>
+                            <option value="" disabled>
+                              No services available
+                            </option>
                           )}
                         </select>
                       ) : (
