@@ -1,3 +1,5 @@
+import { Loader, Trash2, X } from "lucide-react";
+
 const DeleteModal = ({
   isOpen,
   onClose,
@@ -29,7 +31,7 @@ const DeleteModal = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity backdrop-blur-sm"
+        className="fixed inset-0 bg-transparent bg-opacity-90 transition-opacity "
         onClick={onClose}
       />
 

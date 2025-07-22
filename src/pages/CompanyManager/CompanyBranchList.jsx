@@ -36,6 +36,8 @@ import Table from "../../components/elements/table/Table";
 import Container from "../../components/elements/container/Container";
 import Span from "../../components/elements/span/Span";
 import OutlineButton from "../../components/elements/elements/buttons/OutlineButton/OutlineButton";
+import DeleteModal from "../../components/elements/modal/DeleteModal";
+import CustomAlert from "../../components/elements/Alert/CustomAlerts";
 
 const CompanyBranchList = () => {
   const navigate = useNavigate();
@@ -127,6 +129,12 @@ const CompanyBranchList = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [alert, setAlert] = useState({
+    isVisible: false,
+    type: "success", // success, error, warning
+    title: "",
+    message: "",
+  });
 
   // Fetch branches on component mount
   useEffect(() => {
@@ -212,7 +220,7 @@ const CompanyBranchList = () => {
       }
     } catch (error) {
       console.error("Error fetching branch details:", error);
-      alert("Failed to fetch branch details");
+      showAlert("error", "Failed to Load", "Could not load branch details.");
     }
   };
 
@@ -229,7 +237,11 @@ const CompanyBranchList = () => {
       }
     } catch (error) {
       console.error("Error fetching branch for edit:", error);
-      alert("Failed to fetch branch details for editing");
+      showAlert(
+        "error",
+        "Failed to Load",
+        "Could not load branch data for editing."
+      );
     }
   };
 
@@ -243,14 +255,14 @@ const CompanyBranchList = () => {
               ...branchData,
               BranchName: `${branchData.BranchName || ""} (Copy)`,
               Id: undefined,
-              IsHeadOffice: false, // Clone should not be head office
+              IsHeadOffice: false,
             },
           },
         });
       }
     } catch (error) {
       console.error("Error cloning branch:", error);
-      alert("Failed to clone branch");
+      showAlert("error", "Clone Failed", "Could not clone the branch.");
     }
   };
 
@@ -266,6 +278,18 @@ const CompanyBranchList = () => {
     }
   };
 
+  const showAlert = (type, title, message = "") => {
+    setAlert({
+      isVisible: true,
+      type,
+      title,
+      message,
+    });
+  };
+  const hideAlert = () => {
+    setAlert((prev) => ({ ...prev, isVisible: false }));
+  };
+
   const confirmDeleteBranch = async () => {
     if (!branchToDelete) return;
 
@@ -274,16 +298,27 @@ const CompanyBranchList = () => {
       await deleteBranch(branchToDelete.Id);
       setShowDeleteModal(false);
       setBranchToDelete(null);
+
+      // Show success alert
+      showAlert(
+        "success",
+        "Branch Deleted Successfully",
+        `${branchToDelete.BranchName} has been deleted.`
+      );
+
       // Refresh the branch list
       await getBranches();
     } catch (error) {
       console.error("Error deleting branch:", error);
-      alert("Failed to delete branch");
+      showAlert(
+        "error",
+        "Delete Failed",
+        "Failed to delete the branch. Please try again."
+      );
     } finally {
       setIsDeleting(false);
     }
   };
-
   // Pagination
   const handlePageChange = async (newPage) => {
     if (newPage < 1 || newPage > pagination.TotalPages) return;
@@ -381,10 +416,10 @@ const CompanyBranchList = () => {
               bgColor="bg-gray-100 hover:bg-gray-200"
               textColor="text-gray-700"
               rounded="rounded-lg"
-              borderColor={'dsf'}
+              // borderColor={}
               buttonText={translations.Filters}
               height="h-10"
-              px="px-4"
+              // px="px-4"
               fontWeight="font-medium"
               fontSize="text-sm"
               isIconLeft={true}
@@ -903,41 +938,6 @@ const CompanyBranchList = () => {
           )
         }
       />
-
-      {/* Delete Confirmation Modal */}
-      <Modall
-        modalOpen={showDeleteModal}
-        setModalOpen={setShowDeleteModal}
-        title={
-          <Container className="flex items-center gap-2 text-red-600">
-            <Trash2 className="w-5 h-5" />
-            <Span>{translations["Delete Branch"]}</Span>
-          </Container>
-        }
-        width={500}
-        okText={translations.Delete}
-        cancelText={translations.Cancel}
-        okAction={confirmDeleteBranch}
-        cancelAction={() => setShowDeleteModal(false)}
-        okButtonDisabled={isDeleting}
-        body={
-          <Container className="text-center py-4">
-            <Container className="bg-red-50 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <Trash2 className="w-8 h-8 text-red-600" />
-            </Container>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {translations["Are you sure?"]}
-            </h3>
-            <Span className="text-gray-500 mb-4 block">
-              {translations["This action cannot be undone"]}. This will
-              permanently delete the branch{" "}
-              <strong>"{branchToDelete?.BranchName}"</strong> and all associated
-              data.
-            </Span>
-          </Container>
-        }
-      />
-
       {/* Filters Sidebar/Offcanvas */}
       {showFilters && (
         <Container className="fixed inset-0 z-50 overflow-hidden">
@@ -1035,6 +1035,26 @@ const CompanyBranchList = () => {
           </Container>
         </Container>
       )}
+      {/* Custom Alert */}
+      <CustomAlert
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        isVisible={alert.isVisible}
+        onClose={hideAlert}
+      />
+
+      {/* Delete Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteBranch}
+        title={translations["Delete Branch"]}
+        message={translations["This action cannot be undone"]}
+        itemName={branchToDelete?.BranchName}
+        isDeleting={isDeleting}
+        variant="danger"
+      />
     </Container>
   );
 };

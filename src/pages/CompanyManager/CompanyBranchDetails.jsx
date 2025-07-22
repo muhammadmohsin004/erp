@@ -25,7 +25,7 @@ const CompanyBranchDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Branch Details": language === "ar" ? "تفاصيل الفرع" : "Branch Details",
@@ -55,10 +55,14 @@ const CompanyBranchDetails = () => {
     Yes: language === "ar" ? "نعم" : "Yes",
     No: language === "ar" ? "لا" : "No",
     Loading: language === "ar" ? "جارٍ التحميل..." : "Loading...",
-    "Branch not found": language === "ar" ? "لم يتم العثور على الفرع" : "Branch not found",
-    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
-    "Contact Information": language === "ar" ? "معلومات الاتصال" : "Contact Information",
-    "System Information": language === "ar" ? "معلومات النظام" : "System Information",
+    "Branch not found":
+      language === "ar" ? "لم يتم العثور على الفرع" : "Branch not found",
+    "Basic Information":
+      language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Contact Information":
+      language === "ar" ? "معلومات الاتصال" : "Contact Information",
+    "System Information":
+      language === "ar" ? "معلومات النظام" : "System Information",
     Created: language === "ar" ? "تاريخ الإنشاء" : "Created",
     "Last Updated": language === "ar" ? "آخر تحديث" : "Last Updated",
     "Branch ID": language === "ar" ? "معرف الفرع" : "Branch ID",
@@ -66,13 +70,8 @@ const CompanyBranchDetails = () => {
   };
 
   // Get branch context
-  const {
-    currentBranch,
-    loading,
-    error,
-    getBranch,
-    deleteBranch,
-  } = useCompanyBranch();
+  const { currentBranch, loading, error, getBranch, deleteBranch } =
+    useCompanyBranch();
 
   // Local state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -141,8 +140,8 @@ const CompanyBranchDetails = () => {
         navigate("/admin/company-branches", {
           state: {
             message: "Branch deleted successfully",
-            type: "success"
-          }
+            type: "success",
+          },
         });
       }
     } catch (error) {
@@ -162,7 +161,9 @@ const CompanyBranchDetails = () => {
     return (
       <Container className="flex justify-center items-center min-h-screen">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <Span className="text-blue-500 text-lg ml-4">{translations.Loading}</Span>
+        <Span className="text-blue-500 text-lg ml-4">
+          {translations.Loading}
+        </Span>
       </Container>
     );
   }
@@ -344,10 +345,14 @@ const CompanyBranchDetails = () => {
                     )}
                     <Span
                       className={`text-lg font-medium ${
-                        currentBranch.IsActive ? "text-green-600" : "text-red-600"
+                        currentBranch.IsActive
+                          ? "text-green-600"
+                          : "text-red-600"
                       }`}
                     >
-                      {currentBranch.IsActive ? translations.Active : translations.Inactive}
+                      {currentBranch.IsActive
+                        ? translations.Active
+                        : translations.Inactive}
                     </Span>
                   </Container>
                 </Container>
@@ -539,8 +544,8 @@ const CompanyBranchDetails = () => {
             <Span className="text-gray-500 mb-4 block">
               {translations["This action cannot be undone"]}. This will
               permanently delete the branch{" "}
-              <strong>"{currentBranch?.BranchName}"</strong>{" "}
-              and all associated data.
+              <strong>"{currentBranch?.BranchName}"</strong> and all associated
+              data.
             </Span>
           </Container>
         }

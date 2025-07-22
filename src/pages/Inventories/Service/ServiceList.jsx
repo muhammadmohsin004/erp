@@ -42,7 +42,7 @@ import Span from "../../../components/elements/span/Span";
 const ServiceList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Service": language === "ar" ? "إضافة خدمة" : "Add Service",
@@ -300,8 +300,9 @@ const ServiceList = () => {
       }
 
       const csvContent = convertToCSV(allServicesData);
-      const filename = `services_export_${new Date().toISOString().split("T")[0]
-        }.csv`;
+      const filename = `services_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
 
       downloadCSV(csvContent, filename);
 
@@ -331,8 +332,9 @@ const ServiceList = () => {
       );
 
       const csvContent = convertToCSV(selectedServicesData);
-      const filename = `selected_services_export_${new Date().toISOString().split("T")[0]
-        }.csv`;
+      const filename = `selected_services_export_${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
 
       downloadCSV(csvContent, filename);
 
@@ -587,7 +589,6 @@ const ServiceList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -602,13 +603,12 @@ const ServiceList = () => {
               isIcon={true}
               icon={Download}
               iconSize="w-4 h-4"
-              bgColor={isExporting ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"}
-
+              bgColor={
+                isExporting ? "bg-gray-300" : "bg-gray-100 hover:bg-gray-200"
+              }
               rounded="rounded-lg"
               buttonText={
-                isExporting
-                  ? translations["Exporting..."]
-                  : translations.Export
+                isExporting ? translations["Exporting..."] : translations.Export
               }
               height="h-10"
               px="px-4"
@@ -639,7 +639,8 @@ const ServiceList = () => {
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     <Download className="w-4 h-4" />
-                    {translations["Export Selected"]} ({selectedServices.length})
+                    {translations["Export Selected"]} ({selectedServices.length}
+                    )
                   </button>
                 </div>
               </div>
@@ -662,7 +663,6 @@ const ServiceList = () => {
             />
           </div>
         </div>
-
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -833,7 +833,7 @@ const ServiceList = () => {
                         </td>
                         <td className="px-6 py-4 hidden xl:table-cell">
                           {service.Discount &&
-                            parseFloat(service.Discount) > 0 ? (
+                          parseFloat(service.Discount) > 0 ? (
                             <Container className="flex items-center gap-1">
                               <Span className="text-sm text-orange-600">
                                 {formatCurrency(service.Discount)}
@@ -850,10 +850,11 @@ const ServiceList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${service.Status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                              }`}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              service.Status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
                             {translations[service.Status] || service.Status}
                           </Span>
@@ -1046,10 +1047,11 @@ const ServiceList = () => {
                       {translations.Status}
                     </Span>
                     <Span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedService.Status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                        }`}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                        selectedService.Status === "Active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
                     >
                       {translations[selectedService.Status] ||
                         selectedService.Status}

@@ -52,7 +52,7 @@ const initialState = {
   },
 };
 
-// Action types (same as your original)
+// Action types
 const actionTypes = {
   SET_LOADING: "SET_LOADING",
   SET_ERROR: "SET_ERROR",
@@ -85,7 +85,7 @@ const actionTypes = {
   RESET_STATE: "RESET_STATE",
 };
 
-// Reducer (same as your original)
+// Reducer
 const productsManagerReducer = (state, action) => {
   switch (action.type) {
     case actionTypes.SET_LOADING:
@@ -176,7 +176,76 @@ const productsManagerReducer = (state, action) => {
       };
     }
 
-    // ... other cases (same as your original)
+    case actionTypes.SET_PRODUCT_IMAGES:
+      return {
+        ...state,
+        productImages: action.payload,
+        loading: false,
+        error: null,
+      };
+
+    case actionTypes.SET_CURRENT_PRODUCT_IMAGES:
+      return {
+        ...state,
+        currentProductImages: action.payload,
+        loading: false,
+        error: null,
+      };
+
+    case actionTypes.ADD_PRODUCT_IMAGE: {
+      const currentImages = state.productImages?.Data?.$values || [];
+      const updatedImages = [...currentImages, action.payload];
+      return {
+        ...state,
+        productImages: {
+          ...state.productImages,
+          Data: {
+            ...state.productImages?.Data,
+            $values: updatedImages,
+          },
+        },
+        loading: false,
+        error: null,
+      };
+    }
+
+    case actionTypes.ADD_MULTIPLE_PRODUCT_IMAGES: {
+      const currentImages = state.productImages?.Data?.$values || [];
+      const updatedImages = [...currentImages, ...action.payload];
+      return {
+        ...state,
+        productImages: {
+          ...state.productImages,
+          Data: {
+            ...state.productImages?.Data,
+            $values: updatedImages,
+          },
+        },
+        loading: false,
+        error: null,
+      };
+    }
+
+    case actionTypes.DELETE_PRODUCT_IMAGE: {
+      const currentImages = state.productImages?.Data?.$values || [];
+      const updatedImages = currentImages.filter(
+        (image) => image.Id !== action.payload
+      );
+      return {
+        ...state,
+        productImages: {
+          ...state.productImages,
+          Data: {
+            ...state.productImages?.Data,
+            $values: updatedImages,
+          },
+        },
+        loading: false,
+        error: null,
+      };
+    }
+
+    // ... other cases for brands, categories, statistics, etc.
 
     default:
       return state;
@@ -245,7 +314,9 @@ const makeApiCall = async (url, options = {}) => {
         console.error("Validation errors:", validationErrors);
 
         if (Array.isArray(validationErrors)) {
-          errorMessage += ` | Validation errors: ${validationErrors.join(", ")}`;
+          errorMessage += ` | Validation errors: ${validationErrors.join(
+            ", "
+          )}`;
         } else if (typeof validationErrors === "object") {
           const validationErrorString = Object.entries(validationErrors)
             .map(([key, values]) => {
@@ -293,20 +364,20 @@ const makeApiCall = async (url, options = {}) => {
 export const ProductsManagerProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productsManagerReducer, initialState);
 
-  // FIXED: Stable utility functions
+  // Stable utility functions
   const clearError = useCallback(() => {
     dispatch({ type: actionTypes.CLEAR_ERROR });
-  }, []); // FIXED: No dependencies
+  }, []);
 
   const setLoading = useCallback((loading) => {
     dispatch({ type: actionTypes.SET_LOADING, payload: loading });
-  }, []); // FIXED: No dependencies
+  }, []);
 
   const setFilters = useCallback((filters) => {
     dispatch({ type: actionTypes.SET_FILTERS, payload: filters });
-  }, []); // FIXED: No dependencies
+  }, []);
 
-  // FIXED: Stable API functions
+  // Product API functions
   const getProducts = useCallback(async (params = {}) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
@@ -343,6 +414,7 @@ export const ProductsManagerProvider = ({ children }) => {
       );
 
       if (response.Success) {
+        console.log("products===in context", response);
         dispatch({ type: actionTypes.SET_PRODUCTS, payload: response });
 
         if (response.Paginations) {
@@ -367,7 +439,7 @@ export const ProductsManagerProvider = ({ children }) => {
     } catch (error) {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
     }
-  }, []); // FIXED: No dependencies
+  }, []);
 
   const getProduct = useCallback(async (id) => {
     try {
@@ -388,7 +460,7 @@ export const ProductsManagerProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       return null;
     }
-  }, []); // FIXED: No dependencies
+  }, []);
 
   const createProduct = useCallback(async (productData) => {
     try {
@@ -429,7 +501,7 @@ export const ProductsManagerProvider = ({ children }) => {
     } finally {
       dispatch({ type: actionTypes.SET_LOADING, payload: false });
     }
-  }, []); // FIXED: No dependencies
+  }, []);
 
   const updateProduct = useCallback(async (id, productData) => {
     try {
@@ -450,7 +522,7 @@ export const ProductsManagerProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       return null;
     }
-  }, []); // FIXED: No dependencies
+  }, []);
 
   const deleteProduct = useCallback(async (id) => {
     try {
@@ -470,7 +542,133 @@ export const ProductsManagerProvider = ({ children }) => {
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       return false;
     }
-  }, []); // FIXED: No dependencies
+  }, []);
+
+  // Product Images API functions
+  const getProductImages = useCallback(async (params = {}) => {
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+      const queryParams = new URLSearchParams();
+
+      // Add query parameters if provided
+      if (params.productId) {
+        queryParams.append("productId", params.productId);
+      }
+      if (params.isMain !== undefined) {
+        queryParams.append("isMain", params.isMain);
+      }
+      if (params.page) {
+        queryParams.append("page", params.page);
+      }
+      if (params.pageSize) {
+        queryParams.append("pageSize", params.pageSize);
+      }
+
+      const url = queryParams.toString()
+        ? `${API_BASE_URLS.productImages}?${queryParams}`
+        : API_BASE_URLS.productImages;
+
+      const response = await makeApiCall(url);
+
+      if (response.Success) {
+        console.log("product images===in context", response);
+        dispatch({ type: actionTypes.SET_PRODUCT_IMAGES, payload: response });
+        return response.Data;
+      } else {
+        throw new Error(response.Message || "Failed to fetch product images");
+      }
+    } catch (error) {
+      console.error("Get product images error:", error);
+      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+      throw error;
+    }
+  }, []);
+
+  const getProductImagesByProductId = useCallback(
+    async (productId) => {
+      try {
+        dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+        const response = await getProductImages({ productId });
+
+        if (response && response.$values) {
+          const productImages = response.$values.filter(
+            (image) => image.ProductId === parseInt(productId)
+          );
+
+          dispatch({
+            type: actionTypes.SET_CURRENT_PRODUCT_IMAGES,
+            payload: productImages,
+          });
+
+          return productImages;
+        }
+
+        return [];
+      } catch (error) {
+        console.error("Get product images by product ID error:", error);
+        dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+        return [];
+      }
+    },
+    [getProductImages]
+  );
+
+  const createProductImage = useCallback(async (imageData) => {
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+      console.log("=== CONTEXT: Creating product image ===");
+      console.log("Image data:", imageData);
+
+      const response = await makeApiCall(API_BASE_URLS.productImages, {
+        method: "POST",
+        body: JSON.stringify(imageData),
+      });
+
+      console.log("Create product image response:", response);
+
+      if (response.Success) {
+        dispatch({
+          type: actionTypes.ADD_PRODUCT_IMAGE,
+          payload: response.Data,
+        });
+        return response.Data;
+      } else {
+        throw new Error(response.Message || "Failed to create product image");
+      }
+    } catch (error) {
+      console.error("Context create product image error:", error);
+      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+      throw error;
+    } finally {
+      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+    }
+  }, []);
+
+  const deleteProductImage = useCallback(async (id) => {
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+      const response = await makeApiCall(
+        `${API_BASE_URLS.productImages}/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.Success) {
+        dispatch({ type: actionTypes.DELETE_PRODUCT_IMAGE, payload: id });
+        return true;
+      } else {
+        throw new Error(response.Message || "Failed to delete product image");
+      }
+    } catch (error) {
+      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+      return false;
+    }
+  }, []);
 
   // Context value with stable functions
   const value = {
@@ -491,14 +689,20 @@ export const ProductsManagerProvider = ({ children }) => {
     filters: state.filters,
     dropdowns: state.dropdowns,
 
-    // Stable API methods
+    // Product API methods
     getProducts,
     getProduct,
     createProduct,
     updateProduct,
     deleteProduct,
 
-    // Stable utility methods
+    // Product Images API methods
+    getProductImages,
+    getProductImagesByProductId,
+    createProductImage,
+    deleteProductImage,
+
+    // Utility methods
     setFilters,
     clearError,
     setLoading,

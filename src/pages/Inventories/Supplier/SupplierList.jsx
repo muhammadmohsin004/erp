@@ -44,7 +44,7 @@ import Span from "../../../components/elements/span/Span";
 const SupplierList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Supplier": language === "ar" ? "إضافة مورد" : "Add Supplier",
@@ -242,13 +242,15 @@ const SupplierList = () => {
           `"${supplier.Status || ""}"`,
           `"${supplier.TaxId || ""}"`,
           `"${supplier.Notes || ""}"`,
-          `"${supplier.CreatedAt
-            ? new Date(supplier.CreatedAt).toLocaleDateString()
-            : ""
+          `"${
+            supplier.CreatedAt
+              ? new Date(supplier.CreatedAt).toLocaleDateString()
+              : ""
           }"`,
-          `"${supplier.UpdatedAt
-            ? new Date(supplier.UpdatedAt).toLocaleDateString()
-            : ""
+          `"${
+            supplier.UpdatedAt
+              ? new Date(supplier.UpdatedAt).toLocaleDateString()
+              : ""
           }"`,
         ].join(",")
       ),
@@ -511,7 +513,6 @@ const SupplierList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -534,8 +535,8 @@ const SupplierList = () => {
                 isExporting
                   ? "Exporting..."
                   : selectedSuppliers.length > 0
-                    ? `${translations.Export} (${selectedSuppliers.length})`
-                    : translations.Export
+                  ? `${translations.Export} (${selectedSuppliers.length})`
+                  : translations.Export
               }
               height="h-10"
               px="px-4"
@@ -563,7 +564,6 @@ const SupplierList = () => {
             />
           </div>
         </div>
-
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -741,10 +741,11 @@ const SupplierList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${supplier.Status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                              }`}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              supplier.Status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
                             {translations[supplier.Status] || supplier.Status}
                           </Span>
@@ -920,10 +921,11 @@ const SupplierList = () => {
                     {translations.Status}
                   </Span>
                   <Span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedSupplier.Status === "Active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                      }`}
+                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                      selectedSupplier.Status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
                   >
                     {translations[selectedSupplier.Status] ||
                       selectedSupplier.Status}
@@ -974,29 +976,29 @@ const SupplierList = () => {
                 {(selectedSupplier.Address ||
                   selectedSupplier.City ||
                   selectedSupplier.Country) && (
-                    <Container>
-                      <Span className="text-sm font-medium text-gray-500">
-                        {translations.Address}
-                      </Span>
-                      <Container className="mt-1">
-                        {selectedSupplier.Address && (
-                          <Span className="text-sm text-gray-900 block">
-                            {selectedSupplier.Address}
-                          </Span>
-                        )}
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">
+                      {translations.Address}
+                    </Span>
+                    <Container className="mt-1">
+                      {selectedSupplier.Address && (
                         <Span className="text-sm text-gray-900 block">
-                          {[
-                            selectedSupplier.City,
-                            selectedSupplier.State,
-                            selectedSupplier.ZipCode,
-                            selectedSupplier.Country,
-                          ]
-                            .filter(Boolean)
-                            .join(", ")}
+                          {selectedSupplier.Address}
                         </Span>
-                      </Container>
+                      )}
+                      <Span className="text-sm text-gray-900 block">
+                        {[
+                          selectedSupplier.City,
+                          selectedSupplier.State,
+                          selectedSupplier.ZipCode,
+                          selectedSupplier.Country,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </Span>
                     </Container>
-                  )}
+                  </Container>
+                )}
 
                 {selectedSupplier.Notes && (
                   <Container>
@@ -1016,8 +1018,8 @@ const SupplierList = () => {
                     Created:{" "}
                     {selectedSupplier.CreatedAt
                       ? new Date(
-                        selectedSupplier.CreatedAt
-                      ).toLocaleDateString()
+                          selectedSupplier.CreatedAt
+                        ).toLocaleDateString()
                       : "N/A"}
                   </Container>
                   {selectedSupplier.UpdatedAt && (

@@ -37,7 +37,7 @@ import Span from "../../../components/elements/span/Span";
 const PriceListList = () => {
   const navigate = useNavigate();
   const language = useSelector((state) => state.language?.language || "en");
-  const token = useSelector((state) => state.auth?.token);
+  const token = localStorage.getItem("token");
 
   const translations = {
     "Add Price List":
@@ -574,7 +574,6 @@ const PriceListList = () => {
               icon={Filter}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
               buttonText={translations.Filters}
               height="h-10"
@@ -590,7 +589,6 @@ const PriceListList = () => {
               icon={Download}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
-
               rounded="rounded-lg"
               buttonText={translations.Export}
               height="h-10"
@@ -622,7 +620,6 @@ const PriceListList = () => {
             />
           </div>
         </div>
-
 
         {/* Statistics Cards */}
         <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
