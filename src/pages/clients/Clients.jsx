@@ -1047,7 +1047,7 @@ const DynamicClientDashboard = () => {
 
           <Container className="flex gap-1 mt-3">
             <button
-              onClick={() => navigate(`/admin/clients/${client.Id}`)}
+              onClick={() => navigate(`/admin/ViewClients-Details/${client.Id}`)}
               className="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
               title={translations.View}
             >
