@@ -6,10 +6,6 @@ import {
   Edit,
   Trash2,
   Copy,
-  ToggleLeft,
-  ToggleRight,
-  MapPin,
-  Phone,
   Filter,
   Search,
   ChevronLeft,
@@ -19,6 +15,8 @@ import {
   User,
   RefreshCw,
   X,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import { notification } from "antd";
 import Container from "../../components/elements/container/Container";
@@ -29,6 +27,40 @@ import Table from "../../components/elements/table/Table";
 import InputField from "../../components/elements/inputField/InputField";
 import SelectBox from "../../components/elements/selectBox/SelectBox";
 import { useVendor } from "../../Contexts/VendorContext/VendorContext";
+import Modall from "../../components/elements/modal/Modal";
+import CustomAlert from "../../components/elements/Alert/CustomAlerts";
+import DeleteModal from "../../components/elements/modal/DeleteModal";
+
+// Constants for filter options
+const CURRENCY_OPTIONS = [
+  { value: "USD", label: "USD - US Dollar" },
+  { value: "EUR", label: "EUR - Euro" },
+  { value: "GBP", label: "GBP - British Pound" },
+  { value: "PKR", label: "PKR - Pakistani Rupee" },
+  { value: "CAD", label: "CAD - Canadian Dollar" },
+  { value: "AUD", label: "AUD - Australian Dollar" },
+  { value: "JPY", label: "JPY - Japanese Yen" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
+
+const COUNTRY_OPTIONS = [
+  { value: "", label: "All Countries" },
+  { value: "US", label: "United States" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "CA", label: "Canada" },
+  { value: "PK", label: "Pakistan" },
+  { value: "IN", label: "India" },
+  { value: "AU", label: "Australia" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "JP", label: "Japan" },
+  { value: "CN", label: "China" },
+];
 
 const VendorManagement = () => {
   const navigate = useNavigate();
@@ -53,45 +85,23 @@ const VendorManagement = () => {
     bulkDeleteVendors,
   } = useVendor();
 
-  // Local state
+  // State management
   const [apiNotification, contextHolder] = notification.useNotification();
   const [selectedVendors, setSelectedVendors] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
-  const [isTogglingStatus, setIsTogglingStatus] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-
-  // Filter options
-  const currencyOptions = [
-    { value: "USD", label: "USD - US Dollar" },
-    { value: "EUR", label: "EUR - Euro" },
-    { value: "GBP", label: "GBP - British Pound" },
-    { value: "PKR", label: "PKR - Pakistani Rupee" },
-    { value: "CAD", label: "CAD - Canadian Dollar" },
-    { value: "AUD", label: "AUD - Australian Dollar" },
-    { value: "JPY", label: "JPY - Japanese Yen" },
-  ];
-
-  const statusOptions = [
-    { value: "", label: "All Status" },
-    { value: "true", label: "Active" },
-    { value: "false", label: "Inactive" },
-  ];
-
-  const countryOptions = [
-    { value: "", label: "All Countries" },
-    { value: "US", label: "United States" },
-    { value: "GB", label: "United Kingdom" },
-    { value: "CA", label: "Canada" },
-    { value: "PK", label: "Pakistan" },
-    { value: "IN", label: "India" },
-    { value: "AU", label: "Australia" },
-    { value: "DE", label: "Germany" },
-    { value: "FR", label: "France" },
-    { value: "JP", label: "Japan" },
-    { value: "CN", label: "China" },
-  ];
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingVendor, setViewingVendor] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState(null);
+  const [alert, setAlert] = useState({
+    isVisible: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
 
   // Initialize data
   useEffect(() => {
@@ -104,18 +114,18 @@ const VendorManagement = () => {
       showNotification("error", "Error", error);
       clearError();
     }
-  }, [error, clearError]);
+  }, [error]);
 
   // Update selectAll state based on selectedVendors
   useEffect(() => {
-    if (vendors && vendors.length > 0) {
+    if (vendors?.length > 0) {
       setSelectAll(selectedVendors.length === vendors.length);
     } else {
       setSelectAll(false);
     }
   }, [selectedVendors, vendors]);
 
-  // Show notification
+  // Helper functions
   const showNotification = (type, message, description) => {
     apiNotification[type]({
       message,
@@ -125,11 +135,33 @@ const VendorManagement = () => {
     });
   };
 
-  // Handle vendor selection
+  const showAlert = (type, title, message = "") => {
+    setAlert({
+      isVisible: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const hideAlert = () => {
+    setAlert(prev => ({ ...prev, isVisible: false }));
+  };
+
+  const formatAddress = (vendor) => {
+    const addressParts = [
+      vendor.City,
+      vendor.State,
+      vendor.Country
+    ].filter(Boolean);
+    return addressParts.join(", ") || "N/A";
+  };
+
+  // Vendor selection handlers
   const handleVendorSelection = (vendorId) => {
-    setSelectedVendors((prev) =>
+    setSelectedVendors(prev =>
       prev.includes(vendorId)
-        ? prev.filter((id) => id !== vendorId)
+        ? prev.filter(id => id !== vendorId)
         : [...prev, vendorId]
     );
   };
@@ -138,12 +170,16 @@ const VendorManagement = () => {
     if (selectAll) {
       setSelectedVendors([]);
     } else {
-      setSelectedVendors(vendors?.map((vendor) => vendor.Id) || []);
+      // Safely handle cases where vendors is not an array
+      const vendorIds = Array.isArray(vendors)
+        ? vendors.map(vendor => vendor.Id)
+        : [];
+      setSelectedVendors(vendorIds);
     }
   };
 
   // Navigation handlers
-
+  const handleCreateVendor = () => navigate("/admin/add-vendors");
 
   const handleEditVendor = async (vendorId) => {
     try {
@@ -162,46 +198,50 @@ const VendorManagement = () => {
     }
   };
 
-  const handleCreateVendor = () => {
-    navigate("/admin/add-vendors");
-  };
+  //Delete Handler 
 
-  const handleCloneVendor = async (vendorId) => {
-    try {
-      const vendorData = await getVendor(vendorId);
-      if (vendorData) {
-        navigate("/admin/add-vendors", {
-          state: {
-            cloneData: {
-              ...vendorData,
-              Name: `${vendorData.Name || "Vendor"} (Copy)`,
-              Id: undefined,
-              IsDefault: false,
-            },
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error cloning vendor:", error);
-      showNotification("error", "Error", "Failed to clone vendor");
+ const handleDeleteVendor = (vendorId) => {
+    const vendor = Array.isArray(vendors)
+      ? vendors.find((v) => v.Id === vendorId)
+      : null;
+
+    if (vendor) {
+      setVendorToDelete(vendor);
+      setShowDeleteModal(true);
+    } else {
+      console.error("Vendor not found");
+      showNotification("error", "Error", "Vendor not found");
     }
   };
 
-  // Delete handlers
-  const handleDeleteVendor = async (vendorId) => {
-    if (window.confirm("Are you sure you want to delete this vendor? This action cannot be undone.")) {
-      setIsDeleting(vendorId);
-      try {
-        const success = await deleteVendor(vendorId);
-        if (success) {
-          showNotification("success", "Success", "Vendor deleted successfully");
-          setSelectedVendors((prev) => prev.filter((id) => id !== vendorId));
-        }
-      } catch (err) {
-        showNotification("error", "Error", err.message || "Failed to delete vendor");
-      } finally {
-        setIsDeleting(null);
+  const confirmDeleteVendor = async () => {
+    if (!vendorToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const success = await deleteVendor(vendorToDelete.Id);
+      if (success) {
+        setShowDeleteModal(false);
+        setVendorToDelete(null);
+        showAlert(
+          "success",
+          "Vendor Deleted Successfully",
+          `${vendorToDelete.Name} has been deleted.`
+        );
+        // Refresh the vendor list
+        await getVendors();
+        // Remove from selected vendors if present
+        setSelectedVendors(prev => prev.filter(id => id !== vendorToDelete.Id));
       }
+    } catch (error) {
+      console.error("Error deleting vendor:", error);
+      showAlert(
+        "error",
+        "Delete Failed",
+        error.message || "Failed to delete the vendor. Please try again."
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -224,25 +264,26 @@ const VendorManagement = () => {
     }
   };
 
-  // Toggle status handler
-  const handleToggleStatus = async (vendorId) => {
-    setIsTogglingStatus(vendorId);
+
+
+  // View handler
+  const handleViewVendor = async (vendorId) => {
     try {
-      const success = await toggleVendorStatus(vendorId);
-      if (success) {
-        showNotification("success", "Success", "Vendor status updated successfully");
+      const vendorData = await getVendor(vendorId);
+
+      if (vendorData) {
+        setViewingVendor(vendorData.Vendor);
+        setShowViewModal(true);
       }
-    } catch (err) {
-      showNotification("error", "Error", err.message || "Failed to update vendor status");
-    } finally {
-      setIsTogglingStatus(null);
+    } catch (error) {
+      console.error("Error fetching vendor details:", error);
+      showAlert("error", "Failed to Load", "Could not load vendor details.");
     }
   };
 
   // Filter handlers
   const handleSearch = (e) => {
-    const searchTerm = e.target.value;
-    searchVendors(searchTerm);
+    searchVendors(e.target.value);
   };
 
   const handleCurrencyFilter = (value) => {
@@ -286,15 +327,6 @@ const VendorManagement = () => {
 
   const handlePageSizeChange = (value) => {
     changePageSize(Number(value));
-  };
-
-  // Format display data
-  const formatAddress = (vendor) => {
-    const addressParts = [];
-    if (vendor.City) addressParts.push(vendor.City);
-    if (vendor.State) addressParts.push(vendor.State);
-    if (vendor.Country) addressParts.push(vendor.Country);
-    return addressParts.join(", ") || "N/A";
   };
 
   const totalPages = Math.ceil(pagination.totalItems / pagination.pageSize);
@@ -351,6 +383,13 @@ const VendorManagement = () => {
             </div>
           </div>
         </Container>
+        <CustomAlert
+          type={alert.type}
+          title={alert.title}
+          message={alert.message}
+          isVisible={alert.isVisible}
+          onClose={hideAlert}
+        />
 
         {/* Filters */}
         {showFilters && (
@@ -372,7 +411,7 @@ const VendorManagement = () => {
                 placeholder="All Currencies"
                 value={filters.currency || ""}
                 handleChange={handleCurrencyFilter}
-                optionList={[{ value: "", label: "All Currencies" }, ...currencyOptions]}
+                optionList={[{ value: "", label: "All Currencies" }, ...CURRENCY_OPTIONS]}
                 label="Currency"
                 disabled={loading}
               />
@@ -382,7 +421,7 @@ const VendorManagement = () => {
                 placeholder="All Countries"
                 value={filters.country || ""}
                 handleChange={handleCountryFilter}
-                optionList={countryOptions}
+                optionList={COUNTRY_OPTIONS}
                 label="Country"
                 disabled={loading}
               />
@@ -392,7 +431,7 @@ const VendorManagement = () => {
                 placeholder="All Status"
                 value={filters.isActive === null ? "" : String(filters.isActive)}
                 handleChange={handleStatusFilter}
-                optionList={statusOptions}
+                optionList={STATUS_OPTIONS}
                 label="Status"
                 disabled={loading}
               />
@@ -452,7 +491,7 @@ const VendorManagement = () => {
       </Container>
 
       {/* Table */}
-      <Container className="bg-white shadow-sm rounded-lg">
+      <Container className="bg-white shadow-sm rounded-lg relative">
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10 rounded-lg">
             <div className="flex items-center gap-2 text-blue-600">
@@ -526,7 +565,7 @@ const VendorManagement = () => {
                   </td>
                 </tr>
               ) : (
-                vendors?.map((vendor) => (
+                (vendors?.length ? vendors : []).map((vendor) => (
                   <tr key={vendor.Id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <input
@@ -622,7 +661,6 @@ const VendorManagement = () => {
 
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-1">
-                        {/* View Button */}
                         <button
                           onClick={() => handleViewVendor(vendor.Id)}
                           className="flex items-center justify-center h-8 w-8 border border-blue-200 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900"
@@ -631,7 +669,6 @@ const VendorManagement = () => {
                           <Eye className="w-4 h-4" />
                         </button>
 
-                        {/* Edit Button */}
                         <button
                           onClick={() => handleEditVendor(vendor.Id)}
                           className="flex items-center justify-center h-8 w-8 border border-green-200 rounded-lg bg-green-50 hover:bg-green-100 text-green-600"
@@ -640,16 +677,6 @@ const VendorManagement = () => {
                           <Edit className="w-4 h-4" />
                         </button>
 
-                        {/* Clone Button */}
-                        <button
-                          onClick={() => handleCloneVendor(vendor.Id)}
-                          className="flex items-center justify-center h-8 w-8 border border-purple-200 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600"
-                          title="Clone Vendor"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-
-                        {/* Delete Button */}
                         <button
                           onClick={() => handleDeleteVendor(vendor.Id)}
                           className={`flex items-center justify-center h-8 w-8 border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 ${isDeleting === vendor.Id ? "opacity-50 cursor-not-allowed" : ""
@@ -740,6 +767,131 @@ const VendorManagement = () => {
           </Container>
         )}
       </Container>
+
+      {/* View Vendor Modal */}
+      <Modall
+        modalOpen={showViewModal}
+        setModalOpen={setShowViewModal}
+        title={
+          <Container className="flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            <Span>Vendor Details</Span>
+          </Container>
+        }
+        width={900}
+        okAction={() => setShowViewModal(false)}
+        cancelAction={() => setShowViewModal(false)}
+        body={
+          viewingVendor && (
+            <Container className="max-h-96 overflow-y-auto">
+              <Container className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Basic Information */}
+                <Container className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Basic Information</h3>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Vendor Name</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.Name || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Address</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.Address || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">City</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.City || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">State</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.State || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Country</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.Country || "N/A"}
+                    </Span>
+                  </Container>
+                </Container>
+
+                {/* Contact & Status Information */}
+                <Container className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Contact & Status</h3>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Zip Code</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.PostalCode || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Phone Number</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.Phone || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Email</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.Email || "N/A"}
+                    </Span>
+                  </Container>
+
+                  <Container>
+                    <Span className="text-sm font-medium text-gray-500">Tax Number</Span>
+                    <Span className="text-sm text-gray-900 block mt-1">
+                      {viewingVendor.TaxNumber || "N/A"}
+                    </Span>
+                  </Container>
+                </Container>
+              </Container>
+
+              {/* Additional Information */}
+              <Container className="mt-6 pt-4 border-t border-gray-200">
+                <Container className="text-xs text-gray-500 space-y-1">
+                  <Container>
+                    Created:{" "}
+                    {viewingVendor.CreatedAt
+                      ? new Date(viewingVendor.CreatedAt).toLocaleDateString()
+                      : "N/A"}
+                  </Container>
+                  {viewingVendor.UpdatedAt && (
+                    <Container>
+                      Updated:{" "}
+                      {new Date(viewingVendor.UpdatedAt).toLocaleDateString()}
+                    </Container>
+                  )}
+                </Container>
+              </Container>
+            </Container>
+          )
+        }
+      />
+
+      {/* Delete Modal */}
+     <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteVendor}
+        title="Delete Vendor"
+        message="This action cannot be undone"
+        itemName={vendorToDelete?.Name || ''}
+        isDeleting={isDeleting}
+        variant="danger"
+      />
     </Container>
   );
 };

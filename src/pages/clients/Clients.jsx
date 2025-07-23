@@ -1052,7 +1052,7 @@ const DynamicClientDashboard = () => {
               title={translations.View}
             >
               <Eye className="w-3 h-3" />
-            </button> */}
+            </button> 
             <button
               onClick={() =>
                 navigate("/admin/new-clients", {
