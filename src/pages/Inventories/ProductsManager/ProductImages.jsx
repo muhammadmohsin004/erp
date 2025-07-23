@@ -391,7 +391,7 @@ const ProductImages = () => {
     console.log("Selected multiple files:", validFiles);
   };
 
-  // FIXED: Single Upload Handler
+  // FIXED: Single Upload Handler - Pass object to context, not FormData
   const handleSingleUpload = async () => {
     console.log("=== SINGLE UPLOAD DEBUG START ===");
     console.log("Upload files:", uploadFiles);
@@ -412,26 +412,19 @@ const ProductImages = () => {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
+      // Create data object for context function - NOT FormData
+      const imageData = {
+        productId: uploadFormData.productId,
+        isMain: uploadFormData.isMain,
+        altText: uploadFormData.altText || "",
+        imageFile: uploadFiles[0], // Pass the actual file object
+      };
 
-      // CRITICAL: Add fields in the EXACT order as your cURL
-      formData.append("IsMain", uploadFormData.isMain ? "true" : "false");
-      formData.append("ProductId", uploadFormData.productId.toString());
-      formData.append("AltText", uploadFormData.altText || "");
-      formData.append("ImageFile", uploadFiles[0], uploadFiles[0].name);
-
-      console.log("=== FormData Contents ===");
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-        if (value instanceof File) {
-          console.log(`  File name: ${value.name}`);
-          console.log(`  File size: ${value.size}`);
-          console.log(`  File type: ${value.type}`);
-        }
-      }
+      console.log("=== Sending to context ===");
+      console.log("Image data:", imageData);
 
       console.log("Calling createProductImage...");
-      const result = await createProductImage(formData);
+      const result = await createProductImage(imageData);
       console.log("Upload successful:", result);
 
       // Reset form after successful upload
@@ -450,7 +443,7 @@ const ProductImages = () => {
     }
   };
 
-  // FIXED: Multiple Upload Handler
+  // FIXED: Multiple Upload Handler - Pass object to context, not FormData
   const handleMultipleUpload = async () => {
     console.log("=== MULTIPLE UPLOAD DEBUG START ===");
     console.log("Multiple upload data:", multipleUploadData);
@@ -470,30 +463,18 @@ const ProductImages = () => {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
+      // Create data object for context function - NOT FormData
+      const imagesData = {
+        productId: multipleUploadData.productId,
+        altText: multipleUploadData.altText || "",
+        imageFiles: multipleUploadData.files, // Pass array of file objects
+      };
 
-      // CRITICAL: Add fields in the EXACT order as your cURL
-      formData.append("ProductId", multipleUploadData.productId.toString());
-
-      // Append each file with the EXACT field name from cURL
-      multipleUploadData.files.forEach((file) => {
-        formData.append("ImageFiles", file, file.name);
-      });
-
-      formData.append("AltText", multipleUploadData.altText || "");
-
-      console.log("=== Multiple Upload FormData Contents ===");
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-        if (value instanceof File) {
-          console.log(`  File name: ${value.name}`);
-          console.log(`  File size: ${value.size}`);
-          console.log(`  File type: ${value.type}`);
-        }
-      }
+      console.log("=== Sending to context ===");
+      console.log("Images data:", imagesData);
 
       console.log("Calling createMultipleProductImages...");
-      const result = await createMultipleProductImages(formData);
+      const result = await createMultipleProductImages(imagesData);
       console.log("Multiple upload successful:", result);
 
       // Reset form after successful upload

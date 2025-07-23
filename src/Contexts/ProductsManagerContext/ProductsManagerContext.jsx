@@ -361,12 +361,25 @@ const makeApiCall = async (url, options = {}) => {
   }
 };
 
-// Helper function for multipart form data API calls
+// FIXED: Helper function for multipart form data API calls
 const makeMultipartApiCall = async (url, formData) => {
   const token = getAuthToken();
 
   try {
-    console.log("Making multipart API call to:", url);
+    console.log("=== CONTEXT: Making multipart API call ===");
+    console.log("URL:", url);
+    
+    // Log FormData contents for debugging
+    console.log("=== FormData Contents ===");
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+      if (value instanceof File) {
+        console.log(`  File name: ${value.name}`);
+        console.log(`  File size: ${value.size}`);
+        console.log(`  File type: ${value.type}`);
+      }
+    }
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -376,6 +389,9 @@ const makeMultipartApiCall = async (url, formData) => {
       },
       body: formData,
     });
+
+    console.log("Response status:", response.status);
+    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       let errorData;
@@ -668,26 +684,39 @@ export const ProductsManagerProvider = ({ children }) => {
     [getProductImages]
   );
 
+  // FIXED: Single Product Image Upload - Construct FormData according to CURL
   const createProductImage = useCallback(async (imageData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-      console.log("=== CONTEXT: Creating product image ===");
-      console.log("Image data:", imageData);
+      console.log("=== CONTEXT: Creating single product image ===");
+      console.log("Image data received:", imageData);
 
-      // Create FormData for single image upload
+      // Validate required fields
+      if (!imageData.productId) {
+        throw new Error("ProductId is required");
+      }
+      if (!imageData.imageFile) {
+        throw new Error("ImageFile is required");
+      }
+
+      // Create FormData exactly as per CURL specification
       const formData = new FormData();
-      formData.append("ProductId", imageData.productId);
-      formData.append("IsMain", imageData.isMain || false);
+      
+      // CRITICAL: Add fields in the EXACT order and format as CURL
+      formData.append("IsMain", imageData.isMain ? "true" : "false");
+      formData.append("ProductId", imageData.productId.toString());
       formData.append("AltText", imageData.altText || "");
-      formData.append("ImageFile", imageData.imageFile);
+      formData.append("ImageFile", imageData.imageFile, imageData.imageFile.name);
+
+      console.log("=== Single Image FormData created ===");
 
       const response = await makeMultipartApiCall(
         API_BASE_URLS.productImages,
         formData
       );
 
-      console.log("Create product image response:", response);
+      console.log("Create single product image response:", response);
 
       if (response.Success) {
         dispatch({
@@ -699,7 +728,7 @@ export const ProductsManagerProvider = ({ children }) => {
         throw new Error(response.Message || "Failed to create product image");
       }
     } catch (error) {
-      console.error("Context create product image error:", error);
+      console.error("=== CONTEXT: Create product image error ===", error);
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       throw error;
     } finally {
@@ -707,24 +736,36 @@ export const ProductsManagerProvider = ({ children }) => {
     }
   }, []);
 
+  // FIXED: Multiple Product Images Upload - Construct FormData according to CURL
   const createMultipleProductImages = useCallback(async (imagesData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
       console.log("=== CONTEXT: Creating multiple product images ===");
-      console.log("Images data:", imagesData);
+      console.log("Images data received:", imagesData);
 
-      // Create FormData for multiple images upload
+      // Validate required fields
+      if (!imagesData.productId) {
+        throw new Error("ProductId is required");
+      }
+      if (!imagesData.imageFiles || !Array.isArray(imagesData.imageFiles) || imagesData.imageFiles.length === 0) {
+        throw new Error("ImageFiles array is required and must not be empty");
+      }
+
+      // Create FormData exactly as per CURL specification
       const formData = new FormData();
-      formData.append("ProductId", imagesData.productId);
+      
+      // CRITICAL: Add fields in the EXACT order and format as CURL
+      formData.append("ProductId", imagesData.productId.toString());
+      
+      // Add all image files with the EXACT field name from CURL
+      imagesData.imageFiles.forEach((file) => {
+        formData.append("ImageFiles", file, file.name);
+      });
+      
       formData.append("AltText", imagesData.altText || "");
 
-      // Add multiple image files
-      if (imagesData.imageFiles && Array.isArray(imagesData.imageFiles)) {
-        imagesData.imageFiles.forEach((file) => {
-          formData.append("ImageFiles", file);
-        });
-      }
+      console.log("=== Multiple Images FormData created ===");
 
       const response = await makeMultipartApiCall(
         API_BASE_URLS.productImagesMultiple,
@@ -734,10 +775,15 @@ export const ProductsManagerProvider = ({ children }) => {
       console.log("Create multiple product images response:", response);
 
       if (response.Success) {
-        // Assuming the response.Data contains an array of created images
-        const createdImages = Array.isArray(response.Data)
-          ? response.Data
-          : response.Data?.$values || [response.Data];
+        // Handle different response formats
+        let createdImages;
+        if (Array.isArray(response.Data)) {
+          createdImages = response.Data;
+        } else if (response.Data?.$values && Array.isArray(response.Data.$values)) {
+          createdImages = response.Data.$values;
+        } else {
+          createdImages = [response.Data]; // Single image in array format
+        }
 
         dispatch({
           type: actionTypes.ADD_MULTIPLE_PRODUCT_IMAGES,
@@ -750,7 +796,7 @@ export const ProductsManagerProvider = ({ children }) => {
         );
       }
     } catch (error) {
-      console.error("Context create multiple product images error:", error);
+      console.error("=== CONTEXT: Create multiple product images error ===", error);
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       throw error;
     } finally {
@@ -811,7 +857,7 @@ export const ProductsManagerProvider = ({ children }) => {
     getProductImages,
     getProductImagesByProductId,
     createProductImage,
-    createMultipleProductImages, // New function added
+    createMultipleProductImages,
     deleteProductImage,
 
     // Utility methods
