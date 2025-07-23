@@ -3,12 +3,10 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Header from "../../components/header/Header";
 import { KpiCard } from "../../components/cards/KpiCard";
 import { ChartSection } from "../../components/cards/ChartSection";
-import { TabNavigation } from "../../components/tabNav/TabNavigation";
 import { useDashboard } from "../../Contexts/DashboardContext/DashboardContext";
 const Dashboard = () => {
   // UI State
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('Overview');
   const [company, setCompany] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -127,7 +125,7 @@ const Dashboard = () => {
       // Attendance Rate KPI - prefer overview data, fallback to companyStats overall rate
       const attendanceRate = attendanceToday?.AttendanceRate || (companyStats?.OverallAttendanceRate * 100) || 0;
       const attendanceRateFormatted = formatters.formatAttendanceRate(attendanceRate);
-      
+
       // Active Employees KPI - prefer overview data, fallback to companyStats
       const activeEmployees = employeeMetrics?.Active || companyStats?.ActiveEmployees || 0;
       const activePercentage = totalEmployees > 0 ? ((activeEmployees / totalEmployees) * 100).toFixed(1) : 0;
@@ -136,7 +134,7 @@ const Dashboard = () => {
       const pendingCount = pendingActions?.length || 0;
       const pendingLeaves = companyStats?.PendingLeaves || 0;
       const totalPending = pendingCount + pendingLeaves;
-      const highPriorityCount = pendingActions?.filter(action => 
+      const highPriorityCount = pendingActions?.filter(action =>
         action.Priority === "High"
       ).length || 0;
 
@@ -186,9 +184,9 @@ const Dashboard = () => {
           <div className="flex items-center space-x-4">
             <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
               {company.LogoUrl ? (
-                <img 
-                  src={company.LogoUrl} 
-                  alt={company.Name} 
+                <img
+                  src={company.LogoUrl}
+                  alt={company.Name}
                   className="h-8 w-8 rounded"
                 />
               ) : (
@@ -240,7 +238,7 @@ const Dashboard = () => {
         <div className="ml-3">
           <h3 className="text-sm font-medium text-red-800">Error Loading Dashboard</h3>
           <p className="mt-1 text-sm text-red-700">{error}</p>
-          <button 
+          <button
             onClick={handleRetry}
             className="mt-2 text-sm font-medium text-red-800 hover:text-red-900 transition-colors"
           >
@@ -258,37 +256,37 @@ const Dashboard = () => {
     const fallbackData = companyStats || {};
 
     const snapshots = [
-      { 
-        label: "Present", 
-        value: todayData.Present ?? fallbackData.TodayPresent ?? 0, 
-        color: "blue" 
+      {
+        label: "Present",
+        value: todayData.Present ?? fallbackData.TodayPresent ?? 0,
+        color: "blue"
       },
-      { 
-        label: "Absent", 
-        value: todayData.Absent ?? (fallbackData.TotalEmployees - fallbackData.TodayPresent) ?? 0, 
-        color: "red" 
+      {
+        label: "Absent",
+        value: todayData.Absent ?? (fallbackData.TotalEmployees - fallbackData.TodayPresent) ?? 0,
+        color: "red"
       },
-      { 
-        label: "Late", 
-        value: todayData.Late ?? 0, 
-        color: "yellow" 
+      {
+        label: "Late",
+        value: todayData.Late ?? 0,
+        color: "yellow"
       },
-      { 
-        label: "Checked In", 
-        value: todayData.CheckedIn ?? fallbackData.TodayPresent ?? 0, 
-        color: "green" 
+      {
+        label: "Checked In",
+        value: todayData.CheckedIn ?? fallbackData.TodayPresent ?? 0,
+        color: "green"
       },
-      { 
-        label: "Checked Out", 
-        value: todayData.CheckedOut ?? 0, 
-        color: "purple" 
+      {
+        label: "Checked Out",
+        value: todayData.CheckedOut ?? 0,
+        color: "purple"
       },
-      { 
-        label: "Rate", 
+      {
+        label: "Rate",
         value: formatters.formatAttendanceRate(
           todayData.AttendanceRate ?? (fallbackData.OverallAttendanceRate * 100) ?? 0
-        ), 
-        color: "indigo" 
+        ),
+        color: "indigo"
       },
     ];
 
@@ -328,14 +326,14 @@ const Dashboard = () => {
         color: "blue"
       },
       {
-        label: "Active Employees", 
+        label: "Active Employees",
         value: companyStats.ActiveEmployees?.toLocaleString() || "0",
         sublabel: `${companyStats.TotalEmployees > 0 ? Math.round((companyStats.ActiveEmployees / companyStats.TotalEmployees) * 100) : 0}% of total`,
         color: "green"
       },
       {
         label: "Departments",
-        value: companyStats.DepartmentsCount?.toLocaleString() || "0", 
+        value: companyStats.DepartmentsCount?.toLocaleString() || "0",
         sublabel: "departments setup",
         color: "purple"
       },
@@ -348,7 +346,7 @@ const Dashboard = () => {
       {
         label: "Pending Leaves",
         value: companyStats.PendingLeaves?.toLocaleString() || "0",
-        sublabel: "awaiting approval", 
+        sublabel: "awaiting approval",
         color: "orange"
       },
       {
@@ -425,7 +423,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gray-50">
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        
+
         <main className="transition-all duration-300">
           <div className="p-6">
             {LoadingComponent}
@@ -441,7 +439,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gray-50">
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        
+
         <main className="transition-all duration-300">
           <div className="p-6">
             {ErrorComponent}
@@ -455,10 +453,10 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-      
+
       <main className="transition-all duration-300">
         <div className="p-6">
-         
+
           {/* Company Header */}
           {CompanyHeader}
 
@@ -516,8 +514,7 @@ const Dashboard = () => {
             <ChartSection />
           </div>
 
-          {/* Tab Navigation */}
-          <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+         
         </div>
       </main>
     </div>
