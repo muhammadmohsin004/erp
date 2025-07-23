@@ -12,7 +12,6 @@ import { SupplierProvider } from "./Contexts/SupplierContext/SupplierContext";
 import { ServiceProvider } from "./Contexts/ServiceContext/ServiceContext";
 import { ProductsManagerProvider } from "./Contexts/ProductsManagerContext/ProductsManagerContext";
 import { SuperDashboardProvider } from "./Contexts/superAdminDashborad/SuperAdminContext";
-import { HRProvider } from "./Contexts/HrContext/HrContext";
 import { RequisitionProvider } from "./Contexts/RequisitionContext/RequisitionContext";
 import { PriceListProvider } from "./Contexts/PriceListContext/PriceListContext";
 import { InvoicesProvider } from "./Contexts/InvoiceContext/InvoiceContext";
@@ -30,6 +29,7 @@ import { FinanceExpensesProvider } from "./Contexts/FinanceContext/FinanceExpens
 import { FinanceIncomesProvider } from "./Contexts/FinanceContext/FinanceIncomeContext";
 import { IncomeCategoryProvider } from "./Contexts/IncomeCategoryContext/IncomeCategoryContext";
 import { FinanceReportsProvider } from "./Contexts/FinanceReportsContext";
+import { HRProvider } from "./Contexts/HRContext/HRContext";
 function App() {
   return (
     <Router>
@@ -60,8 +60,8 @@ function App() {
                                                       <FinanceIncomesProvider>
                                                         <IncomeCategoryProvider>
                                                           <FinanceReportsProvider>
-                                                          <Routes />
-                                                          </FinanceReportsProvider> 
+                                                            <Routes />
+                                                          </FinanceReportsProvider>
                                                         </IncomeCategoryProvider>
                                                       </FinanceIncomesProvider>
                                                     </FinanceExpensesProvider>
