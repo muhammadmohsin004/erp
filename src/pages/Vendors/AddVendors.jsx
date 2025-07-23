@@ -1,677 +1,855 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useVendor } from '../../Contexts/VendorContext/VendorContext';
-import { notification } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    Save,
-    X,
-    ArrowLeft,
-    MapPin,
-    Phone,
-    Mail,
-    User,
-    Globe,
-    CreditCard,
-    Building,
-    Calendar,
-    Info,
-    RefreshCw,
-    Eye,
+  ArrowLeft,
+  Save,
+  Building,
+  MapPin,
+  Phone,
+  Mail,
+  User,
+  Globe,
+  CreditCard,
+  Calendar,
+  Info,
+  RefreshCw,
+  Eye,
+  Copy,
+  X,
 } from 'lucide-react';
-import Container from '../../components/elements/container/Container';
-import Span from '../../components/elements/span/Span';
+import { useVendor } from '../../Contexts/VendorContext/VendorContext';
 import FilledButton from '../../components/elements/elements/buttons/filledButton/FilledButton';
 import OutlineButton from '../../components/elements/elements/buttons/outlineButton/OutlineButton';
+import Container from '../../components/elements/container/Container';
+import Span from '../../components/elements/span/Span';
+import CustomAlert from '../../components/elements/Alert/CustomAlerts';
 import InputField from '../../components/elements/inputField/InputField';
 import SelectBox from '../../components/elements/selectBox/SelectBox';
 import TextArea from '../../components/elements/textArea/TextArea';
 
-// Constants moved outside component to prevent recreation
-const CURRENCY_OPTIONS = [
+const AddVendors = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const language = useSelector((state) => state.language?.language || "en");
+  const token = localStorage.getItem("token");
+
+  const translations = {
+    "Add Vendor": language === "ar" ? "إضافة مورد" : "Add Vendor",
+    "Edit Vendor": language === "ar" ? "تعديل مورد" : "Edit Vendor",
+    "Clone Vendor": language === "ar" ? "نسخ مورد" : "Clone Vendor",
+    "Vendors": language === "ar" ? "الموردين" : "Vendors",
+    "Vendor Name": language === "ar" ? "اسم المورد" : "Vendor Name",
+    "Contact Person": language === "ar" ? "الشخص المسؤول" : "Contact Person",
+    "Email": language === "ar" ? "البريد الإلكتروني" : "Email",
+    "Phone Number": language === "ar" ? "رقم الهاتف" : "Phone Number",
+    "Address": language === "ar" ? "العنوان" : "Address",
+    "City": language === "ar" ? "المدينة" : "City",
+    "State": language === "ar" ? "الولاية" : "State",
+    "Country": language === "ar" ? "الدولة" : "Country",
+    "Postal Code": language === "ar" ? "الرمز البريدي" : "Postal Code",
+    "Tax Number": language === "ar" ? "الرقم الضريبي" : "Tax Number",
+    "Currency": language === "ar" ? "العملة" : "Currency",
+    "Payment Terms": language === "ar" ? "شروط الدفع" : "Payment Terms",
+    "Is Active": language === "ar" ? "نشط" : "Is Active",
+    "Notes": language === "ar" ? "ملاحظات" : "Notes",
+    "Save": language === "ar" ? "حفظ" : "Save",
+    "Cancel": language === "ar" ? "إلغاء" : "Cancel",
+    "Back to List": language === "ar" ? "العودة للقائمة" : "Back to List",
+    "Basic Information": language === "ar" ? "المعلومات الأساسية" : "Basic Information",
+    "Address Information": language === "ar" ? "معلومات العنوان" : "Address Information",
+    "Financial Information": language === "ar" ? "المعلومات المالية" : "Financial Information",
+    "Status & Notes": language === "ar" ? "الحالة والملاحظات" : "Status & Notes",
+    "Enter vendor name": language === "ar" ? "أدخل اسم المورد" : "Enter vendor name",
+    "Enter contact person": language === "ar" ? "أدخل اسم الشخص المسؤول" : "Enter contact person",
+    "Enter email": language === "ar" ? "أدخل البريد الإلكتروني" : "Enter email",
+    "Enter phone number": language === "ar" ? "أدخل رقم الهاتف" : "Enter phone number",
+    "Enter address": language === "ar" ? "أدخل العنوان" : "Enter address",
+    "Enter city": language === "ar" ? "أدخل المدينة" : "Enter city",
+    "Enter state": language === "ar" ? "أدخل الولاية" : "Enter state",
+    "Enter postal code": language === "ar" ? "أدخل الرمز البريدي" : "Enter postal code",
+    "Enter tax number": language === "ar" ? "أدخل الرقم الضريبي" : "Enter tax number",
+    "This field is required": language === "ar" ? "هذا الحقل مطلوب" : "This field is required",
+    "Saving...": language === "ar" ? "جارٍ الحفظ..." : "Saving...",
+    "Creating...": language === "ar" ? "جارٍ الإنشاء..." : "Creating...",
+    "Updating...": language === "ar" ? "جارٍ التحديث..." : "Updating...",
+    "Success": language === "ar" ? "نجاح" : "Success",
+    "Error": language === "ar" ? "خطأ" : "Error",
+    "Vendor created successfully": language === "ar" ? "تم إنشاء المورد بنجاح" : "Vendor created successfully",
+    "Vendor updated successfully": language === "ar" ? "تم تحديث المورد بنجاح" : "Vendor updated successfully",
+    "Failed to save vendor": language === "ar" ? "فشل في حفظ المورد" : "Failed to save vendor",
+    "Please try again": language === "ar" ? "يرجى المحاولة مرة أخرى" : "Please try again",
+  
+    "Reset": language === "ar" ? "إعادة تعيين" : "Reset",
+    "Active Vendor": language === "ar" ? "مورد نشط" : "Active Vendor",
+    "Save & Continue": language === "ar" ? "حفظ والمتابعة" : "Save & Continue",
+  };
+
+  // Constants
+  const CURRENCY_OPTIONS = [
     { value: 'USD', label: 'USD - US Dollar' },
     { value: 'EUR', label: 'EUR - Euro' },
     { value: 'GBP', label: 'GBP - British Pound' },
     { value: 'PKR', label: 'PKR - Pakistani Rupee' },
-    { value: 'CAD', label: 'CAD - Canadian Dollar' },
-    { value: 'AUD', label: 'AUD - Australian Dollar' },
-    { value: 'JPY', label: 'JPY - Japanese Yen' },
-];
+  ];
 
-const COUNTRY_OPTIONS = [
+  const COUNTRY_OPTIONS = [
     { value: 'US', label: 'United States' },
     { value: 'GB', label: 'United Kingdom' },
-    { value: 'CA', label: 'Canada' },
     { value: 'PK', label: 'Pakistan' },
-    { value: 'IN', label: 'India' },
-    { value: 'AU', label: 'Australia' },
-    { value: 'DE', label: 'Germany' },
-    { value: 'FR', label: 'France' },
-    { value: 'JP', label: 'Japan' },
-    { value: 'CN', label: 'China' },
-];
+    { value: 'AE', label: 'United Arab Emirates' },
+  ];
 
-const PAYMENT_TERMS_OPTIONS = [
-    { value: 'NET15', label: 'NET 15 - Payment due in 15 days' },
-    { value: 'NET30', label: 'NET 30 - Payment due in 30 days' },
-    { value: 'NET45', label: 'NET 45 - Payment due in 45 days' },
-    { value: 'NET60', label: 'NET 60 - Payment due in 60 days' },
-    { value: 'NET90', label: 'NET 90 - Payment due in 90 days' },
-    { value: 'IMMEDIATE', label: 'Immediate Payment' },
-    { value: 'COD', label: 'Cash on Delivery' },
-    { value: 'ADVANCE', label: 'Advance Payment' },
-    { value: 'CUSTOM', label: 'Custom Terms' },
-];
+  const PAYMENT_TERMS_OPTIONS = [
+    { value: 'NET15', label: 'NET 15' },
+    { value: 'NET30', label: 'NET 30' },
+    { value: 'NET45', label: 'NET 45' },
+    { value: 'NET60', label: 'NET 60' },
+  ];
 
-const DEFAULT_FORM_DATA = {
-    Name: '',
-    ContactPerson: '',
-    Email: '',
-    Phone: '',
-    Address: '',
-    City: '',
-    State: '',
-    PostalCode: '',
-    Country: '',
-    TaxNumber: '',
-    Currency: 'USD',
-    PaymentTerms: '',
+  // Get vendor context
+  const { createVendor, updateVendor, loading, error, clearError } = useVendor();
+
+  // Determine mode based on location state
+  const { editData, isEditing } = location.state || {};
+
+  const editFields = editData?.Vendor || {};
+  
+
+  
+  console.log("editing vendor", editFields, isEditing)
+ 
+  const isEditMode = isEditing && !!editFields;
+
+  // Form state
+  const [formData, setFormData] = useState({
+    Name: "",
+    ContactPerson: "",
+    Email: "",
+    Phone: "",
+    Address: "",
+    City: "",
+    State: "",
+    Country: "",
+    PostalCode: "",
+    TaxNumber: "",
+    Currency: "USD",
+    PaymentTerms: "",
     IsActive: true,
-    Notes: ''
-};
+    Notes: "",
+  });
 
-const AddVendors = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const {
-        createVendor,
-        updateVendor,
-        getVendor,
-        loading,
-        error,
-        clearError,
-        currentVendor,
-        resetState
-    } = useVendor();
+  const [formErrors, setFormErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // State management
-    const [apiNotification, contextHolder] = notification.useNotification();
-    const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // Alert state
+  const [alert, setAlert] = useState({
+    isVisible: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
 
-    // Memoized values
-    const isEditMode = useMemo(() => !!id, [id]);
-    const hasRequiredFields = useMemo(() => 
-        formData.Name.trim() && formData.ContactPerson.trim(), 
-        [formData.Name, formData.ContactPerson]
-    );
+  // Alert functions
+  const showAlert = (type, title, message) => {
+    setAlert({
+      isVisible: true,
+      type,
+      title,
+      message,
+    });
+  };
 
-    // Utility functions
-    const showNotification = useCallback((type, message, description) => {
-        apiNotification[type]({
-            message,
-            description,
-            placement: 'bottomRight',
-            duration: type === 'error' ? 6 : 4,
-        });
-    }, [apiNotification]);
+  const hideAlert = () => {
+    setAlert((prev) => ({
+      ...prev,
+      isVisible: false,
+    }));
+  };
 
-    const validateForm = useCallback(() => {
-        const errors = [];
+  // Initialize form data based on mode
+  useEffect(() => {
+    if (isEditMode && editFields) {
+      setFormData({
+        Name: editFields.Name || "",
+        ContactPerson: editFields.ContactPerson || "",
+        Email: editFields.Email || "",
+        Phone: editFields.Phone || "",
+        Address: editFields.Address || "",
+        City: editFields.City || "",
+        State: editFields.State || "",
+        Country: editFields.Country || "",
+        PostalCode: editFields.PostalCode || "",
+        TaxNumber: editFields.TaxNumber || "",
+        Currency: editFields.Currency || "USD",
+        PaymentTerms: editFields.PaymentTerms || "",
+        IsActive: editFields.IsActive !== undefined ? editFields.IsActive : true,
+        Notes: editFields.Notes || "",
+      });
+    } 
+    // Clear any existing errors when mode changes
+    if (clearError) {
+      clearError();
+    }
+  }, [isEditMode, editFields, clearError]);
+
+  // Redirect if no token
+  useEffect(() => {
+    if (!token) {
+      navigate("/admin-Login");
+    }
+  }, [token, navigate]);
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const fieldValue = type === "checkbox" ? checked : value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: fieldValue,
+    }));
+
+    // Clear error for this field
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  // Handle select changes
+  const handleSelectChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear error for this field
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  // Handle textarea changes
+  const handleTextAreaChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear error for this field
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.Name.trim()) {
+      errors.Name = translations["This field is required"];
+    }
+
+    if (!formData.ContactPerson.trim()) {
+      errors.ContactPerson = translations["This field is required"];
+    }
+
+    if (formData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.Email)) {
+      errors.Email = translations["Please enter a valid email address"];
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e, saveAndContinue = false) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      showAlert(
+        "error",
+        translations.Error,
+        translations["Please fill in all required fields"]
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      let result;
+
+      if (isEditMode) {
+        result = await updateVendor(editFields.Id, formData);
+      } else {
+        result = await createVendor(formData);
+      }
+
+      if (result) {
+        // Show success alert
+        const successMessage = isEditMode
+          ? translations["Vendor updated successfully"]
+          : translations["Vendor created successfully"];
+
+        showAlert("success", translations.Success, successMessage);
         
-        if (!formData.Name.trim()) {
-            errors.push('Vendor name is required');
-        }
-        
-        if (!formData.ContactPerson.trim()) {
-            errors.push('Contact person is required');
-        }
-        
-        if (formData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.Email)) {
-            errors.push('Please enter a valid email address');
-        }
-        
-        if (errors.length > 0) {
-            showNotification('error', 'Validation Error', errors.join(', '));
-            return false;
-        }
-        
-        return true;
-    }, [formData.Name, formData.ContactPerson, formData.Email, showNotification]);
-
-    const createFormDataFromVendor = useCallback((vendor) => ({
-        Name: vendor.Name || '',
-        ContactPerson: vendor.ContactPerson || '',
-        Email: vendor.Email || '',
-        Phone: vendor.Phone || '',
-        Address: vendor.Address || '',
-        City: vendor.City || '',
-        State: vendor.State || '',
-        PostalCode: vendor.PostalCode || '',
-        Country: vendor.Country || '',
-        TaxNumber: vendor.TaxNumber || '',
-        Currency: vendor.Currency || 'USD',
-        PaymentTerms: vendor.PaymentTerms || '',
-        IsActive: vendor.IsActive !== undefined ? vendor.IsActive : true,
-        Notes: vendor.Notes || ''
-    }), []);
-
-    // Event handlers
-    const handleChange = useCallback((e) => {
-        const { name, value, type, checked } = e.target;
-        const newValue = type === 'checkbox' ? checked : value;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: newValue
-        }));
-    }, []);
-
-    const handleTextAreaChange = useCallback((name, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    }, []);
-
-    const handleSelectChange = useCallback((name, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    }, []);
-
-    const handleSubmit = useCallback(async (e, saveAndContinue = false) => {
-        e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        setIsSubmitting(true);
-        clearError();
-
-        try {
-            const submitData = {
-                ...formData,
-                IsActive: Boolean(formData.IsActive),
-            };
-
-            if (isEditMode) {
-                await updateVendor(id, submitData);
-                showNotification('success', 'Success', 'Vendor updated successfully');
-                if (!saveAndContinue) {
-                    navigate(`/admin/vendors/${id}`);
-                }
-            } else {
-                const result = await createVendor(submitData);
-                showNotification('success', 'Success', 'Vendor created successfully');
-                if (saveAndContinue) {
-                    navigate(`/admin/add-vendors/${result.Id}`);
-                } else {
-                    navigate('/admin/vendors');
-                }
-            }
-        } catch (err) {
-            console.error('Error saving vendor:', err);
-            showNotification('error', 'Error', err.message || 'Failed to save vendor. Please try again.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    }, [formData, isEditMode, id, validateForm, updateVendor, createVendor, navigate, clearError, showNotification]);
-
-    const handleSaveAndContinue = useCallback((e) => {
-        handleSubmit(e, true);
-    }, [handleSubmit]);
-
-    const handleCancel = useCallback(() => {
-        const destination = isEditMode ? `/admin/vendors/${id}` : '/admin/vendors';
-        
-        if (hasUnsavedChanges) {
-            if (window.confirm('You have unsaved changes. Are you sure you want to cancel?')) {
-                navigate(destination);
-            }
+        if (!saveAndContinue) {
+          // Navigate back to list after a short delay to show the alert
+          setTimeout(() => {
+            navigate("/admin/vendors", {
+              state: {
+                message: successMessage,
+                type: "success",
+              },
+            });
+          }, 1500);
+        } else if (isEditMode) {
+          // For edit mode with save and continue, just show success
+          setTimeout(hideAlert, 1500);
         } else {
-            navigate(destination);
+          // For create mode with save and continue, navigate to edit page
+          setTimeout(() => {
+            navigate(`/admin/vendors`, {
+              state: {
+                isEditing: true,
+                editFields: result,
+              },
+            });
+          }, 1500);
         }
-    }, [hasUnsavedChanges, isEditMode, id, navigate]);
+      } else {
+        showAlert(
+          "error",
+          translations.Error,
+          `${translations["Failed to save vendor"]}. ${translations["Please try again"]}`
+        );
+      }
+      navigate('/admin/vendors')
 
-    const handleResetForm = useCallback(() => {
-        if (window.confirm('Are you sure you want to reset all fields? This will lose all current changes.')) {
-            if (isEditMode && currentVendor) {
-                setFormData(createFormDataFromVendor(currentVendor));
-            } else {
-                setFormData(DEFAULT_FORM_DATA);
-            }
-        }
-    }, [isEditMode, currentVendor, createFormDataFromVendor]);
+    } catch (error) {
+      console.error("Error saving vendor:", error);
+      showAlert(
+        "error",
+        translations.Error,
+        error.message || translations["Failed to save vendor"]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const handleViewVendor = useCallback(() => {
-        navigate(`/admin/vendors/${id}`);
-    }, [navigate, id]);
+  // Handle save and continue
+  const handleSaveAndContinue = (e) => {
+    handleSubmit(e, true);
+    navigate('/admin/vendors')
+  };
 
-    const handleBackNavigation = useCallback(() => {
-        navigate(isEditMode ? `/admin/vendors/${id}` : '/admin/vendors');
-    }, [navigate, isEditMode, id]);
+  // Handle cancel
+  const handleCancel = () => {
+    navigate("/admin/vendors");
+  };
 
-    // Effects
-    useEffect(() => {
-        if (isEditMode) {
-            const fetchVendorData = async () => {
-                try {
-                    const vendor = await getVendor(id);
-                    if (vendor) {
-                        setFormData(createFormDataFromVendor(vendor));
-                    }
-                } catch (err) {
-                    showNotification('error', 'Error', err.message || 'Failed to fetch vendor data');
-                }
-            };
-            fetchVendorData();
-        }
-    }, [id, isEditMode, getVendor, createFormDataFromVendor, showNotification]);
-
-    useEffect(() => {
-        if (isEditMode && currentVendor && currentVendor.Id === parseInt(id)) {
-            setFormData(createFormDataFromVendor(currentVendor));
-        }
-    }, [currentVendor, id, isEditMode, createFormDataFromVendor]);
-
-    useEffect(() => {
-        if (error) {
-            showNotification('error', 'Error', error);
-            clearError();
-        }
-    }, [error, clearError, showNotification]);
-
-    useEffect(() => {
-        const hasChanges = Object.keys(formData).some(key => {
-            if (isEditMode && currentVendor) {
-                return formData[key] !== (currentVendor[key] || DEFAULT_FORM_DATA[key]);
-            }
-            return formData[key] !== DEFAULT_FORM_DATA[key];
+  // Handle reset form
+  const handleResetForm = () => {
+    if (window.confirm(translations["Are you sure you want to reset all fields?"])) {
+      if (isEditMode && editFields) {
+        setFormData({
+          Name: editFields.Name || "",
+          ContactPerson: editFields.ContactPerson || "",
+          Email: editFields.Email || "",
+          Phone: editFields.Phone || "",
+          Address: editFields.Address || "",
+          City: editFields.City || "",
+          State: editFields.State || "",
+          Country: editFields.Country || "",
+          PostalCode: editFields.PostalCode || "",
+          TaxNumber: editFields.TaxNumber || "",
+          Currency: editFields.Currency || "USD",
+          PaymentTerms: editFields.PaymentTerms || "",
+          IsActive: editFields.IsActive !== undefined ? editFields.IsActive : true,
+          Notes: editFields.Notes || "",
         });
+      } else {
+        setFormData({
+          Name: "",
+          ContactPerson: "",
+          Email: "",
+          Phone: "",
+          Address: "",
+          City: "",
+          State: "",
+          Country: "",
+          PostalCode: "",
+          TaxNumber: "",
+          Currency: "USD",
+          PaymentTerms: "",
+          IsActive: true,
+          Notes: "",
+        });
+      }
+      setFormErrors({});
+    }
+  };
 
-        setHasUnsavedChanges(hasChanges);
-    }, [formData, isEditMode, currentVendor]);
+  // Handle view vendor
+  const handleViewVendor = () => {
+    if (isEditMode && editFields?.Id) {
+      navigate(`/admin/vendors/${editFields.Id}`);
+    }
+  };
 
-    useEffect(() => {
-        return () => {
-            clearError();
-        };
-    }, [clearError]);
+  // Get page title
+  const getPageTitle = () => {
+    if (isEditMode) return translations["Edit Vendor"];
+   
+    return translations["Add Vendor"];
+  };
 
+  // Loading state
+  if (!token) {
     return (
-        <Container className="p-6 bg-gray-50 min-h-screen">
-            {contextHolder}
-            <Container className="bg-white shadow-sm rounded-lg mb-6 relative">
-                {/* Header */}
-                <Container className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={handleBackNavigation}
-                                className="text-gray-500 hover:text-gray-700 transition-colors"
-                                disabled={isSubmitting}
-                                type="button"
-                            >
-                                <ArrowLeft size={20} />
-                            </button>
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">
-                                    {isEditMode ? 'Edit Vendor' : 'Add New Vendor'}
-                                </h1>
-                                {hasUnsavedChanges && (
-                                    <Span className="text-sm text-orange-600 font-medium">
-                                        • Unsaved changes
-                                    </Span>
-                                )}
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            {isEditMode && (
-                                <OutlineButton
-                                    buttonText="View Vendor"
-                                    onClick={handleViewVendor}
-                                    borderColor="border-blue-300"
-                                    borderWidth="border"
-                                    rounded="rounded-lg"
-                                    bgColor="bg-blue-50 hover:bg-blue-100"
-                                    textColor="text-blue-700"
-                                    height="h-10"
-                                    px="px-4"
-                                    fontWeight="font-medium"
-                                    fontSize="text-sm"
-                                    icon={Eye}
-                                    iconSize="w-4 h-4"
-                                    isIconLeft={true}
-                                    disabled={isSubmitting}
-                                />
-                            )}
-                            <OutlineButton
-                                buttonText="Reset"
-                                onClick={handleResetForm}
-                                borderColor="border-gray-300"
-                                borderWidth="border"
-                                rounded="rounded-lg"
-                                bgColor="bg-white hover:bg-gray-50"
-                                textColor="text-gray-700"
-                                height="h-10"
-                                px="px-4"
-                                fontWeight="font-medium"
-                                fontSize="text-sm"
-                                icon={RefreshCw}
-                                iconSize="w-4 h-4"
-                                isIconLeft={true}
-                                disabled={isSubmitting}
-                            />
-                            <OutlineButton
-                                buttonText="Cancel"
-                                onClick={handleCancel}
-                                borderColor="border-gray-300"
-                                borderWidth="border"
-                                rounded="rounded-lg"
-                                bgColor="bg-white hover:bg-gray-50"
-                                textColor="text-gray-700"
-                                height="h-10"
-                                px="px-4"
-                                fontWeight="font-medium"
-                                fontSize="text-sm"
-                                icon={X}
-                                iconSize="w-4 h-4"
-                                isIconLeft={true}
-                                disabled={isSubmitting}
-                            />
-                            <FilledButton
-                                isIcon={true}
-                                icon={Save}
-                                iconSize="w-4 h-4"
-                                bgColor={hasRequiredFields && !isSubmitting ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400"}
-                                textColor="text-white"
-                                rounded="rounded-lg"
-                                buttonText={
-                                    isSubmitting
-                                        ? (isEditMode ? 'Saving...' : 'Creating...')
-                                        : (isEditMode ? 'Save Changes' : 'Create Vendor')
-                                }
-                                height="h-10"
-                                px="px-4"
-                                fontWeight="font-medium"
-                                fontSize="text-sm"
-                                isIconLeft={true}
-                                onClick={handleSubmit}
-                                disabled={!hasRequiredFields || isSubmitting || loading}
-                            />
-                        </div>
-                    </div>
-                </Container>
-
-                {/* Loading overlay */}
-                {loading && (
-                    <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
-                        <div className="flex items-center gap-2 text-blue-600">
-                            <RefreshCw className="w-5 h-5 animate-spin" />
-                            <span>Loading...</span>
-                        </div>
-                    </div>
-                )}
-
-                {/* Form */}
-                <Container className="p-6">
-                    <form onSubmit={handleSubmit} noValidate>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* Basic Information */}
-                            <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-2">
-                                    <User className="w-5 h-5 text-blue-600" />
-                                    Basic Information
-                                </h2>
-                                <div className="space-y-4">
-                                    <InputField
-                                        name="Name"
-                                        label="Vendor Name"
-                                        placeholder="Enter vendor name"
-                                        value={formData.Name}
-                                        onChange={handleChange}
-                                        required
-                                        icon={Building}
-                                        disabled={isSubmitting}
-                                    />
-                                    <InputField
-                                        name="ContactPerson"
-                                        label="Contact Person"
-                                        placeholder="Enter contact person name"
-                                        value={formData.ContactPerson}
-                                        onChange={handleChange}
-                                        required
-                                        icon={User}
-                                        disabled={isSubmitting}
-                                    />
-                                    <InputField
-                                        name="Email"
-                                        label="Email"
-                                        placeholder="Enter email address"
-                                        type="email"
-                                        value={formData.Email}
-                                        onChange={handleChange}
-                                        icon={Mail}
-                                        disabled={isSubmitting}
-                                    />
-                                    <InputField
-                                        name="Phone"
-                                        label="Phone"
-                                        placeholder="Enter phone number"
-                                        value={formData.Phone}
-                                        onChange={handleChange}
-                                        icon={Phone}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Address Information */}
-                            <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-2">
-                                    <MapPin className="w-5 h-5 text-blue-600" />
-                                    Address Information
-                                </h2>
-                                <div className="space-y-4">
-                                    <TextArea
-                                        name="Address"
-                                        label="Address"
-                                        placeholder="Enter full address"
-                                        value={formData.Address}
-                                        onChange={(value) => handleTextAreaChange('Address', value)}
-                                        rows={3}
-                                        disabled={isSubmitting}
-                                        showCount
-                                        maxLength={500}
-                                    />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <InputField
-                                            name="City"
-                                            label="City"
-                                            placeholder="Enter city"
-                                            value={formData.City}
-                                            onChange={handleChange}
-                                            disabled={isSubmitting}
-                                        />
-                                        <InputField
-                                            name="State"
-                                            label="State/Province"
-                                            placeholder="Enter state or province"
-                                            value={formData.State}
-                                            onChange={handleChange}
-                                            disabled={isSubmitting}
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <SelectBox
-                                            name="Country"
-                                            label="Country"
-                                            placeholder="Select country"
-                                            value={formData.Country}
-                                            handleChange={(value) => handleSelectChange('Country', value)}
-                                            optionList={COUNTRY_OPTIONS}
-                                            disabled={isSubmitting}
-                                        />
-                                        <InputField
-                                            name="PostalCode"
-                                            label="Postal Code"
-                                            placeholder="Enter postal code"
-                                            value={formData.PostalCode}
-                                            onChange={handleChange}
-                                            disabled={isSubmitting}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Financial Information */}
-                            <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-2">
-                                    <CreditCard className="w-5 h-5 text-blue-600" />
-                                    Financial Information
-                                </h2>
-                                <div className="space-y-4">
-                                    <InputField
-                                        name="TaxNumber"
-                                        label="Tax Number"
-                                        placeholder="Enter tax identification number"
-                                        value={formData.TaxNumber}
-                                        onChange={handleChange}
-                                        disabled={isSubmitting}
-                                    />
-                                    <SelectBox
-                                        name="Currency"
-                                        label="Currency"
-                                        placeholder="Select currency"
-                                        value={formData.Currency}
-                                        handleChange={(value) => handleSelectChange('Currency', value)}
-                                        optionList={CURRENCY_OPTIONS}
-                                        disabled={isSubmitting}
-                                    />
-                                    <SelectBox
-                                        name="PaymentTerms"
-                                        label="Payment Terms"
-                                        placeholder="Select payment terms"
-                                        value={formData.PaymentTerms}
-                                        handleChange={(value) => handleSelectChange('PaymentTerms', value)}
-                                        optionList={PAYMENT_TERMS_OPTIONS}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Status & Notes */}
-                            <div className="space-y-6">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-gray-200 pb-2">
-                                    <Info className="w-5 h-5 text-blue-600" />
-                                    Status & Notes
-                                </h2>
-                                <div className="space-y-4">
-                                    <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-                                        <input
-                                            type="checkbox"
-                                            id="IsActive"
-                                            name="IsActive"
-                                            checked={formData.IsActive}
-                                            onChange={handleChange}
-                                            disabled={isSubmitting}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                        />
-                                        <label
-                                            htmlFor="IsActive"
-                                            className="ml-3 block text-sm font-medium text-gray-700 cursor-pointer"
-                                        >
-                                            Active Vendor
-                                        </label>
-                                        <Span className="ml-2 text-xs text-gray-500">
-                                            (Inactive vendors won't appear in selections)
-                                        </Span>
-                                    </div>
-                                    <TextArea
-                                        name="Notes"
-                                        label="Notes"
-                                        placeholder="Enter any additional notes or comments about this vendor"
-                                        value={formData.Notes}
-                                        onChange={(value) => handleTextAreaChange('Notes', value)}
-                                        rows={4}
-                                        disabled={isSubmitting}
-                                        showCount
-                                        maxLength={1000}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Form Actions - Mobile Responsive */}
-                        <div className="mt-8 pt-6 border-t border-gray-200">
-                            <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                                <OutlineButton
-                                    buttonText="Cancel"
-                                    onClick={handleCancel}
-                                    borderColor="border-gray-300"
-                                    borderWidth="border"
-                                    rounded="rounded-lg"
-                                    bgColor="bg-white hover:bg-gray-50"
-                                    textColor="text-gray-700"
-                                    height="h-11"
-                                    px="px-6"
-                                    fontWeight="font-medium"
-                                    fontSize="text-sm"
-                                    icon={X}
-                                    iconSize="w-4 h-4"
-                                    isIconLeft={true}
-                                    disabled={isSubmitting}
-                                />
-                                <FilledButton
-                                    isIcon={true}
-                                    icon={Save}
-                                    iconSize="w-4 h-4"
-                                    bgColor="bg-green-600 hover:bg-green-700"
-                                    textColor="text-white"
-                                    rounded="rounded-lg"
-                                    buttonText={
-                                        isSubmitting
-                                            ? 'Saving...'
-                                            : 'Save & Continue'
-                                    }
-                                    height="h-11"
-                                    px="px-6"
-                                    fontWeight="font-medium"
-                                    fontSize="text-sm"
-                                    isIconLeft={true}
-                                    onClick={handleSaveAndContinue}
-                                    disabled={!hasRequiredFields || isSubmitting || loading}
-                                />
-                                <FilledButton
-                                    isIcon={true}
-                                    icon={Save}
-                                    iconSize="w-4 h-4"
-                                    bgColor={hasRequiredFields && !isSubmitting ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400"}
-                                    textColor="text-white"
-                                    rounded="rounded-lg"
-                                    buttonText={
-                                        isSubmitting
-                                            ? (isEditMode ? 'Saving Changes...' : 'Creating Vendor...')
-                                            : (isEditMode ? 'Save Changes' : 'Create Vendor')
-                                    }
-                                    height="h-11"
-                                    px="px-6"
-                                    fontWeight="font-medium"
-                                    fontSize="text-sm"
-                                    isIconLeft={true}
-                                    onClick={handleSubmit}
-                                    disabled={!hasRequiredFields || isSubmitting || loading}
-                                />
-                            </div>
-                        </div>
-                    </form>
-                </Container>
-            </Container>
-        </Container>
+      <Container className="flex justify-center items-center min-h-screen">
+        <Span className="text-blue-500 text-lg">Loading...</Span>
+      </Container>
     );
+  }
+
+  return (
+    <Container className="min-h-screen bg-gray-50">
+      {/* Custom Alert */}
+      <CustomAlert
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        isVisible={alert.isVisible}
+        onClose={hideAlert}
+        autoClose={true}
+      />
+
+      <Container className="px-6 py-6">
+        {/* Header */}
+        <Container className="flex items-center justify-between mb-6">
+          <Container className="flex items-center gap-4">
+            <FilledButton
+              isIcon={true}
+              icon={ArrowLeft}
+              iconSize="w-4 h-4"
+              bgColor="bg-gray-100 hover:bg-gray-200"
+              textColor="text-gray-700"
+              rounded="rounded-lg"
+              buttonText=""
+              height="h-10"
+              width="w-10"
+              onClick={handleCancel}
+            />
+            <Container>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {getPageTitle()}
+               
+              </h1>
+              <Span className="text-sm text-gray-500">
+                {translations["Vendors"]}
+              </Span>
+            </Container>
+          </Container>
+        </Container>
+
+        {/* Error Display */}
+        {error && (
+          <Container className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <Span className="text-red-800 text-sm">{error}</Span>
+          </Container>
+        )}
+
+        {/* Form */}
+        <Container className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <form onSubmit={handleSubmit} className="p-6">
+            <Container className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Basic Information */}
+              <Container className="space-y-6">
+                <Container>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    {translations["Basic Information"]}
+                  </h3>
+
+                  {/* Vendor Name */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Vendor Name"]} *
+                    </label>
+                    <input
+                      type="text"
+                      name="Name"
+                      value={formData.Name}
+                      onChange={handleInputChange}
+                      placeholder={translations["Enter vendor name"]}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                        formErrors.Name ? "border-red-300" : "border-gray-300"
+                      }`}
+                      disabled={isSubmitting}
+                    />
+                    {formErrors.Name && (
+                      <Span className="text-red-500 text-sm mt-1 block">
+                        {formErrors.Name}
+                      </Span>
+                    )}
+                  </Container>
+
+                  {/* Contact Person */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Contact Person"]} *
+                    </label>
+                    <input
+                      type="text"
+                      name="ContactPerson"
+                      value={formData.ContactPerson}
+                      onChange={handleInputChange}
+                      placeholder={translations["Enter contact person"]}
+                      className={`w-full px-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                        formErrors.ContactPerson ? "border-red-300" : "border-gray-300"
+                      }`}
+                      disabled={isSubmitting}
+                    />
+                    {formErrors.ContactPerson && (
+                      <Span className="text-red-500 text-sm mt-1 block">
+                        {formErrors.ContactPerson}
+                      </Span>
+                    )}
+                  </Container>
+
+                  {/* Email */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Email"]}
+                    </label>
+                    <Container className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="email"
+                        name="Email"
+                        value={formData.Email}
+                        onChange={handleInputChange}
+                        placeholder={translations["Enter email"]}
+                        className={`w-full pl-10 pr-3 py-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                          formErrors.Email ? "border-red-300" : "border-gray-300"
+                        }`}
+                        disabled={isSubmitting}
+                      />
+                    </Container>
+                    {formErrors.Email && (
+                      <Span className="text-red-500 text-sm mt-1 block">
+                        {formErrors.Email}
+                      </Span>
+                    )}
+                  </Container>
+
+                  {/* Phone */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Phone Number"]}
+                    </label>
+                    <Container className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="tel"
+                        name="Phone"
+                        value={formData.Phone}
+                        onChange={handleInputChange}
+                        placeholder={translations["Enter phone number"]}
+                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
+                      />
+                    </Container>
+                  </Container>
+                </Container>
+              </Container>
+
+              {/* Address Information */}
+              <Container className="space-y-6">
+                <Container>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    {translations["Address Information"]}
+                  </h3>
+
+                  {/* Address */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Address"]}
+                    </label>
+                    <textarea
+                      name="Address"
+                      value={formData.Address}
+                      onChange={(e) => handleTextAreaChange("Address", e.target.value)}
+                      placeholder={translations["Enter address"]}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      disabled={isSubmitting}
+                    />
+                  </Container>
+
+                  {/* City and State */}
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <Container>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {translations["City"]}
+                      </label>
+                      <input
+                        type="text"
+                        name="City"
+                        value={formData.City}
+                        onChange={handleInputChange}
+                        placeholder={translations["Enter city"]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
+                      />
+                    </Container>
+                    <Container>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {translations["State"]}
+                      </label>
+                      <input
+                        type="text"
+                        name="State"
+                        value={formData.State}
+                        onChange={handleInputChange}
+                        placeholder={translations["Enter state"]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
+                      />
+                    </Container>
+                  </Container>
+
+                  {/* Country and Postal Code */}
+                  <Container className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Container>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {translations["Country"]}
+                      </label>
+                      <SelectBox
+                        name="Country"
+                        value={formData.Country}
+                        handleChange={(value) => handleSelectChange("Country", value)}
+                        optionList={COUNTRY_OPTIONS}
+                        placeholder={translations["Select country"]}
+                        disabled={isSubmitting}
+                      />
+                    </Container>
+                    <Container>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {translations["Postal Code"]}
+                      </label>
+                      <input
+                        type="text"
+                        name="PostalCode"
+                        value={formData.PostalCode}
+                        onChange={handleInputChange}
+                        placeholder={translations["Enter postal code"]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
+                      />
+                    </Container>
+                  </Container>
+                </Container>
+              </Container>
+
+              {/* Financial Information */}
+              <Container className="space-y-6">
+                <Container>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    {translations["Financial Information"]}
+                  </h3>
+
+                  {/* Tax Number */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Tax Number"]}
+                    </label>
+                    <input
+                      type="text"
+                      name="TaxNumber"
+                      value={formData.TaxNumber}
+                      onChange={handleInputChange}
+                      placeholder={translations["Enter tax number"]}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      disabled={isSubmitting}
+                    />
+                  </Container>
+
+                  {/* Currency */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Currency"]}
+                    </label>
+                    <SelectBox
+                      name="Currency"
+                      value={formData.Currency}
+                      handleChange={(value) => handleSelectChange("Currency", value)}
+                      optionList={CURRENCY_OPTIONS}
+                      placeholder={translations["Select currency"]}
+                      disabled={isSubmitting}
+                    />
+                  </Container>
+
+                  {/* Payment Terms */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Payment Terms"]}
+                    </label>
+                    <SelectBox
+                      name="PaymentTerms"
+                      value={formData.PaymentTerms}
+                      handleChange={(value) => handleSelectChange("PaymentTerms", value)}
+                      optionList={PAYMENT_TERMS_OPTIONS}
+                      placeholder={translations["Select payment terms"]}
+                      disabled={isSubmitting}
+                    />
+                  </Container>
+                </Container>
+              </Container>
+
+              {/* Status & Notes */}
+              <Container className="space-y-6">
+                <Container>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <Info className="w-5 h-5" />
+                    {translations["Status & Notes"]}
+                  </h3>
+
+                  {/* Is Active */}
+                  <Container className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        name="IsActive"
+                        checked={formData.IsActive}
+                        onChange={handleInputChange}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        disabled={isSubmitting}
+                      />
+                      <Span className="ml-2 text-sm text-gray-700">
+                        {translations["Is Active"]}
+                      </Span>
+                    </label>
+                    <Span className="text-xs text-gray-500 mt-1 block">
+                      {translations["Inactive vendors won't appear in selections"]}
+                    </Span>
+                  </Container>
+
+                  {/* Notes */}
+                  <Container className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {translations["Notes"]}
+                    </label>
+                    <textarea
+                      name="Notes"
+                      value={formData.Notes}
+                      onChange={(e) => handleTextAreaChange("Notes", e.target.value)}
+                      placeholder={translations["Enter any additional notes"]}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      disabled={isSubmitting}
+                    />
+                  </Container>
+                </Container>
+              </Container>
+            </Container>
+
+            {/* Form Actions */}
+            <Container className="mt-8 pt-6 border-t border-gray-200">
+              <Container className="flex flex-col sm:flex-row gap-3 justify-end">
+                <OutlineButton
+                  buttonText={translations["Cancel"]}
+                  onClick={handleCancel}
+                  borderColor="border-gray-300"
+                  borderWidth="border"
+                  rounded="rounded-lg"
+                  bgColor="bg-white hover:bg-gray-50"
+                  textColor="text-gray-700"
+                  height="h-11"
+                  px="px-6"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  icon={X}
+                  iconSize="w-4 h-4"
+                  isIconLeft={true}
+                  disabled={isSubmitting}
+                />
+                
+                <OutlineButton
+                  buttonText={translations["Reset"]}
+                  onClick={handleResetForm}
+                  borderColor="border-gray-300"
+                  borderWidth="border"
+                  rounded="rounded-lg"
+                  bgColor="bg-white hover:bg-gray-50"
+                  textColor="text-gray-700"
+                  height="h-11"
+                  px="px-6"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  icon={RefreshCw}
+                  iconSize="w-4 h-4"
+                  isIconLeft={true}
+                  disabled={isSubmitting}
+                />
+                
+                <FilledButton
+                  isIcon={true}
+                  icon={Save}
+                  iconSize="w-4 h-4"
+                  bgColor="bg-green-600 hover:bg-green-700"
+                  textColor="text-white"
+                  rounded="rounded-lg"
+                  buttonText={translations["Save & Continue"]}
+                  height="h-11"
+                  px="px-6"
+                  fontWeight="font-medium"
+                  fontSize="text-sm"
+                  isIconLeft={true}
+                  onClick={handleSaveAndContinue}
+                  disabled={isSubmitting || loading}
+                />
+                
+              </Container>
+            </Container>
+          </form>
+        </Container>
+
+        {/* Back to List Link */}
+        <Container className="mt-6">
+          <FilledButton
+            isIcon={true}
+            icon={ArrowLeft}
+            iconSize="w-4 h-4"
+            bgColor="bg-transparent hover:bg-gray-100"
+            textColor="text-blue-600 hover:text-blue-700"
+            rounded="rounded-lg"
+            buttonText={translations["Back to List"]}
+            height="h-10"
+            px="px-4"
+            fontWeight="font-medium"
+            fontSize="text-sm"
+            isIconLeft={true}
+            onClick={handleCancel}
+          />
+        </Container>
+      </Container>
+    </Container>
+  );
 };
 
 export default AddVendors;

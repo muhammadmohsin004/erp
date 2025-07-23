@@ -644,11 +644,10 @@ const CompanyBranchList = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              branch.IsActive
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${branch.IsActive
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
-                            }`}
+                              }`}
                           >
                             {branch.IsActive
                               ? translations.Active
@@ -886,11 +885,10 @@ const CompanyBranchList = () => {
                       {translations["Head Office"]}
                     </Span>
                     <Span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                        selectedBranch.IsHeadOffice
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedBranch.IsHeadOffice
                           ? "bg-purple-100 text-purple-800"
                           : "bg-gray-100 text-gray-800"
-                      }`}
+                        }`}
                     >
                       {selectedBranch.IsHeadOffice
                         ? translations.Yes
@@ -903,11 +901,10 @@ const CompanyBranchList = () => {
                       {translations.Status}
                     </Span>
                     <Span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                        selectedBranch.IsActive
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${selectedBranch.IsActive
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
-                      }`}
+                        }`}
                     >
                       {selectedBranch.IsActive
                         ? translations.Active
