@@ -29,7 +29,7 @@ import { FinanceExpensesProvider } from "./Contexts/FinanceContext/FinanceExpens
 import { FinanceIncomesProvider } from "./Contexts/FinanceContext/FinanceIncomeContext";
 import { IncomeCategoryProvider } from "./Contexts/IncomeCategoryContext/IncomeCategoryContext";
 import { FinanceReportsProvider } from "./Contexts/FinanceReportsContext";
-import { HRProvider } from "./Contexts/HRContext/HRContext";
+import { HRProvider } from "./Contexts/HrContext/HrContext";
 function App() {
   return (
     <Router>

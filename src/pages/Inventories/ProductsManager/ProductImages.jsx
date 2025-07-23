@@ -165,7 +165,6 @@ const ProductImages = () => {
 
   // Process images data from API response
   const imagesData = productImages?.Data?.$values || [];
-
   const productsDropdown = products?.Data?.$values || [];
 
   // Local state management
@@ -392,6 +391,7 @@ const ProductImages = () => {
     console.log("Selected multiple files:", validFiles);
   };
 
+  // FIXED: Single Upload Handler
   const handleSingleUpload = async () => {
     console.log("=== SINGLE UPLOAD DEBUG START ===");
     console.log("Upload files:", uploadFiles);
@@ -413,10 +413,12 @@ const ProductImages = () => {
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("ImageFile", uploadFiles[0]);
+
+      // CRITICAL: Add fields in the EXACT order as your cURL
+      formData.append("IsMain", uploadFormData.isMain ? "true" : "false");
       formData.append("ProductId", uploadFormData.productId.toString());
       formData.append("AltText", uploadFormData.altText || "");
-      formData.append("IsMain", uploadFormData.isMain.toString());
+      formData.append("ImageFile", uploadFiles[0], uploadFiles[0].name);
 
       console.log("=== FormData Contents ===");
       for (let [key, value] of formData.entries()) {
@@ -448,6 +450,7 @@ const ProductImages = () => {
     }
   };
 
+  // FIXED: Multiple Upload Handler
   const handleMultipleUpload = async () => {
     console.log("=== MULTIPLE UPLOAD DEBUG START ===");
     console.log("Multiple upload data:", multipleUploadData);
@@ -469,12 +472,14 @@ const ProductImages = () => {
     try {
       const formData = new FormData();
 
-      // Append each file individually
+      // CRITICAL: Add fields in the EXACT order as your cURL
+      formData.append("ProductId", multipleUploadData.productId.toString());
+
+      // Append each file with the EXACT field name from cURL
       multipleUploadData.files.forEach((file) => {
-        formData.append("ImageFiles", file);
+        formData.append("ImageFiles", file, file.name);
       });
 
-      formData.append("ProductId", multipleUploadData.productId.toString());
       formData.append("AltText", multipleUploadData.altText || "");
 
       console.log("=== Multiple Upload FormData Contents ===");
