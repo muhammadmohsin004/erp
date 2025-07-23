@@ -428,7 +428,7 @@ const CompanyBranchList = () => {
             <OutlineButton
               isIcon={true}
               icon={Download}
-              iconSize="w-4 h-4"
+              // iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
               textColor="text-gray-700"
               rounded="rounded-lg"

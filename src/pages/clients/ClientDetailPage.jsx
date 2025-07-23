@@ -53,7 +53,7 @@ const ClientDetailPage = () => {
   const navigate = useNavigate();
   const { clientId } = useParams();
   const language = useSelector((state) => state.language?.language || "en");
-  
+
   const {
     currentClient,
     loading,
@@ -90,7 +90,7 @@ const ClientDetailPage = () => {
     "Contacts List": language === "ar" ? "قائمة جهات الاتصال" : "Contacts List",
     "Add Contact": language === "ar" ? "إضافة جهة اتصال" : "Add Contact",
     "Quick Information": language === "ar" ? "معلومات سريعة" : "Quick Information",
-    "Count of invoices": language === "ar" ? "عدد الفواتير" : "Count of invoices",
+    "Count of invoices": language === "ar" ? "عدد الفواتير" : "Count of invoices ",
     "Count of due invoices": language === "ar" ? "عدد الفواتير المستحقة" : "Count of due invoices",
     "Last invoice": language === "ar" ? "آخر فاتورة" : "Last invoice",
     "Last payment": language === "ar" ? "آخر دفعة" : "Last payment",
@@ -108,7 +108,7 @@ const ClientDetailPage = () => {
     if (clientId) {
       getClient(clientId);
     }
-    
+
     return () => {
       clearCurrentClient();
     };
@@ -139,7 +139,7 @@ const ClientDetailPage = () => {
   // Get display name based on client type
   const getDisplayName = useCallback(() => {
     if (!currentClient) return "";
-    
+
     if (currentClient.ClientType === "Business") {
       return currentClient.BusinessName || currentClient.FullName || "Unknown Business";
     }
@@ -195,7 +195,7 @@ const ClientDetailPage = () => {
       )}
 
       {/* Contacts List */}
-      <Container className="bg-white rounded-lg border border-gray-200">
+      {/* <Container className="bg-white rounded-lg border border-gray-200">
         <Container className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">{translations["Contacts List"]}</h3>
           <FilledButton
@@ -213,7 +213,7 @@ const ClientDetailPage = () => {
             onClick={() => console.log("Add contact")}
           />
         </Container>
-        
+
         <Container className="p-4">
           {currentClient?.Contacts && currentClient.Contacts.length > 0 ? (
             <Container className="space-y-3">
@@ -262,14 +262,14 @@ const ClientDetailPage = () => {
             </Container>
           )}
         </Container>
-      </Container>
+      </Container> */}
 
       {/* Quick Information */}
       <Container className="bg-white rounded-lg border border-gray-200">
         <Container className="px-4 py-3 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">{translations["Quick Information"]}</h3>
         </Container>
-        
+
         <Container className="p-4">
           <Container className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Container className="space-y-3">
@@ -277,12 +277,12 @@ const ClientDetailPage = () => {
                 <Span className="text-sm text-gray-600">{translations["Count of invoices"]}:</Span>
                 <Span className="text-sm font-medium text-gray-900">{translations["No issued invoices"]}</Span>
               </Container>
-              
+
               <Container className="flex justify-between">
                 <Span className="text-sm text-gray-600">{translations["Count of due invoices"]}:</Span>
                 <Span className="text-sm font-medium text-gray-900">{translations["No due invoices"]}</Span>
               </Container>
-              
+
               <Container className="flex justify-between">
                 <Span className="text-sm text-gray-600">{translations["Last invoice"]}:</Span>
                 <Span className="text-sm font-medium text-gray-900">{translations["No issued invoices"]}</Span>
@@ -294,12 +294,12 @@ const ClientDetailPage = () => {
                 <Span className="text-sm text-gray-600">{translations["Last payment"]}:</Span>
                 <Span className="text-sm font-medium text-gray-900">{translations["No payments have been made"]}</Span>
               </Container>
-              
+
               <Container className="flex justify-between">
                 <Span className="text-sm text-gray-600">{translations["Last login"]}:</Span>
                 <Span className="text-sm font-medium text-gray-900">{translations["No Login"]}</Span>
               </Container>
-              
+
               <Container className="flex justify-between">
                 <Span className="text-sm text-gray-600">{translations["Last email notification"]}:</Span>
                 <Span className="text-sm font-medium text-gray-900">{translations["No notifications have been sent"]}</Span>
@@ -329,7 +329,7 @@ const ClientDetailPage = () => {
             </Span>
           </Container>
         </Container>
-        
+
         {currentClient?.UpdatedAt && currentClient.UpdatedAt !== currentClient.CreatedAt && (
           <Container className="flex items-start gap-3">
             <Container className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -418,18 +418,17 @@ const ClientDetailPage = () => {
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            
+
             <Container className="flex items-center gap-3">
-              <Container className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
-                currentClient.ClientType === "Individual" ? "bg-blue-500" : "bg-green-500"
-              }`}>
+              <Container className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm ${currentClient.ClientType === "Individual" ? "bg-blue-500" : "bg-green-500"
+                }`}>
                 {currentClient.ClientType === "Individual" ? (
                   <User className="w-5 h-5" />
                 ) : (
                   <Building className="w-5 h-5" />
                 )}
               </Container>
-              
+
               <Container>
                 <Container className="flex items-center gap-2">
                   <h1 className="text-xl font-bold text-gray-900">
@@ -448,9 +447,9 @@ const ClientDetailPage = () => {
           </Container>
 
           {/* Client Info and Contact Details Row */}
-          <Container className="flex items-start justify-between mb-6">
+          <Container className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Left Side - Client Description */}
-            <Container className="flex-1 max-w-2xl">
+            <Container className="flex-1">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">{currentClient.FullName}</h2>
               <Container className="text-sm text-gray-600 leading-relaxed">
                 <Span>
@@ -470,7 +469,7 @@ const ClientDetailPage = () => {
                   )}
                 </Span>
               </Container>
-              
+
               {currentClient?.Category && (
                 <Container className="mt-3 flex items-center gap-2">
                   <Span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
@@ -489,7 +488,7 @@ const ClientDetailPage = () => {
                 <Container className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-gray-400" />
                   <Span className="text-sm text-gray-900 flex-1">{currentClient.Email}</Span>
-                  <button 
+                  <button
                     onClick={() => handleCopyToClipboard(currentClient.Email, "Email")}
                     className="p-1 hover:bg-gray-100 rounded"
                   >
@@ -497,12 +496,12 @@ const ClientDetailPage = () => {
                   </button>
                 </Container>
               )}
-              
+
               {currentClient.Mobile && (
                 <Container className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-gray-400" />
                   <Span className="text-sm text-gray-900 flex-1">{currentClient.Mobile}</Span>
-                  <button 
+                  <button
                     onClick={() => handleCopyToClipboard(currentClient.Mobile, "Mobile")}
                     className="p-1 hover:bg-gray-100 rounded"
                   >
@@ -510,12 +509,12 @@ const ClientDetailPage = () => {
                   </button>
                 </Container>
               )}
-              
+
               {currentClient.Telephone && currentClient.Telephone !== currentClient.Mobile && (
                 <Container className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-gray-400" />
                   <Span className="text-sm text-gray-900 flex-1">{currentClient.Telephone}</Span>
-                  <button 
+                  <button
                     onClick={() => handleCopyToClipboard(currentClient.Telephone, "Telephone")}
                     className="p-1 hover:bg-gray-100 rounded"
                   >
@@ -548,8 +547,8 @@ const ClientDetailPage = () => {
               px="px-3"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => navigate("/admin/new-clients", { 
-                state: { editData: currentClient, isEditing: true } 
+              onClick={() => navigate("/admin/new-clients", {
+                state: { editData: currentClient, isEditing: true }
               })}
             />
 
@@ -581,22 +580,7 @@ const ClientDetailPage = () => {
               px="px-3"
               fontSize="text-sm"
               isIconLeft={true}
-              onClick={() => console.log("Create invoice")}
-            />
-
-            <FilledButton
-              isIcon={true}
-              icon={Calculator}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText={translations["Create Estimate"]}
-              height="h-9"
-              px="px-3"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => console.log("Create estimate")}
+              onClick={() => navigate("/admin/new-invoice")}
             />
 
             <FilledButton
@@ -616,21 +600,6 @@ const ClientDetailPage = () => {
 
             <FilledButton
               isIcon={true}
-              icon={Receipt}
-              iconSize="w-4 h-4"
-              bgColor="bg-gray-100 hover:bg-gray-200"
-              textColor="text-gray-700"
-              rounded="rounded-lg"
-              buttonText={translations.Statement}
-              height="h-9"
-              px="px-3"
-              fontSize="text-sm"
-              isIconLeft={true}
-              onClick={() => console.log("Generate statement")}
-            />
-
-            <FilledButton
-              isIcon={true}
               icon={Plus}
               iconSize="w-4 h-4"
               bgColor="bg-gray-100 hover:bg-gray-200"
@@ -644,7 +613,7 @@ const ClientDetailPage = () => {
               onClick={() => console.log("Add payment credit")}
             />
 
-            <Container className="relative">
+            <Container className="relative"> 
               <button
                 onClick={() => setShowMoreActions(!showMoreActions)}
                 className="px-3 h-9 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm flex items-center gap-2"
@@ -653,15 +622,16 @@ const ClientDetailPage = () => {
                 <ChevronDown className="w-4 h-4" />
               </button>
 
+              {/* Dropdown positioned below the button */}
               {showMoreActions && (
-                <Container className="absolute right-0 top-10 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                <Container className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
                   <Container className="py-1">
                     <button
                       onClick={() => {
                         console.log("Export client data");
                         setShowMoreActions(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
                       Export Data
@@ -681,6 +651,8 @@ const ClientDetailPage = () => {
                 </Container>
               )}
             </Container>
+
+
           </Container>
         </Container>
       </Container>
@@ -699,18 +671,17 @@ const ClientDetailPage = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-                      activeTab === tab.id
-                        ? "border-blue-500 text-blue-600 bg-blue-50"
-                        : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
+                      ? "border-blue-500 text-blue-600 bg-blue-50"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                      }`}
                   >
                     {tab.label}
                   </button>
                 ))}
               </Container>
             </Container>
-            
+
             <Container className="p-6">
               {renderTabContent()}
             </Container>
@@ -731,11 +702,11 @@ const ClientDetailPage = () => {
                 <Span className="text-sm text-gray-600">This action cannot be undone</Span>
               </Container>
             </Container>
-            
+
             <Span className="text-gray-600 mb-6 block">
               Are you sure you want to delete "{getDisplayName()}"? All associated data will be permanently removed.
             </Span>
-            
+
             <Container className="flex justify-end gap-3">
               <FilledButton
                 bgColor="bg-gray-100 hover:bg-gray-200"
