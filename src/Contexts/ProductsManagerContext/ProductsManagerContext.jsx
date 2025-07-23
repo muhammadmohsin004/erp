@@ -261,6 +261,7 @@ const API_BASE_URLS = {
   productBrands: "https://api.speed-erp.com/api/ProductBrands",
   productCategories: "https://api.speed-erp.com/api/ProductCategories",
   productImages: "https://api.speed-erp.com/api/ProductImages",
+  productImagesMultiple: "https://api.speed-erp.com/api/ProductImages/Multiple",
   statistics: "https://api.speed-erp.com/api/products/statistics",
 };
 
@@ -356,6 +357,74 @@ const makeApiCall = async (url, options = {}) => {
       );
     }
 
+    throw error;
+  }
+};
+
+// FIXED: Helper function for multipart form data API calls
+const makeMultipartApiCall = async (url, formData) => {
+  const token = getAuthToken();
+
+  try {
+    console.log("=== CONTEXT: Making multipart API call ===");
+    console.log("URL:", url);
+    
+    // Log FormData contents for debugging
+    console.log("=== FormData Contents ===");
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+      if (value instanceof File) {
+        console.log(`  File name: ${value.name}`);
+        console.log(`  File size: ${value.size}`);
+        console.log(`  File type: ${value.type}`);
+      }
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        accept: "text/plain",
+        // Don't set Content-Type for FormData - browser will set it with boundary
+      },
+      body: formData,
+    });
+
+    console.log("Response status:", response.status);
+    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      let errorData;
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
+        errorData = await response.json();
+      } else {
+        const errorText = await response.text();
+        console.error("Non-JSON error response:", errorText);
+        errorData = { message: errorText };
+      }
+
+      console.error("Detailed error response:", errorData);
+
+      let errorMessage = `HTTP ${response.status} ${response.statusText}`;
+
+      if (errorData.Message) {
+        errorMessage += `: ${errorData.Message}`;
+      } else if (errorData.message) {
+        errorMessage += `: ${errorData.message}`;
+      } else if (errorData.title) {
+        errorMessage += `: ${errorData.title}`;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log("Multipart API response:", data);
+    return data;
+  } catch (error) {
+    console.error("Multipart API call failed:", error);
     throw error;
   }
 };
@@ -615,19 +684,39 @@ export const ProductsManagerProvider = ({ children }) => {
     [getProductImages]
   );
 
+  // FIXED: Single Product Image Upload - Construct FormData according to CURL
   const createProductImage = useCallback(async (imageData) => {
     try {
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
 
-      console.log("=== CONTEXT: Creating product image ===");
-      console.log("Image data:", imageData);
+      console.log("=== CONTEXT: Creating single product image ===");
+      console.log("Image data received:", imageData);
 
-      const response = await makeApiCall(API_BASE_URLS.productImages, {
-        method: "POST",
-        body: JSON.stringify(imageData),
-      });
+      // Validate required fields
+      if (!imageData.productId) {
+        throw new Error("ProductId is required");
+      }
+      if (!imageData.imageFile) {
+        throw new Error("ImageFile is required");
+      }
 
-      console.log("Create product image response:", response);
+      // Create FormData exactly as per CURL specification
+      const formData = new FormData();
+      
+      // CRITICAL: Add fields in the EXACT order and format as CURL
+      formData.append("IsMain", imageData.isMain ? "true" : "false");
+      formData.append("ProductId", imageData.productId.toString());
+      formData.append("AltText", imageData.altText || "");
+      formData.append("ImageFile", imageData.imageFile, imageData.imageFile.name);
+
+      console.log("=== Single Image FormData created ===");
+
+      const response = await makeMultipartApiCall(
+        API_BASE_URLS.productImages,
+        formData
+      );
+
+      console.log("Create single product image response:", response);
 
       if (response.Success) {
         dispatch({
@@ -639,7 +728,75 @@ export const ProductsManagerProvider = ({ children }) => {
         throw new Error(response.Message || "Failed to create product image");
       }
     } catch (error) {
-      console.error("Context create product image error:", error);
+      console.error("=== CONTEXT: Create product image error ===", error);
+      dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
+      throw error;
+    } finally {
+      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+    }
+  }, []);
+
+  // FIXED: Multiple Product Images Upload - Construct FormData according to CURL
+  const createMultipleProductImages = useCallback(async (imagesData) => {
+    try {
+      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+
+      console.log("=== CONTEXT: Creating multiple product images ===");
+      console.log("Images data received:", imagesData);
+
+      // Validate required fields
+      if (!imagesData.productId) {
+        throw new Error("ProductId is required");
+      }
+      if (!imagesData.imageFiles || !Array.isArray(imagesData.imageFiles) || imagesData.imageFiles.length === 0) {
+        throw new Error("ImageFiles array is required and must not be empty");
+      }
+
+      // Create FormData exactly as per CURL specification
+      const formData = new FormData();
+      
+      // CRITICAL: Add fields in the EXACT order and format as CURL
+      formData.append("ProductId", imagesData.productId.toString());
+      
+      // Add all image files with the EXACT field name from CURL
+      imagesData.imageFiles.forEach((file) => {
+        formData.append("ImageFiles", file, file.name);
+      });
+      
+      formData.append("AltText", imagesData.altText || "");
+
+      console.log("=== Multiple Images FormData created ===");
+
+      const response = await makeMultipartApiCall(
+        API_BASE_URLS.productImagesMultiple,
+        formData
+      );
+
+      console.log("Create multiple product images response:", response);
+
+      if (response.Success) {
+        // Handle different response formats
+        let createdImages;
+        if (Array.isArray(response.Data)) {
+          createdImages = response.Data;
+        } else if (response.Data?.$values && Array.isArray(response.Data.$values)) {
+          createdImages = response.Data.$values;
+        } else {
+          createdImages = [response.Data]; // Single image in array format
+        }
+
+        dispatch({
+          type: actionTypes.ADD_MULTIPLE_PRODUCT_IMAGES,
+          payload: createdImages,
+        });
+        return createdImages;
+      } else {
+        throw new Error(
+          response.Message || "Failed to create multiple product images"
+        );
+      }
+    } catch (error) {
+      console.error("=== CONTEXT: Create multiple product images error ===", error);
       dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       throw error;
     } finally {
@@ -700,6 +857,7 @@ export const ProductsManagerProvider = ({ children }) => {
     getProductImages,
     getProductImagesByProductId,
     createProductImage,
+    createMultipleProductImages,
     deleteProductImage,
 
     // Utility methods
