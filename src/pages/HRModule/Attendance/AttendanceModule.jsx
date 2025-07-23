@@ -251,13 +251,12 @@ const AttendanceModule = () => {
     };
     return <Badge variant={statusInfo.variant}>{statusInfo.text}</Badge>;
   };
-
+  console.log("attendances", attendances);
   const filteredAttendances = attendances.filter(
     (attendance) =>
-      attendance.employeeName
-        ?.toLowerCase()
-        .includes(searchValue.toLowerCase()) ||
-      attendance.status?.toLowerCase().includes(searchValue.toLowerCase())
+      attendance.EmployeeName?.toLowerCase().includes(
+        searchValue.toLowerCase()
+      ) || attendance.status?.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   const statusOptions = [
@@ -519,31 +518,31 @@ const AttendanceModule = () => {
                           <User className="h-5 w-5 text-gray-400 mr-2" />
                           <div>
                             <p className="font-medium text-gray-900">
-                              {attendance.employeeName || "N/A"}
+                              {attendance.EmployeeName || "N/A"}
                             </p>
                             <p className="text-sm text-gray-500">
-                              ID: {attendance.employeeId}
+                              ID: {attendance.EmployeeId}
                             </p>
                           </div>
                         </div>
                       </TD>
-                      <TD>{formatDate(attendance.date)}</TD>
+                      <TD>{formatDate(attendance.Date)}</TD>
                       <TD>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 text-green-500 mr-1" />
-                          {formatTime(attendance.checkInTime)}
+                          {formatTime(attendance.CheckInTime)}
                         </div>
                       </TD>
                       <TD>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 text-red-500 mr-1" />
-                          {formatTime(attendance.checkOutTime)}
+                          {formatTime(attendance.CheckOutTime)}
                         </div>
                       </TD>
-                      <TD>{getStatusBadge(attendance.status)}</TD>
+                      <TD>{getStatusBadge(attendance.Status)}</TD>
                       <TD>
                         <span className="text-sm text-gray-900">
-                          {attendance.workingHours || "-"}
+                          {attendance.WorkingHours || "-"}
                         </span>
                       </TD>
                       <TD>
@@ -551,7 +550,7 @@ const AttendanceModule = () => {
                           buttonText=""
                           icon={Eye}
                           isIcon={true}
-                          onClick={() => handleViewDetails(attendance.id)}
+                          onClick={() => handleViewDetails(attendance.Id)}
                           width="w-8"
                           height="h-8"
                           px="px-0"
@@ -570,7 +569,7 @@ const AttendanceModule = () => {
           <div className="p-6 border-t border-gray-200">
             <Pagination
               currentPage={currentPage}
-              totalPages={attendancesPagination.totalPages || 1}
+              totalPages={attendancesPagination.TotalPages || 1}
               onPageChange={setCurrentPage}
             />
           </div>
@@ -635,7 +634,7 @@ const AttendanceModule = () => {
                 <User className="h-5 w-5 text-gray-400 mr-3" />
                 <div>
                   <p className="font-medium text-gray-900">
-                    {attendance.employeeName}
+                    {attendance.EmployeeName}
                   </p>
                   <p className="text-sm text-gray-500">
                     ID: {attendance.employeeId}
@@ -645,17 +644,17 @@ const AttendanceModule = () => {
               <div className="flex items-center space-x-4">
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">
-                    {formatTime(attendance.checkInTime)}
+                    {formatTime(attendance.CheckInTime)}
                   </p>
                   <p className="text-xs text-gray-500">{t("checkInTime")}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">
-                    {formatTime(attendance.checkOutTime)}
+                    {formatTime(attendance.CheckOutTime)}
                   </p>
                   <p className="text-xs text-gray-500">{t("checkOutTime")}</p>
                 </div>
-                {getStatusBadge(attendance.status)}
+                {getStatusBadge(attendance.Status)}
               </div>
             </div>
           ))}
@@ -851,7 +850,7 @@ const AttendanceModule = () => {
                       {t("employee")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {attendanceDetail.employeeName}
+                      {attendanceDetail.EmployeeName}
                     </p>
                   </div>
                   <div>
@@ -859,7 +858,7 @@ const AttendanceModule = () => {
                       {t("date")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {formatDate(attendanceDetail.date)}
+                      {formatDate(attendanceDetail.Date)}
                     </p>
                   </div>
                   <div>
@@ -867,7 +866,7 @@ const AttendanceModule = () => {
                       {t("checkInTime")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {formatTime(attendanceDetail.checkInTime)}
+                      {formatTime(attendanceDetail.CheckInTime)}
                     </p>
                   </div>
                   <div>
@@ -875,7 +874,7 @@ const AttendanceModule = () => {
                       {t("checkOutTime")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {formatTime(attendanceDetail.checkOutTime)}
+                      {formatTime(attendanceDetail.CheckOutTime)}
                     </p>
                   </div>
                   <div>
@@ -883,7 +882,7 @@ const AttendanceModule = () => {
                       {t("status")}
                     </label>
                     <div className="mt-1">
-                      {getStatusBadge(attendanceDetail.status)}
+                      {getStatusBadge(attendanceDetail.Status)}
                     </div>
                   </div>
                   <div>
@@ -891,7 +890,7 @@ const AttendanceModule = () => {
                       {t("workingHours")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {attendanceDetail.workingHours || "-"}
+                      {attendanceDetail.WorkingHours || "-"}
                     </p>
                   </div>
                   <div className="col-span-2">
@@ -899,7 +898,7 @@ const AttendanceModule = () => {
                       {t("checkInLocation")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {attendanceDetail.checkInLocation || "-"}
+                      {attendanceDetail.CheckInLocation || "-"}
                     </p>
                   </div>
                   <div className="col-span-2">
@@ -907,7 +906,7 @@ const AttendanceModule = () => {
                       {t("checkOutLocation")}
                     </label>
                     <p className="text-sm text-gray-900">
-                      {attendanceDetail.checkOutLocation || "-"}
+                      {attendanceDetail.CheckOutLocation || "-"}
                     </p>
                   </div>
                   <div className="col-span-2">
@@ -942,7 +941,7 @@ const AttendanceModule = () => {
                       {t("present")}
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {attendanceSummary.presentDays || 0}
+                      {attendanceSummary.PresentDays || 0}
                     </p>
                   </div>
                   <div className="bg-red-50 p-4 rounded-lg">
@@ -950,7 +949,7 @@ const AttendanceModule = () => {
                       {t("absent")}
                     </p>
                     <p className="text-2xl font-bold text-red-600">
-                      {attendanceSummary.absentDays || 0}
+                      {attendanceSummary.AbsentDays || 0}
                     </p>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg">
@@ -958,7 +957,7 @@ const AttendanceModule = () => {
                       {t("late")}
                     </p>
                     <p className="text-2xl font-bold text-yellow-600">
-                      {attendanceSummary.lateDays || 0}
+                      {attendanceSummary.LateDays || 0}
                     </p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg">
@@ -966,7 +965,7 @@ const AttendanceModule = () => {
                       {t("halfDay")}
                     </p>
                     <p className="text-2xl font-bold text-blue-600">
-                      {attendanceSummary.halfDays || 0}
+                      {attendanceSummary.HalfDays || 0}
                     </p>
                   </div>
                 </div>
@@ -987,7 +986,7 @@ const AttendanceModule = () => {
                         </TR>
                       </Thead>
                       <Tbody>
-                        {attendanceSummary.dailyRecords?.length === 0 ? (
+                        {attendanceSummary.DailyRecords?.length === 0 ? (
                           <TR>
                             <TD
                               colSpan={5}
@@ -1000,11 +999,11 @@ const AttendanceModule = () => {
                           attendanceSummary.dailyRecords?.map(
                             (record, index) => (
                               <TR key={index}>
-                                <TD>{formatDate(record.date)}</TD>
-                                <TD>{formatTime(record.checkInTime)}</TD>
-                                <TD>{formatTime(record.checkOutTime)}</TD>
-                                <TD>{getStatusBadge(record.status)}</TD>
-                                <TD>{record.workingHours || "-"}</TD>
+                                <TD>{formatDate(record.Date)}</TD>
+                                <TD>{formatTime(record.CheckInTime)}</TD>
+                                <TD>{formatTime(record.CheckOutTime)}</TD>
+                                <TD>{getStatusBadge(record.Status)}</TD>
+                                <TD>{record.WorkingHours || "-"}</TD>
                               </TR>
                             )
                           )
