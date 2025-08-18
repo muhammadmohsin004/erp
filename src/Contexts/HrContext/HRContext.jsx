@@ -254,7 +254,7 @@ const hrReducer = (state, action) => {
 };
 
 // Create context
-const HRContext = createContext();
+const HrContext = createContext();
 
 // Provider component
 export const HRProvider = ({ children }) => {
@@ -788,11 +788,11 @@ export const HRProvider = ({ children }) => {
 
 // Custom hook to use HR context
 export const useHR = () => {
-  const context = useContext(HRContext);
+  const context = useContext(HrContext);
   if (!context) {
     throw new Error("useHR must be used within an HRProvider");
   }
   return context;
 };
 
-export default HRContext;
+export default HrContext;
